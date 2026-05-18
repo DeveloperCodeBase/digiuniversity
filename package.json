@@ -1,0 +1,12 @@
+{
+  "name": "digiuniversity-frontend",
+  "version": "1.0.0",
+  "description": "AI-Native online university platform — Persian/RTL frontend prototype",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": ["edtech", "ai", "university", "lms", "rtl", "persian"],
+  "license": "MIT"
+}

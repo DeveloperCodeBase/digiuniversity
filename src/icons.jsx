@@ -1,0 +1,56 @@
+// =====================================================
+// Icons — minimal stroke icon set, no emoji
+// =====================================================
+const Icon = ({ name, size = 18, stroke = 1.7 }) => {
+  const P = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round" };
+  const map = {
+    arrow: <svg {...P}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
+    spark: <svg {...P}><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>,
+    book: <svg {...P}><path d="M4 4h11a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4V4Z"/><path d="M4 16a4 4 0 0 1 4-4h11"/></svg>,
+    live: <svg {...P}><circle cx="12" cy="12" r="3"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9 9 0 0 0 0 13M18.5 5.5a9 9 0 0 1 0 13"/></svg>,
+    chip: <svg {...P}><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/><rect x="10" y="10" width="4" height="4" rx="1"/></svg>,
+    chart: <svg {...P}><path d="M4 20V8M10 20V4M16 20v-8M22 20H2"/></svg>,
+    user: <svg {...P}><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>,
+    users: <svg {...P}><circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="3"/><path d="M14 20a6 6 0 0 1 7-5"/></svg>,
+    search: <svg {...P}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>,
+    mic: <svg {...P}><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>,
+    micOff: <svg {...P}><path d="M9 9v3a3 3 0 0 0 5.1 2.1M15 12V6a3 3 0 0 0-5.9-.7M5 11a7 7 0 0 0 11.8 5M19 11v1M3 3l18 18"/></svg>,
+    video: <svg {...P}><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg>,
+    videoOff: <svg {...P}><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3zM3 3l18 18"/></svg>,
+    share: <svg {...P}><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+    hand: <svg {...P}><path d="M7 11V5a1.5 1.5 0 1 1 3 0v6M10 10V3.5a1.5 1.5 0 1 1 3 0V11M13 10V4.5a1.5 1.5 0 1 1 3 0V12M16 10.5a1.5 1.5 0 1 1 3 0V16a6 6 0 0 1-6 6H11a6 6 0 0 1-6-6v-2"/></svg>,
+    chat: <svg {...P}><path d="M4 5h16v11H9l-5 4z"/></svg>,
+    end: <svg {...P}><path d="M3 14c4-5 14-5 18 0l-3 2c-1-1-3-2-6-2s-5 1-6 2z"/></svg>,
+    pulse: <svg {...P}><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>,
+    grad: <svg {...P}><path d="m12 4 10 5-10 5L2 9z"/><path d="M6 11v4a6 6 0 0 0 12 0v-4M21 10v6"/></svg>,
+    cert: <svg {...P}><circle cx="12" cy="9" r="5"/><path d="m9 13-2 8 5-3 5 3-2-8"/></svg>,
+    layers: <svg {...P}><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5M3 18l9 5 9-5"/></svg>,
+    flask: <svg {...P}><path d="M9 3h6M10 3v6L5 19a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 19l-5-10V3"/></svg>,
+    globe: <svg {...P}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>,
+    settings: <svg {...P}><circle cx="12" cy="12" r="3"/><path d="m19.4 15-1.7-1A7 7 0 0 0 18 12c0-.7-.1-1.3-.3-2l1.7-1-2-3.4-1.9.7a7 7 0 0 0-3-1.8L12 2h-4l-.5 2.5a7 7 0 0 0-3 1.8L2.6 5.6l-2 3.4 1.7 1c-.2.7-.3 1.3-.3 2s.1 1.3.3 2l-1.7 1 2 3.4 1.9-.7a7 7 0 0 0 3 1.8L8 22h4l.5-2.5a7 7 0 0 0 3-1.8l1.9.7z"/></svg>,
+    home: <svg {...P}><path d="m3 11 9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>,
+    calendar: <svg {...P}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>,
+    bell: <svg {...P}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 9H3c0-1 3-2 3-9M10 21a2 2 0 0 0 4 0"/></svg>,
+    plus: <svg {...P}><path d="M12 5v14M5 12h14"/></svg>,
+    check: <svg {...P}><path d="m5 12 5 5L20 7"/></svg>,
+    play: <svg {...P}><path d="M7 4v16l13-8z"/></svg>,
+    download: <svg {...P}><path d="M12 4v12M6 12l6 6 6-6M4 20h16"/></svg>,
+    lock: <svg {...P}><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>,
+    eye: <svg {...P}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>,
+    send: <svg {...P}><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>,
+    sparkle: <svg {...P}><path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2zM19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM5 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg>,
+    target: <svg {...P}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>,
+    bolt: <svg {...P}><path d="m13 2-9 12h6l-2 8 9-12h-6z"/></svg>,
+    headset: <svg {...P}><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="14" width="5" height="7" rx="1.5"/><rect x="17" y="14" width="5" height="7" rx="1.5"/></svg>,
+    file: <svg {...P}><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>,
+    folder: <svg {...P}><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
+    star: <svg {...P}><path d="m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>,
+    trophy: <svg {...P}><path d="M8 4h8v6a4 4 0 0 1-8 0zM5 4h3v3a3 3 0 0 1-3-3zM16 4h3a3 3 0 0 1-3 3zM10 14h4M12 14v4M9 18h6"/></svg>,
+    dollar: <svg {...P}><path d="M12 2v20M17 6c0-2-2.2-3-5-3s-5 1.3-5 4 2.5 3 5 4 5 1.3 5 4-2.2 4-5 4-5-1-5-3"/></svg>,
+    shield: <svg {...P}><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>,
+    code: <svg {...P}><path d="m9 8-5 4 5 4M15 8l5 4-5 4M14 4l-4 16"/></svg>,
+  };
+  return map[name] || null;
+};
+
+window.Icon = Icon;
