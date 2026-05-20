@@ -1,0 +1,120 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Daily 07:15 UTC = 10:45 Tehran. Catches issues that surface after
+    # CVE disclosure even when nobody touched the repo.
+    - cron: '15 7 * * *'
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write   # for uploading SARIF to Security tab
+
+jobs:
+  # ────────────────────────────────────────────────────────────────
+  # gitleaks — secret-scan diff + history.
+  # ────────────────────────────────────────────────────────────────
+  gitleaks:
+    name: gitleaks (secret scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history for diff-mode
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE is only required for org-level scanning.
+          GITLEAKS_ENABLE_COMMENTS: 'true'
+
+  # ────────────────────────────────────────────────────────────────
+  # npm audit — both workspaces.
+  # ────────────────────────────────────────────────────────────────
+  npm-audit:
+    name: npm audit (web + api)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: web
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true   # advisory only until we agree a policy
+
+      - name: api
+        working-directory: apps/api
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true
+
+  # ────────────────────────────────────────────────────────────────
+  # Trivy filesystem scan — picks up CVEs in lockfiles + dockerfiles.
+  # ────────────────────────────────────────────────────────────────
+  trivy-fs:
+    name: trivy filesystem
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy fs scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          # Don't fail the job on findings — we want a SARIF report
+          # in the Security tab without blocking PRs while we triage.
+          exit-code: '0'
+          ignore-unfixed: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ────────────────────────────────────────────────────────────────
+  # semgrep — OWASP top-10 / common-bug rule sets.
+  # ────────────────────────────────────────────────────────────────
+  semgrep:
+    name: semgrep (OWASP rules)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run semgrep
+        run: |
+          semgrep --config=p/owasp-top-ten --sarif --output=semgrep.sarif . || true
+          semgrep --config=p/javascript --sarif --output=semgrep-js.sarif . || true
+
+      - name: Upload SARIF — OWASP top 10
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep-owasp
+
+      - name: Upload SARIF — JavaScript
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-js.sarif
+          category: semgrep-js

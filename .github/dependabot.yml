@@ -1,0 +1,99 @@
+# Dependabot config — Phase 13 R4.
+#
+# Three ecosystems to track: frontend npm (root), backend npm (apps/api),
+# python (apps/ai-gateway), and GitHub Actions. Weekly cadence to keep
+# noise low until we have a triage habit.
+
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Asia/Tehran
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - area/web
+    groups:
+      # Group all minor/patch bumps into one PR per week to reduce noise.
+      web-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:15'
+      timezone: Asia/Tehran
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - area/api
+    groups:
+      api-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: pip
+    directory: /apps/ai-gateway
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:30'
+      timezone: Asia/Tehran
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - area/ai-gateway
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:45'
+      timezone: Asia/Tehran
+    labels:
+      - dependencies
+      - area/ci
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Asia/Tehran
+    labels:
+      - dependencies
+      - area/docker
+  - package-ecosystem: docker
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:15'
+      timezone: Asia/Tehran
+    labels:
+      - dependencies
+      - area/docker
+  - package-ecosystem: docker
+    directory: /apps/ai-gateway
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:30'
+      timezone: Asia/Tehran
+    labels:
+      - dependencies
+      - area/docker

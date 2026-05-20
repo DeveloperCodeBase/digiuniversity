@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel in-flight runs when a new commit is pushed to the same branch
+# so we never waste minutes on superseded builds.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────────────────
+  # Frontend (apps/web is currently still at ./src — Phase 14 splits)
+  # ────────────────────────────────────────────────────────────────
+  web:
+    name: Web (vitest + vite build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Vitest
+        run: npm test
+
+      - name: Vite build
+        run: npm run build
+        env:
+          # Match the production build flags the Dockerfile uses; this
+          # catches any prod-only code path failure (PWA precache, SW
+          # generation, etc.) before deploy time.
+          NODE_ENV: production
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
+
+  # ────────────────────────────────────────────────────────────────
+  # API (apps/api) — Jest + Prisma migration smoke against ephemeral pg.
+  # ────────────────────────────────────────────────────────────────
+  api:
+    name: API (jest + prisma migrate smoke)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        # Wait for postgres to accept connections before tests run.
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install
+        working-directory: apps/api
+        run: npm ci --no-audit --no-fund
+
+      - name: Prisma generate
+        working-directory: apps/api
+        run: npx prisma generate
+
+      - name: Prisma migrate (smoke against ephemeral pg)
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+        run: npx prisma migrate deploy
+
+      - name: Build (tsc)
+        working-directory: apps/api
+        run: npm run build
+
+      - name: Jest
+        working-directory: apps/api
+        env:
+          NODE_ENV: test
+          CI: 'true'
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+          JWT_SECRET: ci-test-jwt-secret-min-32-chars-ci-test-jwt-secret
+          JWT_ACCESS_TTL: 15m
+          JWT_REFRESH_TTL: 30d
+          AI_GATEWAY_URL: http://localhost:9999
+          RUN_SEED: 'false'
+        run: npm test -- --runInBand
