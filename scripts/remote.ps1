@@ -1,14 +1,16 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
     #   restore -File <path-on-vps>
     #   rollout -Service <compose-service-name>
     #   provision-env -Force (rotate existing .env)
+    #   rollback -Sha <git-sha> (image-tag rollback; falls back to git revert)
     [string]$File,
     [string]$Service,
+    [string]$Sha,
     [switch]$Force
 )
 
@@ -526,11 +528,27 @@ echo "OK: $(grep -cE '^[A-Z_]+=' "$ENV_FILE") env vars set."
     }
 
     "rollback" {
-        # Safe rollback: revert the current commit (creates a new commit
-        # that undoes the last one) and redeploy. Never `git reset --hard`
-        # on shared history — that rewrites main and any other agent
-        # pulling will pick up the bad state again on next fetch.
-        Write-Host "Rolling back HEAD on origin/main by reverting the last commit."
+        # Two-mode rollback:
+        #
+        # 1) With -Sha <git-sha>: pin IMAGE_TAG=<sha> and `compose up -d`
+        #    against the existing :<sha> tagged images on the VPS.
+        #    Requires `pin-image` to have been run after the build whose
+        #    SHA you want. Fast (no rebuild), no git history rewrite.
+        #
+        # 2) Without -Sha: safe `git revert HEAD` (creates a new commit
+        #    undoing the last) and redeploy. Slow (rebuild) but works
+        #    even when no SHA-tagged images exist locally. NEVER does
+        #    `git reset --hard` on shared history.
+        if (-not [string]::IsNullOrWhiteSpace($Sha)) {
+            Write-Host "Image-tag rollback: pinning IMAGE_TAG=$Sha"
+            Write-Host "Requires that scripts/remote.ps1 pin-image was run after the build for $Sha."
+            $confirm = Read-Host "Type 'rollback' to confirm"
+            if ($confirm -ne 'rollback') { Write-Host "Aborted."; exit 1 }
+            Remote "IMAGE_TAG=$Sha docker compose up -d --no-build"
+            Write-Host "Done. Verify with `remote.ps1 health` + `remote.ps1 status`."
+            exit 0
+        }
+        Write-Host "Git-revert rollback: reverting HEAD on origin/main, then redeploying with rebuild."
         $head = git rev-parse --short HEAD
         Write-Host "Current HEAD: $head"
         $confirm = Read-Host "Type 'rollback' to confirm git revert + redeploy"
@@ -545,5 +563,24 @@ echo "OK: $(grep -cE '^[A-Z_]+=' "$ENV_FILE") env vars set."
         }
         git push origin $Branch
         Remote "git pull origin $Branch && docker compose up -d --build"
+    }
+
+    "pin-image" {
+        # Tag the currently-running app/api/ai-gateway images with the
+        # current git short-SHA, so a later `rollback -Sha <sha>` can
+        # restore them without rebuilding.
+        #
+        # Tags are local to the VPS docker daemon. They survive a host
+        # reboot but NOT a docker prune; periodic re-pinning + GHCR
+        # push (future deploy.yml) is the durable answer.
+        $shortSha = (git rev-parse --short HEAD).Trim()
+        Write-Host "Pinning current images to tag :$shortSha"
+        Remote "docker tag digiuniversity:latest digiuniversity:$shortSha && docker tag digiuniversity-api:latest digiuniversity-api:$shortSha && docker tag digiuniversity-ai-gateway:latest digiuniversity-ai-gateway:$shortSha && echo 'Pinned:' && docker images --format '{{.Repository}}:{{.Tag}} ({{.Size}})' | grep -E '^(digiuniversity|digiuniversity-api|digiuniversity-ai-gateway):$shortSha\$'"
+    }
+
+    "list-images" {
+        # Show all SHA-tagged digiuniversity images on the VPS, newest
+        # first. Useful to pick a -Sha for rollback.
+        Remote "docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.CreatedSince}}\t{{.Size}}' | grep -E '^(digiuniversity|digiuniversity-api|digiuniversity-ai-gateway)' | head -30"
     }
 }

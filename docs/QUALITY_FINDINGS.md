@@ -243,6 +243,18 @@ Plan-file Phase 13 §3 calls for CI gating PRs on lint/test/build/security. R4 l
 | F-107 ✓ | P1 | Defence in depth | App container published 8090:80 on the host, giving any process on the VPS (including other tenants if the firewall ever lapsed) a plain-HTTP path that bypassed Caddy's TLS + headers + access-log + future-rate-limit. | Removed `ports: - "8090:80"` from the `app` service in `docker-compose.yml`. Replaced with `expose: - "80"` to keep the container's port internal to the docker network. Caddy reaches it via `digiuniversity-app:80` (docker DNS), confirmed via `caddy-verify`. To restore the escape hatch in an emergency, uncomment the ports block. |
 | F-108 ✓ | P2 | Internal probes | `remote.ps1 domain-probe` and `remote.ps1 health` both probed nginx via the host port `127.0.0.1:8090`, so they would silently break after F-107. | Both switched to `docker exec digiuniversity-app curl -fsS http://127.0.0.1/...` so they probe inside the container's network namespace and don't depend on host port publication. Caddy + DNS probes (parts of `domain-probe`) unchanged. |
 
+---
+
+## Phase 13 — Round 3: image tag parameterisation + pin-image / list-images / SHA-rollback
+
+`docker-compose.yml` had `image: digiuniversity:latest` hardcoded for all three services, so deploys had no way to pin a specific build for rollback. R3 lays the parameterisation: compose now reads `${IMAGE_TAG:-latest}`, and two new ops actions (`pin-image`, `list-images`) work alongside an extended `rollback -Sha <sha>` mode. Full SHA-based deploys (GHCR push + signed images) still wait on Phase 14's deploy.yml — R3 just gets the local infrastructure in place.
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-109 ✓ | P2 | Deploy / rollback | Compose hardcoded `image: digiuniversity:latest` across the three services. Every build mutated `:latest`; rollback required a git revert + full rebuild even when the previous image was still in the local docker cache. | All three services switched to `image: <name>:${IMAGE_TAG:-latest}`. Compose-default behaviour unchanged (still resolves to `:latest`), but `IMAGE_TAG=<sha> docker compose up -d` now pins a specific build. |
+| F-110 ✓ | P2 | Deploy tooling | No way to label a known-good build for later rollback. | New `remote.ps1 pin-image` action: tags the currently-running app/api/ai-gateway images with the active git short-SHA (`digiuniversity:abc1234`, etc.). New `remote.ps1 list-images` action: lists all locally-tagged digiuniversity images newest-first so a rollback target is pickable. |
+| F-111 ✓ | P1 | Deploy tooling | `rollback` only did `git revert` + rebuild — slow and risky during an incident (any rebuild bug propagates). | Extended `rollback` with a `-Sha <git-sha>` mode that does `IMAGE_TAG=<sha> docker compose up -d --no-build` against the pinned tag. Fast (no rebuild), no git history change. Falls back to the git-revert path when no `-Sha` is given. Closes the rollback-speed gap. |
+
 
 
 

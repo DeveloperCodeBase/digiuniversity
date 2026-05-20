@@ -9,7 +9,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: digiuniversity:latest
+    # Phase-13 R3: image tag is overridable via the IMAGE_TAG env var
+    # so a future CI deploy pipeline can pin a SHA (digiuniversity:abc1234)
+    # instead of mutable :latest. `remote.ps1 pin-image` retags the
+    # current build with the active git SHA so `rollback -Sha <sha>`
+    # can switch back without rebuilding.
+    image: digiuniversity:${IMAGE_TAG:-latest}
     container_name: digiuniversity-app
     restart: unless-stopped
     # Phase-13 R5: no host port publication. The SPA is reachable
@@ -80,7 +85,7 @@ services:
       # `test` stage — and the api service would silently boot into
       # `jest --runInBand`, exit clean when tests pass, and crash-loop.
       target: runtime
-    image: digiuniversity-api:latest
+    image: digiuniversity-api:${IMAGE_TAG:-latest}
     container_name: digiuniversity-api
     restart: unless-stopped
     depends_on:
@@ -131,7 +136,7 @@ services:
     build:
       context: ./apps/ai-gateway
       dockerfile: Dockerfile
-    image: digiuniversity-ai-gateway:latest
+    image: digiuniversity-ai-gateway:${IMAGE_TAG:-latest}
     container_name: digiuniversity-ai-gateway
     restart: unless-stopped
     environment:
