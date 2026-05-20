@@ -13,6 +13,7 @@ import {
 } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
+import { formatJalaliDate } from "../i18n/format.js";
 
 const SignInPrompt = ({ go }) => (
   <main data-screen-label="درس" className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
@@ -379,7 +380,7 @@ const CourseLivePage = ({ go, courseId }) => {
                         <span>{toFa(String(a._count?.questions ?? 0))} سوال</span>
                         <span>{toFa(String(a._count?.submissions ?? 0))} ارسال</span>
                         {a.dueAt && (
-                          <span>موعد: {new Date(a.dueAt).toLocaleDateString("fa-IR")}</span>
+                          <span>موعد: {formatJalaliDate(a.dueAt)}</span>
                         )}
                         <span className="pill" style={{ fontSize: 11 }}>{a.status}</span>
                       </div>

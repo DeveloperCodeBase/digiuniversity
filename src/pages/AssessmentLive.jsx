@@ -14,6 +14,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { assessmentsApi, submissionsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
+import { formatJalaliDate } from "../i18n/format.js";
 
 const STATUS_LABEL = {
   draft: "پیش‌نویس",
@@ -195,7 +196,7 @@ const AssessmentLivePage = ({ go, assessmentId }) => {
               </span>
               {assessment.dueAt && (
                 <span className="pill" style={{ fontSize: 11 }}>
-                  موعد: {new Date(assessment.dueAt).toLocaleDateString("fa-IR")}
+                  موعد: {formatJalaliDate(assessment.dueAt)}
                 </span>
               )}
               {submission && (

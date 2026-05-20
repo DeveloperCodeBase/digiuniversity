@@ -14,6 +14,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { tutorApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
+import { formatJalaliDate } from "../i18n/format.js";
 
 const SignInPrompt = ({ go }) => (
   <main className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
@@ -290,7 +291,7 @@ const TutorPage = ({ go }) => {
                         style={{ fontSize: 11, color: "var(--fg-mute)", marginTop: 2, direction: "ltr", textAlign: "left" }}
                       >
                         {toFa(String(s._count?.messages ?? 0))} پیام ·{" "}
-                        {new Date(s.lastMessageAt).toLocaleDateString("fa-IR")}
+                        {formatJalaliDate(s.lastMessageAt)}
                       </div>
                     </button>
                   </li>

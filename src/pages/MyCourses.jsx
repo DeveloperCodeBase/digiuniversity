@@ -12,6 +12,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { enrollmentsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
+import { formatJalaliDate } from "../i18n/format.js";
 
 const STATUS_LABEL = {
   active: "فعال",
@@ -196,7 +197,7 @@ const MyCoursesPage = ({ go }) => {
                       </span>
                     </div>
                     <div style={{ fontSize: 12, color: "var(--fg-mute)" }}>
-                      ثبت‌نام: {new Date(e.enrolledAt).toLocaleDateString("fa-IR")}
+                      ثبت‌نام: {formatJalaliDate(e.enrolledAt)}
                       {e.cohort?.name ? " · گروه: " + e.cohort.name : ""}
                     </div>
                     <div className="flex gap-2" style={{ marginTop: "auto" }}>
