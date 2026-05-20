@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs")]
     [string]$Action
 )
 
@@ -163,6 +163,12 @@ echo "Caddy reloaded."
 
     "caddy-reload" {
         Remote "docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile"
+    }
+
+    "caddy-logs" {
+        # Tail Caddy's recent stdout to debug proxy issues. Filtered to lines
+        # that mention digiuniversity so other tenants stay out of the dump.
+        Remote "docker logs --tail=400 hooshgate_caddy 2>&1 | grep -iE 'digiuniversity|reverse_proxy|upstream' | tail -40"
     }
 
     "caddy-verify" {
