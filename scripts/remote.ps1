@@ -80,38 +80,81 @@ cd /var/www/digiuniversity
 git pull origin main
 
 CADDY_CONTAINER=hooshgate_caddy
+APP_NETWORK=digiuniversity_web
 
-# Find where Caddy's config lives on the host.
+# 1. Make sure docker-compose is up and our network exists.
+docker compose up -d --build
+
+# 2. Attach the host Caddy to the app network (idempotent).
+if ! docker network inspect "$APP_NETWORK" --format '{{range .Containers}}{{.Name}} {{end}}' | grep -qw "$CADDY_CONTAINER"; then
+    docker network connect "$APP_NETWORK" "$CADDY_CONTAINER"
+    echo "Connected $CADDY_CONTAINER to $APP_NETWORK."
+else
+    echo "$CADDY_CONTAINER is already on $APP_NETWORK."
+fi
+
+# 3. Locate the host-side Caddyfile / config dir.
 HOST_CADDYFILE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy/Caddyfile"}}{{.Source}}{{end}}{{end}}' "$CADDY_CONTAINER" 2>/dev/null || true)
 HOST_CADDY_DIR=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy"}}{{.Source}}{{end}}{{end}}' "$CADDY_CONTAINER" 2>/dev/null || true)
 
 if [ -z "$HOST_CADDYFILE" ] && [ -z "$HOST_CADDY_DIR" ]; then
     echo "ERROR: $CADDY_CONTAINER does not bind-mount /etc/caddy or /etc/caddy/Caddyfile."
-    echo "Add the snippet manually or mount the config and re-run."
     exit 1
 fi
 
-if [ -n "$HOST_CADDY_DIR" ]; then
-    SNIPPET_TARGET="$HOST_CADDY_DIR/conf.d/digiuniversity.caddy"
-    sudo mkdir -p "$HOST_CADDY_DIR/conf.d"
-    sudo cp infra/Caddyfile.snippet "$SNIPPET_TARGET"
-    echo "Installed snippet at: $SNIPPET_TARGET"
+# 4. Idempotently install the snippet. If a previous version is there,
+#    rewrite the block in place between BEGIN/END markers.
+MARK_BEGIN="# >>> digiuniversity site block (managed by remote.ps1) >>>"
+MARK_END="# <<< digiuniversity site block <<<"
+SNIPPET=$(printf "\n%s\n%s\n%s\n" "$MARK_BEGIN" "$(cat infra/Caddyfile.snippet)" "$MARK_END")
 
-    # Make sure the main Caddyfile imports conf.d/*
-    if ! sudo grep -q "import conf.d/\*" "$HOST_CADDYFILE"; then
+write_snippet() {
+    target_file="$1"
+    # 1. Strip any previously appended (unmarked) digiuniversity block. We
+    #    look for a line that starts a site block whose key contains
+    #    `digiuniversity.ir` and remove from there to the matching closing
+    #    brace at the start of a line.
+    sudo awk '
+        BEGIN { skip=0; depth=0 }
+        skip==0 && /^[[:space:]]*(#.*)?$/ { print; next }
+        skip==0 && /digiuniversity\.ir[[:space:]]*[,{]/ {
+            skip=1; depth=1
+            # If the line itself contains a closing brace, decrement
+            n=gsub(/\}/, "}")
+            depth -= n
+            n=gsub(/\{/, "{")
+            depth += n - 1   # subtract the one we already counted as opener
+            if (depth<=0) { skip=0 }
+            next
+        }
+        skip==1 {
+            n=gsub(/\{/, "{")
+            depth += n
+            n=gsub(/\}/, "}")
+            depth -= n
+            if (depth<=0) { skip=0 }
+            next
+        }
+        { print }
+    ' "$target_file" | sudo tee "$target_file.tmp" > /dev/null
+    sudo mv "$target_file.tmp" "$target_file"
+
+    # 2. Append the managed block.
+    printf "%s" "$SNIPPET" | sudo tee -a "$target_file" > /dev/null
+    echo "Wrote managed block to $target_file"
+}
+
+if [ -n "$HOST_CADDY_DIR" ] && [ -d "$HOST_CADDY_DIR" ]; then
+    # Prefer a conf.d include if the dir is mounted as a directory.
+    sudo mkdir -p "$HOST_CADDY_DIR/conf.d"
+    sudo cp infra/Caddyfile.snippet "$HOST_CADDY_DIR/conf.d/digiuniversity.caddy"
+    if [ -n "$HOST_CADDYFILE" ] && ! sudo grep -q "import conf.d/\*" "$HOST_CADDYFILE"; then
         echo "" | sudo tee -a "$HOST_CADDYFILE" > /dev/null
         echo "import conf.d/*" | sudo tee -a "$HOST_CADDYFILE" > /dev/null
-        echo "Added 'import conf.d/*' to $HOST_CADDYFILE"
     fi
-else
-    # Only the Caddyfile itself is mounted, append the snippet directly if absent.
-    if ! sudo grep -q "digiuniversity.ir" "$HOST_CADDYFILE"; then
-        echo "" | sudo tee -a "$HOST_CADDYFILE" > /dev/null
-        sudo tee -a "$HOST_CADDYFILE" < infra/Caddyfile.snippet > /dev/null
-        echo "Appended snippet to $HOST_CADDYFILE"
-    else
-        echo "Snippet already present in $HOST_CADDYFILE — skipping append."
-    fi
+    echo "Installed snippet at $HOST_CADDY_DIR/conf.d/digiuniversity.caddy"
+elif [ -n "$HOST_CADDYFILE" ]; then
+    write_snippet "$HOST_CADDYFILE"
 fi
 
 docker exec "$CADDY_CONTAINER" caddy validate --config /etc/caddy/Caddyfile

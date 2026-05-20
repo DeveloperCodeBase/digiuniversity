@@ -12,23 +12,17 @@
 # APP_PORT). We could also proxy directly to the container by attaching the
 # host Caddy to the `digiuniversity_web` network — both options are below.
 
-# Option A — proxy to the host port (simplest, no shared network)
+# We use container-to-container traffic on the shared `digiuniversity_web`
+# docker network. The remote.ps1 `caddy-install` action attaches
+# hooshgate_caddy to that network before reloading, so the hostname
+# `digiuniversity-app` resolves inside the Caddy container.
 digiuniversity.ir, www.digiuniversity.ir {
     encode zstd gzip
-
-    # If you're behind a CDN that already terminates TLS and re-encrypts to
-    # origin, keep this block. If the CDN talks plain HTTP to origin, remove
-    # the `tls` directive — Caddy will still serve its own LE cert on :443.
 
     @www host www.digiuniversity.ir
     redir @www https://digiuniversity.ir{uri} 308
 
-    reverse_proxy 127.0.0.1:8090 {
-        header_up X-Forwarded-Proto {scheme}
-        header_up X-Forwarded-For   {remote_host}
-        header_up X-Real-IP         {remote_host}
-        header_up Host              {host}
-    }
+    reverse_proxy digiuniversity-app:80
 
     log {
         output file /var/log/caddy/digiuniversity.log {
@@ -38,12 +32,3 @@ digiuniversity.ir, www.digiuniversity.ir {
         format json
     }
 }
-
-# Option B — share a docker network with digiuniversity-app and proxy by
-# service name. Requires adding the host Caddy to the `digiuniversity_web`
-# external network. Replace the Option A site block above with this if you
-# prefer container-to-container traffic:
-#
-# digiuniversity.ir, www.digiuniversity.ir {
-#     reverse_proxy digiuniversity-app:80
-# }
