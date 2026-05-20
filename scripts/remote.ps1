@@ -75,7 +75,7 @@ switch ($Action) {
         # present, so re-running is safe.
         git push origin $Branch
         $bash = @'
-set -euo pipefail
+set -eu
 cd /var/www/digiuniversity
 git pull origin main
 
@@ -118,7 +118,9 @@ docker exec "$CADDY_CONTAINER" caddy validate --config /etc/caddy/Caddyfile
 docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 echo "Caddy reloaded."
 '@
-        ssh $Server $bash
+        # Pipe the script into bash on the VPS so 'set -e' and arrays work
+        # regardless of the user's login shell.
+        $bash | ssh $Server "bash -s"
     }
 
     "caddy-reload" {
