@@ -181,4 +181,9 @@ echo "Caddy reloaded."
     "caddy-reload" {
         Remote "docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile"
     }
+
+    "caddy-cat" {
+        # Dump the host Caddyfile so we can debug what Caddy is actually loading.
+        Remote "HOST_CADDYFILE=`$(docker inspect -f '{{range .Mounts}}{{if eq .Destination \"/etc/caddy/Caddyfile\"}}{{.Source}}{{end}}{{end}}' hooshgate_caddy) && echo Caddyfile: `$HOST_CADDYFILE && echo '---' && sudo cat `$HOST_CADDYFILE && echo '---' && echo 'Containers on digiuniversity_web:' && docker network inspect digiuniversity_web --format '{{range .Containers}}{{.Name}} {{end}}'"
+    }
 }
