@@ -23,7 +23,7 @@ export const CoursePage = ({ go }) => {
             <span style={{ color: "var(--fg-dim)" }}>/</span>
             <span className="mono">CS-410</span>
           </div>
-          <div className="grid gap-12 items-end"  style={{ gridTemplateColumns: "1.6fr 1fr"}}>
+          <div className="grid gap-12 items-end course-hero-grid"  style={{ gridTemplateColumns: "1.6fr 1fr"}}>
             <div>
               <span className="eyebrow">CORE COURSE · MASTERY-BASED</span>
               <h1 className="h-display mt-3.5"  style={{ fontSize: "clamp(40px, 5.5vw, 84px)"}}>مبانی یادگیری ماشین</h1>
@@ -72,7 +72,7 @@ export const CoursePage = ({ go }) => {
 
       {/* Body */}
       <section className="shell" style={{ padding: "60px 40px" }}>
-        <div className="grid gap-8"  style={{ gridTemplateColumns: "1fr 360px"}}>
+        <div className="grid gap-8 course-body-grid"  style={{ gridTemplateColumns: "1fr 360px"}}>
           {/* outline */}
           <div>
             <div className="flex items-baseline justify-between mb-5" >
@@ -129,7 +129,7 @@ export const CoursePage = ({ go }) => {
               <button
                 className="btn btn-outline mt-4 justify-center"
                  style={{width: "100%"}}
-                onClick={() => go("classroom")}
+                onClick={() => go("tutor")}
               >
                 <Icon name="chat" size={14} />
                 شروع گفتگو
@@ -158,38 +158,31 @@ export const CoursePage = ({ go }) => {
 
 const ModuleRow = ({ module, idx, active, onClick }) => {
   const status = module.status; // done / current / locked
+  const locked = status === "locked";
+  const statusLabel = status === "done" ? "تکمیل شده" : status === "current" ? "در حال انجام" : "قفل";
   return (
-    <div className="grid gap-4.5 p-4.5 rounded-2xl items-center cursor-pointer"
+    <button
+      type="button"
+      className={"module-row " + (active ? "active " : "") + (locked ? "locked" : "")}
       onClick={onClick}
-       style={{
-        gridTemplateColumns: "60px 1fr auto auto",
-        background: active ? "color-mix(in oklch, var(--cyan) 8%, var(--surface))" : "var(--surface)",
-        border: "1px solid " + (active ? "color-mix(in oklch, var(--cyan) 40%, var(--line))" : "var(--line)"),
-        transition: "140ms ease"}}
+      disabled={locked}
+      aria-current={active ? "step" : undefined}
+      aria-label={`ماژول ${toFa(idx + 1)} · ${module.title} · ${statusLabel}`}
     >
-      <div className="rounded-xl grid"  style={{width: 44, height: 44,
-        background: status === "done" ? "var(--cyan)" : status === "current" ? "color-mix(in oklch, var(--cyan) 20%, var(--surface-3))" : "var(--surface-2)",
-        color: status === "done" ? "#051418" : "var(--fg-mute)", placeItems: "center",
-        fontFamily: "var(--f-mono)", fontWeight: 700}}>
+      <span className="module-row-badge" data-status={status}>
         {status === "done" ? <Icon name="check" size={18} stroke={2.5} /> : status === "locked" ? <Icon name="lock" size={16} /> : toFa(idx + 1)}
-      </div>
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 500 }}>{module.title}</div>
-        <div className="mt-1"  style={{fontSize: 12, color: "var(--fg-mute)"}}>{module.sub}</div>
-      </div>
-      <div className="flex gap-1.5" >
+      </span>
+      <span className="module-row-body">
+        <span className="module-row-title">{module.title}</span>
+        <span className="module-row-sub">{module.sub}</span>
+      </span>
+      <span className="module-row-tags">
         {module.kinds.map((k, i) => (
-          <span className="rounded" key={i}  style={{fontFamily: "var(--f-mono)",
-            fontSize: 10,
-            padding: "3px 8px",
-            border: "1px solid var(--line)",
-            color: "var(--fg-mute)"}}>{k}</span>
+          <span className="module-row-tag" key={i}>{k}</span>
         ))}
-      </div>
-      <div className="text-left"  style={{fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)", minWidth: 70}}>
-        {module.duration}
-      </div>
-    </div>
+      </span>
+      <span className="module-row-duration">{module.duration}</span>
+    </button>
   );
 };
 

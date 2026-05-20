@@ -63,6 +63,7 @@ export const Icon = ({ name, size = 18, stroke = 1.7 }) => {
     filter: <svg {...P}><path d="M3 5h18l-7 9v6l-4-2v-4z"/></svg>,
     info: <svg {...P}><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>,
     warn: <svg {...P}><path d="M12 3 2 21h20zM12 10v5M12 18h.01"/></svg>,
+    alert: <svg {...P}><path d="M12 3 2 21h20zM12 10v5M12 18h.01"/></svg>,
     refresh: <svg {...P}><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 4v4h-4M21 12a9 9 0 0 1-15 6.7L3 16M3 20v-4h4"/></svg>,
     upload: <svg {...P}><path d="M12 20V8M6 12l6-6 6 6M4 4h16"/></svg>,
     link: <svg {...P}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>,

@@ -216,6 +216,25 @@ export const DegreeAuditPage = ({ go }) => (
 // =====================================================
 // Course Registration / Add-Drop
 // =====================================================
+const REGISTRATION_FILTERS = ["همه", "الزامی", "تخصصی", "اختیاری", "خالی", "بدون تداخل"];
+const RegistrationFilterPills = () => {
+  const [active, setActive] = React.useState(REGISTRATION_FILTERS[0]);
+  return (
+    <div className="flex gap-2 mb-5 flex-wrap" role="group" aria-label="فیلتر دروس">
+      {REGISTRATION_FILTERS.map((t) => (
+        <button
+          key={t}
+          type="button"
+          className={"pill " + (t === active ? "pill-cyan" : "")}
+          style={{ cursor: "pointer", border: "none", background: t === active ? undefined : "var(--surface)" }}
+          aria-pressed={t === active}
+          onClick={() => setActive(t)}
+        >{t}</button>
+      ))}
+    </div>
+  );
+};
+
 export const RegistrationPage = ({ go }) => {
   const [cart, setCart] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem("digiu_cart") || "[\"CS-580\"]"); } catch { return ["CS-580"]; }
@@ -247,11 +266,8 @@ export const RegistrationPage = ({ go }) => {
 
         <div className="grid gap-8"  style={{ gridTemplateColumns: "1fr 320px"}}>
           <div>
-            <div className="flex gap-2 mb-5 flex-wrap" >
-              {["همه", "الزامی", "تخصصی", "اختیاری", "خالی", "بدون تداخل"].map((t, i) => (
-                <span className={"cursor-pointer " + " " + ("pill " + (i === 0 ? "pill-cyan" : ""))} key={t}  >{t}</span>
-              ))}
-            </div>
+            <RegistrationFilterPills />
+
 
             <div className="card p-0 overflow-hidden" >
               {available.map((c, i) => {

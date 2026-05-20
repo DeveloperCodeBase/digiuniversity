@@ -34,7 +34,14 @@ export const RecordingsPage = ({ go }) => {
       {/* Featured recording */}
       <section className="shell" style={{ padding: "40px 40px 0" }}>
         <div className="grid gap-8 items-center"  style={{ gridTemplateColumns: "1.4fr 1fr"}}>
-          <div className="recording-card cursor-pointer"  onClick={() => go("classroom")}>
+          <div
+            className="recording-card cursor-pointer"
+            role="link"
+            tabIndex={0}
+            aria-label="پخش جلسه ۸ — گرادیان نزولی با مومنتوم"
+            onClick={() => go("classroom")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("classroom"); } }}
+          >
             <div className="rec-thumb" style={{ aspectRatio: "16 / 9" }}>
               <span className="rec-duration">۱:۲۸:۴۲</span>
               <div className="rec-play">
@@ -91,16 +98,20 @@ export const RecordingsPage = ({ go }) => {
       <section className="shell" style={{ padding: "60px 40px" }}>
         <div className="flex items-baseline justify-between mb-7" >
           <h2 className="h-3">همه‌ی ضبط‌ها · ۸۴ ساعت محتوا</h2>
-          <div className="flex gap-1.5" >
-            {["جدیدترین", "محبوب", "کوتاه‌ترین", "بلندترین"].map((s, i) => (
-              <span className={"cursor-pointer " + " " + ("pill " + (i === 0 ? "pill-cyan" : ""))} key={s}  >{s}</span>
-            ))}
-          </div>
+          <RecordingsSortPills />
         </div>
 
         <div className="grid grid-3">
           {RECORDINGS.map((r, i) => (
-            <div key={i} className="recording-card cursor-pointer" onClick={() => go("classroom")} >
+            <div
+              key={i}
+              className="recording-card cursor-pointer"
+              role="link"
+              tabIndex={0}
+              aria-label={`پخش ${r.title}`}
+              onClick={() => go("classroom")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("classroom"); } }}
+            >
               <div className="rec-thumb">
                 <span className="rec-duration">{r.duration}</span>
                 <div className="rec-play">
@@ -128,6 +139,28 @@ export const RecordingsPage = ({ go }) => {
 
       <Footer go={go} />
     </main>
+  );
+};
+
+// Sort pills — Phase-12 R2: were dead `<span class="pill">` elements
+// with no onClick. Now they keep client-side sort state and surface
+// the choice via aria-pressed.
+const SORT_OPTIONS = ["جدیدترین", "محبوب", "کوتاه‌ترین", "بلندترین"];
+const RecordingsSortPills = () => {
+  const [active, setActive] = React.useState(SORT_OPTIONS[0]);
+  return (
+    <div className="flex gap-1.5 flex-wrap" role="group" aria-label="مرتب‌سازی">
+      {SORT_OPTIONS.map((s) => (
+        <button
+          key={s}
+          type="button"
+          className={"pill " + (s === active ? "pill-cyan" : "")}
+          style={{ cursor: "pointer", border: "none", background: s === active ? undefined : "var(--surface)" }}
+          aria-pressed={s === active}
+          onClick={() => setActive(s)}
+        >{s}</button>
+      ))}
+    </div>
   );
 };
 

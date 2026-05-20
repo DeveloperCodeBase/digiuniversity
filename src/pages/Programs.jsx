@@ -56,7 +56,13 @@ export const ProgramsPage = ({ go }) => {
       <section className="shell pb-20" >
         <Stagger className="programs-grid">
           {programs.map((p) => (
-            <div key={p.num} className="prog-card reveal" onClick={() => go("course")}>
+            <button
+              key={p.num}
+              type="button"
+              className="prog-card reveal"
+              onClick={() => go("course")}
+              aria-label={`برنامه ${p.title} · ${p.level} · مشاهده دروس`}
+            >
               <span className="num">{p.num}</span>
               <span className="pill mt-3"  style={{alignSelf: "flex-start"}}>{p.level}</span>
               <h3>{p.title}</h3>
@@ -70,7 +76,7 @@ export const ProgramsPage = ({ go }) => {
                 </div>
                 <Icon name="arrow" size={18} />
               </div>
-            </div>
+            </button>
           ))}
         </Stagger>
       </section>

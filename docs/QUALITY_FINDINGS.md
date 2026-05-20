@@ -130,3 +130,22 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-58 ✓ | P2 | Typography | Tailwind `.h-1`..`.h-3` collisions still need authoritative typography names. | `styles.css` — added `.heading-1`, `.heading-2`, `.heading-3` as canonical names (with `height: auto !important` defence) so new pages don't have to know about the Tailwind history. |
 | F-59 ✓ | P2 | Icons | Used in States/PageHeader but missing from the set: `chev-right/left/up/down`, `x`, `menu`, `external`, `edit`, `trash`, `filter`, `info`, `warn`, `refresh`, `upload`, `link`. | `src/icons.jsx` — 13 new minimal stroke icons appended. |
 
+---
+
+## Phase 12 — Round 2: Page batch 1 (Home, Programs, Dashboard, Course, Recordings, Academic)
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-60 ✓ | P0 | Auth | `Auth.jsx` used `<Icon name="alert" />` for the form-level error banner, but the icon library had no `alert` entry — banner rendered iconless. | `src/icons.jsx` — added `alert` alias (same SVG as `warn`). |
+| F-61 ✓ | P1 | Dashboard | Greeting hardcoded "سلام نسرین" so non-student roles saw the wrong name. | `src/pages/Dashboard.jsx` — pulls `role` from `useRole()` and renders `سلام {firstName}` from `role.name`; eyebrow uses `role.label` + `role.code`. |
+| F-62 ✓ | P1 | Dashboard | "تقویم کامل" link was `<a href="#">` with no preventDefault, so clicking it appended `#` to the URL and broke the SPA router. | Replaced with `<a href="#calendar" onClick={preventDefault+go("calendar")}>`. |
+| F-63 ✓ | P2 | Dashboard | A second, redundant `SideNav` was exported with `<a>` items that had no href/onClick — every click was a no-op. | Deleted; `RoleSideNav` is the canonical sidebar. |
+| F-64 ✓ | P1 | Course | "شروع گفتگو" CTA in the inline AI Tutor card on Course.jsx routed to `classroom` instead of the live `tutor` page. | `src/pages/Course.jsx` — points at `tutor`. |
+| F-65 ✓ | P1 | Course | `ModuleRow` was a `<div onClick>` with no keyboard interaction; locked modules were still clickable. | Rewrote as `<button type="button" disabled={locked}>` with aria-current + aria-label + focus-visible ring. CSS in `styles.css`. |
+| F-66 ✓ | P1 | Course | Hero grid (`1.6fr 1fr`) and body grid (`1fr 360px`) had no responsive collapse, so the sticky 360px sidebar overflowed at tablet width. | Added `.course-hero-grid` and `.course-body-grid` classes with `@media (max-width: 1024px) { grid-template-columns: 1fr; aside: position:static }`. |
+| F-67 ✓ | P1 | Programs | Cards were `<div onClick>` — no keyboard nav, no announced role. Each card also had no `aria-label` describing destination. | `src/pages/Programs.jsx` — `<button type="button" aria-label="…">`. |
+| F-68 ✓ | P1 | Recordings | Filter sort pills ("جدیدترین", "محبوب", …) were dead `<span class="pill">` — visual only, no click. | `src/pages/Recordings.jsx` — extracted `RecordingsSortPills` component with client-side state + aria-pressed. |
+| F-69 ✓ | P1 | Recordings | Featured + grid recording cards were `<div onClick>` with no keyboard activation. | Added `role="link"`, `tabIndex={0}`, `aria-label`, and `Enter`/`Space` key handlers. |
+| F-70 ✓ | P1 | Academic.Registration | Filter pills ("همه", "الزامی", …) were dead `<span class="pill">`. | Extracted `RegistrationFilterPills` with state + aria-pressed. |
+
+

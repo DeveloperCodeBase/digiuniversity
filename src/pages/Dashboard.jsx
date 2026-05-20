@@ -6,8 +6,13 @@ import { Icon } from "../icons.jsx";
 import { Footer, Sparkline, CognitiveRadar } from "../shared.jsx";
 import { RoleSideNav } from "../sidenav.jsx";
 import { StatCard } from "../components/widgets.jsx";
+import { useRole } from "../role.jsx";
 
 export const DashboardPage = ({ go }) => {
+  const { role } = useRole();
+  // First-name greeting from the active role; falls back to "نسرین" if the
+  // role record happens to be missing one (it shouldn't).
+  const firstName = role?.name?.split(" ")[0] || "نسرین";
   return (
     <main data-screen-label="04 میز کار من">
       <div className="dash">
@@ -17,8 +22,8 @@ export const DashboardPage = ({ go }) => {
           {/* Greeting */}
           <div className="dash-greet">
             <div>
-              <span className="eyebrow">پنل دانشجو · شناسه ۸۴۰۲۱۷</span>
-              <h1 className="mt-2.5" >سلام نسرین، امروز روی <span style={{ color: "var(--cyan)" }}>بهینه‌سازی</span> تمرکز کن.</h1>
+              <span className="eyebrow">پنل {role?.label || "دانشجو"} · شناسه {role?.code || "۸۴۰۲۱۷"}</span>
+              <h1 className="mt-2.5" >سلام {firstName}، امروز روی <span style={{ color: "var(--cyan)" }}>بهینه‌سازی</span> تمرکز کن.</h1>
               <p className="muted">۳ کار باز · جلسه‌ی بعدی ۹۰ دقیقه دیگر · پروفایل شناختی به‌روز.</p>
             </div>
             <div className="flex gap-2.5" >
@@ -94,7 +99,11 @@ export const DashboardPage = ({ go }) => {
             <div>
               <div className="flex justify-between items-baseline mb-4" >
                 <h3 className="h-3">برنامه‌ی این هفته</h3>
-                <a href="#" style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}>تقویم کامل ←</a>
+                <a
+                  href="#calendar"
+                  onClick={(e) => { e.preventDefault(); go("calendar"); }}
+                  style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}
+                >تقویم کامل ←</a>
               </div>
               <div className="flex flex-col gap-2" >
                 {SCHEDULE.map((s, i) => (
@@ -161,35 +170,10 @@ export const DashboardPage = ({ go }) => {
   );
 };
 
-export const SideNav = ({ active }) => (
-  <aside className="side-nav">
-    <h6>یادگیری</h6>
-    <ul>
-      <li><a className={active === "home" ? "active" : ""}><Icon name="home" size={14} />خانه</a></li>
-      <li><a><Icon name="book" size={14} />دروس من</a></li>
-      <li><a><Icon name="calendar" size={14} />تقویم</a></li>
-      <li><a><Icon name="folder" size={14} />منابع</a></li>
-      <li><a><Icon name="chart" size={14} />پیشرفت</a></li>
-    </ul>
-    <h6>هوش مصنوعی</h6>
-    <ul>
-      <li><a><Icon name="sparkle" size={14} />دستیار شخصی</a></li>
-      <li><a><Icon name="target" size={14} />مسیر جبرانی</a></li>
-      <li><a><Icon name="bolt" size={14} />تمرین تطبیقی</a></li>
-    </ul>
-    <h6>اجتماع</h6>
-    <ul>
-      <li><a><Icon name="users" size={14} />گروه‌های مطالعه</a></li>
-      <li><a><Icon name="chat" size={14} />انجمن‌ها</a></li>
-    </ul>
-    <h6>کارنامه</h6>
-    <ul>
-      <li><a><Icon name="cert" size={14} />گواهی‌ها</a></li>
-      <li><a><Icon name="trophy" size={14} />دستاوردها</a></li>
-      <li><a><Icon name="dollar" size={14} />شهریه</a></li>
-    </ul>
-  </aside>
-);
+// (Phase 12 R2: deleted dead SideNav export. It listed links with no
+// href/onClick — every click was a no-op. The canonical sidebar is
+// `RoleSideNav` from `src/sidenav.jsx`, which is what every page now
+// imports.)
 
 
 const ActionCard = ({ icon, label, title, sub }) => (

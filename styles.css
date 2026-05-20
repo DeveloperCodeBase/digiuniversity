@@ -4465,3 +4465,103 @@ body.nav-drawer-open { overflow: hidden; }
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+/* ================================================================
+   Course module rows (Course.jsx) — converted from <div onClick> to
+   real <button> in Phase-12 R2 so keyboard users can navigate the
+   module outline.
+   ================================================================ */
+.module-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.module-row:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--cyan) 4%, var(--surface));
+}
+.module-row.active {
+  background: color-mix(in oklch, var(--cyan) 8%, var(--surface));
+  border-color: color-mix(in oklch, var(--cyan) 40%, var(--line));
+}
+.module-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.module-row.locked,
+.module-row:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.module-row-badge {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--fg-mute);
+  font-family: var(--f-mono);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.module-row-badge[data-status="done"] { background: var(--cyan); color: #051418; }
+.module-row-badge[data-status="current"] { background: color-mix(in oklch, var(--cyan) 20%, var(--surface-3)); }
+.module-row-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.module-row-title { font-size: 15px; font-weight: 500; }
+.module-row-sub   { font-size: 12px; color: var(--fg-mute); }
+.module-row-tags  { display: flex; gap: 6px; flex-wrap: wrap; }
+.module-row-tag {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  color: var(--fg-mute);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.module-row-duration {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--fg-mute);
+  min-width: 70px;
+  text-align: start;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .module-row {
+    grid-template-columns: 48px 1fr;
+    grid-template-areas:
+      "badge body"
+      "tags  tags"
+      "dur   dur";
+    gap: 10px;
+    padding: 14px;
+  }
+  .module-row-badge { width: 36px; height: 36px; grid-area: badge; }
+  .module-row-body  { grid-area: body; }
+  .module-row-tags  { grid-area: tags; }
+  .module-row-duration { grid-area: dur; }
+}
+
+/* ================================================================
+   Phase 12 — Course detail responsive collapse + Programs grid
+   ================================================================ */
+@media (max-width: 1024px) {
+  /* CoursePage hero columns (instructor card stacks under headline) */
+  .course-hero-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+  /* CoursePage body grid: sticky sidebar drops below main content */
+  .course-body-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .course-body-grid aside { position: static !important; }
+}
