@@ -8,3 +8,5 @@ npm-debug.log*
 .gitignore
 *.log
 coverage
+
+# We DO want prisma/ in the image — leave it un-ignored.

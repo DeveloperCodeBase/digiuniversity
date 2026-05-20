@@ -32,6 +32,35 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: digiuniversity-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-digiuniversity}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-digiuniversity_dev}
+      - POSTGRES_DB=${POSTGRES_DB:-digiuniversity}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-digiuniversity} -d ${POSTGRES_DB:-digiuniversity}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+
   api:
     build:
       context: ./apps/api
@@ -39,13 +68,23 @@ services:
     image: digiuniversity-api:latest
     container_name: digiuniversity-api
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - NODE_ENV=production
       - TZ=${TZ:-UTC}
       - PORT=4000
-      - APP_VERSION=0.1.0
-      # Wire the API to the AI gateway by service name on the same network.
+      - APP_VERSION=0.2.0
       - AI_GATEWAY_URL=http://ai-gateway:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-digiuniversity}:${POSTGRES_PASSWORD:-digiuniversity_dev}@postgres:5432/${POSTGRES_DB:-digiuniversity}?schema=public
+      - JWT_SECRET=${JWT_SECRET:-change-me-min-32-chars-change-me-min-32-chars}
+      - JWT_ACCESS_TTL=${JWT_ACCESS_TTL:-15m}
+      - JWT_REFRESH_TTL=${JWT_REFRESH_TTL:-30d}
+      - RUN_SEED=${RUN_SEED:-true}
+      - SEED_TENANT_SLUG=${SEED_TENANT_SLUG:-demo}
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL:-admin@digiuniversity.ir}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-ChangeMe!2026}
     expose:
       - "4000"
     healthcheck:
@@ -53,7 +92,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 30s
     logging:
       driver: json-file
       options:
@@ -99,3 +138,7 @@ services:
 networks:
   web:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

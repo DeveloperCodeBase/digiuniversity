@@ -1,0 +1,170 @@
+// DigiUniversity core schema — Phase 2.
+//
+// Source of truth for the auth + tenant + RBAC + AI audit layer. The
+// university domain (Faculty, Course, Enrollment, ClassSession, …) lands
+// in Phase 3 as additive migrations.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Tenants ----------
+//
+// Every domain row carries `tenantId`. We add an index per table so the
+// "always filter by tenant" rule is also enforceable at the DB level.
+
+model Tenant {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]
+  roles           Role[]
+  permissions     Permission[]
+  refreshTokens   RefreshToken[]
+  aiInteractions  AiInteractionLog[]
+
+  @@index([slug])
+}
+
+// ---------- Identity ----------
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  fullName     String?
+  locale       String   @default("fa")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userRoles      UserRole[]
+  refreshTokens  RefreshToken[]
+  aiInteractions AiInteractionLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+// ---------- RBAC ----------
+//
+// Roles and permissions are tenant-scoped so each tenant can shape its
+// own access model. Three roles are seeded by default: admin, instructor,
+// student. Permissions are colon-namespaced strings (resource:action).
+
+model Role {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String   // admin, instructor, student, ...
+  label     String?  // human-readable, e.g. "مدیر سامانه"
+  createdAt DateTime @default(now())
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  tenantId  String
+  key       String   // e.g. "course:create", "user:invite"
+  createdAt DateTime @default(now())
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+// ---------- Refresh tokens ----------
+//
+// Stored as the SHA-256 of the token (never the raw value) so a DB leak
+// can't be used to mint sessions. Rotated on every /v1/auth/refresh call.
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  tenantId   String
+  userId     String
+  tokenHash  String    @unique
+  userAgent  String?
+  ip         String?
+  issuedAt   DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([expiresAt])
+}
+
+// ---------- AI audit log ----------
+//
+// Mandated by AGENTS.md: every AI Gateway response is persisted with its
+// provenance + confidence + humanReviewRequired flag. The `requestId`
+// matches the value in the ai-gateway response envelope so the two halves
+// can be joined.
+
+model AiInteractionLog {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  userId               String?
+  requestId            String   @unique
+  endpoint             String   // e.g. "/v1/rag/query"
+  model                String
+  provider             String
+  mode                 String   // "mock" | "external_api"
+  confidence           Float
+  humanReviewRequired  Boolean
+  request              Json
+  response             Json
+  latencyMs            Int?
+  createdAt            DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([endpoint])
+  @@index([createdAt])
+}
