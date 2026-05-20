@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -40,7 +40,10 @@ export class LearningEventsService {
           lessonId: args.lessonId ?? null,
           assessmentId: args.assessmentId ?? null,
           classSessionId: args.classSessionId ?? null,
-          data: (args.data ?? null) as Prisma.InputJsonValue | null,
+          data:
+            args.data == null
+              ? Prisma.JsonNull
+              : (args.data as Prisma.InputJsonValue),
           ...(args.occurredAt ? { occurredAt: args.occurredAt } : {}),
         },
       });
