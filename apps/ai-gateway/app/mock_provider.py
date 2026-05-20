@@ -126,3 +126,46 @@ def asr_status(job_id: str) -> dict[str, Any]:
         "language": "fa",
         "duration_seconds": 42.0,
     }
+
+
+def assessment_grade_draft(
+    submission_id: str,
+    questions: list[dict[str, Any]],
+    answers: dict[str, Any],
+) -> dict[str, Any]:
+    """Per-question rubric notes + a suggested overall grade.
+
+    Returns mock scores that look plausible enough for the SPA to render
+    a useful UI. The envelope wrapping happens in routes.py.
+    """
+    total_points = sum(int(q.get("points") or 1) for q in questions) or 1
+    earned = 0
+    per_question: list[dict[str, Any]] = []
+    for q in questions:
+        pts = int(q.get("points") or 1)
+        # Mock heuristic: short answers + essays get partial credit;
+        # multiple-choice gets full credit if an answer was provided.
+        suggested = pts if q.get("kind") == "multiple_choice" else round(pts * 0.7, 2)
+        earned += suggested
+        per_question.append(
+            {
+                "question_id": q.get("id"),
+                "suggested_points": suggested,
+                "max_points": pts,
+                "rubric_notes": (
+                    "نمره پیشنهادی بر اساس مطابقت پاسخ با شاخص‌های هدف."
+                ),
+            }
+        )
+    grade_pct = round((earned / total_points) * 100, 2)
+    return {
+        "submission_id": submission_id,
+        "suggested_grade": grade_pct,
+        "earned_points": round(earned, 2),
+        "total_points": total_points,
+        "per_question": per_question,
+        "feedback": (
+            "تحلیل اولیه نشان می‌دهد دانشجو با مفاهیم کلیدی آشناست؛ "
+            "بازبینی نهایی توسط استاد توصیه می‌شود."
+        ),
+    }

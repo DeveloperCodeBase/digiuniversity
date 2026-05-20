@@ -60,6 +60,39 @@ export const classSessionsApi = {
     api.post("/v1/class-sessions/" + encodeURIComponent(id) + "/analyze", { task, language }),
 };
 
+// ---------- assessments + submissions ----------
+export const assessmentsApi = {
+  list: ({ courseId, status, kind } = {}) => {
+    const q = [];
+    if (courseId) q.push("courseId=" + encodeURIComponent(courseId));
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (kind) q.push("kind=" + encodeURIComponent(kind));
+    return api.get("/v1/assessments" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/assessments/" + encodeURIComponent(id)),
+  create: (body) => api.post("/v1/assessments", body),
+  addQuestion: (assessmentId, body) =>
+    api.post("/v1/assessments/" + encodeURIComponent(assessmentId) + "/questions", body),
+  publish: (id) => api.patch("/v1/assessments/" + encodeURIComponent(id), { status: "published" }),
+};
+
+export const submissionsApi = {
+  submit: ({ assessmentId, answers, finalize = false }) =>
+    api.post("/v1/submissions", { assessmentId, answers, finalize }),
+  listMine: () => api.get("/v1/submissions/me"),
+  getMine: (assessmentId) =>
+    api.get("/v1/submissions/me/assessment/" + encodeURIComponent(assessmentId)),
+  get: (id) => api.get("/v1/submissions/" + encodeURIComponent(id)),
+  list: ({ assessmentId } = {}) =>
+    api.get(
+      "/v1/submissions" + (assessmentId ? "?assessmentId=" + encodeURIComponent(assessmentId) : ""),
+    ),
+  grade: (id, { grade, feedback }) =>
+    api.patch("/v1/submissions/" + encodeURIComponent(id) + "/grade", { grade, feedback }),
+  aiGradeDraft: (id) =>
+    api.post("/v1/submissions/" + encodeURIComponent(id) + "/ai-grade-draft"),
+};
+
 // ---------- enrollments ----------
 export const enrollmentsApi = {
   enrol: ({ courseId, cohortId } = {}) =>

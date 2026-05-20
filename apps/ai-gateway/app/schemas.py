@@ -81,3 +81,19 @@ class AsrJobIn(BaseModel):
     tenant_id: str
     media_url: str
     language: str = "fa"
+
+
+class AssessmentGradeDraftIn(BaseModel):
+    """Body the core API sends when asking for a draft grade.
+
+    `questions` carries the question key (without `correctAnswer` if you
+    want to truly blind-score in `external_api` mode), and `answers` is
+    the student's submission body.
+    """
+
+    tenant_id: str
+    assessment_id: str
+    submission_id: str
+    student_id: str
+    questions: list[dict[str, Any]]
+    answers: dict[str, Any]

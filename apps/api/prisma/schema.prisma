@@ -43,6 +43,9 @@ model Tenant {
   classSessions   ClassSession[]
   recordings      Recording[]
   attendance      Attendance[]
+  assessments     Assessment[]
+  questions       Question[]
+  submissions     Submission[]
 
   @@index([slug])
 }
@@ -67,6 +70,7 @@ model User {
   enrollments    Enrollment[]
   attendance     Attendance[]
   hostedSessions ClassSession[]     @relation("ClassSessionHost")
+  submissions    Submission[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -254,6 +258,7 @@ model Course {
   modules        CourseModule[]
   enrollments    Enrollment[]
   classSessions  ClassSession[]
+  assessments    Assessment[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -450,6 +455,104 @@ model Attendance {
   @@index([tenantId])
   @@index([classSessionId])
   @@index([userId])
+}
+
+// ---------- Assessments (quizzes + assignments) ----------
+//
+// One table for both shapes (see ADR 0007). `kind` discriminates:
+//   - "quiz"       → questions answered in-app, auto-graded where possible
+//   - "assignment" → free-form Submission.answers, manually graded
+//
+// `totalPoints` is denormalised so the catalog view doesn't need to sum
+// over Question rows on every list query.
+
+model Assessment {
+  id            String    @id @default(cuid())
+  tenantId      String
+  courseId      String
+  kind          String    // "quiz" | "assignment"
+  title         String
+  description   String?
+  instructions  String?
+  status        String    @default("draft")    // "draft" | "published" | "closed"
+  totalPoints   Int       @default(0)
+  dueAt         DateTime?
+  publishedAt   DateTime?
+  closedAt      DateTime?
+  allowLate     Boolean   @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  submissions Submission[]
+
+  @@index([tenantId])
+  @@index([courseId])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model Question {
+  id              String    @id @default(cuid())
+  tenantId        String
+  assessmentId    String
+  kind            String    // "multiple_choice" | "short_answer" | "essay"
+  prompt          String
+  options         Json?     // [string, ...] for multiple_choice
+  correctAnswer   Json?     // multiple_choice → number | number[]; short_answer → string
+  points          Int       @default(1)
+  orderIndex      Int       @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([assessmentId])
+  @@index([deletedAt])
+}
+
+model Submission {
+  id            String    @id @default(cuid())
+  tenantId      String
+  assessmentId  String
+  userId        String
+  status        String    @default("draft")      // "draft" | "submitted" | "graded"
+  answers       Json      @default("{}")         // { [questionId]: { selectedIndex?, text? } } | { text } for assignment
+  autoScore     Int?
+  grade         Float?                            // 0..100 percentage
+  feedback      String?
+  aiGradeDraft  Json?     // last envelope from /v1/assessment/grade-draft
+  submittedAt   DateTime?
+  gradedAt      DateTime?
+  gradedBy      String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, userId])
+  @@index([tenantId])
+  @@index([assessmentId])
+  @@index([userId])
+  @@index([deletedAt])
 }
 
 // ---------- AI audit log ----------

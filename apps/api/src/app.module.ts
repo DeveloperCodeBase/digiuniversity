@@ -4,6 +4,7 @@ import { APP_GUARD } from "@nestjs/core";
 
 import { AiBridgeModule } from "./ai-bridge/ai-bridge.module";
 import { AiLogsModule } from "./ai-logs/ai-logs.module";
+import { AssessmentsModule } from "./assessments/assessments.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RolesGuard } from "./auth/guards/roles.guard";
@@ -37,6 +38,8 @@ import { UsersModule } from "./users/users.module";
     // Live class + AI bridge (Phase 6).
     AiBridgeModule,
     LiveClassModule,
+    // Assessments + submissions (Phase 7).
+    AssessmentsModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -5,7 +5,12 @@
 import React from "react";
 import { Icon } from "../icons.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { catalogApi, classSessionsApi, enrollmentsApi } from "../api/endpoints.js";
+import {
+  assessmentsApi,
+  catalogApi,
+  classSessionsApi,
+  enrollmentsApi,
+} from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
 
@@ -43,6 +48,7 @@ const CourseLivePage = ({ go, courseId }) => {
   const [joiningId, setJoiningId] = React.useState(null);
   const [analyzing, setAnalyzing] = React.useState(null);
   const [analysisBySession, setAnalysisBySession] = React.useState({});
+  const [assessments, setAssessments] = React.useState([]);
 
   React.useEffect(() => {
     if (!isAuthenticated || !courseId) return;
@@ -53,14 +59,16 @@ const CourseLivePage = ({ go, courseId }) => {
       catalogApi.getCourse(courseId),
       enrollmentsApi.listMine().catch(() => []),
       classSessionsApi.list({ courseId }).catch(() => []),
+      assessmentsApi.list({ courseId }).catch(() => []),
     ])
-      .then(([c, mine, sess]) => {
+      .then(([c, mine, sess, ass]) => {
         if (cancelled) return;
         setCourse(c);
         setEnrolled(
           mine.some((e) => e.courseId === courseId && e.status === "active"),
         );
         setSessions(sess);
+        setAssessments(ass);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -312,6 +320,74 @@ const CourseLivePage = ({ go, courseId }) => {
                     </li>
                   );
                 })}
+              </ul>
+            )}
+          </section>
+
+          <section className="mt-12">
+            <div className="flex items-end justify-between flex-wrap gap-2">
+              <h2 className="h-2">آزمون‌ها و تکالیف</h2>
+              <span className="mono" style={{ fontSize: 11, color: "var(--fg-mute)" }}>
+                {toFa(String(assessments.length))} مورد
+              </span>
+            </div>
+            {assessments.length === 0 ? (
+              <p style={{ color: "var(--fg-mute)", marginTop: 12 }}>
+                هنوز آزمون یا تکلیفی برای این درس منتشر نشده است.
+              </p>
+            ) : (
+              <ul
+                className="mt-5"
+                style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}
+              >
+                {assessments.map((a) => (
+                  <li
+                    key={a.id}
+                    className="rounded-2xl flex items-center justify-between flex-wrap gap-3"
+                    style={{
+                      padding: "16px 20px",
+                      background: "var(--surface)",
+                      border: "1px solid var(--line)",
+                    }}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className="pill"
+                          style={{
+                            fontSize: 11,
+                            background:
+                              a.kind === "quiz"
+                                ? "color-mix(in oklch, var(--cyan) 16%, var(--bg))"
+                                : "color-mix(in oklch, var(--amber) 16%, var(--bg))",
+                            color: a.kind === "quiz" ? "var(--cyan)" : "var(--amber)",
+                          }}
+                        >
+                          {a.kind === "quiz" ? "آزمون" : "تکلیف"}
+                        </span>
+                        <strong style={{ fontSize: 15 }}>{a.title}</strong>
+                      </div>
+                      <div
+                        className="flex gap-3 flex-wrap mt-2"
+                        style={{ fontSize: 12, color: "var(--fg-mute)" }}
+                      >
+                        <span>{toFa(String(a.totalPoints))} نمره</span>
+                        <span>{toFa(String(a._count?.questions ?? 0))} سوال</span>
+                        <span>{toFa(String(a._count?.submissions ?? 0))} ارسال</span>
+                        {a.dueAt && (
+                          <span>موعد: {new Date(a.dueAt).toLocaleDateString("fa-IR")}</span>
+                        )}
+                        <span className="pill" style={{ fontSize: 11 }}>{a.status}</span>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => go("assessment-live", a.id)}
+                    >
+                      {a.kind === "quiz" ? "شروع آزمون" : "مشاهده تکلیف"}
+                    </button>
+                  </li>
+                ))}
               </ul>
             )}
           </section>

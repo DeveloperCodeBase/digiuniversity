@@ -15,6 +15,7 @@ from . import mock_provider
 from .schemas import (
     AiResponseEnvelope,
     AsrJobIn,
+    AssessmentGradeDraftIn,
     ClassSummarizeIn,
     EmbeddingsBatchIn,
     ExtractConceptsIn,
@@ -30,14 +31,19 @@ from .settings import settings
 router = APIRouter(prefix="/v1")
 
 
-def _envelope(payload: object, confidence: float = 0.82) -> AiResponseEnvelope:
+def _envelope(
+    payload: object,
+    confidence: float = 0.82,
+    *,
+    force_review: bool = False,
+) -> AiResponseEnvelope:
     return AiResponseEnvelope(
         request_id=f"req_{uuid4().hex[:16]}",
         model=mock_provider.MOCK_MODEL,
         provider=mock_provider.MOCK_PROVIDER,
         mode=settings.ai_mode,
         confidence=confidence,
-        human_review_required=confidence < 0.85,
+        human_review_required=force_review or confidence < 0.85,
         payload=payload,
     )
 
@@ -165,6 +171,20 @@ async def asr_submit(body: AsrJobIn) -> AiResponseEnvelope:
     else:
         data = mock_provider.asr_submit(body.media_url)
     return _envelope(data, confidence=0.90)
+
+
+# ---------- assessment grading ----------
+
+@router.post("/assessment/grade-draft", response_model=AiResponseEnvelope)
+async def assessment_grade_draft(body: AssessmentGradeDraftIn) -> AiResponseEnvelope:
+    if settings.ai_mode == "external_api":
+        data = await _proxy("/v1/assessment/grade-draft", body.model_dump())
+    else:
+        data = mock_provider.assessment_grade_draft(
+            body.submission_id, body.questions, body.answers
+        )
+    # Grading drafts ALWAYS need a human pass — see AGENTS.md.
+    return _envelope(data, confidence=0.65, force_review=True)
 
 
 @router.get("/asr/jobs/{job_id}", response_model=AiResponseEnvelope)

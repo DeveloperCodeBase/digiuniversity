@@ -263,6 +263,96 @@ async function main(): Promise<void> {
 
   console.log(`[seed] class session ${sessionId} scheduled at ${start.toISOString()}`);
 
+  // ---------- Phase 7: a demo quiz + 3 multiple-choice questions ----------
+  const quizId = `seed_${tenant.id}_${course.id}_quiz1`;
+  const dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // a week out
+  const quiz = await prisma.assessment.upsert({
+    where: { id: quizId },
+    update: {},
+    create: {
+      id: quizId,
+      tenantId: tenant.id,
+      courseId: course.id,
+      kind: "quiz",
+      title: "آزمون فصل اول — مفاهیم پایه",
+      description: "آزمون چندگزینه‌ای از مفاهیم درس‌های ۱ و ۲.",
+      instructions: "هر سوال یک پاسخ صحیح دارد. زمان: ۲۰ دقیقه.",
+      status: "published",
+      publishedAt: new Date(),
+      dueAt,
+    },
+  });
+
+  type SeedQuestion = {
+    suffix: string;
+    prompt: string;
+    options: string[];
+    correctAnswer: number;
+    points: number;
+  };
+  const seedQs: SeedQuestion[] = [
+    {
+      suffix: "q1",
+      prompt: "کدام گزینه تعریف overfitting را بهتر بیان می‌کند؟",
+      options: [
+        "مدل روی داده آموزشی بیش از حد دقیق می‌شود و تعمیم نمی‌دهد",
+        "مدل به اندازه کافی پیچیده نیست",
+        "داده آموزشی و آزمون با هم یکسان‌اند",
+        "هیچکدام",
+      ],
+      correctAnswer: 0,
+      points: 2,
+    },
+    {
+      suffix: "q2",
+      prompt: "هدف مجموعه validation چیست؟",
+      options: [
+        "آموزش مدل",
+        "ارزیابی هایپرپارامترها بدون آلودگی داده آزمون",
+        "ذخیره خروجی نهایی",
+        "افزایش حجم داده",
+      ],
+      correctAnswer: 1,
+      points: 2,
+    },
+    {
+      suffix: "q3",
+      prompt:
+        "پیچیدگی زمانی الگوریتم جستجوی دودویی روی یک آرایه مرتب با n عضو چیست؟",
+      options: ["O(1)", "O(log n)", "O(n)", "O(n log n)"],
+      correctAnswer: 1,
+      points: 1,
+    },
+  ];
+
+  for (let i = 0; i < seedQs.length; i++) {
+    const q = seedQs[i];
+    await prisma.question.upsert({
+      where: { id: `seed_${tenant.id}_${quizId}_${q.suffix}` },
+      update: {},
+      create: {
+        id: `seed_${tenant.id}_${quizId}_${q.suffix}`,
+        tenantId: tenant.id,
+        assessmentId: quiz.id,
+        kind: "multiple_choice",
+        prompt: q.prompt,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        points: q.points,
+        orderIndex: i,
+      },
+    });
+  }
+  // Denormalised totalPoints on the assessment.
+  const totalPoints = seedQs.reduce((s, q) => s + q.points, 0);
+  if (quiz.totalPoints !== totalPoints) {
+    await prisma.assessment.update({
+      where: { id: quiz.id },
+      data: { totalPoints },
+    });
+  }
+  console.log(`[seed] quiz ${quiz.id} published (${seedQs.length} questions, ${totalPoints} pts)`);
+
   console.log("[seed] done");
 }
 

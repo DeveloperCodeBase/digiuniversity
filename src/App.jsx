@@ -9,6 +9,7 @@ import { ScrollProgress } from "./motion.jsx";
 import { Nav } from "./shared.jsx";
 
 import HomePage from "./pages/Home.jsx";
+import AssessmentLivePage from "./pages/AssessmentLive.jsx";
 import CatalogPage from "./pages/Catalog.jsx";
 import CourseLivePage from "./pages/CourseLive.jsx";
 import MyCoursesPage from "./pages/MyCourses.jsx";
@@ -71,6 +72,7 @@ const AppShell = () => {
     case "catalog": page = <CatalogPage go={go} />; break;
     case "my-courses": page = <MyCoursesPage go={go} />; break;
     case "course-live": page = <CourseLivePage go={go} courseId={routeParam} />; break;
+    case "assessment-live": page = <AssessmentLivePage go={go} assessmentId={routeParam} />; break;
     case "classroom": page = <ClassroomPage go={go} />; break;
     case "dashboard": page = <DashboardPage go={go} />; break;
     case "course": page = <CoursePage go={go} courseId={routeParam} />; break;
