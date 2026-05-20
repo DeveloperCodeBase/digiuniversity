@@ -132,6 +132,27 @@ export const learningEventsApi = {
   },
 };
 
+// ---------- tutor ----------
+export const tutorApi = {
+  createSession: ({ courseId, title } = {}) =>
+    api.post("/v1/tutor/sessions", {
+      ...(courseId ? { courseId } : {}),
+      ...(title ? { title } : {}),
+    }),
+  listSessions: () => api.get("/v1/tutor/sessions"),
+  getSession: (id) => api.get("/v1/tutor/sessions/" + encodeURIComponent(id)),
+  ask: (id, { question, topK = 5 }) =>
+    api.post("/v1/tutor/sessions/" + encodeURIComponent(id) + "/ask", { question, topK }),
+  deleteSession: (id) => api.del("/v1/tutor/sessions/" + encodeURIComponent(id)),
+};
+
+export const documentsApi = {
+  list: ({ courseId } = {}) =>
+    api.get("/v1/documents" + (courseId ? "?courseId=" + encodeURIComponent(courseId) : "")),
+  get: (id) => api.get("/v1/documents/" + encodeURIComponent(id)),
+  create: (body) => api.post("/v1/documents", body),
+};
+
 // ---------- users ----------
 export const usersApi = {
   me: () => api.get("/v1/users/me"),

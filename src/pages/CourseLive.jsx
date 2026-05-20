@@ -183,7 +183,11 @@ const CourseLivePage = ({ go, courseId }) => {
             {course.level && <span className="pill" style={{ fontSize: 11 }}>{course.level}</span>}
           </div>
 
-          <div className="mt-7">
+          <div className="mt-7 flex gap-3 flex-wrap items-center">
+            <button className="btn btn-outline" onClick={() => go("tutor")}>
+              <Icon name="sparkle" size={14} />
+              پرسش از دستیار AI
+            </button>
             {enrolled ? (
               <div
                 className="rounded-lg"

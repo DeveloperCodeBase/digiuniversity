@@ -47,6 +47,10 @@ model Tenant {
   questions       Question[]
   submissions     Submission[]
   learningEvents  LearningEvent[]
+  documents       Document[]
+  documentChunks  DocumentChunk[]
+  tutorSessions   TutorSession[]
+  tutorMessages   TutorMessage[]
 
   @@index([slug])
 }
@@ -73,6 +77,8 @@ model User {
   hostedSessions ClassSession[]     @relation("ClassSessionHost")
   submissions    Submission[]
   learningEvents LearningEvent[]
+  tutorSessions  TutorSession[]
+  tutorMessages  TutorMessage[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -590,6 +596,103 @@ model LearningEvent {
   @@index([courseId])
   @@index([assessmentId])
   @@index([classSessionId])
+}
+
+// ---------- RAG corpus + tutor ----------
+//
+// Phase 9 ships the *control plane* — documents are persisted with
+// chunked text so future ai-gateway / external GPU work can index them
+// without another migration. The vector column is JSON so we can switch
+// to pgvector by changing one ALTER without losing rows.
+
+model Document {
+  id          String    @id @default(cuid())
+  tenantId    String
+  courseId    String?
+  title       String
+  source      String?   // URL or storage URI, optional
+  kind        String    @default("text") // "text" | "pdf" | "external"
+  content     String    @db.Text         // raw text — small for MVP
+  language    String    @default("fa")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  chunks DocumentChunk[]
+
+  @@index([tenantId])
+  @@index([courseId])
+  @@index([deletedAt])
+}
+
+model DocumentChunk {
+  id           String   @id @default(cuid())
+  tenantId     String
+  documentId   String
+  orderIndex   Int      @default(0)
+  text         String   @db.Text
+  tokenCount   Int?
+  embedding    Json?    // placeholder for future vectors
+
+  createdAt DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([documentId])
+}
+
+model TutorSession {
+  id            String    @id @default(cuid())
+  tenantId      String
+  userId        String
+  courseId      String?   // optional: scoped to a course
+  title         String    @default("گفت‌و‌گوی جدید")
+  lastMessageAt DateTime  @default(now())
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages TutorMessage[]
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([lastMessageAt])
+  @@index([deletedAt])
+}
+
+model TutorMessage {
+  id             String    @id @default(cuid())
+  tenantId       String
+  sessionId      String
+  userId         String?   // null for assistant turns
+  role           String    // "user" | "assistant" | "system"
+  content        String    @db.Text
+  citations      Json?     // [{ id, title, score }, ...] for assistant turns
+  aiRequestId    String?   // joins to AiInteractionLog.requestId
+  confidence     Float?
+  humanReviewRequired Boolean?
+
+  createdAt DateTime @default(now())
+
+  tenant  Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  session TutorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([sessionId])
+  @@index([createdAt])
 }
 
 // ---------- AI audit log ----------

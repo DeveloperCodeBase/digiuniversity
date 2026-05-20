@@ -6,6 +6,7 @@ import { AiBridgeModule } from "./ai-bridge/ai-bridge.module";
 import { AiLogsModule } from "./ai-logs/ai-logs.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { AssessmentsModule } from "./assessments/assessments.module";
+import { TutorModule } from "./tutor/tutor.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RolesGuard } from "./auth/guards/roles.guard";
@@ -44,6 +45,8 @@ import { UsersModule } from "./users/users.module";
     // Learning events + analytics (Phase 8). Global so other modules
     // can inject LearningEventsService without re-importing.
     AnalyticsModule,
+    // RAG-ready tutor (Phase 9).
+    TutorModule,
   ],
   controllers: [HealthController],
   providers: [

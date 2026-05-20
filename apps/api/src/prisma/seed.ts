@@ -353,6 +353,52 @@ async function main(): Promise<void> {
   }
   console.log(`[seed] quiz ${quiz.id} published (${seedQs.length} questions, ${totalPoints} pts)`);
 
+  // ---------- Phase 9: a reference document for the tutor on CS101 ----------
+  const docId = `seed_${tenant.id}_${course.id}_doc1`;
+  const seedDocText = [
+    "خلاصه فصل اول — مفاهیم پایه علوم کامپیوتر.",
+    "",
+    "تعریف overfitting: حالتی است که در آن مدل آنقدر روی داده‌های آموزشی دقیق می‌شود",
+    "که توانایی تعمیم به داده‌های جدید را از دست می‌دهد. نشانه‌های آن: خطای آموزش پایین،",
+    "خطای اعتبارسنجی بالا، و حساسیت زیاد به نویز.",
+    "",
+    "مجموعه validation: زیرمجموعه‌ای از داده‌ها که برای انتخاب هایپرپارامترها استفاده می‌شود.",
+    "هرگز نباید با داده آزمون نهایی یکی باشد.",
+    "",
+    "پیچیدگی زمانی جستجوی دودویی (binary search) روی یک آرایه مرتب با n عنصر برابر",
+    "با O(log n) است. این بهترین حالت برای جستجو در داده‌های مرتب‌شده است.",
+    "",
+    "مفاهیم کلیدی این فصل: تعریف الگوریتم، تحلیل پیچیدگی زمانی و فضایی،",
+    "تفاوت validation و test set، و راه‌های جلوگیری از overfitting (رگولاریزاسیون،",
+    "early stopping، افزایش داده).",
+  ].join("\n");
+
+  const existingDoc = await prisma.document.findUnique({ where: { id: docId } });
+  if (!existingDoc) {
+    await prisma.document.create({
+      data: {
+        id: docId,
+        tenantId: tenant.id,
+        courseId: course.id,
+        title: "خلاصه فصل اول — مفاهیم پایه",
+        kind: "text",
+        language: "fa",
+        content: seedDocText,
+        chunks: {
+          create: [
+            {
+              tenantId: tenant.id,
+              orderIndex: 0,
+              text: seedDocText,
+              tokenCount: Math.ceil(seedDocText.length / 4),
+            },
+          ],
+        },
+      },
+    });
+    console.log(`[seed] document ${docId} created with 1 chunk`);
+  }
+
   console.log("[seed] done");
 }
 

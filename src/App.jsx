@@ -14,6 +14,7 @@ import CatalogPage from "./pages/Catalog.jsx";
 import CourseLivePage from "./pages/CourseLive.jsx";
 import MyCoursesPage from "./pages/MyCourses.jsx";
 import ProgressPage from "./pages/Progress.jsx";
+import TutorPage from "./pages/Tutor.jsx";
 import ProgramsPage from "./pages/Programs.jsx";
 import ClassroomPage from "./pages/Classroom.jsx";
 import DashboardPage from "./pages/Dashboard.jsx";
@@ -75,6 +76,7 @@ const AppShell = () => {
     case "course-live": page = <CourseLivePage go={go} courseId={routeParam} />; break;
     case "assessment-live": page = <AssessmentLivePage go={go} assessmentId={routeParam} />; break;
     case "progress": page = <ProgressPage go={go} />; break;
+    case "tutor": page = <TutorPage go={go} />; break;
     case "classroom": page = <ClassroomPage go={go} />; break;
     case "dashboard": page = <DashboardPage go={go} />; break;
     case "course": page = <CoursePage go={go} courseId={routeParam} />; break;
