@@ -179,8 +179,11 @@ echo -n "unmanaged site-opener lines (expect 0): "
 sudo grep -cE '^digiuniversity\.ir' "$HOST_CADDYFILE" || true
 echo -n "header_up X-Forwarded-* lines in digi area (expect 0): "
 sudo grep -cE 'header_up X-Forwarded' "$HOST_CADDYFILE" || true
-echo "--- digiuniversity-only lines (managed block + matches) ---"
+echo "--- managed block ---"
 sudo sed -n '/^# >>> digiuniversity/,/^# <<< digiuniversity/p' "$HOST_CADDYFILE"
+echo "--- unmanaged digiuniversity lines (with line numbers, +/- 1 line of context) ---"
+# Show only the line numbers of unmanaged opener lines so we know roughly where they are
+sudo grep -nE '^digiuniversity\.ir' "$HOST_CADDYFILE" || echo "(none)"
 '@
         $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
         $si = New-Object System.Diagnostics.ProcessStartInfo
