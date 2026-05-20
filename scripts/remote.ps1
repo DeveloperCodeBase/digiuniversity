@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs")]
     [string]$Action
 )
 
@@ -169,6 +169,32 @@ echo "Caddy reloaded."
         # Tail Caddy's recent stdout to debug proxy issues. Filtered to lines
         # that mention digiuniversity so other tenants stay out of the dump.
         Remote "docker logs --tail=400 hooshgate_caddy 2>&1 | grep -iE 'digiuniversity|reverse_proxy|upstream' | tail -40"
+    }
+
+    "caddy-probe-and-logs" {
+        # Force a request through Caddy from inside the network, then
+        # immediately tail the very latest digiuniversity log entry to see
+        # what Caddy actually attempted.
+        $bash = @'
+set -eu
+echo "--- request via local :443 ---"
+curl -k -sSI --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/ || true
+sleep 1
+echo "--- most recent Caddy log entries for digiuniversity ---"
+docker logs --since=10s hooshgate_caddy 2>&1 | grep -iE 'digiuniversity|upstream|dial' | tail -10
+'@
+        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
+        $si = New-Object System.Diagnostics.ProcessStartInfo
+        $si.FileName = "ssh"
+        $si.Arguments = "$Server `"bash -s`""
+        $si.UseShellExecute = $false
+        $si.RedirectStandardInput = $true
+        $p = [System.Diagnostics.Process]::Start($si)
+        $p.StandardInput.NewLine = "`n"
+        $p.StandardInput.Write($bash)
+        $p.StandardInput.Close()
+        $p.WaitForExit()
+        exit $p.ExitCode
     }
 
     "caddy-verify" {
