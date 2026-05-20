@@ -1,15 +1,19 @@
 // =====================================================
 // Search — Semantic search across courses, video, docs
 // =====================================================
-const SearchPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer } from "../shared.jsx";
+
+export const SearchPage = ({ go }) => {
   const [query, setQuery] = React.useState("گرادیان نزولی با مومنتوم");
   const [mode, setMode] = React.useState("hybrid");
 
   return (
     <main data-screen-label="09 جستجو">
       <section className="search-hero shell">
-        <span className="eyebrow" style={{ justifyContent: "center" }}>SEMANTIC SEARCH · HYBRID RETRIEVAL</span>
-        <h1 className="h-display" style={{ marginTop: 18, fontSize: "clamp(36px, 4.5vw, 72px)" }}>
+        <span className="eyebrow justify-center" >SEMANTIC SEARCH · HYBRID RETRIEVAL</span>
+        <h1 className="h-display mt-4.5"  style={{ fontSize: "clamp(36px, 4.5vw, 72px)"}}>
           هر جمله‌ای که در کلاس گفته شد،
           <br /><span style={{ color: "var(--cyan)" }}>قابل جستجو است</span>
         </h1>
@@ -28,28 +32,28 @@ const SearchPage = ({ go }) => {
             ["instructor", "صحبت استاد"],
             ["student", "پرسش دانشجو"],
           ].map(([id, lbl]) => (
-            <span key={id} onClick={() => setMode(id)} className={"pill " + (mode === id ? "pill-cyan" : "")} style={{ cursor: "pointer" }}>
+            <span className={"cursor-pointer " + " " + ("pill " + (mode === id ? "pill-cyan" : ""))} key={id} onClick={() => setMode(id)}  >
               {lbl}
             </span>
           ))}
         </div>
 
-        <div style={{ marginTop: 24, fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}>
+        <div className="mt-6"  style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)"}}>
           ۴۲ نتیجه در ۲۳ میلی‌ثانیه · رتبه‌بندی هیبرید
         </div>
       </section>
 
-      <section className="shell" style={{ paddingBottom: 80 }}>
+      <section className="shell pb-20" >
         {/* AI synthesized answer */}
-        <div className="card" style={{ padding: 32, marginBottom: 32, background: "linear-gradient(135deg, color-mix(in oklch, var(--violet) 10%, var(--surface)), var(--surface))", border: "1px solid color-mix(in oklch, var(--violet) 30%, var(--line))" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--violet)", marginBottom: 18 }}>
+        <div className="card p-8 mb-8"  style={{ background: "linear-gradient(135deg, color-mix(in oklch, var(--violet) 10%, var(--surface)), var(--surface))", border: "1px solid color-mix(in oklch, var(--violet) 30%, var(--line))"}}>
+          <div className="flex items-center gap-2.5 mb-4.5"  style={{ color: "var(--violet)"}}>
             <Icon name="sparkle" size={18} />
             <span className="mono" style={{ letterSpacing: "0.1em" }}>AI ANSWER · RAG · GROUNDED</span>
           </div>
           <p style={{ fontSize: 16, lineHeight: 1.8 }}>
             گرادیان نزولی با مومنتوم نسخه‌ای از SGD است که در آن میانگین متحرک نمایی از گرادیان‌های قبلی نگه داشته می‌شود. این کار باعث می‌شود مدل از minimaهای محلی عبور کند و در جهت‌های با گرادیان پایدار سریع‌تر حرکت کند. فرمول اصلی: <span style={{ fontFamily: "var(--f-mono)", color: "var(--amber)" }}>v_t = β·v_{"{t-1}"} + (1-β)·∇L</span>، که β معمولاً ۰.۹ است.
           </p>
-          <div style={{ display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" }}>
+          <div className="flex gap-2 mt-4.5 flex-wrap" >
             <span className="pill" style={{ fontSize: 10 }}>۴ منبع</span>
             <span className="pill pill-cyan" style={{ fontSize: 10 }}>CS-410 جلسه ۸</span>
             <span className="pill pill-cyan" style={{ fontSize: 10 }}>جزوه ماژول ۴</span>
@@ -58,7 +62,7 @@ const SearchPage = ({ go }) => {
         </div>
 
         {/* Results */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className="flex flex-col gap-3.5" >
           {RESULTS.map((r, i) => (
             <div key={i} className="search-result" onClick={() => go("classroom")}>
               <div className="search-thumb">
@@ -66,24 +70,32 @@ const SearchPage = ({ go }) => {
                 <span className="ts">{r.timestamp}</span>
               </div>
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <div className="flex items-center gap-2.5 mb-2" >
                   <span className="pill" style={{ fontSize: 10 }}>{r.course}</span>
                   <span className={"pill " + (r.role === "instructor" ? "pill-cyan" : "pill-amber")} style={{ fontSize: 10 }}>
                     {r.role === "instructor" ? "استاد" : r.role === "student" ? "دانشجو" : "جزوه"}
                   </span>
                   <span className="mono" style={{ color: "var(--fg-dim)" }}>score {r.score}</span>
                 </div>
-                <h4 style={{ fontSize: 17, marginBottom: 10 }}>{r.title}</h4>
+                <h4 className="mb-2.5"  style={{fontSize: 17}}>{r.title}</h4>
                 <p style={{ fontSize: 14, color: "var(--fg-mute)", lineHeight: 1.7 }}>{r.excerpt}</p>
-                <div style={{ display: "flex", gap: 14, marginTop: 14, fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)" }}>
+                <div className="flex gap-3.5 mt-3.5"  style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)"}}>
                   <span>{r.speaker}</span>
                   <span>·</span>
                   <span>{r.date}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <button className="btn btn-ghost btn-sm"><Icon name="play" size={13} /> پخش</button>
-                <button className="btn btn-ghost btn-sm"><Icon name="file" size={13} /> متن</button>
+              <div className="flex flex-col gap-1.5" >
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => go("recordings")}
+                  aria-label={"پخش " + r.title}
+                ><Icon name="play" size={13} /> پخش</button>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => window.toast?.({ title: "متن کامل", msg: r.excerpt })}
+                  aria-label={"متن " + r.title}
+                ><Icon name="file" size={13} /> متن</button>
               </div>
             </div>
           ))}
@@ -103,4 +115,4 @@ const RESULTS = [
   { course: "CS-410", role: "doc", title: "جزوه ماژول ۴ — بهینه‌سازی", excerpt: "...در عمل، مومنتوم باعث می‌شود مسیر بهینه‌سازی نوسان کمتری داشته باشد و سریع‌تر همگرا شود. این به‌ویژه در شبکه‌های عصبی عمیق اهمیت دارد...", speaker: "متن مرجع", date: "PDF · صفحه ۲۳", timestamp: "—", score: "۰.۷۸" },
 ];
 
-window.SearchPage = SearchPage;
+export default SearchPage;

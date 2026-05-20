@@ -1,8 +1,11 @@
 // =====================================================
 // Master role-aware sidebar — used in all dashboards
 // =====================================================
+import React from "react";
+import { Icon } from "./icons.jsx";
+import { useRole } from "./role.jsx";
 
-const SIDEBAR_BY_ROLE = {
+export const SIDEBAR_BY_ROLE = {
   student: [
     { h: "یادگیری" },
     { id: "dashboard", t: "میز کار", ic: "home" },
@@ -109,32 +112,8 @@ const SIDEBAR_BY_ROLE = {
   ],
 };
 
-const RoleSideNav = ({ active, go }) => {
-  const { role } = useRole();
-  const items = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
-  return (
-    <aside className="side-nav">
-      {items.map((it, i) =>
-        it.h ? (
-          <h6 key={"h" + i}>{it.h}</h6>
-        ) : (
-          <a
-            key={it.id}
-            onClick={() => go(it.id)}
-            className={active === it.id ? "active" : ""}
-            style={{ cursor: "pointer" }}
-          >
-            <Icon name={it.ic} size={14} />
-            {it.t}
-          </a>
-        )
-      )}
-    </aside>
-  );
-};
-
 // Wrap a list in <ul> if it isn't already (compat with existing CSS)
-const RoleSideNavWrapped = ({ active, go }) => {
+export const RoleSideNav = ({ active, go }) => {
   const { role } = useRole();
   const items = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
   // Group items: each h: starts a new group
@@ -153,10 +132,8 @@ const RoleSideNavWrapped = ({ active, go }) => {
           <ul>
             {g.items.map(it => (
               <li key={it.id}>
-                <a
+                <a className={"cursor-pointer " + " " + (active === it.id ? "active" : "")}
                   onClick={() => go(it.id)}
-                  className={active === it.id ? "active" : ""}
-                  style={{ cursor: "pointer" }}
                 >
                   <Icon name={it.ic} size={14} />
                   {it.t}
@@ -170,5 +147,4 @@ const RoleSideNavWrapped = ({ active, go }) => {
   );
 };
 
-window.SIDEBAR_BY_ROLE = SIDEBAR_BY_ROLE;
-window.RoleSideNav = RoleSideNavWrapped;
+export default RoleSideNav;

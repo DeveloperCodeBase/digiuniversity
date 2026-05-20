@@ -1,13 +1,55 @@
 // =====================================================
 // Credential / Certificate page
 // =====================================================
-const CredentialPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer, toFa } from "../shared.jsx";
+import { CREDENTIALS } from "../data.js";
+
+const CredentialVerifyForm = () => {
+  const [code, setCode] = React.useState("");
+  return (
+    <form className="flex gap-2 mt-3.5"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!code.trim()) {
+          window.toast?.({ title: "خطا", msg: "ابتدا شناسه گواهی را وارد کنید.", kind: "warn" });
+          return;
+        }
+        if (code.startsWith("DU-")) {
+          window.toast?.({ title: "گواهی معتبر است", msg: "این گواهی توسط DigiUniversity در ۱۴۰۴ صادر شده.", kind: "success", ttl: 4500 });
+        } else {
+          window.toast?.({ title: "شناسه نامعتبر", msg: "شناسه باید با DU- شروع شود.", kind: "danger" });
+        }
+      }}
+      
+    >
+      <input className="flex-1 rounded-xl text-left"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="DU-2026-..."
+        aria-label="شناسه گواهی"
+         style={{
+          background: "var(--surface-2)",
+          border: "1px solid var(--line)",
+          padding: "10px 12px",
+          color: "var(--fg)",
+          fontFamily: "var(--f-mono)",
+          fontSize: 13,
+          direction: "ltr"}}
+      />
+      <button type="submit" className="btn btn-amber btn-sm" aria-label="بررسی گواهی">بررسی</button>
+    </form>
+  );
+};
+
+export const CredentialPage = ({ go }) => {
   return (
     <main data-screen-label="08 گواهی">
       <section style={{ padding: "80px 0 40px", borderBottom: "1px solid var(--line)" }}>
-        <div className="shell" style={{ textAlign: "center" }}>
-          <span className="eyebrow" style={{ justifyContent: "center" }}>VERIFIABLE CREDENTIALS · OPEN BADGES 3.0</span>
-          <h1 className="h-display" style={{ marginTop: 18, fontSize: "clamp(40px, 5vw, 80px)" }}>
+        <div className="shell text-center" >
+          <span className="eyebrow justify-center" >VERIFIABLE CREDENTIALS · OPEN BADGES 3.0</span>
+          <h1 className="h-display mt-4.5"  style={{ fontSize: "clamp(40px, 5vw, 80px)"}}>
             مدرکی که <span style={{ background: "linear-gradient(110deg, var(--amber), var(--cyan))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>قابل اثبات</span> است
           </h1>
           <p className="lead" style={{ margin: "20px auto 0" }}>
@@ -17,22 +59,22 @@ const CredentialPage = ({ go }) => {
       </section>
 
       <section className="shell" style={{ padding: "60px 40px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 40, alignItems: "start" }}>
+        <div className="grid gap-10 items-start"  style={{ gridTemplateColumns: "1.4fr 1fr"}}>
           {/* Certificate */}
           <div className="cert">
             <div className="cert-head">
               <div>
                 <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.12em" }}>DIGIUNIVERSITY · CERT</div>
-                <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)", marginTop: 6 }}>ID · DU-2026-CS410-04217-A1</div>
+                <div className="mt-1.5"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)"}}>ID · DU-2026-CS410-04217-A1</div>
               </div>
               <div className="cert-seal"></div>
             </div>
             <h2>گواهی پایان دوره با تسلط کامل</h2>
-            <div style={{ fontSize: 14, color: "var(--fg-mute)", marginTop: 18 }}>
+            <div className="mt-4.5"  style={{fontSize: 14, color: "var(--fg-mute)"}}>
               این سند گواهی می‌کند که
             </div>
             <div className="name">نسرین رضوی</div>
-            <div style={{ fontSize: 14, color: "var(--fg-mute)", marginTop: 8 }}>
+            <div className="mt-2"  style={{fontSize: 14, color: "var(--fg-mute)"}}>
               دوره‌ی <strong style={{ color: "var(--fg)" }}>مبانی یادگیری ماشین (CS-410)</strong> را با تسلط <strong style={{ color: "var(--amber)" }}>۹۲٪</strong> بر اهداف یادگیری به پایان رسانده است.
             </div>
             <div className="meta-row">
@@ -53,23 +95,16 @@ const CredentialPage = ({ go }) => {
           </div>
 
           {/* Sidebar */}
-          <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="card" style={{ padding: 24 }}>
-              <div className="mono" style={{ color: "var(--fg-mute)", marginBottom: 14, fontSize: 11, letterSpacing: "0.08em" }}>RAW CREDENTIAL · OB 3.0</div>
-              <pre style={{
-                fontFamily: "var(--f-mono)",
+          <aside className="flex flex-col gap-4" >
+            <div className="card p-6" >
+              <div className="mono mb-3.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>RAW CREDENTIAL · OB 3.0</div>
+              <pre className="p-4 rounded-lg overflow-auto text-left m-0"  style={{fontFamily: "var(--f-mono)",
                 fontSize: 11,
                 lineHeight: 1.7,
                 background: "var(--bg-deep)",
-                padding: 16,
-                borderRadius: 8,
-                overflow: "auto",
                 direction: "ltr",
-                textAlign: "left",
                 color: "var(--fg-mute)",
-                border: "1px solid var(--line)",
-                margin: 0,
-              }}>
+                border: "1px solid var(--line)"}}>
 {`{
   "@context": "https://w3.org/openbadges/v3",
   "type": "OpenBadgeCredential",
@@ -84,26 +119,34 @@ const CredentialPage = ({ go }) => {
   "proof": { "type": "Ed25519Sig" }
 }`}
               </pre>
-              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <button className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: "center" }}>
+              <div className="flex gap-2 mt-3.5" >
+                <button
+                  className="btn btn-outline btn-sm flex-1 justify-center"
+                  
+                  onClick={() => window.toast?.({ title: "JSON-LD آماده شد", msg: "credential.json دانلود شد.", kind: "success" })}
+                >
                   <Icon name="download" size={13} />JSON-LD
                 </button>
-                <button className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: "center" }}>
+                <button
+                  className="btn btn-outline btn-sm flex-1 justify-center"
+                  
+                  onClick={() => window.toast?.({ title: "PDF آماده شد", msg: "گواهی به‌صورت PDF دانلود شد.", kind: "success" })}
+                >
                   <Icon name="download" size={13} />PDF
                 </button>
               </div>
             </div>
 
-            <div className="card" style={{ padding: 24 }}>
-              <div className="mono" style={{ color: "var(--cyan)", marginBottom: 14, fontSize: 11, letterSpacing: "0.08em" }}>EVIDENCE · ۲۴ شاهد یادگیری</div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="card p-6" >
+              <div className="mono mb-3.5"  style={{color: "var(--cyan)", fontSize: 11, letterSpacing: "0.08em"}}>EVIDENCE · ۲۴ شاهد یادگیری</div>
+              <ul className="p-0 m-0 flex flex-col gap-2"  style={{listStyle: "none"}}>
                 {[
                   ["۸ آزمون تطبیقی موفق", "۹۲٪"],
                   ["۱۲ پروژه عملی", "۹۰٪"],
                   ["۲۲ ساعت کلاس فعال", "۹۸٪"],
                   ["پروژه پایانی", "A"],
                 ].map(([t, v]) => (
-                  <li key={t} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
+                  <li className="flex justify-between" key={t}  style={{ fontSize: 13, padding: "8px 0", borderBottom: "1px solid var(--line)"}}>
                     <span style={{ color: "var(--fg-mute)" }}>{t}</span>
                     <span style={{ fontFamily: "var(--f-mono)", color: "var(--cyan)", fontWeight: 600 }}>{v}</span>
                   </li>
@@ -111,72 +154,65 @@ const CredentialPage = ({ go }) => {
               </ul>
             </div>
 
-            <div className="card" style={{ padding: 24 }}>
-              <div className="mono" style={{ color: "var(--amber)", marginBottom: 14, fontSize: 11, letterSpacing: "0.08em" }}>VERIFY</div>
+            <div className="card p-6" >
+              <div className="mono mb-3.5"  style={{color: "var(--amber)", fontSize: 11, letterSpacing: "0.08em"}}>VERIFY</div>
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
                 هر شخص یا سازمان می‌تواند با اسکن QR یا وارد کردن شناسه گواهی، صحت آن را در ثانیه راستی‌آزمایی کند.
               </p>
-              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <input placeholder="DU-2026-..." style={{
-                  flex: 1,
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--line)",
-                  borderRadius: 10,
-                  padding: "10px 12px",
-                  color: "var(--fg)",
-                  fontFamily: "var(--f-mono)",
-                  fontSize: 13,
-                  direction: "ltr",
-                  textAlign: "left",
-                }} />
-                <button className="btn btn-amber btn-sm">بررسی</button>
-              </div>
+              <CredentialVerifyForm />
             </div>
           </aside>
         </div>
 
         {/* All credentials grid */}
-        <div style={{ marginTop: 80 }}>
-          <div className="section-head" style={{ marginBottom: 32 }}>
+        <div className="mt-20" >
+          <div className="section-head mb-8" >
             <div className="text">
               <span className="eyebrow">ALL CREDENTIALS</span>
-              <h2 className="h-2" style={{ marginTop: 14 }}>کیف اعتبارنامه</h2>
+              <h2 className="h-2 mt-3.5" >کیف اعتبارنامه</h2>
             </div>
-            <button className="btn btn-outline">
+            <button
+              className="btn btn-outline"
+              onClick={() => {
+                if (navigator.clipboard) navigator.clipboard.writeText("https://digiu.edu/u/nasrin/credentials").catch(() => {});
+                window.toast?.({ title: "لینک پروفایل کپی شد", msg: "digiu.edu/u/nasrin/credentials", kind: "success" });
+              }}
+            >
               <Icon name="share" size={14} />
               اشتراک پروفایل عمومی
             </button>
           </div>
           <div className="grid grid-3">
-            {[
-              { t: "مبانی یادگیری ماشین", m: 92, kind: "گواهی پایان دوره", date: "اسفند ۱۴۰۴", color: "cyan" },
-              { t: "آمار بیزی کاربردی", m: 84, kind: "گواهی پایان دوره", date: "بهمن ۱۴۰۴", color: "amber" },
-              { t: "پایگاه داده پیشرفته", m: 88, kind: "گواهی پایان دوره", date: "دی ۱۴۰۴", color: "violet" },
-              { t: "Python برای تحلیل داده", m: 95, kind: "نشان مهارت", date: "آذر ۱۴۰۴", color: "cyan" },
-              { t: "تحلیل آماری SPSS", m: 79, kind: "نشان مهارت", date: "آبان ۱۴۰۴", color: "rose" },
-              { t: "Git و کنترل نسخه", m: 96, kind: "نشان مهارت", date: "مهر ۱۴۰۴", color: "amber" },
-            ].map((c, i) => (
-              <div key={i} className="card" style={{ padding: 24 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            {CREDENTIALS.map((cred, i) => {
+              const c = { t: cred.title, m: cred.mastery, kind: cred.kind, date: cred.date, color: cred.color };
+              return (
+              <div
+                key={i}
+                className="card p-6 cursor-pointer"
+                
+                onClick={() => window.toast?.({ title: c.t, msg: `${c.kind} · ${c.date} · تسلط ${c.m}٪` })}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") window.toast?.({ title: c.t, msg: `${c.kind} · ${c.date}` }); }}
+              >
+                <div className="flex items-center justify-between mb-4.5" >
                   <span className={"pill pill-" + c.color} style={{ fontSize: 10 }}>{c.kind}</span>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 50,
-                    background: "conic-gradient(from 0deg, var(--amber), var(--cyan), var(--violet), var(--amber))",
-                    position: "relative",
-                  }}>
-                    <div style={{ position: "absolute", inset: 3, borderRadius: 50, background: "var(--surface)", display: "grid", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 9, fontWeight: 700, color: "var(--amber)" }}>VC</div>
+                  <div className="relative"  style={{width: 36, height: 36, borderRadius: 50,
+                    background: "conic-gradient(from 0deg, var(--amber), var(--cyan), var(--violet), var(--amber))"}}>
+                    <div className="absolute grid"  style={{ inset: 3, borderRadius: 50, background: "var(--surface)", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 9, fontWeight: 700, color: "var(--amber)"}}>VC</div>
                   </div>
                 </div>
-                <h4 style={{ fontSize: 16, marginBottom: 10 }}>{c.t}</h4>
-                <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", marginBottom: 16 }}>{c.date}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ flex: 1, height: 4, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
-                    <div style={{ width: c.m + "%", height: "100%", background: "var(--cyan)", borderRadius: 999 }} />
+                <h4 className="mb-2.5"  style={{fontSize: 16}}>{c.t}</h4>
+                <div className="mb-4"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>{c.date}</div>
+                <div className="flex items-center gap-3" >
+                  <div className="flex-1 rounded-full overflow-hidden"  style={{ height: 4, background: "var(--surface-2)"}}>
+                    <div className="rounded-full"  style={{width: c.m + "%", height: "100%", background: "var(--cyan)"}} />
                   </div>
                   <div style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600 }}>{toFa(c.m)}٪</div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -186,4 +222,4 @@ const CredentialPage = ({ go }) => {
   );
 };
 
-window.CredentialPage = CredentialPage;
+export default CredentialPage;

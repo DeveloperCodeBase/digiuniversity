@@ -1,10 +1,9 @@
 // =====================================================
 // Motion system — Reveal + ScrollProgress + Parallax
-// Zero external deps. Uses IntersectionObserver + rAF.
 // =====================================================
+import React from "react";
 
-// ---------- useReveal: applies .in when element enters viewport ----------
-const useReveal = (threshold = 0.15) => {
+export const useReveal = (threshold = 0.15) => {
   const ref = React.useRef(null);
   React.useEffect(() => {
     const el = ref.current;
@@ -30,8 +29,7 @@ const useReveal = (threshold = 0.15) => {
   return ref;
 };
 
-// ---------- <Reveal>: drop-in wrapper ----------
-const Reveal = ({ as: As = "div", variant = "", delay, children, className = "", ...rest }) => {
+export const Reveal = ({ as: As = "div", variant = "", delay, children, className = "", ...rest }) => {
   const ref = useReveal();
   const cls = "reveal" + (variant ? "-" + variant : "") + (className ? " " + className : "");
   const style = delay ? { "--reveal-delay": delay + "ms", ...(rest.style || {}) } : rest.style;
@@ -42,8 +40,7 @@ const Reveal = ({ as: As = "div", variant = "", delay, children, className = "",
   );
 };
 
-// ---------- <Stagger>: wraps children with .stagger and reveals each ----------
-const Stagger = ({ as: As = "div", children, className = "", ...rest }) => {
+export const Stagger = ({ as: As = "div", children, className = "", ...rest }) => {
   const ref = React.useRef(null);
   React.useEffect(() => {
     const el = ref.current;
@@ -75,8 +72,7 @@ const Stagger = ({ as: As = "div", children, className = "", ...rest }) => {
   );
 };
 
-// ---------- Scroll progress bar (lives outside route, fixed) ----------
-const ScrollProgress = () => {
+export const ScrollProgress = () => {
   const ref = React.useRef(null);
   React.useEffect(() => {
     const el = ref.current;
@@ -96,8 +92,7 @@ const ScrollProgress = () => {
   return <div ref={ref} className="scroll-progress" />;
 };
 
-// ---------- useMouseParallax: subtle aurora drift on hero ----------
-const useMouseParallax = (selector = ".hero-bg .aurora", strength = 30) => {
+export const useMouseParallax = (selector = ".hero-bg .aurora", strength = 30) => {
   React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
@@ -119,11 +114,7 @@ const useMouseParallax = (selector = ".hero-bg .aurora", strength = 30) => {
   }, [selector, strength]);
 };
 
-window.useReveal = useReveal;
-window.Reveal = Reveal;
-window.Stagger = Stagger;
-window.ScrollProgress = ScrollProgress;
-window.useMouseParallax = useMouseParallax;
+// Global reveal observer below uses window so it remains side-effecting.
 
 // ---------- Global reveal observer ----------
 // Picks up ANY .reveal element on the page, regardless of how it was added.

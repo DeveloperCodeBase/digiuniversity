@@ -1,15 +1,20 @@
 // =====================================================
 // Course Authoring Studio — AI Planner + blueprint
 // =====================================================
-const AuthoringPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer, toFa } from "../shared.jsx";
+import { Toggle, FormField } from "../components/widgets.jsx";
+
+export const AuthoringPage = ({ go }) => {
   const [step, setStep] = React.useState("blueprint");
 
   return (
     <main data-screen-label="13 استودیو">
       <section style={{ borderBottom: "1px solid var(--line)", padding: "32px 40px" }}>
-        <div className="shell" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 0, flexWrap: "wrap", gap: 16 }}>
+        <div className="shell flex justify-between items-center p-0 flex-wrap gap-4" >
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <div className="flex items-center gap-2.5 mb-2" >
               <span className="mono" style={{ color: "var(--fg-mute)" }}>کنسول استاد</span>
               <span style={{ color: "var(--fg-dim)" }}>/</span>
               <span className="mono" style={{ color: "var(--fg-mute)" }}>دروس من</span>
@@ -18,16 +23,32 @@ const AuthoringPage = ({ go }) => {
             </div>
             <h1 className="h-2">یادگیری تقویتی · سطح ارشد</h1>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn btn-ghost"><Icon name="eye" size={14} />پیش‌نمایش</button>
-            <button className="btn btn-outline"><Icon name="download" size={14} />ذخیره پیش‌نویس</button>
-            <button className="btn btn-primary">انتشار</button>
+          <div className="flex gap-2" >
+            <button
+              className="btn btn-ghost"
+              onClick={() => { window.toast?.("پیش‌نمایش در پنجره جدید"); go("course"); }}
+            ><Icon name="eye" size={14} />پیش‌نمایش</button>
+            <button
+              className="btn btn-outline"
+              onClick={() => window.toast?.({ title: "پیش‌نویس ذخیره شد", msg: "تغییرات شما به‌صورت خودکار همگام شد.", kind: "success" })}
+            ><Icon name="download" size={14} />ذخیره پیش‌نویس</button>
+            <button
+              className="btn btn-primary"
+              onClick={async () => {
+                const ok = await window.confirmAction?.({
+                  title: "انتشار درس",
+                  body: "پس از انتشار، درس به دانشجویان نمایش داده می‌شود. ادامه می‌دهید؟",
+                  confirmLabel: "انتشار",
+                });
+                if (ok) window.toast?.({ title: "درس منتشر شد", msg: "همه‌ی دانشجویان درس را در کاتالوگ می‌بینند.", kind: "success" });
+              }}
+            >انتشار</button>
           </div>
         </div>
       </section>
 
       <section style={{ borderBottom: "1px solid var(--line)" }}>
-        <div className="shell" style={{ padding: "16px 40px", display: "flex", gap: 4 }}>
+        <div className="shell flex gap-1"  style={{padding: "16px 40px"}}>
           {[
             ["blueprint", "Blueprint", "target"],
             ["outline", "سرفصل", "layers"],
@@ -36,17 +57,12 @@ const AuthoringPage = ({ go }) => {
             ["resources", "منابع", "folder"],
             ["agents", "عامل‌های AI", "sparkle"],
           ].map(([id, lbl, ic]) => (
-            <button key={id} onClick={() => setStep(id)} style={{
-              padding: "10px 16px",
+            <button className="rounded-xl flex items-center gap-2 cursor-pointer" key={id} onClick={() => setStep(id)}  style={{padding: "10px 16px",
               background: step === id ? "var(--surface)" : "transparent",
               border: "1px solid " + (step === id ? "var(--line-2)" : "transparent"),
-              borderRadius: 10,
               color: step === id ? "var(--fg)" : "var(--fg-mute)",
               fontSize: 13,
-              fontFamily: "inherit",
-              display: "flex", alignItems: "center", gap: 8,
-              cursor: "pointer",
-            }}>
+              fontFamily: "inherit"}}>
               <Icon name={ic} size={14} />
               {lbl}
             </button>
@@ -55,7 +71,7 @@ const AuthoringPage = ({ go }) => {
       </section>
 
       <section className="shell" style={{ padding: "32px 40px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24 }}>
+        <div className="grid gap-6"  style={{ gridTemplateColumns: "1fr 320px"}}>
           <div>
             {step === "blueprint" && <BlueprintStep />}
             {step === "outline" && <OutlineStep />}
@@ -66,31 +82,35 @@ const AuthoringPage = ({ go }) => {
           </div>
 
           {/* AI planner side */}
-          <aside style={{ position: "sticky", top: 90, alignSelf: "start", display: "flex", flexDirection: "column", gap: 16 }}>
-            <div className="card" style={{ padding: 20, background: "linear-gradient(135deg, color-mix(in oklch, var(--violet) 12%, var(--surface)), var(--surface))" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--violet)", marginBottom: 14 }}>
+          <aside className="sticky flex flex-col gap-4"  style={{ top: 90, alignSelf: "start"}}>
+            <div className="card p-5"  style={{ background: "linear-gradient(135deg, color-mix(in oklch, var(--violet) 12%, var(--surface)), var(--surface))"}}>
+              <div className="flex items-center gap-2.5 mb-3.5"  style={{ color: "var(--violet)"}}>
                 <Icon name="sparkle" size={16} />
                 <span className="mono" style={{ letterSpacing: "0.08em" }}>AI COURSE PLANNER</span>
               </div>
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
                 می‌توانم برای این درس، ۱۲ جلسه با اهداف یادگیری، نقشه‌ی مفهومی و کوییز پیشنهاد بدهم. شما نهایی می‌کنید.
               </p>
-              <button className="btn btn-outline" style={{ width: "100%", justifyContent: "center", marginTop: 14 }}>
+              <button
+                className="btn btn-outline justify-center mt-3.5"
+                 style={{width: "100%"}}
+                onClick={() => window.toast?.({ title: "AI در حال تولید", msg: "ساختار اولیه‌ی درس در ۲۰ ثانیه آماده می‌شود…", kind: "info", ttl: 5000 })}
+              >
                 <Icon name="bolt" size={13} />
                 تولید پیشنهاد اولیه
               </button>
             </div>
 
-            <div className="card" style={{ padding: 20 }}>
-              <div className="mono" style={{ color: "var(--fg-mute)", marginBottom: 14, fontSize: 11, letterSpacing: "0.08em" }}>ARCHIVES TO PULL FROM</div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="card p-5" >
+              <div className="mono mb-3.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>ARCHIVES TO PULL FROM</div>
+              <ul className="p-0 m-0 flex flex-col gap-2"  style={{listStyle: "none"}}>
                 {[
                   ["مقاله Sutton & Barto", "PDF · ۵۲۰ صفحه"],
                   ["دوره قدیمی RL ۱۴۰۳", "۱۸ جلسه ضبط‌شده"],
                   ["یادداشت‌های استاد", "Markdown · ۱۲ فایل"],
                   ["بانک سوال موجود", "۲۳۴ سوال QTI"],
                 ].map(([t, m]) => (
-                  <li key={t} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--line)", fontSize: 12 }}>
+                  <li className="flex justify-between" key={t}  style={{ padding: "8px 0", borderBottom: "1px solid var(--line)", fontSize: 12}}>
                     <span>{t}</span>
                     <span style={{ fontFamily: "var(--f-mono)", color: "var(--fg-mute)" }}>{m}</span>
                   </li>
@@ -98,8 +118,8 @@ const AuthoringPage = ({ go }) => {
               </ul>
             </div>
 
-            <div className="card" style={{ padding: 20 }}>
-              <div className="mono" style={{ color: "var(--amber)", marginBottom: 12, fontSize: 11, letterSpacing: "0.08em" }}>
+            <div className="card p-5" >
+              <div className="mono mb-3"  style={{color: "var(--amber)", fontSize: 11, letterSpacing: "0.08em"}}>
                 <Icon name="shield" size={12} /> SAFETY POLICY
               </div>
               <div style={{ fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6 }}>
@@ -117,9 +137,9 @@ const AuthoringPage = ({ go }) => {
 
 const BlueprintStep = () => (
   <div>
-    <div className="card" style={{ padding: 32, marginBottom: 20 }}>
-      <h3 className="h-3" style={{ marginBottom: 24 }}>Course Blueprint</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+    <div className="card p-8 mb-5" >
+      <h3 className="h-3 mb-6" >Course Blueprint</h3>
+      <div className="grid gap-4.5"  style={{ gridTemplateColumns: "1fr 1fr"}}>
         <FormField label="عنوان فارسی" placeholder="یادگیری تقویتی" />
         <FormField label="عنوان انگلیسی" placeholder="Reinforcement Learning" />
         <FormField label="کد درس" placeholder="CS-650" mono />
@@ -127,19 +147,17 @@ const BlueprintStep = () => (
         <FormField label="تعداد ماژول" placeholder="۱۲" mono />
         <FormField label="مدت زمان" placeholder="۱۰ هفته" />
       </div>
-      <div style={{ marginTop: 24 }}>
-        <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 10, letterSpacing: "0.1em", marginBottom: 8, textTransform: "uppercase" }}>توضیحات</div>
-        <textarea placeholder="درس یادگیری تقویتی، اصول و الگوریتم‌های یادگیری از تجربه را پوشش می‌دهد..." rows={4} style={{
-          width: "100%", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10,
-          padding: "12px 14px", color: "var(--fg)", fontFamily: "inherit", fontSize: 14, direction: "rtl", resize: "vertical",
-        }} />
+      <div className="mt-6" >
+        <div className="mono mb-2 uppercase"  style={{color: "var(--fg-mute)", fontSize: 10, letterSpacing: "0.1em"}}>توضیحات</div>
+        <textarea className="rounded-xl resize-y" placeholder="درس یادگیری تقویتی، اصول و الگوریتم‌های یادگیری از تجربه را پوشش می‌دهد..." rows={4}  style={{width: "100%", background: "var(--surface-2)", border: "1px solid var(--line)",
+          padding: "12px 14px", color: "var(--fg)", fontFamily: "inherit", fontSize: 14, direction: "rtl"}} />
       </div>
     </div>
 
-    <div className="card" style={{ padding: 32 }}>
-      <h3 className="h-3" style={{ marginBottom: 18 }}>Learning Outcomes</h3>
-      <p style={{ color: "var(--fg-mute)", fontSize: 13, marginBottom: 20 }}>تا پایان این درس، دانشجو می‌تواند:</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="card p-8" >
+      <h3 className="h-3 mb-4.5" >Learning Outcomes</h3>
+      <p className="mb-5"  style={{color: "var(--fg-mute)", fontSize: 13}}>تا پایان این درس، دانشجو می‌تواند:</p>
+      <div className="flex flex-col gap-2.5" >
         {[
           "مسئله را در قالب MDP فرموله کند",
           "معادله بلمن را برای یک محیط ساده حل کند",
@@ -147,15 +165,19 @@ const BlueprintStep = () => (
           "تفاوت روش‌های on-policy و off-policy را توضیح دهد",
           "یک پروژه RL واقعی روی محیط Gym انجام دهد",
         ].map((o, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: 14, background: "var(--surface-2)", borderRadius: 10, border: "1px solid var(--line)" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: "var(--surface-3)", color: "var(--cyan)", display: "grid", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700 }}>
+          <div className="flex items-center gap-3 p-3.5 rounded-xl" key={i}  style={{ background: "var(--surface-2)", border: "1px solid var(--line)"}}>
+            <div className="rounded-lg grid"  style={{width: 28, height: 28, background: "var(--surface-3)", color: "var(--cyan)", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700}}>
               LO{toFa(i + 1)}
             </div>
-            <span style={{ flex: 1, fontSize: 14 }}>{o}</span>
+            <span className="flex-1"  style={{ fontSize: 14}}>{o}</span>
             <span className="pill" style={{ fontSize: 10 }}>{["یادآوری", "فهم", "کاربرد", "تحلیل", "ساختن"][i]}</span>
           </div>
         ))}
-        <button className="btn btn-ghost" style={{ alignSelf: "flex-start" }}>
+        <button
+          className="btn btn-ghost"
+          style={{ alignSelf: "flex-start" }}
+          onClick={() => window.toast?.({ title: "هدف یادگیری جدید", msg: "هدف به فهرست اضافه شد." })}
+        >
           <Icon name="plus" size={14} />
           افزودن هدف یادگیری
         </button>
@@ -166,7 +188,7 @@ const BlueprintStep = () => (
 
 const OutlineStep = () => (
   <div className="studio-canvas">
-    <h3 className="h-3" style={{ marginBottom: 20 }}>سرفصل · ۱۲ جلسه</h3>
+    <h3 className="h-3 mb-5" >سرفصل · ۱۲ جلسه</h3>
     {[
       ["جلسه ۱", "مقدمه — تاریخچه و کاربردهای RL", "MDP, Bandit"],
       ["جلسه ۲", "فرآیندهای تصمیم مارکوف", "MDP, Policy"],
@@ -180,33 +202,42 @@ const OutlineStep = () => (
       <div key={n} className="studio-block">
         <span className="handle">⋮⋮</span>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+          <div className="flex items-center gap-2.5 mb-1" >
             <span className="mono" style={{ color: "var(--cyan)", fontSize: 11 }}>{n}</span>
             <span style={{ fontSize: 14, fontWeight: 500 }}>{t}</span>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="flex gap-1.5" >
             {tags.split(", ").map((tag) => <span key={tag} className="pill" style={{ fontSize: 9 }}>{tag}</span>)}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 4 }}>
-          <button className="btn btn-ghost btn-sm"><Icon name="settings" size={13} /></button>
+        <div className="flex gap-1" >
+          <button
+            className="btn btn-ghost btn-sm icon-btn"
+            onClick={() => window.toast?.({ title: n, msg: t })}
+            aria-label={"تنظیمات " + n}
+            title="تنظیمات جلسه"
+          ><Icon name="settings" size={13} /></button>
         </div>
       </div>
     ))}
-    <button className="btn btn-outline" style={{ width: "100%", justifyContent: "center", marginTop: 12 }}>
+    <button
+      className="btn btn-outline justify-center mt-3"
+       style={{width: "100%"}}
+      onClick={() => window.toast?.({ title: "جلسه‌ی جدید اضافه شد", kind: "success" })}
+    >
       <Icon name="plus" size={14} />افزودن جلسه
     </button>
   </div>
 );
 
 const AgentsStep = () => (
-  <div className="card" style={{ padding: 32 }}>
-    <h3 className="h-3" style={{ marginBottom: 8 }}>سیاست عامل‌های AI برای این درس</h3>
-    <p style={{ color: "var(--fg-mute)", fontSize: 13, marginBottom: 24 }}>
+  <div className="card p-8" >
+    <h3 className="h-3 mb-2" >سیاست عامل‌های AI برای این درس</h3>
+    <p className="mb-6"  style={{color: "var(--fg-mute)", fontSize: 13}}>
       تعریف کنید هر عامل چه کارهایی مجاز است، از چه منابعی استفاده کند و کجا نیاز به تأیید انسانی دارد.
     </p>
 
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="flex flex-col gap-3" >
       {[
         { name: "TUTOR — توضیح‌دهنده", role: "پاسخ به سوال دانشجو با مرجع داخلی", color: "var(--cyan)", on: true, controls: ["RAG", "ارجاع به ویدئو", "توضیح چندسطحی"] },
         { name: "COACH — مربی پرسش‌گر", role: "پرسیدن سوال کاوشی به‌جای پاسخ مستقیم", color: "var(--amber)", on: true, controls: ["پرسش کاوشگرانه", "feedback constructive"] },
@@ -214,16 +245,16 @@ const AgentsStep = () => (
         { name: "MENTOR — منتور بلندمدت", role: "راهنمایی مسیر یادگیری و انگیزشی", color: "var(--rose)", on: true, controls: ["Long-term plan", "Motivation"] },
         { name: "GRADER — ارزیاب", role: "نمره‌دهی اولیه با rubric · نیاز به تأیید", color: "var(--fg-mute)", on: true, controls: ["Rubric scoring", "تأیید استاد الزامی"] },
       ].map((a) => (
-        <div key={a.name} style={{ padding: 20, background: "var(--surface-2)", borderRadius: 12, border: "1px solid var(--line)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="p-5 rounded-xl" key={a.name}  style={{ background: "var(--surface-2)", border: "1px solid var(--line)"}}>
+          <div className="flex justify-between items-center mb-2.5" >
+            <div className="flex items-center gap-3" >
               <span style={{ width: 8, height: 8, borderRadius: 50, background: a.color, boxShadow: `0 0 10px ${a.color}` }} />
               <span style={{ fontSize: 15, fontWeight: 600 }}>{a.name}</span>
             </div>
             <Toggle on={a.on} />
           </div>
-          <div style={{ fontSize: 13, color: "var(--fg-mute)", marginBottom: 12 }}>{a.role}</div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <div className="mb-3"  style={{fontSize: 13, color: "var(--fg-mute)"}}>{a.role}</div>
+          <div className="flex gap-1.5 flex-wrap" >
             {a.controls.map((c) => <span key={c} className="pill" style={{ fontSize: 10 }}>{c}</span>)}
           </div>
         </div>
@@ -232,24 +263,5 @@ const AgentsStep = () => (
   </div>
 );
 
-const Toggle = ({ on }) => (
-  <div style={{
-    width: 40, height: 22, borderRadius: 999,
-    background: on ? "var(--accent)" : "var(--surface-3)",
-    position: "relative", transition: "200ms ease",
-    cursor: "pointer",
-  }}>
-    <div style={{
-      position: "absolute",
-      top: 3, left: on ? 3 : 21,
-      right: on ? 21 : 3,
-      width: 16, height: 16, borderRadius: 50,
-      background: "white",
-      transition: "200ms ease",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
-    }} />
-  </div>
-);
 
-window.AuthoringPage = AuthoringPage;
-window.Toggle = Toggle;
+export default AuthoringPage;

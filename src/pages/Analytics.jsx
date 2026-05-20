@@ -1,7 +1,13 @@
 // =====================================================
 // Analytics Dashboard — admin / institutional view
 // =====================================================
-const AnalyticsPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer, toFa } from "../shared.jsx";
+import { RoleSideNav } from "../sidenav.jsx";
+import { StatCard } from "../components/widgets.jsx";
+
+export const AnalyticsPage = ({ go }) => {
   return (
     <main data-screen-label="12 تحلیل‌گری">
       <div className="dash">
@@ -12,16 +18,19 @@ const AnalyticsPage = ({ go }) => {
           <div className="dash-greet">
             <div>
               <span className="eyebrow">INSTITUTIONAL ANALYTICS · TERM SPRING-1405</span>
-              <h1 style={{ marginTop: 10 }}>دانشگاه شما، در یک نگاه</h1>
+              <h1 className="mt-2.5" >دانشگاه شما، در یک نگاه</h1>
               <p className="muted">۸ دانشکده · ۲۳ برنامه · ۱۲۸۴ دانشجو فعال · ۹۴ استاد</p>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <select style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, color: "var(--fg)", fontFamily: "inherit", fontSize: 13 }}>
+            <div className="flex gap-2.5" >
+              <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", color: "var(--fg)", fontFamily: "inherit", fontSize: 13}}>
                 <option>ترم بهار ۱۴۰۵</option>
                 <option>سال ۱۴۰۴</option>
                 <option>کل دوره</option>
               </select>
-              <button className="btn btn-outline"><Icon name="download" size={14} />Export CSV</button>
+              <button
+                className="btn btn-outline"
+                onClick={() => window.toast?.({ title: "Export آغاز شد", msg: "فایل CSV آماده‌سازی می‌شود (۲ مگابایت).", kind: "success" })}
+              ><Icon name="download" size={14} />Export CSV</button>
             </div>
           </div>
 
@@ -35,14 +44,14 @@ const AnalyticsPage = ({ go }) => {
 
           {/* Engagement heatmap */}
           <div className="analytic-card">
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
+            <div className="flex justify-between mb-6" >
               <div>
                 <span className="eyebrow">LEARNING ACTIVITY · HEATMAP</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>فعالیت یادگیری · ۲۸ روز اخیر</h3>
+                <h3 className="h-3 mt-2.5" >فعالیت یادگیری · ۲۸ روز اخیر</h3>
               </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>
+              <div className="flex gap-2.5 items-center"  style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>
                 <span>کم</span>
-                <div style={{ display: "flex", gap: 2 }}>
+                <div className="flex gap-0.5" >
                   {[0.1, 0.3, 0.5, 0.7, 0.9].map((o) => (
                     <div key={o} style={{ width: 14, height: 14, background: `oklch(0.5 0.14 195 / ${o})`, borderRadius: 2 }} />
                   ))}
@@ -50,11 +59,11 @@ const AnalyticsPage = ({ go }) => {
                 <span>زیاد</span>
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", gap: 10, alignItems: "center" }}>
+            <div className="grid gap-2.5 items-center"  style={{ gridTemplateColumns: "60px 1fr"}}>
               {["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day, di) => (
                 <React.Fragment key={day}>
-                  <div style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)", textAlign: "center" }}>{day}</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(28, 1fr)", gap: 3 }}>
+                  <div className="text-center"  style={{fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)"}}>{day}</div>
+                  <div className="grid"  style={{ gridTemplateColumns: "repeat(28, 1fr)", gap: 3}}>
                     {Array.from({ length: 28 }, (_, i) => {
                       // Deterministic-ish "activity"
                       const v = ((Math.sin(i * 1.3 + di * 0.7) + 1) / 2) * 0.9 + 0.1;
@@ -69,14 +78,14 @@ const AnalyticsPage = ({ go }) => {
           </div>
 
           {/* Cohort comparison + Mastery distribution */}
-          <div className="grid" style={{ gridTemplateColumns: "1.4fr 1fr", gap: 24 }}>
+          <div className="grid gap-6"  style={{gridTemplateColumns: "1.4fr 1fr"}}>
             <div className="analytic-card">
-              <div style={{ marginBottom: 24 }}>
+              <div className="mb-6" >
                 <span className="eyebrow">COHORT COMPARISON</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>عملکرد cohortها · تسلط در طول ترم</h3>
+                <h3 className="h-3 mt-2.5" >عملکرد cohortها · تسلط در طول ترم</h3>
               </div>
               <CohortChart />
-              <div style={{ display: "flex", gap: 16, marginTop: 20, flexWrap: "wrap" }}>
+              <div className="flex gap-4 mt-5 flex-wrap" >
                 <Legend color="var(--cyan)" label="Cohort 1405 — کنونی" />
                 <Legend color="var(--amber)" label="Cohort 1404" />
                 <Legend color="var(--violet)" label="Cohort 1403" />
@@ -84,9 +93,9 @@ const AnalyticsPage = ({ go }) => {
             </div>
 
             <div className="analytic-card">
-              <div style={{ marginBottom: 24 }}>
+              <div className="mb-6" >
                 <span className="eyebrow">MASTERY DISTRIBUTION</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>توزیع تسلط</h3>
+                <h3 className="h-3 mt-2.5" >توزیع تسلط</h3>
               </div>
               {[
                 ["۹۰-۱۰۰٪", 24, "var(--cyan)"],
@@ -97,21 +106,21 @@ const AnalyticsPage = ({ go }) => {
               ].map(([range, pct, c]) => (
                 <div key={range} className="bar-chart-row">
                   <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}>{range}</span>
-                  <div style={{ height: 10, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
-                    <div style={{ width: pct * 2 + "%", height: "100%", background: c, borderRadius: 999 }} />
+                  <div className="rounded-full overflow-hidden"  style={{height: 10, background: "var(--surface-2)"}}>
+                    <div className="rounded-full"  style={{width: pct * 2 + "%", height: "100%", background: c}} />
                   </div>
-                  <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, textAlign: "left" }}>{toFa(pct)}٪</span>
+                  <span className="text-left"  style={{fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600}}>{toFa(pct)}٪</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Top courses + AI usage */}
-          <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="grid gap-6"  style={{gridTemplateColumns: "1fr 1fr"}}>
             <div className="analytic-card">
-              <div style={{ marginBottom: 20 }}>
+              <div className="mb-5" >
                 <span className="eyebrow">TOP COURSES · BY ENGAGEMENT</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>پر تعامل‌ترین دروس</h3>
+                <h3 className="h-3 mt-2.5" >پر تعامل‌ترین دروس</h3>
               </div>
               {[
                 ["مبانی یادگیری ماشین", "CS-410", 92],
@@ -120,14 +129,14 @@ const AnalyticsPage = ({ go }) => {
                 ["آمار بیزی", "STAT-440", 79],
                 ["اخلاق AI", "PHIL-220", 71],
               ].map(([name, code, score]) => (
-                <div key={code} style={{ padding: "12px 0", borderBottom: "1px solid var(--line)", display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center" }}>
+                <div className="grid gap-3 items-center" key={code}  style={{padding: "12px 0", borderBottom: "1px solid var(--line)", gridTemplateColumns: "1fr auto"}}>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>{name}</div>
-                    <div className="mono" style={{ fontSize: 11, color: "var(--fg-mute)", marginTop: 2 }}>{code}</div>
+                    <div className="mono mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)"}}>{code}</div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 80, height: 4, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}>
-                      <div style={{ width: score + "%", height: "100%", background: "var(--cyan)", borderRadius: 999 }} />
+                  <div className="flex items-center gap-3" >
+                    <div className="rounded-full overflow-hidden"  style={{width: 80, height: 4, background: "var(--surface-2)"}}>
+                      <div className="rounded-full"  style={{width: score + "%", height: "100%", background: "var(--cyan)"}} />
                     </div>
                     <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, minWidth: 30 }}>{toFa(score)}</span>
                   </div>
@@ -136,9 +145,9 @@ const AnalyticsPage = ({ go }) => {
             </div>
 
             <div className="analytic-card">
-              <div style={{ marginBottom: 20 }}>
+              <div className="mb-5" >
                 <span className="eyebrow">AI AGENT USAGE</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>استفاده از عامل‌های هوشمند</h3>
+                <h3 className="h-3 mt-2.5" >استفاده از عامل‌های هوشمند</h3>
               </div>
               {[
                 ["TUTOR · توضیح‌دهنده", 42384, "var(--cyan)"],
@@ -147,13 +156,13 @@ const AnalyticsPage = ({ go }) => {
                 ["CRITIC · منتقد", 4128, "var(--rose)"],
                 ["MENTOR · منتور", 2841, "var(--fg-mute)"],
               ].map(([name, count, c]) => (
-                <div key={name} style={{ padding: "12px 0", borderBottom: "1px solid var(--line)", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center" }}>
+                <div className="grid gap-3 items-center" key={name}  style={{padding: "12px 0", borderBottom: "1px solid var(--line)", gridTemplateColumns: "auto 1fr auto"}}>
                   <span style={{ width: 8, height: 8, borderRadius: 50, background: c, boxShadow: `0 0 10px ${c}` }} />
                   <div style={{ fontSize: 13 }}>{name}</div>
                   <div style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600 }}>{toFa(count.toLocaleString())}</div>
                 </div>
               ))}
-              <div style={{ marginTop: 16, padding: 12, background: "var(--surface-2)", borderRadius: 8, fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6 }}>
+              <div className="mt-4 p-3 rounded-lg"  style={{ background: "var(--surface-2)", fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6}}>
                 <span style={{ color: "var(--amber)" }}>● </span>
                 ۹۲٪ از پاسخ‌های Tutor دارای منبع داخلی هستند (RAG-grounded).
               </div>
@@ -162,23 +171,23 @@ const AnalyticsPage = ({ go }) => {
 
           {/* At-risk early warning */}
           <div className="analytic-card" style={{ borderColor: "color-mix(in oklch, var(--rose) 40%, var(--line))" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div className="flex justify-between items-center mb-5" >
               <div>
                 <span className="eyebrow" style={{ color: "var(--rose)" }}>EARLY WARNING · ML PIPELINE</span>
-                <h3 className="h-3" style={{ marginTop: 10 }}>هشدار افت تحصیلی</h3>
+                <h3 className="h-3 mt-2.5" >هشدار افت تحصیلی</h3>
               </div>
               <span className="pill pill-rose">۲۳ دانشجو</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+            <div className="grid gap-3"  style={{ gridTemplateColumns: "repeat(4, 1fr)"}}>
               {[
                 ["خیلی بالا", 6, "var(--rose)"],
                 ["بالا", 17, "var(--rose)"],
                 ["متوسط", 34, "var(--amber)"],
                 ["پایش", 72, "var(--fg-mute)"],
               ].map(([level, count, c]) => (
-                <div key={level} style={{ padding: 16, background: "var(--surface-2)", borderRadius: 10, border: `1px solid ${c}33` }}>
+                <div className="p-4 rounded-xl" key={level}  style={{ background: "var(--surface-2)", border: `1px solid ${c}33`}}>
                   <div className="mono" style={{ fontSize: 10, color: c, letterSpacing: "0.08em" }}>{level}</div>
-                  <div style={{ fontFamily: "var(--f-mono)", fontSize: 28, fontWeight: 700, marginTop: 4, color: c }}>{toFa(count)}</div>
+                  <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 28, fontWeight: 700, color: c}}>{toFa(count)}</div>
                 </div>
               ))}
             </div>
@@ -216,8 +225,8 @@ const AnalyticsSideNav = () => (
 );
 
 const Legend = ({ color, label }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--fg-mute)" }}>
-    <span style={{ width: 12, height: 3, background: color, borderRadius: 999 }} />
+  <div className="flex items-center gap-2"  style={{ fontSize: 12, color: "var(--fg-mute)"}}>
+    <span className="rounded-full"  style={{width: 12, height: 3, background: color}} />
     {label}
   </div>
 );
@@ -230,7 +239,7 @@ const CohortChart = () => {
   ];
   const W = 800, H = 240;
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: "visible" }}>
+    <svg className="overflow-visible" width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" >
       {[0, 25, 50, 75, 100].map((y) => (
         <line key={y} x1="0" y1={H - (y / 100) * H} x2={W} y2={H - (y / 100) * H} stroke="var(--line)" strokeDasharray="4 4" />
       ))}
@@ -249,4 +258,4 @@ const CohortChart = () => {
   );
 };
 
-window.AnalyticsPage = AnalyticsPage;
+export default AnalyticsPage;

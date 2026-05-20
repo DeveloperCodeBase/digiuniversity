@@ -7,6 +7,13 @@ node_modules/
 dist/
 build/
 coverage/
+storybook-static/
+playwright-report/
+test-results/
+
+# Claude / agent local state
+.claude/
+
 .DS_Store
 .vscode/
 .idea/

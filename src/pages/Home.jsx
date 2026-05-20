@@ -1,7 +1,12 @@
 // =====================================================
 // Home / Landing page
 // =====================================================
-const HomePage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Stagger, useMouseParallax } from "../motion.jsx";
+import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared.jsx";
+
+export const HomePage = ({ go }) => {
   useMouseParallax();
   return (
     <main data-screen-label="01 خانه">
@@ -101,7 +106,7 @@ const HomePage = ({ go }) => {
               <span className="num">۰۲ / پروفایل شناختی</span>
               <h3>هر دانشجو، یک نقشه‌ی زنده</h3>
               <p>دانش قبلی، سرعت یادگیری، مفاهیم مسلط و مبهم، سبک تعامل و ریسک افت — همگی به‌روزرسانی لحظه‌ای.</p>
-              <div style={{ marginTop: "auto", paddingTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <div className="pt-5 flex gap-2.5 flex-wrap"  style={{marginTop: "auto"}}>
                 <span className="pill pill-cyan">Bayesian KT</span>
                 <span className="pill pill-amber">Deep KT</span>
                 <span className="pill">IRT 2PL</span>
@@ -113,7 +118,7 @@ const HomePage = ({ go }) => {
               <span className="num">۰۳ / تسلط</span>
               <h3>عبور با شواهد، نه با حضور</h3>
               <p>هر فعالیت به یک هدف یادگیری متصل است. آستانه‌ی تسلط قابل تنظیم. سامانه می‌داند کجا تمرین بیشتر نیاز است.</p>
-              <div style={{ marginTop: "auto", paddingTop: 20 }}>
+              <div className="pt-5"  style={{marginTop: "auto"}}>
                 <MasteryRing percent={78} />
               </div>
             </div>
@@ -170,20 +175,20 @@ const HomePage = ({ go }) => {
       </div>
 
       {/* ============== KNOWLEDGE GRAPH ============== */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section pt-0" >
         <div className="shell">
-          <div className="grid grid-2" style={{ gridTemplateColumns: "1fr 1.1fr", gap: 48, alignItems: "center" }}>
+          <div className="grid grid-2 gap-12 items-center"  style={{gridTemplateColumns: "1fr 1.1fr"}}>
             <div>
               <span className="eyebrow">KNOWLEDGE GRAPH</span>
-              <h2 className="h-1" style={{ marginTop: 16 }}>
+              <h2 className="h-1 mt-4" >
                 هر درس یک
                 <br />
                 <span style={{ color: "var(--cyan)" }}>شبکه‌ی مفهومی</span> است
               </h2>
-              <p className="lead" style={{ marginTop: 20 }}>
+              <p className="lead mt-5" >
                 وقتی دانشجو روی یک مفهوم گیر می‌کند، سامانه می‌داند کدام پیش‌نیازها را مرور کند، کدام تمرین جبرانی بدهد و کدام بخش از ویدئوی کلاس را نشان دهد.
               </p>
-              <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", marginTop: 32, gap: 18 }}>
+              <div className="grid mt-8 gap-4.5"  style={{gridTemplateColumns: "1fr 1fr"}}>
                 <Feature title="بازیابی هیبرید" desc="BM25 + dense embeddings برای جستجوی معنایی" icon="search" />
                 <Feature title="جهش به ثانیه" desc="نتایج جستجو مستقیماً به ثانیه‌ی دقیق ویدئو" icon="play" />
                 <Feature title="استخراج مفهوم" desc="NER و تحلیل ابهام در لحظه‌ی تدریس" icon="sparkle" />
@@ -199,23 +204,23 @@ const HomePage = ({ go }) => {
       </section>
 
       {/* ============== ARCHITECTURE ============== */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section pt-0" >
         <div className="shell">
-          <div className="grid grid-2" style={{ gridTemplateColumns: "1.1fr 1fr", gap: 48, alignItems: "center" }}>
-            <div className="kg-wrap" style={{ minHeight: 480, display: "grid", placeItems: "center" }}>
+          <div className="grid grid-2 gap-12 items-center"  style={{gridTemplateColumns: "1.1fr 1fr"}}>
+            <div className="kg-wrap grid"  style={{minHeight: 480, placeItems: "center"}}>
               <ArchStack />
             </div>
             <div>
               <span className="eyebrow">PLATFORM ARCHITECTURE</span>
-              <h2 className="h-1" style={{ marginTop: 16 }}>
+              <h2 className="h-1 mt-4" >
                 معماری <span style={{ color: "var(--amber)" }}>پنج لایه</span>،
                 <br />
                 cloud-native و قابل خودمیزبانی
               </h2>
-              <p className="lead" style={{ marginTop: 20 }}>
+              <p className="lead mt-5" >
                 از SaaS برای مؤسسات کوچک تا Private Cloud و On-Premise برای نهادهای حساس. هر سرویس مستقل، هر سرویس قابل جایگزینی.
               </p>
-              <div style={{ marginTop: 28 }}>
+              <div className="mt-7" >
                 <TechRow label="Frontend" items={["Next.js 15", "TypeScript", "Tailwind", "WebRTC client"]} />
                 <TechRow label="Backend" items={["NestJS", "Spring Boot", "FastAPI", "gRPC"]} />
                 <TechRow label="AI & Data" items={["LangGraph", "Qdrant", "Whisper", "MLflow"]} />
@@ -232,7 +237,7 @@ const HomePage = ({ go }) => {
           <div className="section-head">
             <div className="text">
               <span className="eyebrow">CATALOG</span>
-              <h2 className="h-1" style={{ marginTop: 16 }}>دروسی که با تو رشد می‌کنند</h2>
+              <h2 className="h-1 mt-4" >دروسی که با تو رشد می‌کنند</h2>
             </div>
             <button className="btn btn-outline" onClick={() => go("programs")}>
               همه‌ی دروس
@@ -264,14 +269,14 @@ const HomePage = ({ go }) => {
       </section>
 
       {/* ============== STANDARDS ============== */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section pt-0" >
         <div className="shell">
-          <div className="card" style={{ padding: 48, textAlign: "center" }}>
-            <span className="eyebrow" style={{ justifyContent: "center" }}>STANDARDS · INTEROPERABILITY</span>
-            <h2 className="h-2" style={{ marginTop: 18, maxWidth: 720, margin: "18px auto 0" }}>
+          <div className="card p-12 text-center" >
+            <span className="eyebrow justify-center" >STANDARDS · INTEROPERABILITY</span>
+            <h2 className="h-2 mt-4.5"  style={{ maxWidth: 720, margin: "18px auto 0"}}>
               ساخته‌شده بر شانه‌ی استانداردهایی که دانشگاه‌های دنیا با آن کار می‌کنند
             </h2>
-            <div className="standards" style={{ justifyContent: "center", marginTop: 32 }}>
+            <div className="standards justify-center mt-8" >
               <span className="std">LTI 1.3 / Advantage</span>
               <span className="std">xAPI · cmi5</span>
               <span className="std">QTI 3.0</span>
@@ -288,12 +293,12 @@ const HomePage = ({ go }) => {
       </section>
 
       {/* ============== PLATFORM TOUR ============== */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      <section className="section pt-0" >
         <div className="shell">
           <div className="section-head">
             <div className="text">
               <span className="eyebrow">PLATFORM TOUR · ۲۰ SCREEN</span>
-              <h2 className="h-1" style={{ marginTop: 16 }}>هر نقش، یک محیط کاری مستقل</h2>
+              <h2 className="h-1 mt-4" >هر نقش، یک محیط کاری مستقل</h2>
             </div>
             <p className="lead">
               دانشجو، استاد، طراح آموزشی، مدیر — هر یک ابزار خود را دارد. همه روی یک پلتفرم.
@@ -327,27 +332,20 @@ const HomePage = ({ go }) => {
               { id: "credential", t: "گواهی دیجیتال", d: "Open Badges 3.0 + VC", ic: "cert" },
               { id: "about", t: "درباره ما", d: "ماموریت، اصول، تیم", ic: "sparkle" },
             ].map((p) => (
-              <div key={p.id} className="reveal" onClick={() => go(p.id)} style={{
-                background: "var(--surface)",
+              <div key={p.id} className="reveal rounded-xl p-5 cursor-pointer relative overflow-hidden" onClick={() => go(p.id)}  style={{background: "var(--surface)",
                 border: "1px solid var(--line)",
-                borderRadius: 10,
-                padding: 20,
-                cursor: "pointer",
-                transition: "200ms ease",
-                position: "relative",
-                overflow: "hidden",
-              }}
+                transition: "200ms ease"}}
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--line)"; }}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--surface-2)", color: "var(--accent)", display: "grid", placeItems: "center" }}>
+                <div className="flex items-center justify-between mb-3.5" >
+                  <div className="rounded-lg grid"  style={{width: 36, height: 36, background: "var(--surface-2)", color: "var(--accent)", placeItems: "center"}}>
                     <Icon name={p.ic} size={16} />
                   </div>
                   <Icon name="arrow" size={14} stroke={2} />
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600 }}>{p.t}</div>
-                <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 6, lineHeight: 1.5 }}>{p.d}</div>
+                <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.5}}>{p.d}</div>
               </div>
             ))}
           </Stagger>
@@ -357,18 +355,15 @@ const HomePage = ({ go }) => {
       {/* ============== CTA ============== */}
       <section className="section">
         <div className="shell">
-          <div className="card" style={{
-            padding: "64px 48px",
-            background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in oklch, var(--cyan) 8%, var(--surface-2)) 100%)",
-            display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 48, alignItems: "center"
-          }}>
+          <div className="card grid gap-12 items-center"  style={{padding: "64px 48px",
+            background: "linear-gradient(135deg, var(--surface) 0%, color-mix(in oklch, var(--cyan) 8%, var(--surface-2)) 100%)", gridTemplateColumns: "1.4fr 1fr"}}>
             <div>
               <span className="eyebrow">GET STARTED</span>
-              <h2 className="h-1" style={{ marginTop: 16 }}>دانشگاهی تأسیس کنید که هرگز نمی‌خوابد</h2>
-              <p className="lead" style={{ marginTop: 16 }}>
+              <h2 className="h-1 mt-4" >دانشگاهی تأسیس کنید که هرگز نمی‌خوابد</h2>
+              <p className="lead mt-4" >
                 در کمتر از ۳۰ روز، اولین ترم آنلاین خود را با کلاس زنده، ضبط هوشمند، آزمون تطبیقی و گواهی دیجیتال اجرا کنید.
               </p>
-              <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
+              <div className="flex gap-3 mt-8" >
                 <button className="btn btn-primary btn-lg" onClick={() => go("admissions")}>
                   درخواست دموی نهادی
                   <Icon name="arrow" size={16} />
@@ -379,19 +374,19 @@ const HomePage = ({ go }) => {
                 </button>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="flex flex-col gap-2.5" >
               {[
                 ["MVP در ۳۰ روز", "اولین درس آنلاین قابل اجرا"],
                 ["ترم کامل در ۹۰ روز", "تمام سرویس‌های دانشگاه آماده"],
                 ["مقیاس ملی در ۶ ماه", "چند مستاجره، SLA 99.9٪"],
               ].map(([t, s], i) => (
-                <div key={i} className="card-flat" style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "var(--surface-3)", color: "var(--cyan)", display: "grid", placeItems: "center", fontFamily: "var(--f-mono)", fontWeight: 700, fontSize: 13 }}>
+                <div key={i} className="card-flat flex items-center gap-3.5" >
+                  <div className="rounded-xl grid"  style={{width: 36, height: 36, background: "var(--surface-3)", color: "var(--cyan)", placeItems: "center", fontFamily: "var(--f-mono)", fontWeight: 700, fontSize: 13}}>
                     {toFa(i + 1)}
                   </div>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{t}</div>
-                    <div style={{ color: "var(--fg-mute)", fontSize: 12, marginTop: 2 }}>{s}</div>
+                    <div className="mt-0.5"  style={{color: "var(--fg-mute)", fontSize: 12}}>{s}</div>
                   </div>
                 </div>
               ))}
@@ -415,7 +410,7 @@ const Stat = ({ v, unit, l }) => (
 
 const Feature = ({ title, desc, icon }) => (
   <div>
-    <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--cyan)", marginBottom: 8 }}>
+    <div className="flex items-center gap-2.5 mb-2"  style={{ color: "var(--cyan)"}}>
       <Icon name={icon} size={18} />
       <div style={{ fontWeight: 600, color: "var(--fg)", fontSize: 14 }}>{title}</div>
     </div>
@@ -424,10 +419,10 @@ const Feature = ({ title, desc, icon }) => (
 );
 
 const TechRow = ({ label, items }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 18, padding: "12px 0", borderTop: "1px solid var(--line)" }}>
-    <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-      {items.map((i) => <span key={i} style={{ fontFamily: "var(--f-mono)", fontSize: 12, padding: "3px 9px", background: "var(--surface-2)", borderRadius: 6, border: "1px solid var(--line)" }}>{i}</span>)}
+  <div className="grid gap-4.5"  style={{ gridTemplateColumns: "100px 1fr", padding: "12px 0", borderTop: "1px solid var(--line)"}}>
+    <div className="uppercase"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.1em"}}>{label}</div>
+    <div className="flex flex-wrap gap-1.5" >
+      {items.map((i) => <span className="rounded-md" key={i}  style={{fontFamily: "var(--f-mono)", fontSize: 12, padding: "3px 9px", background: "var(--surface-2)", border: "1px solid var(--line)"}}>{i}</span>)}
     </div>
   </div>
 );
@@ -437,7 +432,7 @@ const MasteryRing = ({ percent }) => {
   const r = 36, c = 2 * Math.PI * r;
   const off = c - (percent / 100) * c;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+    <div className="flex items-center gap-4.5" >
       <svg width="90" height="90" viewBox="0 0 90 90">
         <circle cx="45" cy="45" r={r} fill="none" stroke="var(--surface-3)" strokeWidth="6" />
         <circle cx="45" cy="45" r={r} fill="none" stroke="var(--violet)" strokeWidth="6"
@@ -447,7 +442,7 @@ const MasteryRing = ({ percent }) => {
       </svg>
       <div>
         <div style={{ fontSize: 13, fontWeight: 500 }}>تسلط فعلی</div>
-        <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", marginTop: 4 }}>۷ از ۹ هدف</div>
+        <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>۷ از ۹ هدف</div>
       </div>
     </div>
   );
@@ -508,9 +503,9 @@ const Hero3DCredential = () => (
     </div>
     <div className="credential-mini">
       <div className="credential-seal float"></div>
-      <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 12 }}>تسلط کامل بر:</div>
-      <div style={{ fontSize: 13, fontWeight: 600, marginTop: 4 }}>یادگیری عمیق</div>
-      <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)", marginTop: 8 }}>#7f3a · OB 3.0</div>
+      <div className="mt-3"  style={{fontSize: 12, color: "var(--fg-mute)"}}>تسلط کامل بر:</div>
+      <div className="mt-1"  style={{fontSize: 13, fontWeight: 600}}>یادگیری عمیق</div>
+      <div className="mt-2"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)"}}>#7f3a · OB 3.0</div>
     </div>
   </div>
 );
@@ -525,4 +520,4 @@ const COURSES = [
   { title: "آمار بیزی کاربردی", code: "STAT-440", by: "دکتر فرهادی", desc: "از قانون بیز تا MCMC با مثال‌های واقعی.", weeks: "۱۰", modules: "۲۰", students: "۲۸۹", cover: "green", glyph: "Σ" },
 ];
 
-window.HomePage = HomePage;
+export default HomePage;

@@ -1,7 +1,12 @@
 // =====================================================
 // Settings / Profile page
 // =====================================================
-const SettingsPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer } from "../shared.jsx";
+import { Toggle } from "../components/widgets.jsx";
+
+export const SettingsPage = ({ go }) => {
   const [tab, setTab] = React.useState("profile");
 
   return (
@@ -46,18 +51,18 @@ const SettingsPage = ({ go }) => {
 };
 
 const SectionH = ({ eyebrow, title, sub }) => (
-  <div style={{ marginBottom: 28 }}>
+  <div className="mb-7" >
     <span className="eyebrow">{eyebrow}</span>
-    <h1 className="h-2" style={{ marginTop: 10 }}>{title}</h1>
-    {sub && <p style={{ color: "var(--fg-mute)", fontSize: 14, marginTop: 10, maxWidth: 640 }}>{sub}</p>}
+    <h1 className="h-2 mt-2.5" >{title}</h1>
+    {sub && <p className="mt-2.5"  style={{color: "var(--fg-mute)", fontSize: 14, maxWidth: 640}}>{sub}</p>}
   </div>
 );
 
 const Row = ({ label, hint, children }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 32, padding: "20px 0", borderBottom: "1px solid var(--line)", alignItems: "start" }}>
+  <div className="grid gap-8 items-start"  style={{ gridTemplateColumns: "240px 1fr", padding: "20px 0", borderBottom: "1px solid var(--line)"}}>
     <div>
       <div style={{ fontSize: 14, fontWeight: 500 }}>{label}</div>
-      {hint && <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 6, lineHeight: 1.5 }}>{hint}</div>}
+      {hint && <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.5}}>{hint}</div>}
     </div>
     <div>{children}</div>
   </div>
@@ -66,36 +71,39 @@ const Row = ({ label, hint, children }) => (
 const ProfileTab = () => (
   <div>
     <SectionH eyebrow="PROFILE · نمایه عمومی" title="پروفایل" sub="این اطلاعات روی پروفایل عمومی شما و در کلاس‌ها قابل مشاهده است." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="عکس پروفایل" hint="JPG یا PNG · حداکثر ۲MB · ابعاد مربعی پیشنهاد می‌شود">
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div className="flex items-center gap-4 flex-wrap" >
           <div className="avatar cyan" style={{ width: 76, height: 76, fontSize: 22 }}>نر</div>
-          <button className="btn btn-outline">آپلود تصویر جدید</button>
-          <button className="btn btn-ghost">حذف</button>
+          <button className="btn btn-outline" onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}>آپلود تصویر جدید</button>
+          <button className="btn btn-ghost" onClick={async () => {
+            const ok = await window.confirmAction?.({ title: "حذف عکس پروفایل", body: "آیا مطمئن هستید؟", confirmLabel: "حذف", danger: true });
+            if (ok) window.toast?.({ title: "حذف شد", kind: "success" });
+          }}>حذف</button>
         </div>
       </Row>
       <Row label="نام نمایشی" hint="در کلاس‌ها و پروفایل عمومی نشان داده می‌شود">
-        <input defaultValue="نسرین رضوی" style={{ width: "100%", maxWidth: 400, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "inherit", fontSize: 14 }} />
+        <input className="rounded-xl" defaultValue="نسرین رضوی"  style={{width: "100%", maxWidth: 400, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
       </Row>
       <Row label="بیوگرافی کوتاه" hint="حداکثر ۲۸۰ کاراکتر">
-        <textarea defaultValue="دانشجوی ارشد علوم داده، علاقمند به مدل‌های زبانی فارسی و آموزش." rows={3} style={{ width: "100%", maxWidth: 600, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "inherit", fontSize: 14, resize: "vertical" }} />
+        <textarea className="rounded-xl resize-y" defaultValue="دانشجوی ارشد علوم داده، علاقمند به مدل‌های زبانی فارسی و آموزش." rows={3}  style={{width: "100%", maxWidth: 600, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
       </Row>
       <Row label="علایق پژوهشی" hint="با تب جدا کنید">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div className="flex flex-wrap gap-1.5" >
           {["NLP فارسی", "یادگیری عمیق", "RAG", "ترنسفورمر", "+ افزودن"].map((t, i) => (
-            <span key={i} className={"pill " + (i === 4 ? "" : "pill-cyan")} style={{ cursor: "pointer" }}>{t}</span>
+            <span className={"cursor-pointer " + " " + ("pill " + (i === 4 ? "" : "pill-cyan"))} key={i}  >{t}</span>
           ))}
         </div>
       </Row>
       <Row label="پیوندها" hint="GitHub، LinkedIn، Google Scholar و...">
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <input placeholder="GitHub" defaultValue="github.com/nasrin" style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr", textAlign: "left" }} />
-          <input placeholder="LinkedIn" style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr", textAlign: "left" }} />
+        <div className="flex flex-col gap-2" >
+          <input className="rounded-xl text-left" placeholder="GitHub" defaultValue="github.com/nasrin"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr"}} />
+          <input className="rounded-xl text-left" placeholder="LinkedIn"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr"}} />
         </div>
       </Row>
-      <div style={{ paddingTop: 24, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button className="btn btn-ghost">انصراف</button>
-        <button className="btn btn-primary">ذخیره تغییرات</button>
+      <div className="pt-6 flex justify-end gap-2.5" >
+        <button className="btn btn-ghost" onClick={() => window.toast?.("تغییرات نادیده گرفته شد")}>انصراف</button>
+        <button className="btn btn-primary" onClick={() => window.toast?.({ title: "ذخیره شد", msg: "تغییرات شما با موفقیت ذخیره شد.", kind: "success" })}>ذخیره تغییرات</button>
       </div>
     </div>
   </div>
@@ -104,40 +112,54 @@ const ProfileTab = () => (
 const SecurityTab = () => (
   <div>
     <SectionH eyebrow="SECURITY" title="امنیت حساب" sub="کنترل کامل بر دسترسی، احراز هویت دومرحله‌ای، و نشست‌های فعال." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="رمز عبور" hint="آخرین تغییر: ۲۳ روز پیش">
-        <button className="btn btn-outline">تغییر رمز عبور</button>
+        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "تغییر رمز عبور", msg: "لینک تغییر رمز به ایمیل شما ارسال شد.", kind: "info" })}>تغییر رمز عبور</button>
       </Row>
       <Row label="احراز هویت دو مرحله‌ای" hint="با اپلیکیشن authenticator یا پیامک امن‌تر شوید">
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-3" >
           <Toggle on={true} />
           <span style={{ fontSize: 13, color: "var(--sage)", fontWeight: 500 }}>فعال · Google Authenticator</span>
         </div>
       </Row>
       <Row label="کلید سخت‌افزاری (FIDO2)" hint="بالاترین سطح امنیت — کلید فیزیکی USB یا NFC">
-        <button className="btn btn-outline">ثبت کلید جدید</button>
+        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "ثبت کلید امنیتی", msg: "WebAuthn روی این مرورگر فعال نیست." , kind: "warn"})}>ثبت کلید جدید</button>
       </Row>
       <Row label="نشست‌های فعال" hint="می‌توانید هر نشست را از راه دور خارج کنید">
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="flex flex-col gap-2" >
           {[
             ["MacBook Pro · Chrome", "تهران · همین الان", "current"],
             ["iPhone 14 · Safari", "تهران · ۲ ساعت پیش", ""],
             ["iPad · Safari", "اصفهان · دیروز", ""],
           ].map(([d, w, s], i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: 14, background: "var(--surface-2)", borderRadius: 10 }}>
+            <div className="flex items-center justify-between p-3.5 rounded-xl" key={i}  style={{ background: "var(--surface-2)"}}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 500 }}>{d}</div>
-                <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", marginTop: 4 }}>{w}</div>
+                <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>{w}</div>
               </div>
-              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <button className="btn btn-ghost btn-sm">خروج</button>}
+              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <button className="btn btn-ghost btn-sm" onClick={() => window.toast?.({ title: "نشست بسته شد", kind: "success" })}>خروج</button>}
             </div>
           ))}
         </div>
       </Row>
       <Row label="منطقه‌ی خطر" hint="حذف یا غیرفعال‌سازی حساب">
-        <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn btn-outline" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>غیرفعال‌سازی موقت</button>
-          <button className="btn btn-outline" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>حذف کامل حساب</button>
+        <div className="flex gap-2.5" >
+          <button
+            className="btn btn-outline"
+            style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+            onClick={async () => {
+              const ok = await window.confirmAction?.({ title: "غیرفعال‌سازی موقت حساب", body: "حساب شما تا فعال‌سازی مجدد قابل دسترس نخواهد بود.", confirmLabel: "غیرفعال کن", danger: true });
+              if (ok) window.toast?.({ title: "حساب غیرفعال شد", kind: "warn" });
+            }}
+          >غیرفعال‌سازی موقت</button>
+          <button
+            className="btn btn-outline"
+            style={{ borderColor: "var(--rose)", color: "var(--rose)" }}
+            onClick={async () => {
+              const ok = await window.confirmAction?.({ title: "حذف کامل حساب", body: "این عملیات غیرقابل بازگشت است و همه‌ی داده‌های شما حذف می‌شوند.", confirmLabel: "حذف کامل", danger: true });
+              if (ok) window.toast?.({ title: "درخواست حذف ثبت شد", msg: "تا ۳۰ روز قابل لغو است.", kind: "danger" });
+            }}
+          >حذف کامل حساب</button>
         </div>
       </Row>
     </div>
@@ -147,28 +169,28 @@ const SecurityTab = () => (
 const AccountTab = () => (
   <div>
     <SectionH eyebrow="ACCOUNT" title="حساب کاربری" sub="اطلاعات هویتی و تماس." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="ایمیل اصلی" hint="برای ورود و اعلان‌ها استفاده می‌شود">
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div className="flex gap-2.5 items-center" >
           <span style={{ fontFamily: "var(--f-mono)", fontSize: 14 }}>nasrin@example.com</span>
           <span className="pill pill-cyan" style={{ fontSize: 10 }}>تأیید شده</span>
         </div>
       </Row>
       <Row label="شماره تماس" hint="برای پیامک اضطراری و 2FA">
-        <input defaultValue="۰۹۱۲ ۱۲۳ ۴۵۶۷" style={{ width: "100%", maxWidth: 300, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr", textAlign: "left" }} />
+        <input className="rounded-xl text-left" defaultValue="۰۹۱۲ ۱۲۳ ۴۵۶۷"  style={{width: "100%", maxWidth: 300, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "var(--f-mono)", fontSize: 13, direction: "ltr"}} />
       </Row>
       <Row label="کد دانشجویی" hint="در پروفایل شما ثابت است">
         <span style={{ fontFamily: "var(--f-mono)", fontSize: 14, color: "var(--fg-mute)" }}>۸۴-۰۲-۱۷-۳۳</span>
       </Row>
       <Row label="زبان رابط" hint="بر زبان کلی پلتفرم اثر می‌گذارد">
-        <select style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "inherit", fontSize: 14 }}>
+        <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}}>
           <option>فارسی</option>
           <option>English</option>
           <option>العربية</option>
         </select>
       </Row>
       <Row label="منطقه زمانی" hint="برای زمان‌بندی کلاس‌ها و یادآوری‌ها">
-        <select style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "inherit", fontSize: 14 }}>
+        <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}}>
           <option>تهران (UTC+03:30)</option>
           <option>دبی (UTC+04:00)</option>
           <option>لندن (UTC+00:00)</option>
@@ -181,30 +203,30 @@ const AccountTab = () => (
 const NotificationsTab = () => (
   <div>
     <SectionH eyebrow="NOTIFICATIONS" title="ترجیحات اعلان" sub="کنترل کنید چه چیزی، کجا و چه زمان به شما اطلاع داده شود." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       {[
         { cat: "آموزشی", items: [["جلسه‌ی کلاس زنده", "۱۵ دقیقه قبل از شروع"], ["یادآوری تکلیف", "۲۴ ساعت قبل از موعد"], ["نمره منتشر شد", "بلافاصله"], ["AI Tutor پاسخ داد", "بلافاصله"]] },
         { cat: "اجتماعی", items: [["پاسخ به سوال شما", "بلافاصله"], ["لایک یا ارجاع", "خلاصه روزانه"], ["پیام خصوصی", "بلافاصله"]] },
         { cat: "اداری", items: [["تأیید پذیرش / مدرک", "بلافاصله"], ["یادآوری پرداخت", "۷ روز قبل"], ["به‌روزرسانی سامانه", "هفتگی"]] },
       ].map((g) => (
-        <div key={g.cat} style={{ marginBottom: 28 }}>
-          <h3 className="h-3" style={{ marginBottom: 14 }}>{g.cat}</h3>
-          <div style={{ background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "12px 18px", borderBottom: "1px solid var(--line)", fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+        <div className="mb-7" key={g.cat} >
+          <h3 className="h-3 mb-3.5" >{g.cat}</h3>
+          <div className="rounded-xl overflow-hidden"  style={{background: "var(--surface-2)", border: "1px solid var(--line)"}}>
+            <div className="grid uppercase"  style={{ gridTemplateColumns: "1fr 100px 100px 100px", padding: "12px 18px", borderBottom: "1px solid var(--line)", fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.08em"}}>
               <span>نوع</span>
-              <span style={{ textAlign: "center" }}>ایمیل</span>
-              <span style={{ textAlign: "center" }}>اپ</span>
-              <span style={{ textAlign: "center" }}>پیامک</span>
+              <span className="text-center" >ایمیل</span>
+              <span className="text-center" >اپ</span>
+              <span className="text-center" >پیامک</span>
             </div>
             {g.items.map(([t, w], i) => (
-              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 100px", padding: "14px 18px", borderBottom: i < g.items.length - 1 ? "1px solid var(--line)" : "none", alignItems: "center" }}>
+              <div className="grid items-center" key={i}  style={{ gridTemplateColumns: "1fr 100px 100px 100px", padding: "14px 18px", borderBottom: i < g.items.length - 1 ? "1px solid var(--line)" : "none"}}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 500 }}>{t}</div>
-                  <div style={{ fontSize: 11, color: "var(--fg-mute)", marginTop: 2 }}>{w}</div>
+                  <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)"}}>{w}</div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "center" }}><Toggle on={true} /></div>
-                <div style={{ display: "flex", justifyContent: "center" }}><Toggle on={true} /></div>
-                <div style={{ display: "flex", justifyContent: "center" }}><Toggle on={i % 2 === 0} /></div>
+                <div className="flex justify-center" ><Toggle on={true} /></div>
+                <div className="flex justify-center" ><Toggle on={true} /></div>
+                <div className="flex justify-center" ><Toggle on={i % 2 === 0} /></div>
               </div>
             ))}
           </div>
@@ -214,12 +236,35 @@ const NotificationsTab = () => (
   </div>
 );
 
+const ToneSelector = () => {
+  const [tone, setTone] = React.useState(() => {
+    try { return localStorage.getItem("digiu_tone") || "سقراطی"; } catch { return "سقراطی"; }
+  });
+  const set = (t) => {
+    setTone(t);
+    try { localStorage.setItem("digiu_tone", t); } catch {}
+    window.toast?.({ title: "لحن دستیار", msg: `به «${t}» تغییر یافت.`, kind: "success" });
+  };
+  return (
+    <div className="flex gap-2 flex-wrap" >
+      {["دوستانه", "رسمی", "سقراطی"].map((t) => (
+        <button
+          key={t}
+          onClick={() => set(t)}
+          aria-pressed={tone === t}
+          className={"btn " + (tone === t ? "btn-primary" : "btn-outline")}
+        >{t}</button>
+      ))}
+    </div>
+  );
+};
+
 const AITab = () => (
   <div>
     <SectionH eyebrow="AI ASSISTANT" title="تنظیمات دستیار هوشمند" sub="کنترل بر نحوه‌ی کمک‌رسانی AI، سطح توضیحات و گزینه‌های پیشرفته." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="سطح توضیحات" hint="چقدر توضیحات تفصیلی باشد">
-        <select style={{ padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 10, fontFamily: "inherit", fontSize: 14 }}>
+        <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}}>
           <option>متعادل — پیشنهاد می‌شود</option>
           <option>کوتاه و سریع</option>
           <option>تفصیلی با مثال</option>
@@ -227,11 +272,7 @@ const AITab = () => (
         </select>
       </Row>
       <Row label="لحن دستیار" hint="چگونه با شما صحبت کند">
-        <div style={{ display: "flex", gap: 8 }}>
-          {["دوستانه", "رسمی", "سقراطی"].map((t, i) => (
-            <button key={t} className={"btn " + (i === 2 ? "btn-primary" : "btn-outline")}>{t}</button>
-          ))}
-        </div>
+        <ToneSelector />
       </Row>
       <Row label="پاسخ خودکار در کلاس" hint="آیا AI می‌تواند سوال شما در چت کلاس را به طور خودکار پاسخ دهد؟">
         <Toggle on={true} />
@@ -249,7 +290,7 @@ const AITab = () => (
 const PrivacyTab = () => (
   <div>
     <SectionH eyebrow="PRIVACY" title="حریم خصوصی و داده" sub="کنترل کنید چه داده‌ای جمع‌آوری می‌شود و چگونه استفاده می‌شود." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="پروفایل عمومی" hint="آیا پروفایل شما برای دانشجویان دیگر قابل مشاهده باشد؟">
         <Toggle on={true} />
       </Row>
@@ -263,7 +304,7 @@ const PrivacyTab = () => (
         <Toggle on={false} />
       </Row>
       <Row label="گزارش حقوق داده" hint="درخواست همه‌ی داده‌های جمع‌آوری‌شده درباره‌ی شما">
-        <button className="btn btn-outline"><Icon name="download" size={14} />درخواست export کامل (GDPR)</button>
+        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "درخواست ثبت شد", msg: "ظرف ۷۲ ساعت لینک دانلود به ایمیل شما ارسال می‌شود.", kind: "info" })}><Icon name="download" size={14} />درخواست export کامل (GDPR)</button>
       </Row>
     </div>
   </div>
@@ -272,7 +313,7 @@ const PrivacyTab = () => (
 const AccessibilityTab = () => (
   <div>
     <SectionH eyebrow="ACCESSIBILITY · WCAG 2.2 AA" title="دسترس‌پذیری" sub="تنظیم رابط برای راحتی شخصی شما." />
-    <div className="card" style={{ padding: 32 }}>
+    <div className="card p-8" >
       <Row label="اندازه فونت" hint="بر همه‌ی متون پلتفرم اثر می‌گذارد">
         <input type="range" min="14" max="22" defaultValue="16" style={{ width: 280, accentColor: "var(--accent)" }} />
       </Row>
@@ -295,27 +336,27 @@ const AccessibilityTab = () => (
 const BillingTab = () => (
   <div>
     <SectionH eyebrow="BILLING · صورتحساب" title="پرداخت و فاکتور" sub="مدیریت روش‌های پرداخت، فاکتورها و اشتراک." />
-    <div className="card" style={{ padding: 32, marginBottom: 16 }}>
-      <h3 className="h-3" style={{ marginBottom: 18 }}>اشتراک فعلی</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "center", padding: 24, background: "var(--accent-soft)", borderRadius: 12 }}>
+    <div className="card p-8 mb-4" >
+      <h3 className="h-3 mb-4.5" >اشتراک فعلی</h3>
+      <div className="grid gap-6 items-center p-6 rounded-xl"  style={{ gridTemplateColumns: "1fr auto", background: "var(--accent-soft)"}}>
         <div>
           <div style={{ fontSize: 12, color: "var(--accent-2)", fontFamily: "var(--f-mono)", letterSpacing: "0.08em" }}>پلن دانشجویی · ترم بهار ۱۴۰۵</div>
-          <div style={{ fontSize: 22, fontWeight: 700, marginTop: 6 }}>۱۲ میلیون تومان</div>
-          <div style={{ fontSize: 13, color: "var(--fg-mute)", marginTop: 4 }}>تجدید خودکار: ۱۵ شهریور ۱۴۰۵</div>
+          <div className="mt-1.5"  style={{fontSize: 22, fontWeight: 700}}>۱۲ میلیون تومان</div>
+          <div className="mt-1"  style={{fontSize: 13, color: "var(--fg-mute)"}}>تجدید خودکار: ۱۵ شهریور ۱۴۰۵</div>
         </div>
-        <button className="btn btn-outline">ارتقاء پلن</button>
+        <button className="btn btn-outline" onClick={() => window.location.hash = "#pricing"}>ارتقاء پلن</button>
       </div>
     </div>
 
-    <div className="card" style={{ padding: 32 }}>
-      <h3 className="h-3" style={{ marginBottom: 18 }}>فاکتورهای قبلی</h3>
+    <div className="card p-8" >
+      <h3 className="h-3 mb-4.5" >فاکتورهای قبلی</h3>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid var(--line)" }}>
-            <th style={{ textAlign: "right", padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500 }}>تاریخ</th>
-            <th style={{ textAlign: "right", padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500 }}>شرح</th>
-            <th style={{ textAlign: "right", padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500 }}>مبلغ</th>
-            <th style={{ textAlign: "left", padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500 }}>وضعیت</th>
+            <th className="text-right uppercase"  style={{ padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", fontWeight: 500}}>تاریخ</th>
+            <th className="text-right uppercase"  style={{ padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", fontWeight: 500}}>شرح</th>
+            <th className="text-right uppercase"  style={{ padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", fontWeight: 500}}>مبلغ</th>
+            <th className="text-left uppercase"  style={{ padding: "12px 0", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.08em", fontWeight: 500}}>وضعیت</th>
           </tr>
         </thead>
         <tbody>
@@ -329,7 +370,7 @@ const BillingTab = () => (
               <td style={{ padding: "14px 0", fontFamily: "var(--f-mono)", fontSize: 13 }}>{d}</td>
               <td style={{ padding: "14px 0", fontSize: 14 }}>{t}</td>
               <td style={{ padding: "14px 0", fontFamily: "var(--f-mono)", fontSize: 13 }}>{a} ت</td>
-              <td style={{ padding: "14px 0", textAlign: "left" }}>
+              <td className="text-left"  style={{padding: "14px 0"}}>
                 <span className="pill pill-violet" style={{ fontSize: 10 }}>پرداخت شد</span>
               </td>
             </tr>
@@ -343,15 +384,24 @@ const BillingTab = () => (
 const WalletTab = () => (
   <div>
     <SectionH eyebrow="WALLET · کیف پول" title="موجودی و تراکنش‌ها" />
-    <div className="card" style={{ padding: 40, background: "linear-gradient(135deg, var(--surface), var(--surface-2))" }}>
+    <div className="card p-10"  style={{ background: "linear-gradient(135deg, var(--surface), var(--surface-2))"}}>
       <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em" }}>BALANCE · موجودی</div>
-      <div style={{ fontFamily: "var(--f-mono)", fontSize: 56, fontWeight: 700, marginTop: 12, color: "var(--accent)" }}>۲,۴۵۰,۰۰۰<span style={{ fontSize: 20, color: "var(--fg-mute)", marginRight: 8 }}>تومان</span></div>
-      <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-        <button className="btn btn-primary"><Icon name="plus" size={14} />شارژ کیف پول</button>
-        <button className="btn btn-outline"><Icon name="download" size={14} />برداشت</button>
+      <div className="mt-3"  style={{fontFamily: "var(--f-mono)", fontSize: 56, fontWeight: 700, color: "var(--accent)"}}>۲,۴۵۰,۰۰۰<span className="me-2"  style={{fontSize: 20, color: "var(--fg-mute)"}}>تومان</span></div>
+      <div className="flex gap-2.5 mt-6" >
+        <button
+          className="btn btn-primary"
+          onClick={() => window.toast?.({ title: "هدایت به درگاه پرداخت", msg: "در حال انتقال…", kind: "info" })}
+        ><Icon name="plus" size={14} />شارژ کیف پول</button>
+        <button
+          className="btn btn-outline"
+          onClick={async () => {
+            const ok = await window.confirmAction?.({ title: "برداشت از کیف پول", body: "مبلغ به حساب بانکی متصل به حساب شما واریز می‌شود.", confirmLabel: "ادامه" });
+            if (ok) window.toast?.({ title: "درخواست برداشت ثبت شد", kind: "success" });
+          }}
+        ><Icon name="download" size={14} />برداشت</button>
       </div>
     </div>
   </div>
 );
 
-window.SettingsPage = SettingsPage;
+export default SettingsPage;

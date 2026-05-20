@@ -1,7 +1,9 @@
 // =====================================================
 // Icons — minimal stroke icon set, no emoji
 // =====================================================
-const Icon = ({ name, size = 18, stroke = 1.7 }) => {
+import React from "react";
+
+export const Icon = ({ name, size = 18, stroke = 1.7 }) => {
   const P = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round" };
   const map = {
     arrow: <svg {...P}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
@@ -53,4 +55,4 @@ const Icon = ({ name, size = 18, stroke = 1.7 }) => {
   return map[name] || null;
 };
 
-window.Icon = Icon;
+export default Icon;

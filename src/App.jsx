@@ -1,31 +1,62 @@
 // =====================================================
-// App router — hash-based, lightweight, role-aware
+// App router — hash-based, role-aware, with parameterized routes
 // =====================================================
-const App = () => (
-  <RoleProvider>
-    <AppShell />
-  </RoleProvider>
-);
+import React from "react";
+import { RoleProvider } from "./role.jsx";
+import { ThemeProvider, UIRoot } from "./ui.jsx";
+import { ScrollProgress } from "./motion.jsx";
+import { Nav } from "./shared.jsx";
+
+import HomePage from "./pages/Home.jsx";
+import ProgramsPage from "./pages/Programs.jsx";
+import ClassroomPage from "./pages/Classroom.jsx";
+import DashboardPage from "./pages/Dashboard.jsx";
+import CoursePage from "./pages/Course.jsx";
+import InstructorPage from "./pages/Instructor.jsx";
+import AdmissionsPage from "./pages/Admissions.jsx";
+import CredentialPage from "./pages/Credential.jsx";
+import SearchPage from "./pages/Search.jsx";
+import AssessmentPage from "./pages/Assessment.jsx";
+import CommunityPage from "./pages/Community.jsx";
+import AnalyticsPage from "./pages/Analytics.jsx";
+import AuthoringPage from "./pages/Authoring.jsx";
+import RecordingsPage from "./pages/Recordings.jsx";
+import { LoginPage, RegisterPage, ForgotPage, VerifyEmailPage, TwoFactorPage, OnboardingPage } from "./pages/Auth.jsx";
+import SettingsPage from "./pages/Settings.jsx";
+import { CalendarPage, LibraryPage, HelpPage, PricingPage, FacultyPage } from "./pages/More.jsx";
+import { AdminPage, ParentPage, OfficeHoursPage, EventsPage, AboutPage } from "./pages/Roles.jsx";
+import { SchoolsPage, VirtualLabPage, LabsPage, ResearchPage } from "./pages/University.jsx";
+import { NotificationsPage, MessagesPage, BookmarksPage, AchievementsPage, SubmissionPage, ProfilePage } from "./pages/Productivity.jsx";
+import { TranscriptPage, DegreeAuditPage, RegistrationPage, CareerPage, FinancialAidPage, WellnessPage, AlumniPage, HackathonsPage, HonorCodePage } from "./pages/Academic.jsx";
+
+const parseRoute = (raw) => {
+  const h = (raw || "").replace(/^#/, "");
+  if (!h) return { id: "home", param: null };
+  const [id, ...rest] = h.split("/");
+  return { id: id || "home", param: rest.length ? rest.join("/") : null };
+};
 
 const AppShell = () => {
-  const [route, setRoute] = React.useState(() => {
-    const h = window.location.hash.replace("#", "");
-    return h || "home";
-  });
+  const [{ id: route, param: routeParam }, setRoute] = React.useState(() =>
+    parseRoute(window.location.hash)
+  );
 
   React.useEffect(() => {
     const onHash = () => {
-      const h = window.location.hash.replace("#", "");
-      setRoute(h || "home");
+      setRoute(parseRoute(window.location.hash));
       window.scrollTo({ top: 0, behavior: "instant" });
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  const go = (id) => {
-    window.location.hash = "#" + id;
-    setRoute(id);
+  const go = (id, param) => {
+    const hash = "#" + id + (param ? "/" + param : "");
+    if (window.location.hash !== hash) {
+      window.location.hash = hash;
+    } else {
+      setRoute({ id, param: param || null });
+    }
     window.scrollTo({ top: 0, behavior: "instant" });
   };
 
@@ -35,7 +66,7 @@ const AppShell = () => {
     case "programs": page = <ProgramsPage go={go} />; break;
     case "classroom": page = <ClassroomPage go={go} />; break;
     case "dashboard": page = <DashboardPage go={go} />; break;
-    case "course": page = <CoursePage go={go} />; break;
+    case "course": page = <CoursePage go={go} courseId={routeParam} />; break;
     case "instructor": page = <InstructorPage go={go} />; break;
     case "admissions": page = <AdmissionsPage go={go} />; break;
     case "credential": page = <CredentialPage go={go} />; break;
@@ -64,7 +95,7 @@ const AppShell = () => {
     case "about": page = <AboutPage go={go} />; break;
     case "schools": page = <SchoolsPage go={go} />; break;
     case "labs": page = <LabsPage go={go} />; break;
-    case "virtuallab": page = <VirtualLabPage go={go} />; break;
+    case "virtuallab": page = <VirtualLabPage go={go} labId={routeParam} />; break;
     case "research": page = <ResearchPage go={go} />; break;
     case "inbox": page = <NotificationsPage go={go} />; break;
     case "messages": page = <MessagesPage go={go} />; break;
@@ -85,12 +116,20 @@ const AppShell = () => {
   }
 
   return (
-    <>
+    <UIRoot onNavigate={go}>
       <ScrollProgress />
       <Nav current={route} go={go} />
-      <div key={route} className="page-shell">{page}</div>
-    </>
+      <div key={route + ":" + (routeParam || "")} className="page-shell">{page}</div>
+    </UIRoot>
   );
 };
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+const App = () => (
+  <ThemeProvider>
+    <RoleProvider>
+      <AppShell />
+    </RoleProvider>
+  </ThemeProvider>
+);
+
+export default App;

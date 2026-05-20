@@ -1,6 +1,10 @@
 // =====================================================
 // Shared: Nav, Footer, common widgets
 // =====================================================
+import React from "react";
+import { Icon } from "./icons.jsx";
+import { useRole, ROLES } from "./role.jsx";
+import { useTheme } from "./ui.jsx";
 
 const NAV_ITEMS_BY_ROLE = {
   student: [
@@ -46,8 +50,9 @@ const NAV_ITEMS_BY_ROLE = {
   ],
 };
 
-const Nav = ({ current, go }) => {
+export const Nav = ({ current, go }) => {
   const { role, setRole } = useRole();
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = React.useState(false);
   const [notifsOpen, setNotifsOpen] = React.useState(false);
   const [userOpen, setUserOpen] = React.useState(false);
@@ -90,8 +95,28 @@ const Nav = ({ current, go }) => {
         </div>
 
         <div className="nav-actions">
+          {/* Command palette trigger */}
+          <button
+            className="nav-icon-btn"
+            onClick={() => window.openCommandPalette?.()}
+            aria-label="پالت دستورات (Cmd+K)"
+            title="جستجوی سریع (Ctrl+K)"
+          >
+            <Icon name="search" size={18} />
+          </button>
+
+          {/* Theme toggle */}
+          <button
+            className="nav-icon-btn"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={theme === "dark" ? "تم روشن" : "تم تیره"}
+            title={theme === "dark" ? "روشن" : "تیره"}
+          >
+            <Icon name={theme === "dark" ? "sparkle" : "globe"} size={18} />
+          </button>
+
           {/* Notifications */}
-          <div className="notif-wrap" style={{ position: "relative" }}>
+          <div className="notif-wrap relative" >
             <button className="nav-icon-btn" onClick={() => setNotifsOpen(!notifsOpen)} aria-label="اعلان‌ها">
               <Icon name="bell" size={18} />
               <span className="notif-dot"></span>
@@ -100,7 +125,7 @@ const Nav = ({ current, go }) => {
           </div>
 
           {/* User menu */}
-          <div className="user-wrap" style={{ position: "relative" }}>
+          <div className="user-wrap relative" >
             <button className="user-btn" onClick={() => setUserOpen(!userOpen)}>
               <div className={"avatar " + role.color} style={{ width: 32, height: 32, fontSize: 11 }}>{role.avatar}</div>
               <span className="user-name">{role.name.split(" ").slice(-1)[0]}</span>
@@ -128,7 +153,7 @@ const NotificationsDropdown = ({ go }) => (
       <h4>اعلان‌ها</h4>
       <span style={{ fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)" }}>۳ جدید</span>
     </div>
-    <div style={{ maxHeight: 420, overflowY: "auto" }}>
+    <div className="overflow-y-auto"  style={{maxHeight: 420}}>
       {[
         { ic: "live", k: "جلسه کلاس", t: "یادگیری ماشین · جلسه ۸ تا ۱۵ دقیقه دیگر شروع می‌شود", time: "همین الان", unread: true, action: () => go("classroom") },
         { ic: "sparkle", k: "AI Tutor", t: "خلاصه‌ی پساکلاس جلسه ۷ آماده شد. ۳ کوییز پیشنهاد شده.", time: "۸ دقیقه پیش", unread: true, action: () => go("recordings") },
@@ -138,13 +163,13 @@ const NotificationsDropdown = ({ go }) => (
       ].map((n, i) => (
         <div key={i} onClick={n.action} className="notif-item">
           <div className="notif-icon"><Icon name={n.ic} size={14} /></div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-              <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: "0.08em", color: "var(--fg-mute)", textTransform: "uppercase" }}>{n.k}</span>
+          <div className="flex-1"  style={{ minWidth: 0}}>
+            <div className="flex items-center gap-2 mb-1" >
+              <span className="uppercase"  style={{fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: "0.08em", color: "var(--fg-mute)"}}>{n.k}</span>
               {n.unread && <span style={{ width: 6, height: 6, borderRadius: 50, background: "var(--accent)" }}></span>}
             </div>
             <div style={{ fontSize: 13, lineHeight: 1.5 }}>{n.t}</div>
-            <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)", marginTop: 4 }}>{n.time}</div>
+            <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)"}}>{n.time}</div>
           </div>
         </div>
       ))}
@@ -163,15 +188,15 @@ const UserDropdown = ({ go, role, setRole }) => {
   );
   return (
   <div className="dropdown" style={{ width: 300 }}>
-    <div style={{ padding: 18, borderBottom: "1px solid var(--line)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+    <div className="p-4.5"  style={{ borderBottom: "1px solid var(--line)"}}>
+      <div className="flex items-center gap-3" >
         <div className={"avatar " + role.color} style={{ width: 44, height: 44 }}>{role.avatar}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-1"  style={{ minWidth: 0}}>
           <div style={{ fontSize: 14, fontWeight: 600 }}>{role.name}</div>
-          <div style={{ fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)", marginTop: 2 }}>{role.code}</div>
+          <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)"}}>{role.code}</div>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+      <div className="flex gap-1.5 mt-3" >
         <span className="pill pill-cyan" style={{ fontSize: 10 }}>{role.label}</span>
         <span className="pill" style={{ fontSize: 10 }}>{role.subtitle}</span>
       </div>
@@ -179,25 +204,20 @@ const UserDropdown = ({ go, role, setRole }) => {
 
     {/* Role switcher — only in demo mode (?demo=1) */}
     {isDemoMode && (
-      <div style={{ padding: 14, borderBottom: "1px solid var(--line)", background: "var(--surface-2)" }}>
-        <div className="mono" style={{ fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.1em", marginBottom: 10 }}>
+      <div className="p-3.5"  style={{ borderBottom: "1px solid var(--line)", background: "var(--surface-2)"}}>
+        <div className="mono mb-2.5"  style={{fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.1em"}}>
           DEMO · مشاهده به عنوان
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 4 }}>
+        <div className="grid gap-1"  style={{ gridTemplateColumns: "repeat(5, 1fr)"}}>
           {Object.values(ROLES).map((r) => (
-            <button key={r.id} onClick={() => { setRole(r.id); go(r.homeRoute); }}
+            <button className="rounded-md cursor-pointer flex flex-col items-center gap-1" key={r.id} onClick={() => { setRole(r.id); go(r.homeRoute); }}
               title={r.label}
-              style={{
-                padding: "8px 4px",
+               style={{padding: "8px 4px",
                 background: role.id === r.id ? "var(--accent-soft)" : "var(--surface)",
                 border: "1px solid " + (role.id === r.id ? "var(--accent)" : "var(--line)"),
-                borderRadius: 6,
                 fontSize: 10,
                 fontFamily: "inherit",
-                color: role.id === r.id ? "var(--accent)" : "var(--fg-mute)",
-                cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-              }}>
+                color: role.id === r.id ? "var(--accent)" : "var(--fg-mute)"}}>
               <div className={"avatar " + (role.id === r.id ? r.color : "")} style={{ width: 22, height: 22, fontSize: 9, opacity: role.id === r.id ? 1 : 0.6 }}>{r.avatar}</div>
               {r.label}
             </button>
@@ -206,7 +226,7 @@ const UserDropdown = ({ go, role, setRole }) => {
       </div>
     )}
 
-    <div style={{ padding: 6 }}>
+    <div className="p-1.5" >
       {[
         ["میز کار", "home", role.homeRoute],
         ["پروفایل عمومی", "user", "profile"],
@@ -223,7 +243,7 @@ const UserDropdown = ({ go, role, setRole }) => {
         </button>
       ))}
     </div>
-    <div style={{ padding: 6, borderTop: "1px solid var(--line)" }}>
+    <div className="p-1.5"  style={{ borderTop: "1px solid var(--line)"}}>
       <button onClick={() => go("login")} className="dropdown-item" style={{ color: "var(--accent)" }}>
         <Icon name="end" size={14} />
         خروج از حساب
@@ -233,12 +253,12 @@ const UserDropdown = ({ go, role, setRole }) => {
   );
 };
 
-const Footer = ({ go }) => (
+export const Footer = ({ go }) => (
   <footer className="footer">
     <div className="shell">
       <div className="footer-grid">
         <div>
-          <div className="brand" style={{ marginBottom: 18 }}>
+          <div className="brand mb-4.5" >
             <span className="brand-mark"></span>
             <span>دیجی‌یونیورسیتی
               <div className="brand-sub">AI · NATIVE · LEARNING</div>
@@ -247,7 +267,7 @@ const Footer = ({ go }) => (
           <p style={{ color: "var(--fg-mute)", fontSize: 14, lineHeight: 1.7, maxWidth: 360 }}>
             یک زیرساخت آموزشی کاملاً دیجیتال که در آن هوش مصنوعی نه یک افزونه، بلکه شالوده‌ی یادگیری، طراحی برنامه و سنجش است.
           </p>
-          <div className="standards" style={{ marginTop: 20 }}>
+          <div className="standards mt-5" >
             <span className="std">LTI 1.3</span>
             <span className="std">xAPI</span>
             <span className="std">QTI</span>
@@ -310,12 +330,12 @@ const Footer = ({ go }) => (
 // =====================================================
 // Persian numerals helper
 // =====================================================
-const toFa = (n) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+export const toFa = (n) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
 // =====================================================
 // Sparkline mini-chart (SVG)
 // =====================================================
-const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 220 }) => {
+export const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 220 }) => {
   const max = Math.max(...values);
   const min = Math.min(...values);
   const range = max - min || 1;
@@ -343,7 +363,7 @@ const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 220 }) 
 // =====================================================
 // Cognitive radar (SVG) — for student profile
 // =====================================================
-const CognitiveRadar = ({ values, labels, size = 280 }) => {
+export const CognitiveRadar = ({ values, labels, size = 280 }) => {
   const cx = size / 2, cy = size / 2;
   const radius = size * 0.4;
   const n = values.length;
@@ -385,7 +405,7 @@ const CognitiveRadar = ({ values, labels, size = 280 }) => {
 // =====================================================
 // Knowledge Graph visualization (SVG)
 // =====================================================
-const KnowledgeGraph = () => {
+export const KnowledgeGraph = () => {
   const nodes = [
     { id: "ml", x: 50, y: 40, r: 36, kind: "core", label: "یادگیری ماشین" },
     { id: "sup", x: 22, y: 22, r: 24, kind: "topic", label: "نظارت‌شده" },
@@ -435,7 +455,7 @@ const KnowledgeGraph = () => {
 // =====================================================
 // 3D-ish architecture diagram (isometric stack)
 // =====================================================
-const ArchStack = () => {
+export const ArchStack = () => {
   const layers = [
     { name: "Experience Layer", sub: "وب · موبایل · کلاس آنلاین · داشبورد", color: "var(--cyan)" },
     { name: "Agent Orchestration", sub: "AI Tutor · Coach · Critic · Mentor · Grader", color: "var(--violet)" },
@@ -445,32 +465,19 @@ const ArchStack = () => {
   ];
   return (
     <div style={{ perspective: 1400, transformStyle: "preserve-3d", padding: "20px 0" }}>
-      <div style={{
-        transform: "rotateX(48deg) rotateZ(-28deg)",
-        transformStyle: "preserve-3d",
-        display: "flex",
-        flexDirection: "column",
-        gap: 18,
-        alignItems: "center",
-      }}>
+      <div className="flex flex-col gap-4.5 items-center"  style={{transform: "rotateX(48deg) rotateZ(-28deg)",
+        transformStyle: "preserve-3d"}}>
         {layers.map((L, i) => (
-          <div key={i} style={{
-            width: 320,
+          <div className="rounded-xl relative flex flex-col justify-center" key={i}  style={{width: 320,
             height: 70,
             background: "linear-gradient(180deg, var(--surface-2), var(--surface))",
             border: "1px solid var(--line-2)",
-            borderRadius: 10,
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
             padding: "0 18px",
             transform: `translateZ(${(layers.length - i) * 20}px)`,
-            boxShadow: "0 20px 40px -20px rgba(0,0,0,0.7)",
-          }}>
-            <div style={{ position: "absolute", top: 8, left: 12, width: 5, height: 5, borderRadius: 50, background: L.color, boxShadow: `0 0 12px ${L.color}` }} />
+            boxShadow: "0 20px 40px -20px rgba(0,0,0,0.7)"}}>
+            <div className="absolute"  style={{ top: 8, left: 12, width: 5, height: 5, borderRadius: 50, background: L.color, boxShadow: `0 0 12px ${L.color}`}} />
             <div style={{ fontSize: 14, fontWeight: 600 }}>{L.name}</div>
-            <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)", marginTop: 4 }}>{L.sub}</div>
+            <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)"}}>{L.sub}</div>
           </div>
         ))}
       </div>
@@ -478,10 +485,4 @@ const ArchStack = () => {
   );
 };
 
-window.Nav = Nav;
-window.Footer = Footer;
-window.toFa = toFa;
-window.Sparkline = Sparkline;
-window.CognitiveRadar = CognitiveRadar;
-window.KnowledgeGraph = KnowledgeGraph;
-window.ArchStack = ArchStack;
+// (exports above)

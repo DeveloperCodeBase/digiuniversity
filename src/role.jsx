@@ -1,8 +1,9 @@
 // =====================================================
-// Role context — manages current user role for the prototype
+// Role context — manages current user role
 // =====================================================
+import React from "react";
 
-const ROLES = {
+export const ROLES = {
   student: {
     id: "student",
     label: "دانشجو",
@@ -65,14 +66,14 @@ const ROLES = {
   },
 };
 
-const RoleContext = React.createContext({
+export const RoleContext = React.createContext({
   role: ROLES.student,
   setRole: () => {},
 });
 
-const useRole = () => React.useContext(RoleContext);
+export const useRole = () => React.useContext(RoleContext);
 
-const RoleProvider = ({ children }) => {
+export const RoleProvider = ({ children }) => {
   const [roleId, setRoleId] = React.useState(() => {
     try { return localStorage.getItem("digiu_role") || "student"; }
     catch { return "student"; }
@@ -89,8 +90,3 @@ const RoleProvider = ({ children }) => {
     </RoleContext.Provider>
   );
 };
-
-window.ROLES = ROLES;
-window.RoleContext = RoleContext;
-window.useRole = useRole;
-window.RoleProvider = RoleProvider;

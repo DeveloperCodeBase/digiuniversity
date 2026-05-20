@@ -5,22 +5,18 @@
 // =====================================================
 // Calendar / Schedule
 // =====================================================
-const CalendarPage = ({ go }) => {
-  const days = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه"];
-  const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Footer, toFa } from "../shared.jsx";
+import { FACULTY as FACULTY_DATA, SCHOOLS, LIBRARY_RESOURCES, WEEKLY_SCHEDULE, WEEK_DAYS } from "../data.js";
+import { RoleSideNav } from "../sidenav.jsx";
 
-  const events = [
-    { day: 0, start: 10, dur: 2, t: "یادگیری ماشین", code: "CS-410", kind: "live" },
-    { day: 0, start: 14, dur: 1.5, t: "تمرین تطبیقی", code: "AUTO", kind: "self" },
-    { day: 1, start: 9, dur: 2, t: "NLP پیشرفته", code: "CS-620", kind: "live" },
-    { day: 1, start: 16, dur: 2, t: "آمار بیزی", code: "STAT-440", kind: "live" },
-    { day: 2, start: 11, dur: 1.5, t: "گروه مطالعه", code: "PEER", kind: "peer" },
-    { day: 2, start: 14, dur: 3, t: "Office Hours", code: "OH", kind: "office" },
-    { day: 3, start: 10, dur: 2, t: "یادگیری ماشین", code: "CS-410", kind: "live" },
-    { day: 3, start: 18, dur: 1, t: "آزمون میان‌ترم", code: "EXAM", kind: "exam" },
-    { day: 4, start: 9, dur: 2, t: "NLP پیشرفته", code: "CS-620", kind: "live" },
-    { day: 4, start: 15, dur: 2, t: "کارگاه عملی", code: "WORK", kind: "lab" },
-  ];
+export const CalendarPage = ({ go }) => {
+  const [view, setView] = React.useState("week");
+  const days = WEEK_DAYS;
+  const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+  // Map data.js shape (`title`) to local shape (`t`)
+  const events = WEEKLY_SCHEDULE.map((e) => ({ ...e, t: e.title }));
 
   const colorFor = (k) => ({
     live: "var(--accent)",
@@ -39,29 +35,38 @@ const CalendarPage = ({ go }) => {
           <div className="dash-greet">
             <div>
               <span className="eyebrow">CALENDAR · هفته‌ی جاری</span>
-              <h1 style={{ marginTop: 10 }}>تقویم تحصیلی — هفته‌ی ۱۲</h1>
+              <h1 className="mt-2.5" >تقویم تحصیلی — هفته‌ی ۱۲</h1>
               <p className="muted">۸ کلاس زنده · ۳ تمرین · ۱ آزمون · همگامی با Google Calendar</p>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button className="btn btn-outline btn-sm">روز</button>
-              <button className="btn btn-outline btn-sm" style={{ background: "var(--accent-soft)", color: "var(--accent)", borderColor: "var(--accent)" }}>هفته</button>
-              <button className="btn btn-outline btn-sm">ماه</button>
-              <button className="btn btn-primary btn-sm"><Icon name="plus" size={13} />رویداد جدید</button>
+            <div className="flex gap-2" >
+              {[["day", "روز"], ["week", "هفته"], ["month", "ماه"]].map(([v, l]) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  aria-pressed={view === v}
+                  className="btn btn-outline btn-sm"
+                  style={view === v ? { background: "var(--accent-soft)", color: "var(--accent)", borderColor: "var(--accent)" } : undefined}
+                >{l}</button>
+              ))}
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => window.toast?.({ title: "فرم رویداد جدید", msg: "افزودن رویداد به‌زودی فعال می‌شود.", kind: "info" })}
+              ><Icon name="plus" size={13} />رویداد جدید</button>
             </div>
           </div>
 
-          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "60px repeat(7, 1fr)", borderBottom: "1px solid var(--line)" }}>
+          <div className="card p-0 overflow-hidden" >
+            <div className="grid"  style={{ gridTemplateColumns: "60px repeat(7, 1fr)", borderBottom: "1px solid var(--line)"}}>
               <div style={{ padding: "16px 12px" }}></div>
               {days.map((d, i) => (
-                <div key={d} style={{ padding: "16px 12px", textAlign: "center", borderRight: i < 6 ? "1px solid var(--line)" : "none", borderRightColor: "var(--line)" }}>
-                  <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{d}</div>
-                  <div style={{ fontFamily: "var(--f-display)", fontSize: 22, fontWeight: 700, marginTop: 4, color: i === 0 ? "var(--accent)" : "var(--fg)" }}>{toFa(8 + i)}</div>
+                <div className="text-center" key={d}  style={{padding: "16px 12px", borderRight: i < 6 ? "1px solid var(--line)" : "none", borderRightColor: "var(--line)"}}>
+                  <div className="uppercase"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-dim)", letterSpacing: "0.08em"}}>{d}</div>
+                  <div className="mt-1"  style={{fontFamily: "var(--f-display)", fontSize: 22, fontWeight: 700, color: i === 0 ? "var(--accent)" : "var(--fg)"}}>{toFa(8 + i)}</div>
                 </div>
               ))}
             </div>
 
-            <div style={{ position: "relative", display: "grid", gridTemplateColumns: "60px repeat(7, 1fr)", minHeight: 700 }}>
+            <div className="relative grid"  style={{ gridTemplateColumns: "60px repeat(7, 1fr)", minHeight: 700}}>
               <div>
                 {hours.map((h) => (
                   <div key={h} style={{ height: 60, borderBottom: "1px solid var(--line)", padding: "4px 8px", fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)" }}>
@@ -70,7 +75,7 @@ const CalendarPage = ({ go }) => {
                 ))}
               </div>
               {days.map((d, di) => (
-                <div key={di} style={{ position: "relative", borderRight: di < 6 ? "1px solid var(--line)" : "none" }}>
+                <div className="relative" key={di}  style={{ borderRight: di < 6 ? "1px solid var(--line)" : "none"}}>
                   {hours.map((h) => (
                     <div key={h} style={{ height: 60, borderBottom: "1px solid var(--line)" }}></div>
                   ))}
@@ -79,21 +84,16 @@ const CalendarPage = ({ go }) => {
                     const height = e.dur * 60;
                     const c = colorFor(e.kind);
                     return (
-                      <div key={ei} onClick={() => go("classroom")} style={{
-                        position: "absolute",
+                      <div className="absolute rounded-md cursor-pointer overflow-hidden" key={ei} onClick={() => go("classroom")}  style={{
                         top: top + 2,
                         right: 4, left: 4,
                         height: height - 4,
                         background: "color-mix(in oklch, " + c + " 10%, var(--surface))",
                         borderRight: "3px solid " + c,
-                        borderRadius: 6,
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        overflow: "hidden",
-                      }}>
+                        padding: "8px 12px"}}>
                         <div className="mono" style={{ fontSize: 10, color: c, letterSpacing: "0.06em" }}>{e.code}</div>
                         <div style={{ fontSize: 12, fontWeight: 600, marginTop: 3, lineHeight: 1.3 }}>{e.t}</div>
-                        <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)", marginTop: 2 }}>
+                        <div className="mt-0.5"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)"}}>
                           {toFa(e.start)}:۰۰ — {toFa(e.start + e.dur)}:۰۰
                         </div>
                       </div>
@@ -105,7 +105,7 @@ const CalendarPage = ({ go }) => {
           </div>
 
           {/* Legend */}
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <div className="flex gap-4 flex-wrap" >
             {[
               ["کلاس زنده", "live"],
               ["تمرین خودخوان", "self"],
@@ -114,8 +114,8 @@ const CalendarPage = ({ go }) => {
               ["آزمون", "exam"],
               ["کارگاه", "lab"],
             ].map(([t, k]) => (
-              <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--fg-mute)" }}>
-                <span style={{ width: 12, height: 3, background: colorFor(k), borderRadius: 999 }}></span>
+              <div className="flex items-center gap-2" key={k}  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
+                <span className="rounded-full"  style={{width: 12, height: 3, background: colorFor(k)}}></span>
                 {t}
               </div>
             ))}
@@ -130,7 +130,11 @@ const CalendarPage = ({ go }) => {
 // =====================================================
 // Library — Resources
 // =====================================================
-const LibraryPage = ({ go }) => {
+export const LibraryPage = ({ go }) => {
+  const [activeCat, setActiveCat] = React.useState("all");
+  const [query, setQuery] = React.useState("");
+  const [filters, setFilters] = React.useState({ "زبان: فارسی": true, "موضوع: ML": true });
+
   const cats = [
     { id: "all", t: "همه", n: 1284, ic: "folder" },
     { id: "video", t: "ویدئو", n: 524, ic: "video" },
@@ -140,52 +144,68 @@ const LibraryPage = ({ go }) => {
     { id: "data", t: "داده", n: 64, ic: "chip" },
   ];
 
+  const filteredItems = LIBRARY_ITEMS.filter((it) => {
+    if (activeCat !== "all") {
+      const map = { video: "VIDEO", pdf: "PDF", code: "CODE", data: "DATA", slide: "SLIDE" };
+      if (it.t !== map[activeCat]) return false;
+    }
+    if (query && !it.title.toLowerCase().includes(query.toLowerCase())) return false;
+    return true;
+  });
+
   return (
     <main data-screen-label="17 کتابخانه">
       <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
         <div className="shell">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", gap: 24, flexWrap: "wrap" }}>
+          <div className="flex justify-between items-end gap-6 flex-wrap" >
             <div>
               <span className="eyebrow">DIGITAL LIBRARY · ۱۲۸۴ resource</span>
-              <h1 className="h-1" style={{ marginTop: 16 }}>کتابخانه‌ی دیجیتال</h1>
-              <p className="lead" style={{ marginTop: 14 }}>
+              <h1 className="h-1 mt-4" >کتابخانه‌ی دیجیتال</h1>
+              <p className="lead mt-3.5" >
                 مقالات، کتاب‌ها، نوت‌بوک‌های Jupyter، دیتاست‌ها، اسلایدها. همه با جستجوی معنایی و قابل ارجاع از داخل درس.
               </p>
             </div>
-            <button className="btn btn-primary"><Icon name="plus" size={14} />آپلود منبع</button>
+            <button
+              className="btn btn-primary"
+              onClick={() => window.toast?.({ title: "آپلود منبع", msg: "فرم آپلود به‌زودی فعال می‌شود.", kind: "info" })}
+            ><Icon name="plus" size={14} />آپلود منبع</button>
           </div>
         </div>
       </section>
 
       <section className="shell" style={{ padding: "40px 40px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 32 }}>
-          <aside style={{ position: "sticky", top: 90, alignSelf: "start" }}>
-            <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em", marginBottom: 12 }}>دسته‌ها</div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 2 }}>
-              {cats.map((c, i) => (
+        <div className="grid gap-8"  style={{ gridTemplateColumns: "260px 1fr"}}>
+          <aside className="sticky"  style={{ top: 90, alignSelf: "start"}}>
+            <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>دسته‌ها</div>
+            <ul className="p-0 m-0 flex flex-col gap-0.5"  style={{listStyle: "none"}}>
+              {cats.map((c) => (
                 <li key={c.id}>
-                  <button style={{
-                    width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "10px 14px",
-                    background: i === 0 ? "var(--accent-soft)" : "transparent",
-                    border: "1px solid " + (i === 0 ? "color-mix(in oklch, var(--accent) 25%, transparent)" : "transparent"),
-                    borderRadius: 8,
-                    color: i === 0 ? "var(--accent)" : "var(--fg-mute)",
-                    fontFamily: "inherit", fontSize: 14,
-                    cursor: "pointer",
-                  }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 10 }}><Icon name={c.ic} size={14} />{c.t}</span>
+                  <button className="flex items-center justify-between rounded-lg cursor-pointer"
+                    onClick={() => setActiveCat(c.id)}
+                    aria-pressed={activeCat === c.id}
+                     style={{width: "100%",
+                      padding: "10px 14px",
+                      background: activeCat === c.id ? "var(--accent-soft)" : "transparent",
+                      border: "1px solid " + (activeCat === c.id ? "color-mix(in oklch, var(--accent) 25%, transparent)" : "transparent"),
+                      color: activeCat === c.id ? "var(--accent)" : "var(--fg-mute)",
+                      fontFamily: "inherit", fontSize: 14}}>
+                    <span className="flex items-center gap-2.5" ><Icon name={c.ic} size={14} />{c.t}</span>
                     <span className="mono" style={{ fontSize: 11 }}>{toFa(c.n)}</span>
                   </button>
                 </li>
               ))}
             </ul>
 
-            <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em", marginTop: 32, marginBottom: 12 }}>فیلتر</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="mono mt-8 mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>فیلتر</div>
+            <div className="flex flex-col gap-2" >
               {["زبان: فارسی", "زبان: انگلیسی", "سطح: ارشد", "سطح: کارشناسی", "سال: ۱۴۰۴", "موضوع: ML", "موضوع: NLP"].map((f) => (
-                <label key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--fg-mute)", cursor: "pointer" }}>
-                  <input type="checkbox" defaultChecked={f.includes("فارسی") || f.includes("ML")} style={{ accentColor: "var(--accent)" }} />
+                <label className="flex items-center gap-2.5 cursor-pointer" key={f}  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
+                  <input
+                    type="checkbox"
+                    checked={!!filters[f]}
+                    onChange={(e) => setFilters({ ...filters, [f]: e.target.checked })}
+                    style={{ accentColor: "var(--accent)" }}
+                  />
                   {f}
                 </label>
               ))}
@@ -195,30 +215,38 @@ const LibraryPage = ({ go }) => {
           <div>
             <div className="search-bar" style={{ margin: "0 0 32px", maxWidth: "100%" }}>
               <Icon name="search" size={18} />
-              <input placeholder="جستجو در کتابخانه — متن کامل، معنایی" />
+              <input
+                placeholder="جستجو در کتابخانه — متن کامل، معنایی"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="جستجو در کتابخانه"
+              />
               <span className="mono" style={{ color: "var(--fg-mute)" }}>⌘ K</span>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 18 }}>
+            <div className="flex justify-between items-baseline mb-4.5" >
               <h3 className="h-3">جدیدترین منابع</h3>
-              <span className="mono" style={{ color: "var(--fg-mute)", fontSize: 11 }}>۱۲۸۴ نتیجه · ۳۲ صفحه</span>
+              <span className="mono" style={{ color: "var(--fg-mute)", fontSize: 11 }}>{toFa(filteredItems.length)} نتیجه</span>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {LIBRARY_ITEMS.map((it, i) => (
-                <div key={i} className="card-flat" style={{ display: "grid", gridTemplateColumns: "60px 1fr auto auto", gap: 18, alignItems: "center", padding: 18 }}>
-                  <div style={{
-                    width: 48, height: 60, borderRadius: 4,
+            <div className="flex flex-col gap-2.5" >
+              {filteredItems.length === 0 && (
+                <div className="card-flat p-8 text-center"  style={{ color: "var(--fg-mute)"}}>
+                  <Icon name="search" size={28} />
+                  <div className="mt-2.5"  style={{ fontSize: 14}}>منبعی با این جستجو پیدا نشد.</div>
+                </div>
+              )}
+              {filteredItems.map((it, i) => (
+                <div key={i} className="card-flat grid gap-4.5 items-center p-4.5"  style={{ gridTemplateColumns: "60px 1fr auto auto"}}>
+                  <div className="rounded grid"  style={{width: 48, height: 60,
                     background: it.t === "PDF" ? "var(--gold-soft)" : it.t === "VIDEO" ? "var(--accent-soft)" : it.t === "CODE" ? "var(--sage-soft)" : "var(--navy-soft)",
-                    color: it.t === "PDF" ? "var(--gold)" : it.t === "VIDEO" ? "var(--accent)" : it.t === "CODE" ? "var(--sage)" : "var(--navy)",
-                    display: "grid", placeItems: "center",
-                    fontFamily: "var(--f-mono)", fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
-                  }}>
+                    color: it.t === "PDF" ? "var(--gold)" : it.t === "VIDEO" ? "var(--accent)" : it.t === "CODE" ? "var(--sage)" : "var(--navy)", placeItems: "center",
+                    fontFamily: "var(--f-mono)", fontSize: 10, fontWeight: 700, letterSpacing: "0.06em"}}>
                     {it.t}
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>{it.title}</div>
-                    <div style={{ display: "flex", gap: 14, fontSize: 12, color: "var(--fg-mute)", fontFamily: "var(--f-mono)" }}>
+                    <div className="mb-1"  style={{fontSize: 15, fontWeight: 500}}>{it.title}</div>
+                    <div className="flex gap-3.5"  style={{ fontSize: 12, color: "var(--fg-mute)", fontFamily: "var(--f-mono)"}}>
                       <span>{it.author}</span>
                       <span>·</span>
                       <span>{it.size}</span>
@@ -226,12 +254,22 @@ const LibraryPage = ({ go }) => {
                       <span>{it.year}</span>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div className="flex gap-1.5" >
                     {it.tags.map((t) => <span key={t} className="pill" style={{ fontSize: 9 }}>{t}</span>)}
                   </div>
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button className="btn btn-ghost btn-sm"><Icon name="eye" size={13} /></button>
-                    <button className="btn btn-outline btn-sm"><Icon name="download" size={13} /></button>
+                  <div className="flex gap-1.5" >
+                    <button
+                      className="btn btn-ghost btn-sm icon-btn"
+                      onClick={() => window.toast?.({ title: "پیش‌نمایش", msg: it.title })}
+                      aria-label={"پیش‌نمایش " + it.title}
+                      title="پیش‌نمایش"
+                    ><Icon name="eye" size={13} /></button>
+                    <button
+                      className="btn btn-outline btn-sm icon-btn"
+                      onClick={() => window.toast?.({ title: "در حال دانلود", msg: it.title + " (" + it.size + ")", kind: "success" })}
+                      aria-label={"دانلود " + it.title}
+                      title="دانلود"
+                    ><Icon name="download" size={13} /></button>
                   </div>
                 </div>
               ))}
@@ -245,27 +283,25 @@ const LibraryPage = ({ go }) => {
   );
 };
 
-const LIBRARY_ITEMS = [
-  { t: "PDF", title: "Deep Learning — Goodfellow, Bengio, Courville", author: "MIT Press", size: "۸۰۲ صفحه · ۱۸ MB", year: "۲۰۱۶", tags: ["ML", "DL", "EN"] },
-  { t: "VIDEO", title: "ضبط جلسه ۸ — گرادیان نزولی با مومنتوم", author: "دکتر عظیمی · CS-410", size: "۱:۲۸ · ۴۸۰p", year: "۱۴۰۴", tags: ["FA"] },
-  { t: "PDF", title: "Attention is All You Need", author: "Vaswani et al. — NeurIPS 2017", size: "۱۵ صفحه · ۱.۲ MB", year: "۲۰۱۷", tags: ["NLP", "EN"] },
-  { t: "CODE", title: "Transformer from scratch — Jupyter notebook", author: "دکتر موسوی", size: "۲۴ سلول", year: "۱۴۰۴", tags: ["NLP", "Python"] },
-  { t: "PDF", title: "آمار بیزی کاربردی — فصل ۳ و ۴", author: "دکتر فرهادی", size: "۸۲ صفحه · ۴.۱ MB", year: "۱۴۰۴", tags: ["Stats", "FA"] },
-  { t: "DATA", title: "Persian Sentiment Corpus — v2", author: "آزمایشگاه NLP فارسی", size: "۱۲۴ MB", year: "۱۴۰۴", tags: ["NLP", "FA"] },
-  { t: "VIDEO", title: "کارگاه — معماری میکروسرویس", author: "م. کیانی · CS-580", size: "۲:۱۲ · HD", year: "۱۴۰۴", tags: ["SYS"] },
-  { t: "PDF", title: "Pattern Recognition and ML — Bishop", author: "Springer", size: "۷۳۸ صفحه · ۲۲ MB", year: "۲۰۰۶", tags: ["ML", "EN"] },
-  { t: "CODE", title: "RAG implementation با LangGraph", author: "آرشیو درس CS-620", size: "Repo", year: "۱۴۰۵", tags: ["NLP", "RAG"] },
-];
+// Library items are sourced from data.js — adapt shape for the existing UI.
+const LIBRARY_ITEMS = LIBRARY_RESOURCES.map((r) => ({
+  t: r.type,
+  title: r.title,
+  author: r.author,
+  size: r.size,
+  year: String(r.year),
+  tags: r.tags,
+}));
 
 // =====================================================
 // Help Center / Knowledge Base
 // =====================================================
-const HelpPage = ({ go }) => (
+export const HelpPage = ({ go }) => (
   <main data-screen-label="18 پشتیبانی">
     <section style={{ padding: "80px 0 60px", background: "var(--surface-2)", borderBottom: "1px solid var(--line)" }}>
-      <div className="shell" style={{ textAlign: "center" }}>
-        <span className="eyebrow" style={{ justifyContent: "center" }}>HELP CENTER · ۲۴/۷</span>
-        <h1 className="h-display" style={{ marginTop: 18, fontSize: "clamp(36px, 5vw, 72px)" }}>
+      <div className="shell text-center" >
+        <span className="eyebrow justify-center" >HELP CENTER · ۲۴/۷</span>
+        <h1 className="h-display mt-4.5"  style={{ fontSize: "clamp(36px, 5vw, 72px)"}}>
           چطور می‌توانیم کمک کنیم؟
         </h1>
         <div className="search-bar" style={{ margin: "32px auto 0" }}>
@@ -277,7 +313,7 @@ const HelpPage = ({ go }) => (
     </section>
 
     <section className="shell" style={{ padding: "60px 40px" }}>
-      <div className="grid grid-3" style={{ marginBottom: 60 }}>
+      <div className="grid grid-3 mb-15" >
         {[
           { ic: "play", t: "شروع سریع", d: "اولین کلاس، اولین تمرین، اولین گواهی"},
           { ic: "user", t: "حساب کاربری", d: "ثبت‌نام، احراز هویت، تغییر اطلاعات"},
@@ -286,23 +322,23 @@ const HelpPage = ({ go }) => (
           { ic: "cert", t: "گواهی و مدرک", d: "صدور، راستی‌آزمایی، اشتراک"},
           { ic: "sparkle", t: "دستیار AI", d: "نحوه استفاده، محدودیت‌ها، تنظیمات"},
         ].map((c, i) => (
-          <div key={i} className="card" style={{ padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 8, background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center" }}>
+          <div key={i} className="card p-7 cursor-pointer flex flex-col gap-3.5" >
+            <div className="rounded-lg grid"  style={{width: 40, height: 40, background: "var(--accent-soft)", color: "var(--accent)", placeItems: "center"}}>
               <Icon name={c.ic} size={18} />
             </div>
             <h3 style={{ fontSize: 18 }}>{c.t}</h3>
-            <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6, margin: 0 }}>{c.d}</p>
-            <div style={{ marginTop: 4, fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--accent)", letterSpacing: "0.08em" }}>
+            <p className="m-0"  style={{fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6}}>{c.d}</p>
+            <div className="mt-1"  style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--accent)", letterSpacing: "0.08em"}}>
               ۱۲ مقاله ←
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 32 }}>
+      <div className="grid gap-8"  style={{ gridTemplateColumns: "1fr 380px"}}>
         <div>
-          <h2 className="h-2" style={{ marginBottom: 24 }}>سوالات متداول</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          <h2 className="h-2 mb-6" >سوالات متداول</h2>
+          <div className="flex flex-col gap-0" >
             {[
               ["چطور به اولین کلاس زنده‌ام بپیوندم؟", "از داشبورد، روی برنامه‌ی هفته کلیک کنید. ۱۵ دقیقه قبل از شروع، دکمه‌ی «ورود» فعال می‌شود..."],
               ["آیا گواهی DigiUniversity در ایران رسمی است؟", "گواهی‌های ما با مرجع وزارت علوم همخوانی دارند و در سامانه‌های ملی قابل استعلام هستند..."],
@@ -311,33 +347,37 @@ const HelpPage = ({ go }) => (
               ["چگونه شهریه را اقساط بپردازم؟", "در مرحله‌ی پرداخت، گزینه‌ی اقساط ۳ ماهه بدون بهره را انتخاب کنید..."],
               ["آیا می‌توانم پروژه‌ی پایان درس را تغییر دهم؟", "تا پیش از انتخاب رسمی، می‌توانید پروژه را تغییر دهید. پس از تایید، نیاز به مجوز استاد دارد..."],
             ].map(([q, a], i) => (
-              <details key={i} style={{ borderTop: i > 0 ? "1px solid var(--line)" : "1px solid var(--line)", borderBottom: i === 5 ? "1px solid var(--line)" : "none", padding: 0 }}>
-                <summary style={{ padding: "20px 0", cursor: "pointer", fontWeight: 500, fontSize: 16, listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+              <details className="p-0" key={i}  style={{borderTop: i > 0 ? "1px solid var(--line)" : "1px solid var(--line)", borderBottom: i === 5 ? "1px solid var(--line)" : "none"}}>
+                <summary className="cursor-pointer flex justify-between items-center gap-4"  style={{padding: "20px 0", fontWeight: 500, fontSize: 16, listStyle: "none"}}>
                   <span>{q}</span>
                   <Icon name="plus" size={16} />
                 </summary>
-                <p style={{ fontSize: 14, color: "var(--fg-mute)", lineHeight: 1.7, paddingBottom: 20, margin: 0 }}>{a}</p>
+                <p className="pb-5 m-0"  style={{fontSize: 14, color: "var(--fg-mute)", lineHeight: 1.7}}>{a}</p>
               </details>
             ))}
           </div>
         </div>
 
-        <aside style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div className="card" style={{ padding: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--accent)", marginBottom: 14 }}>
+        <aside className="flex flex-col gap-4" >
+          <div className="card p-6" >
+            <div className="flex items-center gap-2.5 mb-3.5"  style={{ color: "var(--accent)"}}>
               <Icon name="headset" size={16} />
               <span className="mono" style={{ letterSpacing: "0.08em" }}>پشتیبانی زنده</span>
             </div>
             <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
               تیم پشتیبانی ۲۴/۷ آماده پاسخگویی است. زمان میانگین پاسخ: ۸ دقیقه.
             </p>
-            <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 14 }}>
+            <button
+              className="btn btn-primary justify-center mt-3.5"
+               style={{width: "100%"}}
+              onClick={() => window.toast?.({ title: "اتصال به پشتیبانی", msg: "اپراتور ظرف چند ثانیه پاسخ می‌دهد.", kind: "info" })}
+            >
               <Icon name="chat" size={14} />شروع گفتگو
             </button>
           </div>
-          <div className="card" style={{ padding: 24 }}>
-            <div className="mono" style={{ color: "var(--fg-mute)", marginBottom: 14, fontSize: 11, letterSpacing: "0.08em" }}>SYSTEM STATUS</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="card p-6" >
+            <div className="mono mb-3.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>SYSTEM STATUS</div>
+            <div className="flex flex-col gap-2.5" >
               {[
                 ["LMS", "operational"],
                 ["کلاس زنده", "operational"],
@@ -345,9 +385,9 @@ const HelpPage = ({ go }) => (
                 ["پرداخت", "operational"],
                 ["ASR · فارسی", "degraded"],
               ].map(([t, s]) => (
-                <div key={t} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                <div className="flex justify-between" key={t}  style={{ fontSize: 13}}>
                   <span>{t}</span>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6, color: s === "operational" ? "var(--sage)" : "var(--gold)" }}>
+                  <span className="flex items-center gap-1.5"  style={{ color: s === "operational" ? "var(--sage)" : "var(--gold)"}}>
                     <span style={{ width: 8, height: 8, borderRadius: 50, background: "currentColor" }}></span>
                     {s === "operational" ? "سالم" : "بررسی"}
                   </span>
@@ -366,22 +406,31 @@ const HelpPage = ({ go }) => (
 // =====================================================
 // Pricing / Plans
 // =====================================================
-const PricingPage = ({ go }) => (
+export const PricingPage = ({ go }) => {
+  const [billing, setBilling] = React.useState("month");
+  const factor = billing === "month" ? 1 : billing === "term" ? 0.85 : 0.75;
+  return (
   <main data-screen-label="19 پلن‌ها">
     <section style={{ padding: "80px 0 32px", borderBottom: "1px solid var(--line)" }}>
-      <div className="shell" style={{ textAlign: "center" }}>
-        <span className="eyebrow" style={{ justifyContent: "center" }}>PRICING · شفاف، بدون شگفتی</span>
-        <h1 className="h-display" style={{ marginTop: 18, fontSize: "clamp(36px, 5vw, 72px)" }}>
+      <div className="shell text-center" >
+        <span className="eyebrow justify-center" >PRICING · شفاف، بدون شگفتی</span>
+        <h1 className="h-display mt-4.5"  style={{ fontSize: "clamp(36px, 5vw, 72px)"}}>
           آموزش با کیفیت دانشگاهی،<br />
           <span style={{ color: "var(--accent)" }}>قیمت منصفانه</span>
         </h1>
         <p className="lead" style={{ margin: "20px auto 0" }}>
           همه‌ی پلن‌ها شامل: دستیار AI ۲۴/۷، کلاس زنده، آرشیو ضبط‌شده، گواهی دیجیتال.
         </p>
-        <div style={{ display: "inline-flex", gap: 4, marginTop: 32, padding: 4, background: "var(--surface)", border: "1px solid var(--line-2)", borderRadius: 999 }}>
-          <button className="btn btn-sm" style={{ background: "var(--fg)", color: "var(--bg)", borderRadius: 999 }}>ماهانه</button>
-          <button className="btn btn-ghost btn-sm" style={{ borderRadius: 999 }}>ترمی · ۱۵٪ تخفیف</button>
-          <button className="btn btn-ghost btn-sm" style={{ borderRadius: 999 }}>سالانه · ۲۵٪ تخفیف</button>
+        <div className="inline-flex gap-1 mt-8 p-1 rounded-full"  style={{ background: "var(--surface)", border: "1px solid var(--line-2)"}}>
+          {[["month", "ماهانه"], ["term", "ترمی · ۱۵٪ تخفیف"], ["year", "سالانه · ۲۵٪ تخفیف"]].map(([id, lbl]) => (
+            <button
+              key={id}
+              onClick={() => setBilling(id)}
+              aria-pressed={billing === id}
+              className={"btn btn-sm " + (billing === id ? "" : "btn-ghost")}
+              style={billing === id ? { background: "var(--fg)", color: "var(--bg)", borderRadius: 999 } : { borderRadius: 999 }}
+            >{lbl}</button>
+          ))}
         </div>
       </div>
     </section>
@@ -390,7 +439,7 @@ const PricingPage = ({ go }) => (
       <div className="grid grid-3">
         {[
           {
-            t: "آزاد", p: "۰", curr: "رایگان", d: "برای کاوش پلتفرم",
+            t: "آزاد", p: 0, curr: "رایگان", d: "برای کاوش پلتفرم",
             features: [
               ["دسترسی به ۳ درس آزاد", true],
               ["کلاس‌های زنده محدود", true],
@@ -403,7 +452,7 @@ const PricingPage = ({ go }) => (
             popular: false,
           },
           {
-            t: "دانشجویی", p: "۳", curr: "میلیون / ماه", d: "محبوب‌ترین انتخاب",
+            t: "دانشجویی", p: 3, curr: billing === "month" ? "میلیون / ماه" : billing === "term" ? "میلیون / ترم" : "میلیون / سال", d: "محبوب‌ترین انتخاب",
             features: [
               ["دسترسی به همه‌ی دروس", true],
               ["کلاس‌های زنده نامحدود", true],
@@ -416,7 +465,7 @@ const PricingPage = ({ go }) => (
             popular: true,
           },
           {
-            t: "حرفه‌ای", p: "۸", curr: "میلیون / ماه", d: "برای دانشجویان ارشد و دکتری",
+            t: "حرفه‌ای", p: 8, curr: billing === "month" ? "میلیون / ماه" : billing === "term" ? "میلیون / ترم" : "میلیون / سال", d: "برای دانشجویان ارشد و دکتری",
             features: [
               ["همه‌ی موارد پلن دانشجویی", true],
               ["دسترسی به برنامه‌های ارشد", true],
@@ -429,38 +478,34 @@ const PricingPage = ({ go }) => (
             popular: false,
           },
         ].map((p) => (
-          <div key={p.t} className="card" style={{
-            padding: 36,
-            position: "relative",
-            border: p.popular ? "2px solid var(--accent)" : "1px solid var(--line)",
-          }}>
+          <div key={p.t} className="card p-9 relative"  style={{
+            border: p.popular ? "2px solid var(--accent)" : "1px solid var(--line)"}}>
             {p.popular && (
-              <div style={{
-                position: "absolute",
+              <div className="absolute rounded-full"  style={{
                 top: -12, right: 24,
                 background: "var(--accent)",
                 color: "var(--accent-on)",
                 padding: "4px 12px",
-                borderRadius: 999,
                 fontSize: 11,
                 fontFamily: "var(--f-mono)",
                 letterSpacing: "0.08em",
-                fontWeight: 600,
-              }}>محبوب‌ترین</div>
+                fontWeight: 600}}>محبوب‌ترین</div>
             )}
             <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em" }}>{p.d}</div>
-            <h3 style={{ fontSize: 28, marginTop: 8 }}>{p.t}</h3>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 16, marginBottom: 24 }}>
-              <span style={{ fontFamily: "var(--f-display)", fontSize: 56, fontWeight: 800, letterSpacing: "-0.03em" }}>{p.p}</span>
+            <h3 className="mt-2"  style={{fontSize: 28}}>{p.t}</h3>
+            <div className="flex items-baseline gap-1.5 mt-4 mb-6" >
+              <span style={{ fontFamily: "var(--f-display)", fontSize: 56, fontWeight: 800, letterSpacing: "-0.03em" }}>
+                {p.p === 0 ? "۰" : toFa(Math.round(p.p * factor * 10) / 10)}
+              </span>
               <span style={{ fontSize: 14, color: "var(--fg-mute)" }}>{p.curr}</span>
             </div>
-            <button className={"btn " + (p.popular ? "btn-primary" : "btn-outline")} style={{ width: "100%", justifyContent: "center", marginBottom: 28 }} onClick={() => go("register")}>
+            <button className={"justify-center mb-7 " + " " + ("btn " + (p.popular ? "btn-primary" : "btn-outline"))}   style={{width: "100%"}} onClick={() => go("register")}>
               {p.cta}
             </button>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+            <ul className="p-0 m-0 flex flex-col gap-3"  style={{listStyle: "none"}}>
               {p.features.map(([t, on], i) => (
-                <li key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: on ? "var(--fg)" : "var(--fg-dim)" }}>
-                  <span style={{ width: 18, height: 18, borderRadius: 50, background: on ? "var(--accent)" : "var(--surface-3)", color: on ? "var(--accent-on)" : "var(--fg-dim)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                <li className="flex items-center gap-2.5" key={i}  style={{ fontSize: 13, color: on ? "var(--fg)" : "var(--fg-dim)"}}>
+                  <span className="grid"  style={{width: 18, height: 18, borderRadius: 50, background: on ? "var(--accent)" : "var(--surface-3)", color: on ? "var(--accent-on)" : "var(--fg-dim)", placeItems: "center", flexShrink: 0}}>
                     <Icon name={on ? "check" : "plus"} size={11} stroke={on ? 3 : 2} />
                   </span>
                   {t}
@@ -471,60 +516,82 @@ const PricingPage = ({ go }) => (
         ))}
       </div>
 
-      <div className="card" style={{ padding: 40, marginTop: 40, textAlign: "center" }}>
-        <span className="eyebrow" style={{ justifyContent: "center" }}>ENTERPRISE · سازمانی</span>
-        <h2 className="h-2" style={{ marginTop: 16 }}>پلن سازمانی — برای دانشگاه‌ها و شرکت‌ها</h2>
+      <div className="card p-10 mt-10 text-center" >
+        <span className="eyebrow justify-center" >ENTERPRISE · سازمانی</span>
+        <h2 className="h-2 mt-4" >پلن سازمانی — برای دانشگاه‌ها و شرکت‌ها</h2>
         <p className="lead" style={{ margin: "16px auto 0", maxWidth: 640 }}>
           چنددانشکده‌ای، چندمستاجره، Single Sign-On، API اختصاصی، SLA 99.9٪، استقرار on-premise.
         </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 24 }}>
-          <button className="btn btn-primary btn-lg">گفتگو با تیم فروش</button>
-          <button className="btn btn-outline btn-lg"><Icon name="download" size={14} />دانلود معماری</button>
+        <div className="flex gap-3 justify-center mt-6" >
+          <button
+            className="btn btn-primary btn-lg"
+            onClick={() => go("messages")}
+          >گفتگو با تیم فروش</button>
+          <button
+            className="btn btn-outline btn-lg"
+            onClick={() => window.toast?.({ title: "در حال دانلود", msg: "مستند معماری Enterprise در راه است.", kind: "success" })}
+          ><Icon name="download" size={14} />دانلود معماری</button>
         </div>
       </div>
     </section>
 
     <Footer go={go} />
   </main>
-);
+  );
+};
 
 // =====================================================
 // Faculty Directory
 // =====================================================
-const FacultyPage = ({ go }) => (
+export const FacultyPage = ({ go }) => {
+  const [activeDept, setActiveDept] = React.useState("همه");
+  const DEPTS = ["همه", "علوم رایانه", "ریاضی و آمار", "مدیریت", "زبان‌شناسی", "فلسفه و اخلاق", "علوم داده", "مهندسی"];
+  const filtered = activeDept === "همه" ? FACULTY : FACULTY.filter((f) => f.role.includes(activeDept) || (f.tags || []).some((t) => activeDept.includes(t)));
+  return (
   <main data-screen-label="20 هیات علمی">
     <section style={{ padding: "80px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
         <span className="eyebrow">FACULTY · هیات علمی</span>
-        <h1 className="h-1" style={{ marginTop: 16 }}>استادان دیجی‌یونیورسیتی</h1>
-        <p className="lead" style={{ marginTop: 14 }}>
+        <h1 className="h-1 mt-4" >استادان دیجی‌یونیورسیتی</h1>
+        <p className="lead mt-3.5" >
           ۹۴ استاد در ۸ دانشکده. پژوهشگران، صنعت‌گران، نویسندگان، فعالان آموزش.
         </p>
       </div>
     </section>
 
     <section className="shell" style={{ padding: "40px 40px" }}>
-      <div style={{ display: "flex", gap: 10, marginBottom: 32, flexWrap: "wrap" }}>
-        {["همه", "علوم رایانه", "ریاضی و آمار", "مدیریت", "زبان‌شناسی", "فلسفه و اخلاق", "علوم داده", "مهندسی"].map((t, i) => (
-          <span key={t} className={"pill " + (i === 0 ? "pill-cyan" : "")} style={{ cursor: "pointer", padding: "6px 12px" }}>{t}</span>
+      <div className="flex gap-2.5 mb-8 flex-wrap" >
+        {DEPTS.map((t) => (
+          <button
+            key={t}
+            onClick={() => setActiveDept(t)}
+            className={"pill filter-pill " + (activeDept === t ? "active" : "")}
+            aria-pressed={activeDept === t}
+            style={{ border: "none", background: activeDept === t ? "var(--accent-soft)" : "var(--surface)", padding: "6px 12px" }}
+          >{t}</button>
         ))}
       </div>
 
       <div className="grid grid-3">
-        {FACULTY.map((f, i) => (
-          <div key={i} className="card" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        {filtered.length === 0 && (
+          <div className="card-flat p-8 text-center"  style={{ color: "var(--fg-mute)", gridColumn: "1 / -1"}}>
+            استادی در این دانشکده پیدا نشد.
+          </div>
+        )}
+        {filtered.map((f, i) => (
+          <div key={i} className="card p-7 flex flex-col gap-3.5" >
+            <div className="flex items-center gap-3.5" >
               <div className={"avatar " + f.color} style={{ width: 56, height: 56, fontSize: 18 }}>{f.av}</div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ fontSize: 16, marginBottom: 4 }}>{f.name}</h4>
+              <div className="flex-1" >
+                <h4 className="mb-1"  style={{fontSize: 16}}>{f.name}</h4>
                 <div style={{ fontSize: 12, color: "var(--fg-mute)" }}>{f.role}</div>
               </div>
             </div>
-            <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6, margin: 0 }}>{f.bio}</p>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+            <p className="m-0"  style={{fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6}}>{f.bio}</p>
+            <div className="flex gap-1.5 flex-wrap mt-1" >
               {f.tags.map((t) => <span key={t} className="pill" style={{ fontSize: 9 }}>{t}</span>)}
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 14, borderTop: "1px solid var(--line)", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>
+            <div className="flex justify-between pt-3.5"  style={{ borderTop: "1px solid var(--line)", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>
               <span>{f.courses} درس</span>
               <span>{f.papers} مقاله</span>
               <span>h-index {f.h}</span>
@@ -535,19 +602,20 @@ const FacultyPage = ({ go }) => (
     </section>
     <Footer go={go} />
   </main>
-);
+  );
+};
 
-const FACULTY = [
-  { name: "دکتر آرش عظیمی", role: "دانشیار · علوم رایانه", av: "AA", color: "cyan", bio: "تخصص در یادگیری ماشین کاربردی و مدل‌های زبانی فارسی. مولف ۴ کتاب.", tags: ["ML", "NLP", "FA"], courses: 8, papers: 42, h: 18 },
-  { name: "دکتر سپیده موسوی", role: "استادیار · پردازش زبان", av: "SM", color: "amber", bio: "پژوهش روی attention mechanism و ترجمه ماشینی. عضو هیات تحریریه دو ژورنال.", tags: ["NLP", "Transformer"], courses: 5, papers: 28, h: 14 },
-  { name: "مهندس مهدی کیانی", role: "مدرس · مهندسی نرم‌افزار", av: "MK", color: "violet", bio: "۱۲ سال تجربه‌ی صنعتی در طراحی سیستم‌های توزیع‌شده مقیاس بالا. CTO سابق.", tags: ["Sys", "DDD"], courses: 6, papers: 8, h: 6 },
-  { name: "دکتر بهنام فرهادی", role: "دانشیار · آمار", av: "BF", color: "rose", bio: "آمار بیزی، MCMC، مدل‌های گرافیکی احتمالاتی. نویسنده کتاب آمار بیزی به فارسی.", tags: ["Bayes", "Stats"], courses: 4, papers: 36, h: 16 },
-  { name: "دکتر رویا طاهری", role: "استاد · فلسفه و اخلاق", av: "RT", color: "cyan", bio: "اخلاق هوش مصنوعی، عاملیت ماشین، حاکمیت داده. مشاور سیاست‌گذار.", tags: ["AI Ethics"], courses: 3, papers: 24, h: 12 },
-  { name: "دکتر شهرام رضوی", role: "دانشیار · مدیریت محصول", av: "SR", color: "amber", bio: "تجربه‌ی مدیریت محصول در ۳ استارتاپ یونیکورن. مولف کتاب «محصول داده‌محور».", tags: ["PM"], courses: 4, papers: 6, h: 4 },
-];
+// Map data shape to the legacy fields the page uses (av/h/courses/papers).
+const FACULTY = FACULTY_DATA.map((f) => ({
+  name: f.name,
+  role: f.role,
+  av: f.avatar,
+  color: f.color,
+  bio: f.bio,
+  tags: f.tags,
+  courses: f.courses,
+  papers: f.papers,
+  h: f.hIndex,
+}));
 
-window.CalendarPage = CalendarPage;
-window.LibraryPage = LibraryPage;
-window.HelpPage = HelpPage;
-window.PricingPage = PricingPage;
-window.FacultyPage = FacultyPage;
+export default CalendarPage;

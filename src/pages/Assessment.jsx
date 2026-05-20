@@ -1,7 +1,11 @@
 // =====================================================
 // Adaptive Assessment / Exam interface
 // =====================================================
-const AssessmentPage = ({ go }) => {
+import React from "react";
+import { Icon } from "../icons.jsx";
+import { Nav, toFa, Sparkline } from "../shared.jsx";
+
+export const AssessmentPage = ({ go }) => {
   const [selected, setSelected] = React.useState(1);
   const [current, setCurrent] = React.useState(4);
   const total = 12;
@@ -20,7 +24,7 @@ const AssessmentPage = ({ go }) => {
               <div className="mono" style={{ color: "var(--cyan)", fontSize: 11, letterSpacing: "0.1em" }}>
                 ADAPTIVE TEST · IRT 2PL · CAT
               </div>
-              <h2 className="h-3" style={{ marginTop: 8 }}>آزمون میان‌ترم · بهینه‌سازی</h2>
+              <h2 className="h-3 mt-2" >آزمون میان‌ترم · بهینه‌سازی</h2>
             </div>
             <div className="exam-progress">
               {steps.map((s, i) => <span key={i} className={"step " + s} />)}
@@ -32,7 +36,7 @@ const AssessmentPage = ({ go }) => {
 
           {/* Question */}
           <div className="exam-question">
-            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 18 }}>
+            <div className="flex gap-3 items-center mb-4.5" >
               <span className="pill pill-violet" style={{ fontSize: 10 }}>سطح ۳ از ۵ · سختی ۰.۶۸</span>
               <span className="pill" style={{ fontSize: 10 }}>هدف: تنظیم نرخ یادگیری</span>
             </div>
@@ -56,7 +60,7 @@ const AssessmentPage = ({ go }) => {
             </div>
 
             {/* Nav */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 48 }}>
+            <div className="flex justify-between mt-12" >
               <button className="btn btn-ghost" onClick={() => setCurrent(Math.max(1, current - 1))}>
                 <Icon name="arrow" size={14} style={{ transform: "rotate(180deg)" }} />
                 قبلی
@@ -76,22 +80,22 @@ const AssessmentPage = ({ go }) => {
         {/* Side panel */}
         <aside className="exam-aside">
           <div>
-            <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em", marginBottom: 12 }}>زمان باقی‌مانده</div>
+            <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>زمان باقی‌مانده</div>
             <div style={{ fontFamily: "var(--f-mono)", fontSize: 48, fontWeight: 700, color: "var(--amber)" }}>۴۸:۲۲</div>
-            <div style={{ height: 4, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden", marginTop: 8 }}>
-              <div style={{ width: "32%", height: "100%", background: "var(--amber)", borderRadius: 999 }} />
+            <div className="rounded-full overflow-hidden mt-2"  style={{height: 4, background: "var(--surface-2)"}}>
+              <div className="rounded-full"  style={{width: "32%", height: "100%", background: "var(--amber)"}} />
             </div>
           </div>
 
           <div style={{ height: 1, background: "var(--line)" }}></div>
 
           <div>
-            <div className="mono" style={{ color: "var(--cyan)", fontSize: 11, letterSpacing: "0.1em", marginBottom: 12 }}>تخمین زنده‌ی سطح</div>
+            <div className="mono mb-3"  style={{color: "var(--cyan)", fontSize: 11, letterSpacing: "0.1em"}}>تخمین زنده‌ی سطح</div>
             <div style={{ fontFamily: "var(--f-mono)", fontSize: 36, fontWeight: 700 }}>۰.۷۱</div>
-            <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 4 }}>
+            <div className="mt-1"  style={{fontSize: 12, color: "var(--fg-mute)"}}>
               ± ۰.۰۸ · در حال همگرایی
             </div>
-            <div style={{ marginTop: 14, height: 60 }}>
+            <div className="mt-3.5"  style={{ height: 60}}>
               <Sparkline values={[0.5, 0.55, 0.6, 0.58, 0.65, 0.68, 0.7, 0.71]} color="var(--cyan)" />
             </div>
           </div>
@@ -99,19 +103,14 @@ const AssessmentPage = ({ go }) => {
           <div style={{ height: 1, background: "var(--line)" }}></div>
 
           <div>
-            <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em", marginBottom: 12 }}>سوالات نمای کلی</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 6 }}>
+            <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>سوالات نمای کلی</div>
+            <div className="grid gap-1.5"  style={{ gridTemplateColumns: "repeat(6, 1fr)"}}>
               {Array.from({ length: total }, (_, i) => (
-                <div key={i} onClick={() => setCurrent(i + 1)} style={{
-                  aspectRatio: "1",
-                  borderRadius: 6,
+                <div className="rounded-md grid cursor-pointer" key={i} onClick={() => setCurrent(i + 1)}  style={{aspectRatio: "1",
                   background: i < current - 1 ? "var(--cyan)" : i === current - 1 ? "var(--violet)" : "var(--surface-2)",
-                  color: i <= current - 1 ? (i === current - 1 ? "white" : "#051418") : "var(--fg-mute)",
-                  display: "grid", placeItems: "center",
+                  color: i <= current - 1 ? (i === current - 1 ? "white" : "#051418") : "var(--fg-mute)", placeItems: "center",
                   fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700,
-                  cursor: "pointer",
-                  border: "1px solid " + (i === current - 1 ? "var(--violet)" : "transparent"),
-                }}>
+                  border: "1px solid " + (i === current - 1 ? "var(--violet)" : "transparent")}}>
                   {toFa(i + 1)}
                 </div>
               ))}
@@ -120,8 +119,8 @@ const AssessmentPage = ({ go }) => {
 
           <div style={{ height: 1, background: "var(--line)" }}></div>
 
-          <div style={{ padding: 14, background: "color-mix(in oklch, var(--violet) 10%, var(--surface-2))", borderRadius: 10, border: "1px solid color-mix(in oklch, var(--violet) 25%, transparent)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--violet)", marginBottom: 8, fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: "0.08em" }}>
+          <div className="p-3.5 rounded-xl"  style={{ background: "color-mix(in oklch, var(--violet) 10%, var(--surface-2))", border: "1px solid color-mix(in oklch, var(--violet) 25%, transparent)"}}>
+            <div className="flex items-center gap-2 mb-2"  style={{ color: "var(--violet)", fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: "0.08em"}}>
               <Icon name="shield" size={12} />
               PROCTORING · ACTIVE
             </div>
@@ -130,7 +129,7 @@ const AssessmentPage = ({ go }) => {
             </div>
           </div>
 
-          <button className="btn btn-outline" style={{ justifyContent: "center" }}>
+          <button className="btn btn-outline justify-center" >
             ذخیره و ادامه بعداً
           </button>
         </aside>
@@ -139,4 +138,4 @@ const AssessmentPage = ({ go }) => {
   );
 };
 
-window.AssessmentPage = AssessmentPage;
+export default AssessmentPage;
