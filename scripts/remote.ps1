@@ -139,23 +139,27 @@ elif [ -n "$HOST_CADDYFILE" ]; then
     write_snippet "$HOST_CADDYFILE"
 fi
 
-# 6. If a prior sed -i orphaned the bind mount (host inode != container
-#    inode), the container's view of Caddyfile points at an orphan inode
-#    held open by the container. `docker cp` cannot replace an in-use
-#    bind-mounted file. Pipe the new content into `tee` inside the
-#    container instead — tee truncates+writes in place, preserving the
-#    inode the container is pinned to.
+# 6. Reload Caddy. If a prior sed -i orphaned the bind mount (host inode
+#    != container inode), the container's view of Caddyfile is stale and
+#    Caddy would reload the old content. The Caddyfile may also be
+#    mounted read-only, so we can't write to it from inside the
+#    container. Workaround: pipe the canonical host file straight into
+#    `caddy reload --config -`, which bypasses the orphan entirely. The
+#    orphaned mount self-heals on the next legitimate restart of the
+#    Caddy container.
 if [ -n "$HOST_CADDYFILE" ]; then
     HOST_INO=$(sudo stat -c %i "$HOST_CADDYFILE")
     CONT_INO=$(docker exec "$CADDY_CONTAINER" stat -c %i /etc/caddy/Caddyfile)
     if [ "$HOST_INO" != "$CONT_INO" ]; then
-        echo "Bind-mount inode drift detected (host=$HOST_INO container=$CONT_INO); syncing in-place via docker exec tee."
-        sudo cat "$HOST_CADDYFILE" | docker exec -i "$CADDY_CONTAINER" tee /etc/caddy/Caddyfile > /dev/null
+        echo "Bind-mount inode drift detected (host=$HOST_INO container=$CONT_INO); reloading Caddy from stdin instead of the orphaned file."
+        sudo cat "$HOST_CADDYFILE" | docker exec -i "$CADDY_CONTAINER" caddy reload --config /dev/stdin --adapter caddyfile
+    else
+        docker exec "$CADDY_CONTAINER" caddy validate --config /etc/caddy/Caddyfile
+        docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
     fi
+else
+    docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 fi
-
-docker exec "$CADDY_CONTAINER" caddy validate --config /etc/caddy/Caddyfile
-docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 echo "Caddy reloaded."
 '@
         # Pipe the script into bash on the VPS so 'set -e' and arrays work
