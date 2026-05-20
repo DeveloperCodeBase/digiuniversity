@@ -179,11 +179,16 @@ echo -n "unmanaged site-opener lines (expect 0): "
 sudo grep -cE '^digiuniversity\.ir' "$HOST_CADDYFILE" || true
 echo -n "header_up X-Forwarded-* lines in digi area (expect 0): "
 sudo grep -cE 'header_up X-Forwarded' "$HOST_CADDYFILE" || true
-echo "--- managed block ---"
-sudo sed -n '/^# >>> digiuniversity/,/^# <<< digiuniversity/p' "$HOST_CADDYFILE"
-echo "--- unmanaged digiuniversity lines (with line numbers, +/- 1 line of context) ---"
-# Show only the line numbers of unmanaged opener lines so we know roughly where they are
-sudo grep -nE '^digiuniversity\.ir' "$HOST_CADDYFILE" || echo "(none)"
+echo "--- unmanaged digiuniversity lines OUTSIDE the markers (expect none) ---"
+sudo awk '
+  /^# >>> digiuniversity/ {inblock=1; next}
+  /^# <<< digiuniversity/ {inblock=0; next}
+  inblock==0 && /^digiuniversity\.ir/ {print FILENAME ":" NR ": " $0}
+' "$HOST_CADDYFILE" || echo "(none)"
+echo "--- containers on digiuniversity_web ---"
+docker network inspect digiuniversity_web --format '{{range .Containers}}{{.Name}} ({{.IPv4Address}}){{"\n"}}{{end}}'
+echo "--- hooshgate_caddy → digiuniversity-app reachability ---"
+docker exec hooshgate_caddy wget -qO- --timeout=5 http://digiuniversity-app/healthz 2>&1 || echo "(reachability failed)"
 '@
         $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
         $si = New-Object System.Diagnostics.ProcessStartInfo
