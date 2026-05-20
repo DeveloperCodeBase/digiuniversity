@@ -177,6 +177,19 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-84 ✓ | P1 | Analytics | 28-col heatmap squashed at tablet+mobile. | Same `.calendar-week-scroll` wrapper + min-width fallback. |
 | F-85 ✓ | P1 | Messages | 3-pane (`240px 1fr 280px`) was unusable below 980px. | Tablet: drop the right meta pane. Phone: drop the folder pane too, leave just the thread. `height: calc(100vh - 64px)` is also released at phone width so the stacked layout can breathe. |
 
+---
+
+## Phase 12 — Round 5 + Round 6: i18n + a11y polish
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-86 ✓ | P2 | i18n | Live pages still used raw `new Date(x).toLocaleDateString("fa-IR")` — F-57 only added the helper; we never migrated the four call sites that survived. | MyCourses, CourseLive, Tutor, AssessmentLive now import + use `formatJalaliDate`. |
+| F-87 ✓ | P2 | A11y | Skip-link jumped to `#main-content` but the sticky nav covered the target. | `html { scroll-padding-top: 80px } #main-content { scroll-margin-top: 80px }`. |
+| F-88 ✓ | P2 | A11y | Future interactive elements might forget their own focus-visible ring. | Global `:where(button, a, input, ...):focus-visible` fallback. |
+| F-89 ✓ | P2 | A11y | Windows High Contrast (`forced-colors: active`) hid the .btn / .pill / .nav-link borders. | Added explicit `border: 1px solid CanvasText` defence. |
+| F-90 ✓ | P2 | A11y | New shimmer-skeleton animation could trigger motion-sensitivity. | Added a catch-all `prefers-reduced-motion` rule that flattens animation + transition durations across every element. |
+
+
 
 
 

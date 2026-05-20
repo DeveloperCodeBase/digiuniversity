@@ -4467,6 +4467,58 @@ body.nav-drawer-open { overflow: hidden; }
 }
 
 /* ================================================================
+   Phase 12 R6 — global a11y polish
+   ================================================================ */
+
+/* Anchor jumps (e.g. skip-link → #main-content) should land below the
+   sticky nav, not under it. */
+html { scroll-padding-top: 80px; }
+#main-content { scroll-margin-top: 80px; }
+
+/* When the page-shell receives focus via the skip-link, suppress the
+   visible outline because it would highlight the whole main area. */
+#main-content:focus { outline: none; }
+
+/* Default focus ring for any non-styled interactive element. Browsers
+   show their own; this guarantees one if a future style accidentally
+   removes it. */
+:where(button, a, input, select, textarea, [role="button"], [role="link"], [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Prevent UI from being unreadable when forced colors are enabled
+   (Windows High Contrast). */
+@media (forced-colors: active) {
+  .btn, .pill, .nav-link, .dropdown-item {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* RTL polish: ensure form fields with leading icons leave room for them
+   on both directions. The existing forms set padding manually; this
+   is a safety net for any field that forgot. */
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="search"],
+[dir="rtl"] input[type="tel"] {
+  text-align: start;
+}
+
+/* Reduce motion: respect prefers-reduced-motion across all our custom
+   animations (the older rules already covered some; this is a catch-all). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ================================================================
    Course module rows (Course.jsx) — converted from <div onClick> to
    real <button> in Phase-12 R2 so keyboard users can navigate the
    module outline.
