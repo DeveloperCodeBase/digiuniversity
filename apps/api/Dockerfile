@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ---------- Stage 1: deps + build ----------
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ COPY src ./src
 RUN npm run build
 
 # ---------- Stage 2: runtime ----------
-FROM node:20-alpine AS runtime
+FROM node:26-alpine AS runtime
 
 RUN apk add --no-cache curl tini openssl
 
