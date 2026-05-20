@@ -12,8 +12,8 @@ export const ROLES = {
     color: "cyan",
     subtitle: "ارشد علوم داده",
     code: "ST-84-02-17",
-    nav: ["home", "programs", "library", "dashboard", "calendar", "community", "credential"],
-    homeRoute: "dashboard",
+    nav: ["home", "catalog", "my-courses", "progress", "tutor", "calendar", "community"],
+    homeRoute: "progress",
     permissions: ["learn", "submit", "discuss", "view-grades"],
   },
   instructor: {
@@ -24,8 +24,8 @@ export const ROLES = {
     color: "amber",
     subtitle: "دانشکده علوم رایانه",
     code: "FA-09-A47",
-    nav: ["home", "instructor", "authoring", "classroom", "analytics", "library", "officehours"],
-    homeRoute: "instructor",
+    nav: ["home", "catalog", "instructor", "authoring", "classroom", "analytics", "tutor"],
+    homeRoute: "progress",
     permissions: ["teach", "grade", "approve-ai", "create-content"],
   },
   admin: {
@@ -36,8 +36,8 @@ export const ROLES = {
     color: "violet",
     subtitle: "مدیر سامانه‌ها",
     code: "AD-001",
-    nav: ["home", "admin", "analytics", "faculty", "library", "events"],
-    homeRoute: "admin",
+    nav: ["home", "catalog", "progress", "admin", "analytics", "tutor", "events"],
+    homeRoute: "progress",
     permissions: ["manage-users", "moderate", "configure", "billing"],
   },
   parent: {

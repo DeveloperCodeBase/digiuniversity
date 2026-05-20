@@ -4,33 +4,35 @@
 import React from "react";
 import { Icon } from "./icons.jsx";
 import { useRole, ROLES } from "./role.jsx";
+import { useAuth } from "./auth/AuthContext.jsx";
 import { useTheme } from "./ui.jsx";
 
+// Nav highlights the LIVE routes that actually talk to the API (Phase 4-9).
+// Mocked routes from the original SPA still hash-route alongside but are
+// no longer the default landing surface for any role.
 const NAV_ITEMS_BY_ROLE = {
   student: [
-    { id: "home", label: "خانه" },
-    { id: "schools", label: "دانشکده‌ها" },
-    { id: "library", label: "کتابخانه" },
-    { id: "labs", label: "آزمایشگاه" },
-    { id: "dashboard", label: "میز کار" },
+    { id: "progress", label: "پیشرفت من", live: true },
+    { id: "catalog", label: "کاتالوگ", live: true },
+    { id: "my-courses", label: "دوره‌های من", live: true },
+    { id: "tutor", label: "دستیار AI", live: true },
     { id: "calendar", label: "تقویم" },
     { id: "community", label: "جامعه" },
   ],
   instructor: [
-    { id: "home", label: "خانه" },
-    { id: "instructor", label: "میز کار من" },
+    { id: "progress", label: "میز کار", live: true },
+    { id: "catalog", label: "کاتالوگ", live: true },
     { id: "authoring", label: "استودیو" },
     { id: "classroom", label: "کلاس زنده" },
-    { id: "labs", label: "آزمایشگاه" },
     { id: "analytics", label: "تحلیل" },
-    { id: "research", label: "پژوهش" },
+    { id: "tutor", label: "دستیار AI", live: true },
   ],
   admin: [
-    { id: "home", label: "خانه" },
-    { id: "admin", label: "میز مدیریت" },
+    { id: "progress", label: "داشبورد", live: true },
+    { id: "catalog", label: "کاتالوگ", live: true },
+    { id: "admin", label: "مدیریت" },
     { id: "analytics", label: "تحلیل" },
-    { id: "schools", label: "دانشکده‌ها" },
-    { id: "faculty", label: "هیات علمی" },
+    { id: "tutor", label: "دستیار AI", live: true },
     { id: "events", label: "رویدادها" },
   ],
   parent: [
@@ -41,7 +43,7 @@ const NAV_ITEMS_BY_ROLE = {
     { id: "help", label: "پشتیبانی" },
   ],
   org: [
-    { id: "home", label: "خانه" },
+    { id: "progress", label: "داشبورد", live: true },
     { id: "admin", label: "میز سازمان" },
     { id: "analytics", label: "تحلیل تیم" },
     { id: "events", label: "رویدادها" },
@@ -52,6 +54,7 @@ const NAV_ITEMS_BY_ROLE = {
 
 export const Nav = ({ current, go }) => {
   const { role, setRole } = useRole();
+  const auth = useAuth();
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = React.useState(false);
   const [notifsOpen, setNotifsOpen] = React.useState(false);
@@ -88,8 +91,16 @@ export const Nav = ({ current, go }) => {
               href={"#" + n.id}
               onClick={(e) => { e.preventDefault(); go(n.id); setOpen(false); }}
               className={"nav-link " + (current === n.id ? "active" : "")}
+              aria-current={current === n.id ? "page" : undefined}
             >
               {n.label}
+              {n.live && (
+                <span
+                  className="nav-live-dot"
+                  aria-label="داده زنده"
+                  title="متصل به API"
+                />
+              )}
             </a>
           ))}
         </div>
@@ -130,7 +141,7 @@ export const Nav = ({ current, go }) => {
               <div className={"avatar " + role.color} style={{ width: 32, height: 32, fontSize: 11 }}>{role.avatar}</div>
               <span className="user-name">{role.name.split(" ").slice(-1)[0]}</span>
             </button>
-            {userOpen && <UserDropdown go={go} role={role} setRole={setRole} />}
+            {userOpen && <UserDropdown go={go} role={role} setRole={setRole} auth={auth} />}
           </div>
 
           <button
@@ -181,7 +192,28 @@ const NotificationsDropdown = ({ go }) => (
   </div>
 );
 
-const UserDropdown = ({ go, role, setRole }) => {
+const UserDropdown = ({ go, role, setRole, auth }) => {
+  const [loggingOut, setLoggingOut] = React.useState(false);
+  const handleLogout = async (e) => {
+    e?.preventDefault?.();
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      if (auth?.logout) {
+        await auth.logout();
+      }
+    } finally {
+      // Clear local role so the next visitor sees the default.
+      try {
+        localStorage.removeItem("digiu_role");
+      } catch {
+        // ignore
+      }
+      setLoggingOut(false);
+      go("login");
+    }
+  };
+
   const isDemoMode = typeof window !== "undefined" && (
     window.location.search.includes("demo=1") ||
     window.location.hash.includes("demo=1")
@@ -244,9 +276,9 @@ const UserDropdown = ({ go, role, setRole }) => {
       ))}
     </div>
     <div className="p-1.5"  style={{ borderTop: "1px solid var(--line)"}}>
-      <button onClick={() => go("login")} className="dropdown-item" style={{ color: "var(--accent)" }}>
+      <button onClick={handleLogout} disabled={loggingOut} className="dropdown-item" style={{ color: "var(--accent)" }}>
         <Icon name="end" size={14} />
-        خروج از حساب
+        {loggingOut ? "در حال خروج..." : "خروج از حساب"}
       </button>
     </div>
   </div>

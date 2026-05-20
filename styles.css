@@ -2293,6 +2293,27 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent) !importa
 }
 .dropdown-item:hover { background: var(--surface-2); }
 
+/* Phase 11: small green dot next to live-API nav items so users see at
+   a glance which routes are wired to the real backend. */
+.nav-live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background: #10b981;
+  box-shadow: 0 0 0 2px color-mix(in oklch, #10b981 25%, transparent);
+  vertical-align: middle;
+  animation: nav-live-pulse 2.4s ease-in-out infinite;
+}
+@keyframes nav-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.6; transform: scale(0.85); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-live-dot { animation: none; }
+}
+
 /* Toggle */
 .toggle-knob { transition: 200ms cubic-bezier(0.16, 1, 0.3, 1); }
 .nav-toggle {

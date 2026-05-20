@@ -4,6 +4,7 @@
 import React from "react";
 import { RoleProvider } from "./role.jsx";
 import { AuthProvider } from "./auth/AuthContext.jsx";
+import { ErrorBoundary } from "./auth/ErrorBoundary.jsx";
 import { ThemeProvider, UIRoot } from "./ui.jsx";
 import { ScrollProgress } from "./motion.jsx";
 import { Nav } from "./shared.jsx";
@@ -132,7 +133,9 @@ const AppShell = () => {
     <UIRoot onNavigate={go}>
       <ScrollProgress />
       <Nav current={route} go={go} />
-      <div key={route + ":" + (routeParam || "")} className="page-shell">{page}</div>
+      <ErrorBoundary key={route + ":" + (routeParam || "")}>
+        <div className="page-shell">{page}</div>
+      </ErrorBoundary>
     </UIRoot>
   );
 };
