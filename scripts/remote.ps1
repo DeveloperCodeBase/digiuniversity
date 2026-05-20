@@ -119,8 +119,20 @@ docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 echo "Caddy reloaded."
 '@
         # Pipe the script into bash on the VPS so 'set -e' and arrays work
-        # regardless of the user's login shell.
-        $bash | ssh $Server "bash -s"
+        # regardless of the user's login shell. We normalise to LF and write
+        # raw bytes so PowerShell does not inject a BOM or CRLFs.
+        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
+        $si = New-Object System.Diagnostics.ProcessStartInfo
+        $si.FileName = "ssh"
+        $si.Arguments = "$Server `"bash -s`""
+        $si.UseShellExecute = $false
+        $si.RedirectStandardInput = $true
+        $p = [System.Diagnostics.Process]::Start($si)
+        $p.StandardInput.NewLine = "`n"
+        $p.StandardInput.Write($bash)
+        $p.StandardInput.Close()
+        $p.WaitForExit()
+        exit $p.ExitCode
     }
 
     "caddy-reload" {
