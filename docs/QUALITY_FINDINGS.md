@@ -112,3 +112,21 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-37 ✓ | P2 | A11y | Assessment radio rows used the browser default focus ring (often invisible). | `styles.css` — `.assessment-option:focus-within { outline: 2px solid var(--accent); outline-offset: 2px }`. |
 | F-38 ✓ | P1 | Auth/Nav | After logout the navbar avatar persisted (showed previous user's initials) until next route change. | `shared.jsx` — `handleLogout` now calls `setRole("student")` so RoleProvider state resets in the same frame. |
 | F-46 ✓ | P1 | Seed | Demo tenant only had an admin user; the audit had no built-in instructor / student to walk through role-aware flows. | `apps/api/src/prisma/seed.ts` — added idempotent demo users `instructor1@digiuniversity.ir` (InstructorPass!1) + `student1@digiuniversity.ir` (StudentPass!1). |
+
+---
+
+## Phase 12 — Round 1: Nav + role config + shared primitives
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-50 ✓ | P1 | Nav | Parent role's nav led with the public `home` route, which is jarring for a logged-in parent and pushes the parent dashboard to slot 2. | `src/shared.jsx` — parent nav now leads with `parent` dashboard, drops public `home`, adds `messages`. |
+| F-51 ✓ | P1 | Nav | Instructor / admin / org nav surfaces missed the role's dashboard (`instructor`, `schools`, `faculty`) in the primary nav strip. | `src/shared.jsx` — added `instructor` for instructor, `schools` for admin, `faculty` for org. Removed redundant `catalog` from instructor + admin nav (still reachable via sidenav). |
+| F-52 ✓ | P1 | Mobile drawer | Mobile drawer didn't lock body scroll, so iOS users could two-finger scroll the underlying page while the drawer was open. | `src/shared.jsx` — `useEffect` toggles `body.nav-drawer-open`; `styles.css` rule disables body overflow only on viewports below the desktop breakpoint. |
+| F-53 ✓ | P2 | A11y | Drawer + popovers didn't close on Esc. | `src/shared.jsx` — global keydown listener while any of the three popovers is open. |
+| F-54 ✓ | P1 | A11y | No skip-link, so keyboard users had to tab past the entire nav on every page. | `src/App.jsx` — added `<a class="skip-link">` pointing at `#main-content`; `<div class="page-shell">` is now `<main id="main-content" tabindex="-1">`. |
+| F-55 ✓ | P2 | A11y | Sidenav items were `<a class="cursor-pointer" onClick>` without href, so they weren't keyboard-focusable, didn't announce as links, and Cmd-click did nothing. | `src/sidenav.jsx` — now `<a href="#route" onClick={preventDefault+go}>`; `aria-current="page"` on the active item; `aria-label` on the `<aside>`. |
+| F-56 ✓ | P1 | Reusable surfaces | Every page reinvented its loading / empty / error patterns inline, so they looked different each time and missed a11y attrs. | `src/components/States.jsx` — new `<EmptyState>`, `<LoadingSkeleton>`, `<ErrorState>`, `<PageHeader>`; `styles.css` — design tokens for each (matches the surface tokens). |
+| F-57 ✓ | P2 | i18n | `toLocaleDateString("fa-IR")` falls back to Gregorian on older runtimes (TECH_DEBT carried from Phase 11). | `src/i18n/format.js` — `formatJalaliDate`, `formatNumberFa`, `formatRelativeFa`, `toFaDigits`; runtime-detects Jalali support, falls back to an inline Greg→Jalali converter. |
+| F-58 ✓ | P2 | Typography | Tailwind `.h-1`..`.h-3` collisions still need authoritative typography names. | `styles.css` — added `.heading-1`, `.heading-2`, `.heading-3` as canonical names (with `height: auto !important` defence) so new pages don't have to know about the Tailwind history. |
+| F-59 ✓ | P2 | Icons | Used in States/PageHeader but missing from the set: `chev-right/left/up/down`, `x`, `menu`, `external`, `edit`, `trash`, `filter`, `info`, `warn`, `refresh`, `upload`, `link`. | `src/icons.jsx` — 13 new minimal stroke icons appended. |
+

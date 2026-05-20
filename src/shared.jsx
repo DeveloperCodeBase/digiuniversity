@@ -21,7 +21,7 @@ const NAV_ITEMS_BY_ROLE = {
   ],
   instructor: [
     { id: "progress", label: "میز کار", live: true },
-    { id: "catalog", label: "کاتالوگ", live: true },
+    { id: "instructor", label: "کنسول استاد" },
     { id: "authoring", label: "استودیو" },
     { id: "classroom", label: "کلاس زنده" },
     { id: "analytics", label: "تحلیل" },
@@ -29,23 +29,27 @@ const NAV_ITEMS_BY_ROLE = {
   ],
   admin: [
     { id: "progress", label: "داشبورد", live: true },
-    { id: "catalog", label: "کاتالوگ", live: true },
     { id: "admin", label: "مدیریت" },
     { id: "analytics", label: "تحلیل" },
-    { id: "tutor", label: "دستیار AI", live: true },
+    { id: "schools", label: "دانشکده‌ها" },
     { id: "events", label: "رویدادها" },
+    { id: "tutor", label: "دستیار AI", live: true },
   ],
+  // Parent role: lands on the parent dashboard first. The public "home"
+  // route was the first item which felt jarring for a logged-in parent;
+  // now we lead with the parent dashboard and drop "home" — parents
+  // reach the public site via the logo in the brand area if needed.
   parent: [
-    { id: "home", label: "خانه" },
     { id: "parent", label: "میز کار" },
     { id: "calendar", label: "تقویم فرزند" },
     { id: "credential", label: "گواهی‌ها" },
+    { id: "messages", label: "پیام‌ها" },
     { id: "help", label: "پشتیبانی" },
   ],
   org: [
-    { id: "progress", label: "داشبورد", live: true },
     { id: "admin", label: "میز سازمان" },
     { id: "analytics", label: "تحلیل تیم" },
+    { id: "faculty", label: "مربیان" },
     { id: "events", label: "رویدادها" },
     { id: "pricing", label: "پلن‌ها" },
     { id: "help", label: "پشتیبانی" },
@@ -70,6 +74,29 @@ export const Nav = ({ current, go }) => {
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
   }, []);
+
+  // Esc closes the mobile drawer + any popover.
+  React.useEffect(() => {
+    if (!open && !notifsOpen && !userOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setNotifsOpen(false);
+        setUserOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, notifsOpen, userOpen]);
+
+  // Body-scroll lock while the mobile drawer is open. Without this the
+  // page below can be scrolled with two-finger gestures while the drawer
+  // is visible, which feels broken on iOS Safari.
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("nav-drawer-open", open);
+    return () => document.body.classList.remove("nav-drawer-open");
+  }, [open]);
 
   const items = NAV_ITEMS_BY_ROLE[role.id] || NAV_ITEMS_BY_ROLE.student;
 

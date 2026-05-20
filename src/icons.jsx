@@ -51,6 +51,21 @@ export const Icon = ({ name, size = 18, stroke = 1.7 }) => {
     dollar: <svg {...P}><path d="M12 2v20M17 6c0-2-2.2-3-5-3s-5 1.3-5 4 2.5 3 5 4 5 1.3 5 4-2.2 4-5 4-5-1-5-3"/></svg>,
     shield: <svg {...P}><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></svg>,
     code: <svg {...P}><path d="m9 8-5 4 5 4M15 8l5 4-5 4M14 4l-4 16"/></svg>,
+    "chev-right": <svg {...P}><path d="m9 6 6 6-6 6"/></svg>,
+    "chev-left": <svg {...P}><path d="m15 6-6 6 6 6"/></svg>,
+    "chev-up": <svg {...P}><path d="m6 15 6-6 6 6"/></svg>,
+    "chev-down": <svg {...P}><path d="m6 9 6 6 6-6"/></svg>,
+    x: <svg {...P}><path d="M6 6l12 12M18 6 6 18"/></svg>,
+    menu: <svg {...P}><path d="M4 6h16M4 12h16M4 18h16"/></svg>,
+    external: <svg {...P}><path d="M14 4h6v6M20 4 10 14M14 14v6H4V10h6"/></svg>,
+    edit: <svg {...P}><path d="M16 3 21 8l-13 13H3v-5z"/><path d="m14 5 5 5"/></svg>,
+    trash: <svg {...P}><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg>,
+    filter: <svg {...P}><path d="M3 5h18l-7 9v6l-4-2v-4z"/></svg>,
+    info: <svg {...P}><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>,
+    warn: <svg {...P}><path d="M12 3 2 21h20zM12 10v5M12 18h.01"/></svg>,
+    refresh: <svg {...P}><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 4v4h-4M21 12a9 9 0 0 1-15 6.7L3 16M3 20v-4h4"/></svg>,
+    upload: <svg {...P}><path d="M12 20V8M6 12l6-6 6 6M4 4h16"/></svg>,
+    link: <svg {...P}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>,
   };
   return map[name] || null;
 };

@@ -131,10 +131,11 @@ const AppShell = () => {
 
   return (
     <UIRoot onNavigate={go}>
+      <a href="#main-content" className="skip-link">پرش به محتوای اصلی</a>
       <ScrollProgress />
       <Nav current={route} go={go} />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
-        <div className="page-shell">{page}</div>
+        <main id="main-content" className="page-shell" tabIndex={-1}>{page}</main>
       </ErrorBoundary>
     </UIRoot>
   );

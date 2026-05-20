@@ -112,7 +112,12 @@ export const SIDEBAR_BY_ROLE = {
   ],
 };
 
-// Wrap a list in <ul> if it isn't already (compat with existing CSS)
+// Wrap a list in <ul> if it isn't already (compat with existing CSS).
+// Phase 12: items are real <a href="#route"> + onClick so they:
+//   1. show their destination in the status bar on hover,
+//   2. support Cmd-click / middle-click → background tab,
+//   3. expose aria-current="page" for screen readers and styling,
+//   4. are reachable via keyboard with the default focus ring (CSS).
 export const RoleSideNav = ({ active, go }) => {
   const { role } = useRole();
   const items = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
@@ -125,15 +130,18 @@ export const RoleSideNav = ({ active, go }) => {
     else { current = { h: "", items: [it] }; groups.push(current); }
   });
   return (
-    <aside className="side-nav">
+    <aside className="side-nav" aria-label={`ناوبری نقش ${role.label}`}>
       {groups.map((g, gi) => (
         <React.Fragment key={gi}>
           {g.h && <h6>{g.h}</h6>}
           <ul>
             {g.items.map(it => (
               <li key={it.id}>
-                <a className={"cursor-pointer " + " " + (active === it.id ? "active" : "")}
-                  onClick={() => go(it.id)}
+                <a
+                  href={"#" + it.id}
+                  className={active === it.id ? "active" : ""}
+                  aria-current={active === it.id ? "page" : undefined}
+                  onClick={(e) => { e.preventDefault(); go(it.id); }}
                 >
                   <Icon name={it.ic} size={14} />
                   {it.t}
