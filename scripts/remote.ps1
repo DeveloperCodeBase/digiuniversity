@@ -110,21 +110,20 @@ SNIPPET=$(printf "\n%s\n%s\n%s\n" "$MARK_BEGIN" "$(cat infra/Caddyfile.snippet)"
 
 write_snippet() {
     target_file="$1"
-    # 1. Drop any prior managed block (between markers).
-    sudo sed -i "/^# >>> digiuniversity site block/,/^# <<< digiuniversity site block/d" "$target_file"
-    # 2. Drop any prior unmanaged block: from a column-0 line that starts
-    #    with `digiuniversity.ir` (the site key, not a commented example)
-    #    through the next column-0 `}` (site block close).
-    sudo sed -i "/^digiuniversity\.ir/,/^}/d" "$target_file"
-    # 3. Drop any commented Option A/B headers we may have left behind.
-    sudo sed -i "/^# Option [AB] —.*$/d" "$target_file"
-    sudo sed -i "/^# We use container-to-container traffic.*$/d" "$target_file"
-    # 4. Trim trailing blank lines.
-    sudo sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$target_file"
+    # Build the cleaned + extended content in memory, then write it back
+    # with `tee` (O_TRUNC) so the file's inode is preserved. Docker bind
+    # mounts of single files track the inode, so sed -i (which replaces
+    # the file) would silently break the mount.
+    cleaned=$(sudo cat "$target_file" \
+        | sed "/^# >>> digiuniversity site block/,/^# <<< digiuniversity site block/d" \
+        | sed "/^digiuniversity\.ir/,/^}/d" \
+        | sed "/^# Option [AB] —.*$/d" \
+        | sed "/^# We use container-to-container traffic.*$/d" \
+        | awk 'NF {p=1} p{print}' \
+        | awk 'BEGIN{n=0} /./ {for(i=0;i<n;i++) print ""; n=0; print; next} {n++}')
 
-    # 5. Append the managed block.
-    printf "%s" "$SNIPPET" | sudo tee -a "$target_file" > /dev/null
-    echo "Wrote managed block to $target_file"
+    printf "%s%s" "$cleaned" "$SNIPPET" | sudo tee "$target_file" > /dev/null
+    echo "Wrote managed block to $target_file (inode preserved)"
 }
 
 if [ -n "$HOST_CADDY_DIR" ] && [ -d "$HOST_CADDY_DIR" ]; then
