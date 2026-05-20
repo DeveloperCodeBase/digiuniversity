@@ -347,7 +347,19 @@ export const RegisterPage = ({ go }) => {
 
         <label className="flex items-start gap-2.5 mt-1.5 cursor-pointer"  style={{ fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6}}>
           <input className="mt-0.5" type="checkbox" defaultChecked  style={{accentColor: "var(--accent)", width: 16, height: 16, flexShrink: 0}} />
-          با <a href="#" style={{ color: "var(--accent)", textDecoration: "underline" }}>قوانین استفاده</a> و <a href="#" style={{ color: "var(--accent)", textDecoration: "underline" }}>سیاست حریم خصوصی</a> موافق هستم.
+          با{" "}
+          <a
+            href="#honor-code"
+            onClick={(e) => { e.preventDefault(); go("honor-code"); }}
+            style={{ color: "var(--accent)", textDecoration: "underline" }}
+          >قوانین استفاده</a>
+          {" "}و{" "}
+          <a
+            href="#help"
+            onClick={(e) => { e.preventDefault(); go("help"); }}
+            style={{ color: "var(--accent)", textDecoration: "underline" }}
+          >سیاست حریم خصوصی</a>
+          {" "}موافق هستم.
         </label>
 
         <button type="submit" className="btn btn-primary btn-lg mt-3 justify-center" >
@@ -557,7 +569,11 @@ export const VerifyEmailPage = ({ go }) => {
 
       <div className="mt-4 p-3.5 rounded-xl"  style={{ background: "var(--surface-2)", fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6}}>
         <strong>نکته:</strong> اگر ایمیل را در inbox پیدا نکردید، spam را بررسی کنید یا{" "}
-        <a href="#" style={{ color: "var(--accent)" }}>ایمیل را تغییر دهید</a>.
+        <button
+          type="button"
+          onClick={() => go("register")}
+          style={{ color: "var(--accent)", background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer", textDecoration: "underline" }}
+        >ایمیل را تغییر دهید</button>.
       </div>
     </AuthShell>
   );

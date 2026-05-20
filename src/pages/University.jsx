@@ -41,7 +41,15 @@ export const SchoolsPage = ({ go }) => {
       <section className="shell" style={{ padding: "60px 40px" }}>
         <div className="grid grid-2 gap-5" >
           {SCHOOLS.map((s, i) => (
-            <div key={s.id} className="card p-8 cursor-pointer"  onClick={() => go("programs")}>
+            <div
+              key={s.id}
+              className="card p-8 cursor-pointer"
+              role="link"
+              tabIndex={0}
+              aria-label={`دانشکده ${s.name} · ${s.programs} برنامه`}
+              onClick={() => go("programs")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("programs"); } }}
+            >
               <div className="flex justify-between mb-4.5" >
                 <span className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em" }}>{toFa("0" + (i + 1))}/۰۸ · {s.code}</span>
                 <span className="pill" style={{ fontSize: 10 }}>{toFa(s.programs)} برنامه</span>
@@ -448,6 +456,25 @@ export const VirtualLabPage = ({ go, labId }) => {
 // =====================================================
 // Labs Catalog
 // =====================================================
+const LABS_FILTERS = ["همه", "پزشکی", "مهندسی", "علوم پایه", "AI/Data", "شیمی", "فیزیک", "کدنویسی"];
+const LabsFilterPills = () => {
+  const [active, setActive] = React.useState(LABS_FILTERS[0]);
+  return (
+    <div className="flex gap-2 mb-8 flex-wrap" role="group" aria-label="فیلتر آزمایشگاه‌ها">
+      {LABS_FILTERS.map((t) => (
+        <button
+          key={t}
+          type="button"
+          className={"pill " + (t === active ? "pill-cyan" : "")}
+          style={{ cursor: "pointer", border: "none", background: t === active ? undefined : "var(--surface)" }}
+          aria-pressed={t === active}
+          onClick={() => setActive(t)}
+        >{t}</button>
+      ))}
+    </div>
+  );
+};
+
 export const LabsPage = ({ go }) => (
   <main data-screen-label="28 آزمایشگاه‌ها">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
@@ -462,11 +489,8 @@ export const LabsPage = ({ go }) => (
     </section>
 
     <section className="shell" style={{ padding: "40px 40px" }}>
-      <div className="flex gap-2 mb-8 flex-wrap" >
-        {["همه", "پزشکی", "مهندسی", "علوم پایه", "AI/Data", "شیمی", "فیزیک", "کدنویسی"].map((t, i) => (
-          <span className={"cursor-pointer " + " " + ("pill " + (i === 0 ? "pill-cyan" : ""))} key={t}  >{t}</span>
-        ))}
-      </div>
+      <LabsFilterPills />
+
 
       <div className="grid grid-3">
         {LABS.map((l, i) => (

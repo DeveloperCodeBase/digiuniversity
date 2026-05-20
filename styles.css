@@ -4565,3 +4565,40 @@ body.nav-drawer-open { overflow: hidden; }
   .course-body-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
   .course-body-grid aside { position: static !important; }
 }
+
+/* ================================================================
+   Phase 12 — keyboard-link focus rings.
+   Cards rendered with role="link" or as <button> get a visible focus
+   indicator so keyboard users see where they are. Tap behaviour
+   unchanged.
+   ================================================================ */
+.search-result[role="link"],
+.recording-card[role="link"],
+.card[role="link"] {
+  cursor: pointer;
+}
+.search-result[role="link"]:focus-visible,
+.recording-card[role="link"]:focus-visible,
+.card[role="link"]:focus-visible,
+button.course-card:focus-visible,
+button.prog-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+/* When a card becomes a <button> we lose the default <div> visuals.
+   Reset the button defaults so the existing card styling still applies. */
+button.course-card,
+button.prog-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: inherit;
+  text-align: start;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 0;          /* .course-cover and .course-body bring their own */
+  overflow: hidden;
+}

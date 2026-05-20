@@ -247,7 +247,13 @@ export const HomePage = ({ go }) => {
 
           <Stagger className="grid grid-3">
             {COURSES.map((c) => (
-              <div key={c.title} className="course-card reveal" onClick={() => go("course")}>
+              <button
+                key={c.title}
+                type="button"
+                className="course-card reveal"
+                onClick={() => go("course")}
+                aria-label={`درس ${c.title} با ${c.by}`}
+              >
                 <div className={"course-cover " + c.cover}>
                   <span className="glyph">{c.glyph}</span>
                   <span className="pill mono">{c.code}</span>
@@ -262,7 +268,7 @@ export const HomePage = ({ go }) => {
                     <span className="it"><strong>{c.students}</strong> دانشجو</span>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </Stagger>
         </div>
@@ -332,11 +338,19 @@ export const HomePage = ({ go }) => {
               { id: "credential", t: "گواهی دیجیتال", d: "Open Badges 3.0 + VC", ic: "cert" },
               { id: "about", t: "درباره ما", d: "ماموریت، اصول، تیم", ic: "sparkle" },
             ].map((p) => (
-              <div key={p.id} className="reveal rounded-xl p-5 cursor-pointer relative overflow-hidden" onClick={() => go(p.id)}  style={{background: "var(--surface)",
+              <button
+                key={p.id}
+                type="button"
+                className="reveal rounded-xl p-5 cursor-pointer relative overflow-hidden text-right"
+                onClick={() => go(p.id)}
+                aria-label={`${p.t} · ${p.d}`}
+                style={{background: "var(--surface)",
                 border: "1px solid var(--line)",
-                transition: "200ms ease"}}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--line)"; }}
+                transition: "200ms ease",
+                fontFamily: "inherit",
+                color: "var(--fg)"}}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--line)"; }}
               >
                 <div className="flex items-center justify-between mb-3.5" >
                   <div className="rounded-lg grid"  style={{width: 36, height: 36, background: "var(--surface-2)", color: "var(--accent)", placeItems: "center"}}>
@@ -346,7 +360,7 @@ export const HomePage = ({ go }) => {
                 </div>
                 <div style={{ fontSize: 15, fontWeight: 600 }}>{p.t}</div>
                 <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.5}}>{p.d}</div>
-              </div>
+              </button>
             ))}
           </Stagger>
         </div>

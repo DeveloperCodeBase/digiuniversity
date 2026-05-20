@@ -148,4 +148,23 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-69 ✓ | P1 | Recordings | Featured + grid recording cards were `<div onClick>` with no keyboard activation. | Added `role="link"`, `tabIndex={0}`, `aria-label`, and `Enter`/`Space` key handlers. |
 | F-70 ✓ | P1 | Academic.Registration | Filter pills ("همه", "الزامی", …) were dead `<span class="pill">`. | Extracted `RegistrationFilterPills` with state + aria-pressed. |
 
+---
+
+## Phase 12 — Round 3: Cross-page <div onClick> + dead links sweep
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-71 ✓ | P1 | Auth.Register | "قوانین استفاده" + "سیاست حریم خصوصی" were `<a href="#">` — clicking them broke the SPA route. | Wired to `honor-code` + `help` with preventDefault. |
+| F-72 ✓ | P1 | Auth.VerifyEmail | "ایمیل را تغییر دهید" was an `<a href="#">`. | Replaced with `<button>` that routes to `register`. |
+| F-73 ✓ | P1 | University.Schools | School cards were `<div onClick>` — no keyboard interaction. | Added `role="link"`, `tabIndex={0}`, `aria-label`, `Enter`/`Space` key handler. |
+| F-74 ✓ | P1 | University.Labs | Filter pills ("همه", "پزشکی", …) were dead `<span class="pill">`. | Extracted `LabsFilterPills` with state + aria-pressed. |
+| F-75 ✓ | P1 | Search | Mode chips ("هیبرید", "فقط معنایی", …) were `<span onClick>` — no keyboard. | Converted to `<button type="button">` with `aria-pressed`. |
+| F-76 ✓ | P1 | Community | Tag pills were `cursor-pointer` spans with no onClick. | Converted to real `<button>` that surfaces a toast explaining the mock state. |
+| F-77 ✓ | P1 | Admissions | Step indicator pills were `<div onClick>` — no keyboard, no `aria-current`. | Converted to `<button aria-current="step">` with descriptive `aria-label`. |
+| F-78 ✓ | P1 | Assessment | Question-overview grid items were `<div onClick>` (60 items). | Converted to `<button aria-current="step">` with status in `aria-label`. |
+| F-79 ✓ | P1 | Home | Course cards + portal-entry cards were `<div onClick>`. | Converted to `<button>` with `aria-label`; CSS adds focus-visible ring and resets button defaults. |
+| F-80 ✓ | P1 | More.Calendar | Calendar event chips were `<div onClick>`. | Converted to `<button>` with full event description in `aria-label`. |
+| F-81 ✓ | P1 | Search | Result rows were `<div onClick>`. | Added `role="link"`, `tabIndex`, `aria-label`, Enter/Space key handler. |
+
+
 

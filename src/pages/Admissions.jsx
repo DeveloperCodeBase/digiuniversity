@@ -36,10 +36,21 @@ export const AdmissionsPage = ({ go }) => {
           background: "var(--surface)",
           border: "1px solid var(--line)"}}>
           {steps.map((s) => (
-            <div className="p-4 rounded-xl cursor-pointer" key={s.n} onClick={() => setStep(s.n)}  style={{
-              background: step === s.n ? "color-mix(in oklch, var(--cyan) 12%, var(--surface-2))" : "transparent",
-              border: "1px solid " + (step === s.n ? "color-mix(in oklch, var(--cyan) 40%, transparent)" : "transparent"),
-              transition: "140ms ease"}}>
+            <button
+              type="button"
+              className="p-4 rounded-xl cursor-pointer text-right"
+              key={s.n}
+              onClick={() => setStep(s.n)}
+              aria-current={step === s.n ? "step" : undefined}
+              aria-label={`مرحله ${s.n}: ${s.t}${s.done ? " · تکمیل شده" : ""}`}
+              style={{
+                background: step === s.n ? "color-mix(in oklch, var(--cyan) 12%, var(--surface-2))" : "transparent",
+                border: "1px solid " + (step === s.n ? "color-mix(in oklch, var(--cyan) 40%, transparent)" : "transparent"),
+                transition: "140ms ease",
+                fontFamily: "inherit",
+                color: "var(--fg)",
+              }}
+            >
               <div className="flex items-center gap-2.5" >
                 <div className="grid"  style={{width: 28, height: 28, borderRadius: 50,
                   background: s.done ? "var(--cyan)" : step === s.n ? "var(--violet)" : "var(--surface-3)",
@@ -49,7 +60,7 @@ export const AdmissionsPage = ({ go }) => {
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 500 }}>{s.t}</div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 

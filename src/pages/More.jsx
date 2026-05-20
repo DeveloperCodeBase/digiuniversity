@@ -84,19 +84,27 @@ export const CalendarPage = ({ go }) => {
                     const height = e.dur * 60;
                     const c = colorFor(e.kind);
                     return (
-                      <div className="absolute rounded-md cursor-pointer overflow-hidden" key={ei} onClick={() => go("classroom")}  style={{
+                      <button
+                        type="button"
+                        className="absolute rounded-md cursor-pointer overflow-hidden text-right"
+                        key={ei}
+                        onClick={() => go("classroom")}
+                        aria-label={`رویداد ${e.code}: ${e.t} از ${toFa(e.start)}:۰۰ تا ${toFa(e.start + e.dur)}:۰۰`}
+                        style={{
                         top: top + 2,
                         right: 4, left: 4,
                         height: height - 4,
                         background: "color-mix(in oklch, " + c + " 10%, var(--surface))",
                         borderRight: "3px solid " + c,
-                        padding: "8px 12px"}}>
+                        padding: "8px 12px",
+                        fontFamily: "inherit",
+                        color: "var(--fg)"}}>
                         <div className="mono" style={{ fontSize: 10, color: c, letterSpacing: "0.06em" }}>{e.code}</div>
                         <div style={{ fontSize: 12, fontWeight: 600, marginTop: 3, lineHeight: 1.3 }}>{e.t}</div>
                         <div className="mt-0.5"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)"}}>
                           {toFa(e.start)}:۰۰ — {toFa(e.start + e.dur)}:۰۰
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

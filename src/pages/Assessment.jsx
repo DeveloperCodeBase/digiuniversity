@@ -106,13 +106,20 @@ export const AssessmentPage = ({ go }) => {
             <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>سوالات نمای کلی</div>
             <div className="grid gap-1.5"  style={{ gridTemplateColumns: "repeat(6, 1fr)"}}>
               {Array.from({ length: total }, (_, i) => (
-                <div className="rounded-md grid cursor-pointer" key={i} onClick={() => setCurrent(i + 1)}  style={{aspectRatio: "1",
+                <button
+                  type="button"
+                  className="rounded-md grid cursor-pointer"
+                  key={i}
+                  onClick={() => setCurrent(i + 1)}
+                  aria-current={i === current - 1 ? "step" : undefined}
+                  aria-label={`سوال ${toFa(i + 1)}${i < current - 1 ? " · پاسخ داده شده" : i === current - 1 ? " · فعلی" : ""}`}
+                  style={{aspectRatio: "1",
                   background: i < current - 1 ? "var(--cyan)" : i === current - 1 ? "var(--violet)" : "var(--surface-2)",
                   color: i <= current - 1 ? (i === current - 1 ? "white" : "#051418") : "var(--fg-mute)", placeItems: "center",
                   fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700,
                   border: "1px solid " + (i === current - 1 ? "var(--violet)" : "transparent")}}>
                   {toFa(i + 1)}
-                </div>
+                </button>
               ))}
             </div>
           </div>

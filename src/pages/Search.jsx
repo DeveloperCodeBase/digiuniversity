@@ -24,7 +24,7 @@ export const SearchPage = ({ go }) => {
           <span className="mono" style={{ color: "var(--fg-mute)" }}>⌘ K</span>
         </div>
 
-        <div className="search-chips">
+        <div className="search-chips" role="group" aria-label="حالت جستجو">
           {[
             ["hybrid", "هیبرید (BM25 + معنایی)"],
             ["semantic", "فقط معنایی"],
@@ -32,9 +32,16 @@ export const SearchPage = ({ go }) => {
             ["instructor", "صحبت استاد"],
             ["student", "پرسش دانشجو"],
           ].map(([id, lbl]) => (
-            <span className={"cursor-pointer " + " " + ("pill " + (mode === id ? "pill-cyan" : ""))} key={id} onClick={() => setMode(id)}  >
+            <button
+              key={id}
+              type="button"
+              className={"pill " + (mode === id ? "pill-cyan" : "")}
+              style={{ cursor: "pointer", border: "none", background: mode === id ? undefined : "var(--surface)" }}
+              aria-pressed={mode === id}
+              onClick={() => setMode(id)}
+            >
               {lbl}
-            </span>
+            </button>
           ))}
         </div>
 
@@ -64,7 +71,15 @@ export const SearchPage = ({ go }) => {
         {/* Results */}
         <div className="flex flex-col gap-3.5" >
           {RESULTS.map((r, i) => (
-            <div key={i} className="search-result" onClick={() => go("classroom")}>
+            <div
+              key={i}
+              className="search-result"
+              role="link"
+              tabIndex={0}
+              aria-label={`${r.title} · ${r.course} · ${r.role === "instructor" ? "استاد" : r.role === "student" ? "دانشجو" : "جزوه"} در ${r.timestamp}`}
+              onClick={() => go("classroom")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("classroom"); } }}
+            >
               <div className="search-thumb">
                 <div className="play-trig"><Icon name="play" size={14} /></div>
                 <span className="ts">{r.timestamp}</span>

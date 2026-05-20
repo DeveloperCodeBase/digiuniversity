@@ -60,9 +60,15 @@ export const CommunityPage = ({ go }) => {
             </ul>
 
             <div className="mono mt-7 mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>تگ‌های فعال</div>
-            <div className="flex flex-wrap gap-1.5" >
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="تگ‌ها">
               {["یادگیری ماشین", "پایتون", "ریاضی", "NLP", "PyTorch", "آمار", "SQL", "Linux"].map((t) => (
-                <span key={t} className="pill cursor-pointer"  style={{ fontSize: 10}}>{t}</span>
+                <button
+                  key={t}
+                  type="button"
+                  className="pill"
+                  style={{ fontSize: 10, cursor: "pointer", border: "none", background: "var(--surface)" }}
+                  onClick={() => window.toast?.({ title: "فیلتر بر اساس تگ", msg: `موضوع «${t}» — این فیلتر در نسخه‌ی نمایشی فعال نیست.`, kind: "info" })}
+                >{t}</button>
               ))}
             </div>
           </aside>
