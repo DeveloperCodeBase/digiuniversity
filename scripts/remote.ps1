@@ -201,6 +201,35 @@ echo "--- line numbers of reverse_proxy 127.0.0.1:8090 in Caddyfile (expect 0) -
 sudo grep -nE 'reverse_proxy[[:space:]]+127\.0\.0\.1:8090' "$HOST_CADDYFILE" || echo "(none)"
 echo "--- line numbers of reverse_proxy .*digiuniversity in Caddyfile ---"
 sudo grep -nE 'reverse_proxy[[:space:]]+digiuniversity' "$HOST_CADDYFILE" || echo "(none)"
+echo "--- Caddy running config (admin API): upstreams for digiuniversity ---"
+docker exec hooshgate_caddy sh -c 'wget -qO- http://localhost:2019/config/apps/http/servers 2>/dev/null | head -c 30000' \
+  | python3 -c "
+import json,sys
+try:
+    cfg=json.load(sys.stdin)
+except Exception as e:
+    print('cannot parse:', e); sys.exit(0)
+for sname,srv in cfg.items():
+    for route in srv.get('routes',[]):
+        match=route.get('match',[{}])
+        hosts=match[0].get('host',[])
+        if any('digiuniversity' in h for h in hosts):
+            print(sname, hosts)
+            # Walk to find reverse_proxy upstreams
+            def find_upstreams(o):
+                if isinstance(o,dict):
+                    if 'upstreams' in o: return o['upstreams']
+                    for v in o.values():
+                        r=find_upstreams(v)
+                        if r is not None: return r
+                if isinstance(o,list):
+                    for v in o:
+                        r=find_upstreams(v)
+                        if r is not None: return r
+                return None
+            ups=find_upstreams(route)
+            print('  upstreams:', ups)
+" || echo '(admin API not reachable)'
 '@
         $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
         $si = New-Object System.Diagnostics.ProcessStartInfo
