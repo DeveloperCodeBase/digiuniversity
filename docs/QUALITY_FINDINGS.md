@@ -232,6 +232,17 @@ Plan-file Phase 13 §3 calls for CI gating PRs on lint/test/build/security. R4 l
 | F-105 ✓ | P1 | Security / CI | No secret-scan on PRs — a `.env` paste in a commit message or diff could leak. No CVE scanning on the lockfiles. No SAST. | New `.github/workflows/security.yml`. Four jobs: `gitleaks` (full-history diff + history scan), `npm-audit` (web + api, advisory-only for now), `trivy-fs` (CVE scan on lockfiles + Dockerfiles, SARIF uploaded to Security tab, severity HIGH+ CRITICAL), `semgrep` (p/owasp-top-ten + p/javascript rule sets, SARIF uploaded). Runs on push to main, every PR, and a daily 07:15 UTC cron to catch newly-disclosed CVEs. |
 | F-106 ✓ | P2 | Dependency hygiene | No automated dependency updates — repo was vulnerable to silently aging deps with known CVEs. | New `.github/dependabot.yml` tracking 7 update channels: web npm (`/`), api npm (`/apps/api`), pip (`/apps/ai-gateway`), github-actions, and docker images in `/`, `/apps/api`, `/apps/ai-gateway`. Weekly Monday-morning cadence Asia/Tehran. Minor/patch bumps grouped into a single PR per ecosystem to reduce noise; major bumps stay individual. |
 
+---
+
+## Phase 13 — Round 5: defence-in-depth — remove host port 8090
+
+`docker-compose.yml` published the SPA on host port 8090 (`8090:80`). The host Caddy proxies through to it via the docker network, so the 8090 publication was an escape hatch that bypassed Caddy entirely. R5 removes it after verifying Caddy is on the `digiuniversity_web` network and reaches the SPA by docker DNS name.
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-107 ✓ | P1 | Defence in depth | App container published 8090:80 on the host, giving any process on the VPS (including other tenants if the firewall ever lapsed) a plain-HTTP path that bypassed Caddy's TLS + headers + access-log + future-rate-limit. | Removed `ports: - "8090:80"` from the `app` service in `docker-compose.yml`. Replaced with `expose: - "80"` to keep the container's port internal to the docker network. Caddy reaches it via `digiuniversity-app:80` (docker DNS), confirmed via `caddy-verify`. To restore the escape hatch in an emergency, uncomment the ports block. |
+| F-108 ✓ | P2 | Internal probes | `remote.ps1 domain-probe` and `remote.ps1 health` both probed nginx via the host port `127.0.0.1:8090`, so they would silently break after F-107. | Both switched to `docker exec digiuniversity-app curl -fsS http://127.0.0.1/...` so they probe inside the container's network namespace and don't depend on host port publication. Caddy + DNS probes (parts of `domain-probe`) unchanged. |
+
 
 
 

@@ -107,7 +107,9 @@ switch ($Action) {
 
     "domain-probe" {
         # Run from the VPS itself so we bypass any Windows TLS quirks.
-        Remote "echo '--- DNS ---' && (getent hosts digiuniversity.ir || echo 'no DNS resolution from VPS') ; echo '--- direct container (host port 8090) ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1:8090/ ; echo '--- via host Caddy on :80 ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1/ ; echo '--- via host Caddy on :443 with Host hdr ---' && curl -k -sSI --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/ ; echo '--- /healthz via local :443 ---' && curl -k -sS --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/healthz"
+        # Direct-container check uses docker exec instead of a host port,
+        # so this still works after R5 removes the 8090:80 publication.
+        Remote "echo '--- DNS ---' && (getent hosts digiuniversity.ir || echo 'no DNS resolution from VPS') ; echo '--- direct container (via docker exec) ---' && docker exec digiuniversity-app curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1/ ; echo '--- via host Caddy on :80 ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1/ ; echo '--- via host Caddy on :443 with Host hdr ---' && curl -k -sSI --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/ ; echo '--- /healthz via local :443 ---' && curl -k -sS --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/healthz"
     }
 
     "caddy-install" {
@@ -338,11 +340,13 @@ for sname,srv in cfg.items():
     }
 
     "health" {
-        # Probe the three internal services + nginx healthz from the VPS
-        # itself (bypasses any Cloudflare / Caddy / DNS quirk). Each curl
-        # uses -f so a non-2xx fails the action, and -sS for compact
-        # output. Run sequentially so the failure of one is obvious.
-        Remote "set -e; echo '--- nginx (digiuniversity-app) /healthz ---'; curl -fsS http://127.0.0.1:8090/healthz || echo 'FAILED'; echo; echo '--- api /v1/health (via docker exec — container not host-exposed) ---'; docker exec digiuniversity-api curl -fsS http://127.0.0.1:4000/v1/health || echo 'FAILED'; echo; echo '--- ai-gateway /v1/health ---'; docker exec digiuniversity-ai-gateway curl -fsS http://127.0.0.1:8000/v1/health || echo 'FAILED'; echo; echo '--- postgres pg_isready ---'; docker exec digiuniversity-postgres pg_isready -U digiuniversity -d digiuniversity || echo 'FAILED'"
+        # Probe the four services from inside the VPS via docker exec, so
+        # the action does not depend on any host port publication. After
+        # R5, the SPA container is reachable only through the
+        # digiuniversity_web docker network (Caddy joins it via
+        # caddy-install) — this probe still works because docker exec
+        # runs inside the container's own network namespace.
+        Remote "set -e; echo '--- nginx (digiuniversity-app) /healthz ---'; docker exec digiuniversity-app curl -fsS http://127.0.0.1/healthz || echo 'FAILED'; echo; echo '--- api /v1/health ---'; docker exec digiuniversity-api curl -fsS http://127.0.0.1:4000/v1/health || echo 'FAILED'; echo; echo '--- ai-gateway /v1/health ---'; docker exec digiuniversity-ai-gateway curl -fsS http://127.0.0.1:8000/v1/health || echo 'FAILED'; echo; echo '--- postgres pg_isready ---'; docker exec digiuniversity-postgres pg_isready -U digiuniversity -d digiuniversity || echo 'FAILED'"
     }
 
     "migrate" {

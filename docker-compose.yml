@@ -12,8 +12,18 @@ services:
     image: digiuniversity:latest
     container_name: digiuniversity-app
     restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8090}:80"
+    # Phase-13 R5: no host port publication. The SPA is reachable
+    # only via the digiuniversity_web docker network. The host Caddy
+    # (hooshgate_caddy) joins that network via `caddy-install` and
+    # proxies through to `digiuniversity-app:80`. Removing the host
+    # port closes a defence-in-depth gap (no plain-HTTP listener
+    # bypass-Caddy possible). To restore the escape hatch in an
+    # emergency (Caddy is down), uncomment the ports block, run
+    # `remote.ps1 up`, then revert when fixed.
+    # ports:
+    #   - "${APP_PORT:-8090}:80"
+    expose:
+      - "80"
     environment:
       - TZ=${TZ:-UTC}
     healthcheck:
