@@ -139,6 +139,19 @@ elif [ -n "$HOST_CADDYFILE" ]; then
     write_snippet "$HOST_CADDYFILE"
 fi
 
+# 6. If a prior sed -i orphaned the bind mount (host inode != container
+#    inode), the container's view of Caddyfile is stale. Push the host
+#    file content into the container path so they re-converge. `docker cp`
+#    writes to the inode the container currently sees.
+if [ -n "$HOST_CADDYFILE" ]; then
+    HOST_INO=$(sudo stat -c %i "$HOST_CADDYFILE")
+    CONT_INO=$(docker exec "$CADDY_CONTAINER" stat -c %i /etc/caddy/Caddyfile)
+    if [ "$HOST_INO" != "$CONT_INO" ]; then
+        echo "Bind-mount inode drift detected (host=$HOST_INO container=$CONT_INO); syncing via docker cp."
+        sudo docker cp "$HOST_CADDYFILE" "$CADDY_CONTAINER":/etc/caddy/Caddyfile
+    fi
+fi
+
 docker exec "$CADDY_CONTAINER" caddy validate --config /etc/caddy/Caddyfile
 docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 echo "Caddy reloaded."
