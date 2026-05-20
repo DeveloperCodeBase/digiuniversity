@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config")]
     [string]$Action
 )
 
@@ -169,6 +169,12 @@ echo "Caddy reloaded."
         # Tail Caddy's recent stdout to debug proxy issues. Filtered to lines
         # that mention digiuniversity so other tenants stay out of the dump.
         Remote "docker logs --tail=400 hooshgate_caddy 2>&1 | grep -iE 'digiuniversity|reverse_proxy|upstream' | tail -40"
+    }
+
+    "caddy-which-config" {
+        # Confirm exactly which Caddyfile Caddy is loading, and what the
+        # in-container file's reverse_proxy line says.
+        Remote "echo '--- Caddy process command-line ---' && docker exec hooshgate_caddy sh -c 'cat /proc/1/cmdline | tr \0 \  ; echo' && echo '--- digi reverse_proxy line as Caddy sees it ---' && docker exec hooshgate_caddy grep -nE 'reverse_proxy.*8090|reverse_proxy.*digiuniversity' /etc/caddy/Caddyfile || true ; echo '--- inode of /etc/caddy/Caddyfile (container) vs host file ---' && docker exec hooshgate_caddy stat -c '%i %n' /etc/caddy/Caddyfile ; sudo stat -c '%i %n' /home/ubuntu/Desktop/magazine/deploy/Caddyfile"
     }
 
     "caddy-probe-and-logs" {
