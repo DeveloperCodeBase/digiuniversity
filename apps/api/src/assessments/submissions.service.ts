@@ -7,6 +7,7 @@ import {
 import type { Prisma } from "@prisma/client";
 
 import { AiBridgeService } from "../ai-bridge/ai-bridge.service";
+import { LearningEventsService } from "../analytics/learning-events.service";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -21,6 +22,7 @@ export class SubmissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ai: AiBridgeService,
+    private readonly events: LearningEventsService,
   ) {}
 
   /**
@@ -127,7 +129,7 @@ export class SubmissionsService {
 
     const status = dto.finalize ? (grade !== null ? "graded" : "submitted") : "draft";
 
-    return this.prisma.submission.upsert({
+    const saved = await this.prisma.submission.upsert({
       where: {
         assessmentId_userId: { assessmentId: assessment.id, userId: user.userId },
       },
@@ -162,6 +164,19 @@ export class SubmissionsService {
         deletedAt: null,
       },
     });
+
+    if (dto.finalize) {
+      await this.events.emit({
+        tenantId: user.tenantId,
+        userId: user.userId,
+        type: assessment.kind === "quiz" ? "quiz_submitted" : "assignment_submitted",
+        courseId: assessment.courseId,
+        assessmentId: assessment.id,
+        data: { autoScore, grade, status },
+      });
+    }
+
+    return saved;
   }
 
   async listMine(user: AuthenticatedUser) {
@@ -251,7 +266,7 @@ export class SubmissionsService {
     if (dto.grade < 0 || dto.grade > 100) {
       throw new BadRequestException("grade must be between 0 and 100");
     }
-    return this.prisma.submission.update({
+    const updated = await this.prisma.submission.update({
       where: { id },
       data: {
         status: "graded",
@@ -262,6 +277,14 @@ export class SubmissionsService {
         updatedBy: user.userId,
       },
     });
+    await this.events.emit({
+      tenantId: user.tenantId,
+      userId: row.userId,
+      type: "submission_graded",
+      assessmentId: row.assessmentId,
+      data: { grade: dto.grade, gradedBy: user.userId },
+    });
+    return updated;
   }
 
   /**

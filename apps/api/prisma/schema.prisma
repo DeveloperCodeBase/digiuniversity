@@ -46,6 +46,7 @@ model Tenant {
   assessments     Assessment[]
   questions       Question[]
   submissions     Submission[]
+  learningEvents  LearningEvent[]
 
   @@index([slug])
 }
@@ -71,6 +72,7 @@ model User {
   attendance     Attendance[]
   hostedSessions ClassSession[]     @relation("ClassSessionHost")
   submissions    Submission[]
+  learningEvents LearningEvent[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -553,6 +555,41 @@ model Submission {
   @@index([assessmentId])
   @@index([userId])
   @@index([deletedAt])
+}
+
+// ---------- Learning events ----------
+//
+// One row per observed action — emitted by service code at the seams
+// (class-sessions.join, submissions.finalize, …) and by the SPA via
+// POST /v1/learning-events for client-only signals (lesson_opened,
+// ai_summary_viewed, confusion_reported).
+//
+// `type` is open-ended at the DB level (catalogue lives in docs/data/
+// EVENT_CATALOG.md); the analytics service only relies on the curated
+// types it knows about.
+
+model LearningEvent {
+  id              String   @id @default(cuid())
+  tenantId        String
+  userId          String?  // null for system-emitted events
+  type            String
+  courseId        String?
+  lessonId        String?
+  assessmentId    String?
+  classSessionId  String?
+  data            Json?
+  occurredAt      DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([type])
+  @@index([occurredAt])
+  @@index([courseId])
+  @@index([assessmentId])
+  @@index([classSessionId])
 }
 
 // ---------- AI audit log ----------

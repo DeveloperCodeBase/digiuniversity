@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 
+import { LearningEventsService } from "../analytics/learning-events.service";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -21,6 +22,7 @@ export class ClassSessionsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(LIVE_CLASS_PROVIDER) private readonly provider: LiveClassProvider,
+    private readonly events: LearningEventsService,
   ) {}
 
   // ---------- helpers ----------
@@ -234,6 +236,14 @@ export class ClassSessionsService {
         userId: user.userId,
       },
     });
+    await this.events.emit({
+      tenantId: user.tenantId,
+      userId: user.userId,
+      type: "class_joined",
+      courseId: session.courseId,
+      classSessionId: session.id,
+      data: { attendanceId: attendance.id },
+    });
     return {
       session: {
         id: session.id,
@@ -256,6 +266,14 @@ export class ClassSessionsService {
     await this.prisma.attendance.update({
       where: { id: last.id },
       data: { leftAt: new Date() },
+    });
+    await this.events.emit({
+      tenantId: user.tenantId,
+      userId: user.userId,
+      type: "class_left",
+      courseId: session.courseId,
+      classSessionId: session.id,
+      data: { attendanceId: last.id },
     });
     return { left: true };
   }

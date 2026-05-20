@@ -102,6 +102,36 @@ export const enrollmentsApi = {
     api.patch("/v1/enrollments/" + encodeURIComponent(id) + "/status", { status }),
 };
 
+// ---------- analytics + learning events ----------
+export const analyticsApi = {
+  studentMe: () => api.get("/v1/analytics/student/me"),
+  studentByUser: (userId) =>
+    api.get("/v1/analytics/student/" + encodeURIComponent(userId)),
+  course: (courseId) => api.get("/v1/analytics/course/" + encodeURIComponent(courseId)),
+  tenant: () => api.get("/v1/analytics/tenant"),
+  riskMe: () => api.get("/v1/analytics/risk/me"),
+  riskByUser: (userId) =>
+    api.get("/v1/analytics/risk/" + encodeURIComponent(userId)),
+};
+
+export const learningEventsApi = {
+  emit: ({ type, courseId, lessonId, assessmentId, classSessionId, data } = {}) =>
+    api.post("/v1/learning-events", {
+      type,
+      ...(courseId ? { courseId } : {}),
+      ...(lessonId ? { lessonId } : {}),
+      ...(assessmentId ? { assessmentId } : {}),
+      ...(classSessionId ? { classSessionId } : {}),
+      ...(data ? { data } : {}),
+    }),
+  listMine: ({ type, courseId } = {}) => {
+    const q = [];
+    if (type) q.push("type=" + encodeURIComponent(type));
+    if (courseId) q.push("courseId=" + encodeURIComponent(courseId));
+    return api.get("/v1/learning-events/me" + (q.length ? "?" + q.join("&") : ""));
+  },
+};
+
 // ---------- users ----------
 export const usersApi = {
   me: () => api.get("/v1/users/me"),
