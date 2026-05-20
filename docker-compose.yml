@@ -7,7 +7,11 @@ name: digiuniversity
 services:
   app:
     build:
-      context: .
+      # Phase-14 R1: web sources moved from /src + root configs into
+      # apps/web/. The Dockerfile + nginx.conf live alongside the
+      # source now, so the build context narrows to that subdir. The
+      # api + ai-gateway services already followed this convention.
+      context: ./apps/web
       dockerfile: Dockerfile
     # Phase-13 R3: image tag is overridable via the IMAGE_TAG env var
     # so a future CI deploy pipeline can pin a SHA (digiuniversity:abc1234)

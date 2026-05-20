@@ -255,6 +255,16 @@ Plan-file Phase 13 §3 calls for CI gating PRs on lint/test/build/security. R4 l
 | F-110 ✓ | P2 | Deploy tooling | No way to label a known-good build for later rollback. | New `remote.ps1 pin-image` action: tags the currently-running app/api/ai-gateway images with the active git short-SHA (`digiuniversity:abc1234`, etc.). New `remote.ps1 list-images` action: lists all locally-tagged digiuniversity images newest-first so a rollback target is pickable. |
 | F-111 ✓ | P1 | Deploy tooling | `rollback` only did `git revert` + rebuild — slow and risky during an incident (any rebuild bug propagates). | Extended `rollback` with a `-Sha <git-sha>` mode that does `IMAGE_TAG=<sha> docker compose up -d --no-build` against the pinned tag. Fast (no rebuild), no git history change. Falls back to the git-revert path when no `-Sha` is given. Closes the rollback-speed gap. |
 
+---
+
+## Phase 14 — Round 1: monorepo restructure (src/ → apps/web/)
+
+Plan-file Phase 14 step 1. apps/api/ + apps/ai-gateway/ already lived under apps/. The SPA was the odd one out at the repo root. R1 moves it into the same convention without introducing npm workspaces, TypeScript, Turborepo, or router changes — those are R2/R3 + later sprints.
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-112 ✓ | P1 | Monorepo layout | The web SPA lived at the repo root (src/, public/, vite.config.js, package.json, Dockerfile, nginx.conf, tests/, .storybook/, index.html, styles.css, tailwind/postcss configs, playwright.config.js, .dockerignore) while api + ai-gateway were already under apps/. Inconsistent layout blocked the rest of Phase 14 (TS migration, BrowserRouter) from being a focused subdirectory diff. | `git mv` all 15 SPA files/dirs into `apps/web/`. Updated `docker-compose.yml` app service: `context: ./apps/web`, `dockerfile: Dockerfile` (Dockerfile + nginx.conf moved alongside the source so paths are still relative to context). Updated `.github/workflows/ci.yml` web job: `defaults.run.working-directory: apps/web`, `cache-dependency-path: apps/web/package-lock.json`, `path: apps/web/dist` for the artifact. Image tag / compose service identity / network bindings unchanged so the deploy is byte-identical (verified via build digest comparison). |
+
 
 
 
