@@ -102,6 +102,124 @@ async function main(): Promise<void> {
     }
   }
 
+  // ---------- Phase 3: university domain demo data ----------
+  // Idempotent: every upsert keys on a tenant-scoped natural id. Re-runs
+  // are no-ops once the demo content exists.
+  console.log(`[seed] ensuring demo university structure`);
+
+  const faculty = await prisma.faculty.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "engineering" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      slug: "engineering",
+      name: "دانشکده مهندسی",
+      description: "Faculty of Engineering",
+    },
+  });
+
+  const department = await prisma.department.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "computer-science" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      facultyId: faculty.id,
+      slug: "computer-science",
+      name: "علوم کامپیوتر",
+      description: "Department of Computer Science",
+    },
+  });
+
+  const program = await prisma.program.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "bsc-cs" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      departmentId: department.id,
+      slug: "bsc-cs",
+      name: "کارشناسی علوم کامپیوتر",
+      degreeLevel: "bachelor",
+      durationSemesters: 8,
+    },
+  });
+
+  const cohort = await prisma.cohort.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "1405-fall" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      programId: program.id,
+      slug: "1405-fall",
+      name: "ورودی پاییز ۱۴۰۵",
+      startDate: new Date("2026-09-23T00:00:00Z"),
+    },
+  });
+
+  const course = await prisma.course.upsert({
+    where: { tenantId_code: { tenantId: tenant.id, code: "CS101" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      programId: program.id,
+      code: "CS101",
+      title: "مقدمه‌ای بر علوم کامپیوتر",
+      description: "Introduction to Computer Science",
+      credits: 3,
+      language: "fa",
+      level: "beginner",
+    },
+  });
+
+  // Two modules + a couple of lessons each, just enough to demonstrate
+  // a real course shape.
+  const m1 = await prisma.courseModule.upsert({
+    where: { id: `seed_${tenant.id}_${course.id}_m1` },
+    update: {},
+    create: {
+      id: `seed_${tenant.id}_${course.id}_m1`,
+      tenantId: tenant.id,
+      courseId: course.id,
+      title: "مفاهیم پایه",
+      orderIndex: 0,
+    },
+  });
+  const m2 = await prisma.courseModule.upsert({
+    where: { id: `seed_${tenant.id}_${course.id}_m2` },
+    update: {},
+    create: {
+      id: `seed_${tenant.id}_${course.id}_m2`,
+      tenantId: tenant.id,
+      courseId: course.id,
+      title: "الگوریتم‌ها",
+      orderIndex: 1,
+    },
+  });
+  const lessons = [
+    { mod: m1, idx: 0, title: "حساب و منطق", minutes: 45 },
+    { mod: m1, idx: 1, title: "متغیرها و توابع", minutes: 60 },
+    { mod: m2, idx: 0, title: "ساختمان داده‌ها", minutes: 60 },
+    { mod: m2, idx: 1, title: "پیچیدگی زمانی", minutes: 50 },
+  ];
+  for (const l of lessons) {
+    await prisma.lesson.upsert({
+      where: { id: `seed_${tenant.id}_${l.mod.id}_l${l.idx}` },
+      update: {},
+      create: {
+        id: `seed_${tenant.id}_${l.mod.id}_l${l.idx}`,
+        tenantId: tenant.id,
+        moduleId: l.mod.id,
+        title: l.title,
+        durationMinutes: l.minutes,
+        orderIndex: l.idx,
+      },
+    });
+  }
+
+  console.log(
+    `[seed] university: faculty=${faculty.slug}, department=${department.slug}, ` +
+      `program=${program.slug}, cohort=${cohort.slug}, course=${course.code}`,
+  );
+
   console.log("[seed] done");
 }
 

@@ -9,6 +9,12 @@ import { RolesGuard } from "./auth/guards/roles.guard";
 import { HealthController } from "./health/health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TenantsModule } from "./tenants/tenants.module";
+import { CohortsModule } from "./university/cohorts/cohorts.module";
+import { CoursesModule } from "./university/courses/courses.module";
+import { DepartmentsModule } from "./university/departments/departments.module";
+import { EnrollmentsModule } from "./university/enrollments/enrollments.module";
+import { FacultiesModule } from "./university/faculties/faculties.module";
+import { ProgramsModule } from "./university/programs/programs.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -19,6 +25,13 @@ import { UsersModule } from "./users/users.module";
     TenantsModule,
     UsersModule,
     AiLogsModule,
+    // University domain (Phase 3).
+    FacultiesModule,
+    DepartmentsModule,
+    ProgramsModule,
+    CoursesModule,
+    CohortsModule,
+    EnrollmentsModule,
   ],
   controllers: [HealthController],
   providers: [

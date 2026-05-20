@@ -32,6 +32,14 @@ model Tenant {
   permissions     Permission[]
   refreshTokens   RefreshToken[]
   aiInteractions  AiInteractionLog[]
+  faculties       Faculty[]
+  departments     Department[]
+  programs        Program[]
+  courses         Course[]
+  courseModules   CourseModule[]
+  lessons         Lesson[]
+  cohorts         Cohort[]
+  enrollments     Enrollment[]
 
   @@index([slug])
 }
@@ -49,10 +57,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   userRoles      UserRole[]
   refreshTokens  RefreshToken[]
   aiInteractions AiInteractionLog[]
+  enrollments    Enrollment[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -135,6 +144,214 @@ model RefreshToken {
   @@index([userId])
   @@index([tenantId])
   @@index([expiresAt])
+}
+
+// ---------- University domain ----------
+//
+// Org structure: Faculty → Department → Program → (Course | Cohort).
+// Course content: Course → CourseModule → Lesson.
+// Membership: Enrollment ties a User to a Course (optionally inside a
+// Cohort). Every row carries `tenantId` (filtered on every read) plus
+// the audit fields (`createdAt`, `updatedAt`, `createdBy`, `updatedBy`)
+// and a nullable `deletedAt` for soft delete — see docs/ADRs/0005.
+
+model Faculty {
+  id          String    @id @default(cuid())
+  tenantId    String
+  slug        String
+  name        String
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  departments Department[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([deletedAt])
+}
+
+model Department {
+  id          String    @id @default(cuid())
+  tenantId    String
+  facultyId   String
+  slug        String
+  name        String
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  faculty  Faculty   @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  programs Program[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([facultyId])
+  @@index([deletedAt])
+}
+
+model Program {
+  id                String    @id @default(cuid())
+  tenantId          String
+  departmentId      String
+  slug              String
+  name              String
+  description       String?
+  degreeLevel       String    // "bachelor" | "master" | "phd" | "certificate"
+  durationSemesters Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  courses    Course[]
+  cohorts    Cohort[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([departmentId])
+  @@index([deletedAt])
+}
+
+model Course {
+  id          String    @id @default(cuid())
+  tenantId    String
+  programId   String
+  code        String    // human-friendly identifier, e.g. "CS101"
+  title       String
+  description String?
+  credits     Int       @default(3)
+  language    String    @default("fa")
+  level       String?   // "beginner" | "intermediate" | "advanced"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program     Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
+  modules     CourseModule[]
+  enrollments Enrollment[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([programId])
+  @@index([deletedAt])
+}
+
+model CourseModule {
+  id          String    @id @default(cuid())
+  tenantId    String
+  courseId    String
+  title       String
+  description String?
+  orderIndex  Int       @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([tenantId])
+  @@index([courseId])
+  @@index([deletedAt])
+}
+
+model Lesson {
+  id              String    @id @default(cuid())
+  tenantId        String
+  moduleId        String
+  title           String
+  contentMarkdown String?
+  durationMinutes Int?
+  orderIndex      Int       @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  module CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([moduleId])
+  @@index([deletedAt])
+}
+
+model Cohort {
+  id        String    @id @default(cuid())
+  tenantId  String
+  programId String
+  slug      String
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([programId])
+  @@index([deletedAt])
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  tenantId    String
+  userId      String
+  courseId    String
+  cohortId    String?
+  status      String    @default("active") // "active" | "completed" | "dropped" | "withdrawn"
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  cohort Cohort? @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, userId, courseId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([deletedAt])
 }
 
 // ---------- AI audit log ----------
