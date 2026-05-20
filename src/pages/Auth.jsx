@@ -6,6 +6,18 @@ import React from "react";
 import { Icon } from "../icons.jsx";
 import { useRole, ROLES } from "../role.jsx";
 import { toFa } from "../shared.jsx";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { ApiError } from "../api/client.js";
+
+// Map API role names → local RoleProvider role IDs. The seed gives the
+// admin user the "admin" role; self-registered accounts get "student".
+const apiRoleToLocal = (roles) => {
+  if (!roles || roles.length === 0) return "student";
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("instructor")) return "instructor";
+  if (roles.includes("student")) return "student";
+  return roles[0];
+};
 
 const AuthShell = ({ children, eyebrow, title, sub, side }) => (
   <main data-screen-label="Auth" style={{ minHeight: "calc(100vh - 64px)" }}>
@@ -47,21 +59,25 @@ const SocialBtn = ({ icon, label }) => (
 // =====================================================
 export const LoginPage = ({ go }) => {
   const { setRole } = useRole();
+  const auth = useAuth();
   const [roleId, setRoleId] = React.useState("student");
+  const [tenantSlug, setTenantSlug] = React.useState("demo");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState({});
+  const [pending, setPending] = React.useState(false);
 
   const validate = () => {
     const e = {};
+    if (!tenantSlug.trim()) e.tenantSlug = "شناسه سازمان الزامی است.";
     if (!email.trim()) e.email = "ایمیل/کد کاربری الزامی است.";
     else if (email.includes("@") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "فرمت ایمیل صحیح نیست.";
     if (!password) e.password = "رمز عبور الزامی است.";
-    else if (password.length < 6) e.password = "رمز عبور حداقل ۶ کاراکتر باشد.";
+    else if (password.length < 8) e.password = "رمز عبور حداقل ۸ کاراکتر باشد.";
     return e;
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
@@ -69,17 +85,33 @@ export const LoginPage = ({ go }) => {
       window.toast?.({ title: "خطا در ورود", msg: Object.values(errs)[0], kind: "warn" });
       return;
     }
-    setRole(roleId);
-    window.toast?.({ title: "خوش آمدید", msg: "با موفقیت وارد شدید.", kind: "success" });
-    const target = (window.ROLES && window.ROLES[roleId] && window.ROLES[roleId].homeRoute) || "dashboard";
-    go(target);
+    setPending(true);
+    try {
+      const user = await auth.login({
+        tenantSlug: tenantSlug.trim().toLowerCase(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      const localRole = apiRoleToLocal(user.roles);
+      setRole(localRole);
+      window.toast?.({ title: "خوش آمدید", msg: "با موفقیت وارد شدید.", kind: "success" });
+      const target = ROLES[localRole]?.homeRoute || "dashboard";
+      go(target);
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.displayMessage : (err?.message || "خطای ناشناخته");
+      setErrors({ general: msg });
+      window.toast?.({ title: "ورود ناموفق", msg, kind: "warn" });
+    } finally {
+      setPending(false);
+    }
   };
 
   const handleSocial = (id) => {
-    setRole(roleId);
-    window.toast?.({ title: "ورود از طریق " + id, msg: "هدایت به مرکز هویت...", kind: "info" });
-    const target = (window.ROLES && window.ROLES[roleId] && window.ROLES[roleId].homeRoute) || "dashboard";
-    go(target);
+    window.toast?.({
+      title: "هنوز فعال نیست",
+      msg: "ورود اجتماعی از " + id + " در فاز بعد پیاده‌سازی می‌شود.",
+      kind: "info",
+    });
   };
 
   return (
@@ -123,6 +155,24 @@ export const LoginPage = ({ go }) => {
 
       {/* Form */}
       <form className="flex flex-col gap-3.5" onSubmit={handleLogin}  noValidate>
+        {errors.general && (
+          <div className="rounded-lg flex items-center gap-2"
+               style={{ padding: "10px 14px", background: "color-mix(in oklch, var(--warn) 20%, var(--bg))", border: "1px solid var(--warn)", fontSize: 13, color: "var(--warn)"}}>
+            <Icon name="alert" size={14} />
+            {errors.general}
+          </div>
+        )}
+        <AuthField
+          name="tenantSlug"
+          autoComplete="organization"
+          required
+          value={tenantSlug}
+          onChange={(e) => setTenantSlug(e.target.value)}
+          error={errors.tenantSlug}
+          label="شناسه سازمان / Tenant"
+          placeholder="demo"
+          icon="shield"
+        />
         <AuthField
           name="email"
           autoComplete="username"
@@ -135,6 +185,7 @@ export const LoginPage = ({ go }) => {
                 roleId === "org" ? "ایمیل سازمانی (SSO)" :
                 "ایمیل یا کد دانشجویی"}
           placeholder={roleId === "instructor" ? "azimi@digiu.edu" :
+                      roleId === "admin" ? "admin@digiuniversity.ir" :
                       roleId === "org" ? "sso@company.com" :
                       "you@example.com"}
           icon="user"
@@ -159,9 +210,9 @@ export const LoginPage = ({ go }) => {
           مرا به خاطر بسپار · احراز دومرحله‌ای فعال
         </label>
 
-        <button type="submit" className="btn btn-primary btn-lg mt-4 justify-center" >
-          ورود به حساب
-          <Icon name="arrow" size={16} />
+        <button type="submit" disabled={pending} className="btn btn-primary btn-lg mt-4 justify-center" >
+          {pending ? "در حال ورود..." : "ورود به حساب"}
+          {!pending && <Icon name="arrow" size={16} />}
         </button>
       </form>
 

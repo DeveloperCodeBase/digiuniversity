@@ -3,11 +3,15 @@
 // =====================================================
 import React from "react";
 import { RoleProvider } from "./role.jsx";
+import { AuthProvider } from "./auth/AuthContext.jsx";
 import { ThemeProvider, UIRoot } from "./ui.jsx";
 import { ScrollProgress } from "./motion.jsx";
 import { Nav } from "./shared.jsx";
 
 import HomePage from "./pages/Home.jsx";
+import CatalogPage from "./pages/Catalog.jsx";
+import CourseLivePage from "./pages/CourseLive.jsx";
+import MyCoursesPage from "./pages/MyCourses.jsx";
 import ProgramsPage from "./pages/Programs.jsx";
 import ClassroomPage from "./pages/Classroom.jsx";
 import DashboardPage from "./pages/Dashboard.jsx";
@@ -64,6 +68,9 @@ const AppShell = () => {
   switch (route) {
     case "home": page = <HomePage go={go} />; break;
     case "programs": page = <ProgramsPage go={go} />; break;
+    case "catalog": page = <CatalogPage go={go} />; break;
+    case "my-courses": page = <MyCoursesPage go={go} />; break;
+    case "course-live": page = <CourseLivePage go={go} courseId={routeParam} />; break;
     case "classroom": page = <ClassroomPage go={go} />; break;
     case "dashboard": page = <DashboardPage go={go} />; break;
     case "course": page = <CoursePage go={go} courseId={routeParam} />; break;
@@ -126,9 +133,11 @@ const AppShell = () => {
 
 const App = () => (
   <ThemeProvider>
-    <RoleProvider>
-      <AppShell />
-    </RoleProvider>
+    <AuthProvider>
+      <RoleProvider>
+        <AppShell />
+      </RoleProvider>
+    </AuthProvider>
   </ThemeProvider>
 );
 
