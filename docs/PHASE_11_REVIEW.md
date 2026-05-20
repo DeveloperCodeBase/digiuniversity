@@ -45,6 +45,30 @@ during the first browser walk:
 After both fixes the audit walked admin + student through every
 live route — F-31 through F-42 are all PASS rows.
 
+### Round 4 — Polish + seed completeness
+
+Once the responsive layer was in, the remaining items were small but
+each one was the kind of thing a real user notices.
+
+- **F-35:** Tutor "ارسال" button got `aria-label="ارسال پرسش به دستیار AI"`
+  so screen readers say what the button does, not just "button".
+- **F-36:** Tutor empty state used to be a single line of placeholder
+  text. Added three click-to-prefill starter prompts pulled from the
+  CS101 syllabus (overfitting, decision trees, stack data structure).
+- **F-37:** Assessment option rows got a visible focus ring via
+  `.assessment-option:focus-within { outline: 2px solid var(--accent) }`.
+  Keyboard navigation is now clearly visible.
+- **F-38:** Logout used to leave the previous user's initials in the
+  navbar for one render frame because `RoleProvider` is a separate
+  store from `AuthContext`. `handleLogout` now calls
+  `setRole("student")` so the navbar avatar resets in the same frame
+  as the auth state clear.
+- **F-46:** The demo tenant only had an admin user. Audit had no
+  built-in instructor or student. Added idempotent seed entries for
+  `instructor1@digiuniversity.ir` (InstructorPass!1) and
+  `student1@digiuniversity.ir` (StudentPass!1) so every role can be
+  tested from scratch after a fresh `prisma migrate reset`.
+
 ### Round 3 — Responsive fixes
 Chrome MCP can't physically resize below the OS minimum window
 (~700 px), so verification combined:
