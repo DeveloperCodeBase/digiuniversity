@@ -140,15 +140,17 @@ elif [ -n "$HOST_CADDYFILE" ]; then
 fi
 
 # 6. If a prior sed -i orphaned the bind mount (host inode != container
-#    inode), the container's view of Caddyfile is stale. Push the host
-#    file content into the container path so they re-converge. `docker cp`
-#    writes to the inode the container currently sees.
+#    inode), the container's view of Caddyfile points at an orphan inode
+#    held open by the container. `docker cp` cannot replace an in-use
+#    bind-mounted file. Pipe the new content into `tee` inside the
+#    container instead — tee truncates+writes in place, preserving the
+#    inode the container is pinned to.
 if [ -n "$HOST_CADDYFILE" ]; then
     HOST_INO=$(sudo stat -c %i "$HOST_CADDYFILE")
     CONT_INO=$(docker exec "$CADDY_CONTAINER" stat -c %i /etc/caddy/Caddyfile)
     if [ "$HOST_INO" != "$CONT_INO" ]; then
-        echo "Bind-mount inode drift detected (host=$HOST_INO container=$CONT_INO); syncing via docker cp."
-        sudo docker cp "$HOST_CADDYFILE" "$CADDY_CONTAINER":/etc/caddy/Caddyfile
+        echo "Bind-mount inode drift detected (host=$HOST_INO container=$CONT_INO); syncing in-place via docker exec tee."
+        sudo cat "$HOST_CADDYFILE" | docker exec -i "$CADDY_CONTAINER" tee /etc/caddy/Caddyfile > /dev/null
     fi
 fi
 
