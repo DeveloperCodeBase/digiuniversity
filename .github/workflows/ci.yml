@@ -49,7 +49,7 @@ jobs:
           NODE_ENV: production
 
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-dist-${{ github.sha }}
           path: apps/web/dist
