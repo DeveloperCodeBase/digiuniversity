@@ -195,6 +195,10 @@ echo "--- containers on digiuniversity_web ---"
 docker network inspect digiuniversity_web --format '{{range .Containers}}{{.Name}} ({{.IPv4Address}}){{"\n"}}{{end}}'
 echo "--- hooshgate_caddy → digiuniversity-app reachability ---"
 docker exec hooshgate_caddy wget -qO- --timeout=5 http://digiuniversity-app/healthz 2>&1 || echo "(reachability failed)"
+echo "--- mounts under /etc/caddy in hooshgate_caddy ---"
+docker inspect -f '{{range .Mounts}}{{.Destination}} <- {{.Source}}{{"\n"}}{{end}}' hooshgate_caddy | grep -E '/etc/caddy' || echo "(none)"
+echo "--- files Caddy actually has in /etc/caddy/conf.d (if any) ---"
+docker exec hooshgate_caddy sh -c 'ls -la /etc/caddy/conf.d 2>/dev/null && echo "--- contents matching digi: ---" && grep -RnE "reverse_proxy.*(digiuniversity|127.0.0.1:8090)" /etc/caddy 2>/dev/null' || echo "(no conf.d)"
 '@
         $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
         $si = New-Object System.Diagnostics.ProcessStartInfo
