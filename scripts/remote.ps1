@@ -168,6 +168,31 @@ echo "Caddy reloaded."
     "caddy-verify" {
         # Narrow verifier: count managed/unmanaged digiuniversity blocks
         # in the host Caddyfile without dumping unrelated tenants' config.
-        Remote "HOST_CADDYFILE=`$(docker inspect -f '{{range .Mounts}}{{if eq .Destination \"/etc/caddy/Caddyfile\"}}{{.Source}}{{end}}{{end}}' hooshgate_caddy) && echo Caddyfile: `$HOST_CADDYFILE && echo -n 'managed block markers: ' && sudo grep -cE '^# (>>>|<<<) digiuniversity site block' `$HOST_CADDYFILE && echo -n 'unmanaged site lines (should be 0): ' && sudo grep -cE '^digiuniversity\.ir' `$HOST_CADDYFILE && echo 'site blocks in running Caddy config:' && docker exec hooshgate_caddy wget -qO- http://localhost:2019/config/apps/http/servers 2>/dev/null | grep -oE 'digiuniversity\.[a-z]+' | sort -u || echo '(admin API not exposed)'"
+        $bash = @'
+set -eu
+CADDY=hooshgate_caddy
+HOST_CADDYFILE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy/Caddyfile"}}{{.Source}}{{end}}{{end}}' "$CADDY")
+echo "Caddyfile: $HOST_CADDYFILE"
+echo -n "managed-marker lines (expect 2): "
+sudo grep -cE '^# (>>>|<<<) digiuniversity site block' "$HOST_CADDYFILE" || true
+echo -n "unmanaged site-opener lines (expect 0): "
+sudo grep -cE '^digiuniversity\.ir' "$HOST_CADDYFILE" || true
+echo -n "header_up X-Forwarded-* lines in digi area (expect 0): "
+sudo grep -cE 'header_up X-Forwarded' "$HOST_CADDYFILE" || true
+echo "--- digiuniversity-only lines (managed block + matches) ---"
+sudo sed -n '/^# >>> digiuniversity/,/^# <<< digiuniversity/p' "$HOST_CADDYFILE"
+'@
+        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
+        $si = New-Object System.Diagnostics.ProcessStartInfo
+        $si.FileName = "ssh"
+        $si.Arguments = "$Server `"bash -s`""
+        $si.UseShellExecute = $false
+        $si.RedirectStandardInput = $true
+        $p = [System.Diagnostics.Process]::Start($si)
+        $p.StandardInput.NewLine = "`n"
+        $p.StandardInput.Write($bash)
+        $p.StandardInput.Close()
+        $p.WaitForExit()
+        exit $p.ExitCode
     }
 }
