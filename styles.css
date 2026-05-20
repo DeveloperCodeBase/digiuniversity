@@ -173,19 +173,24 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
-/* Phase 11 F-28: Persian glyphs need more vertical room than Latin —
-   line-heights below 1.2 cause descenders to overlap with the next
-   element. These values are tuned for Vazir/IRANSans-style Persian
-   fonts and still look fine on Latin text. */
+/* Phase 11 F-30 (the real bug): Tailwind generates utility classes
+   .h-1 / .h-2 / .h-3 / .h-N that set `height: N * 0.25rem`. Our
+   typography classes share the same names and were being SHADOWED —
+   `.h-1` rendered as a 4px-tall box, causing every page title to
+   overlap with the next element.
+   The minimal surgical fix is `height: auto !important` on every one
+   of our heading classes. TECH_DEBT: rename to .heading-1 etc. in
+   Phase 11.1 (touches ~50 jsx files). */
 .h-display {
   font-size: clamp(48px, 7vw, 104px);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.03em;
+  height: auto !important;
 }
-.h-1 { font-size: clamp(32px, 4vw, 56px); line-height: 1.25; font-weight: 700; letter-spacing: -0.02em; }
-.h-2 { font-size: clamp(24px, 2.6vw, 36px); line-height: 1.3; font-weight: 700; letter-spacing: -0.015em; }
-.h-3 { font-size: clamp(18px, 1.4vw, 22px); line-height: 1.4; font-weight: 600; }
+.h-1 { font-size: clamp(32px, 4vw, 56px); line-height: 1.25; font-weight: 700; letter-spacing: -0.02em; height: auto !important; }
+.h-2 { font-size: clamp(24px, 2.6vw, 36px); line-height: 1.3; font-weight: 700; letter-spacing: -0.015em; height: auto !important; }
+.h-3 { font-size: clamp(18px, 1.4vw, 22px); line-height: 1.4; font-weight: 600; height: auto !important; }
 
 .mono { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em; }
 .muted { color: var(--fg-mute); }
@@ -2844,12 +2849,14 @@ input, textarea { caret-color: var(--accent); }
 }
 
 /* Bigger H-display for hero feel — line-height bumped to 1.1 for
-   Persian descender clearance (Phase 11 F-28). */
+   Persian descender clearance, height: auto !important to defeat
+   Tailwind's .h-N height utility (Phase 11 F-28, F-30). */
 .h-display {
   font-size: clamp(56px, 8vw, 132px);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.045em;
+  height: auto !important;
 }
 
 /* Stronger card hover */
