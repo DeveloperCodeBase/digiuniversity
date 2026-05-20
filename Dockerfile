@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 2: runtime ----------
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 RUN apk add --no-cache curl tini \
     && rm -rf /usr/share/nginx/html/*
