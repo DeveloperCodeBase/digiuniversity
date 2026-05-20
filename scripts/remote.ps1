@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify")]
     [string]$Action
 )
 
@@ -110,36 +110,19 @@ SNIPPET=$(printf "\n%s\n%s\n%s\n" "$MARK_BEGIN" "$(cat infra/Caddyfile.snippet)"
 
 write_snippet() {
     target_file="$1"
-    # 1. Strip any previously appended (unmarked) digiuniversity block. We
-    #    look for a line that starts a site block whose key contains
-    #    `digiuniversity.ir` and remove from there to the matching closing
-    #    brace at the start of a line.
-    sudo awk '
-        BEGIN { skip=0; depth=0 }
-        skip==0 && /^[[:space:]]*(#.*)?$/ { print; next }
-        skip==0 && /digiuniversity\.ir[[:space:]]*[,{]/ {
-            skip=1; depth=1
-            # If the line itself contains a closing brace, decrement
-            n=gsub(/\}/, "}")
-            depth -= n
-            n=gsub(/\{/, "{")
-            depth += n - 1   # subtract the one we already counted as opener
-            if (depth<=0) { skip=0 }
-            next
-        }
-        skip==1 {
-            n=gsub(/\{/, "{")
-            depth += n
-            n=gsub(/\}/, "}")
-            depth -= n
-            if (depth<=0) { skip=0 }
-            next
-        }
-        { print }
-    ' "$target_file" | sudo tee "$target_file.tmp" > /dev/null
-    sudo mv "$target_file.tmp" "$target_file"
+    # 1. Drop any prior managed block (between markers).
+    sudo sed -i "/^# >>> digiuniversity site block/,/^# <<< digiuniversity site block/d" "$target_file"
+    # 2. Drop any prior unmanaged block: from a column-0 line that starts
+    #    with `digiuniversity.ir` (the site key, not a commented example)
+    #    through the next column-0 `}` (site block close).
+    sudo sed -i "/^digiuniversity\.ir/,/^}/d" "$target_file"
+    # 3. Drop any commented Option A/B headers we may have left behind.
+    sudo sed -i "/^# Option [AB] —.*$/d" "$target_file"
+    sudo sed -i "/^# We use container-to-container traffic.*$/d" "$target_file"
+    # 4. Trim trailing blank lines.
+    sudo sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$target_file"
 
-    # 2. Append the managed block.
+    # 5. Append the managed block.
     printf "%s" "$SNIPPET" | sudo tee -a "$target_file" > /dev/null
     echo "Wrote managed block to $target_file"
 }
@@ -182,8 +165,9 @@ echo "Caddy reloaded."
         Remote "docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile"
     }
 
-    "caddy-cat" {
-        # Dump the host Caddyfile so we can debug what Caddy is actually loading.
-        Remote "HOST_CADDYFILE=`$(docker inspect -f '{{range .Mounts}}{{if eq .Destination \"/etc/caddy/Caddyfile\"}}{{.Source}}{{end}}{{end}}' hooshgate_caddy) && echo Caddyfile: `$HOST_CADDYFILE && echo '---' && sudo cat `$HOST_CADDYFILE && echo '---' && echo 'Containers on digiuniversity_web:' && docker network inspect digiuniversity_web --format '{{range .Containers}}{{.Name}} {{end}}'"
+    "caddy-verify" {
+        # Narrow verifier: count managed/unmanaged digiuniversity blocks
+        # in the host Caddyfile without dumping unrelated tenants' config.
+        Remote "HOST_CADDYFILE=`$(docker inspect -f '{{range .Mounts}}{{if eq .Destination \"/etc/caddy/Caddyfile\"}}{{.Source}}{{end}}{{end}}' hooshgate_caddy) && echo Caddyfile: `$HOST_CADDYFILE && echo -n 'managed block markers: ' && sudo grep -cE '^# (>>>|<<<) digiuniversity site block' `$HOST_CADDYFILE && echo -n 'unmanaged site lines (should be 0): ' && sudo grep -cE '^digiuniversity\.ir' `$HOST_CADDYFILE && echo 'site blocks in running Caddy config:' && docker exec hooshgate_caddy wget -qO- http://localhost:2019/config/apps/http/servers 2>/dev/null | grep -oE 'digiuniversity\.[a-z]+' | sort -u || echo '(admin API not exposed)'"
     }
 }
