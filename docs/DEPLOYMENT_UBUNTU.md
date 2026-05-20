@@ -178,17 +178,19 @@ If the container is `Up (healthy)` but the domain still fails:
 
 ## 5. Service inventory
 
-| Service              | Image                                    | Host port | Notes                                  |
-| -------------------- | ---------------------------------------- | --------- | -------------------------------------- |
-| `app`                | `digiuniversity:latest` (built locally)  | `8090`    | nginx serving the built Vite SPA       |
-| (future) `api`       | `digiuniversity/api:latest`              | internal  | NestJS core API, behind host Caddy     |
-| (future) `ai-gateway`| `digiuniversity/ai-gateway:latest`       | internal  | FastAPI adapter, no GPU                |
-| (future) `postgres`  | `postgres:16-alpine`                     | internal  | shared via docker network              |
-| (future) `redis`     | `redis:7-alpine`                         | internal  | shared via docker network              |
-| (future) `minio`     | `minio/minio:RELEASE.2023-08-31...`      | internal  | object storage                         |
+| Service              | Image                                    | Host port | Reached as                                       |
+| -------------------- | ---------------------------------------- | --------- | ------------------------------------------------ |
+| `app`                | `digiuniversity:latest`                  | `8090`    | `https://digiuniversity.ir/`                     |
+| `api`                | `digiuniversity-api:latest`              | internal  | `https://digiuniversity.ir/api/v1/...`           |
+| `ai-gateway`         | `digiuniversity-ai-gateway:latest`       | internal  | `https://digiuniversity.ir/ai/v1/...`            |
+| (future) `postgres`  | `postgres:16-alpine`                     | internal  | shared docker network (Phase 2)                  |
+| (future) `redis`     | `redis:7-alpine`                         | internal  | shared docker network (Phase 5)                  |
+| (future) `minio`     | `minio/minio:...`                        | internal  | shared docker network (Phase 4)                  |
 
-Only `app` exists today. The rest land as the implementation phases listed in
-`AGENTS.md` ship.
+`api` and `ai-gateway` are not bound to host ports — they're only
+reachable through the host Caddy. The `/api` and `/ai` prefixes are
+stripped by Caddy before the request hits the service, so the routes
+inside each service stay clean (`/v1/health`, `/v1/rag/query`, …).
 
 ---
 

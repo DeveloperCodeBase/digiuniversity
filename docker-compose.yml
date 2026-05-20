@@ -1,5 +1,9 @@
 name: digiuniversity
 
+# All three app services share the `web` bridge network. The host Caddy
+# (hooshgate_caddy on this VPS) joins this network too — see
+# infra/Caddyfile.snippet and `scripts/remote.ps1 caddy-install`.
+
 services:
   app:
     build:
@@ -18,6 +22,70 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: digiuniversity-api:latest
+    container_name: digiuniversity-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - TZ=${TZ:-UTC}
+      - PORT=4000
+      - APP_VERSION=0.1.0
+      # Wire the API to the AI gateway by service name on the same network.
+      - AI_GATEWAY_URL=http://ai-gateway:8000
+    expose:
+      - "4000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4000/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+
+  ai-gateway:
+    build:
+      context: ./apps/ai-gateway
+      dockerfile: Dockerfile
+    image: digiuniversity-ai-gateway:latest
+    container_name: digiuniversity-ai-gateway
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ:-UTC}
+      # Default to mock so the stack runs without external secrets.
+      - AI_MODE=${AI_MODE:-mock}
+      - AI_SERVICES_BASE_URL=${AI_SERVICES_BASE_URL:-https://future-gpu-server.example.com}
+      - AI_SERVICES_API_KEY=${AI_SERVICES_API_KEY:-change-me}
+      - AI_TIMEOUT_SECONDS=${AI_TIMEOUT_SECONDS:-120}
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     logging:
       driver: json-file
       options:

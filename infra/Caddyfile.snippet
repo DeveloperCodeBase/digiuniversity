@@ -1,28 +1,34 @@
-# --- DigiUniversity site block ----------------------------------------------
-# Drop this into the HOST Caddy that owns ports 80/443 on the VPS
-# (the running container "hooshgate_caddy" already terminates TLS for other
-# sites on this server). After editing, reload Caddy:
-#
-#   docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile
-#
-# Caddy will obtain and renew the LE certificate automatically as long as the
-# domain's DNS / CDN forwards :80 + :443 to this VPS.
-#
-# digiuniversity-app exposes nginx on host port 8090 (see docker-compose.yml,
-# APP_PORT). We could also proxy directly to the container by attaching the
-# host Caddy to the `digiuniversity_web` network — both options are below.
-
 # We use container-to-container traffic on the shared `digiuniversity_web`
 # docker network. The remote.ps1 `caddy-install` action attaches
-# hooshgate_caddy to that network before reloading, so the hostname
-# `digiuniversity-app` resolves inside the Caddy container.
+# hooshgate_caddy to that network so service hostnames resolve here.
+#
+# Path layout:
+#   /api/*    →  api          (NestJS,  :4000)   /api prefix stripped → /v1/...
+#   /ai/*     →  ai-gateway   (FastAPI, :8000)   /ai  prefix stripped → /v1/...
+#   /*        →  digiuniversity-app (nginx, :80)
 digiuniversity.ir, www.digiuniversity.ir {
     encode zstd gzip
 
     @www host www.digiuniversity.ir
     redir @www https://digiuniversity.ir{uri} 308
 
-    reverse_proxy digiuniversity-app:80
+    # Core API. The trailing `*` in `handle_path` strips the `/api` prefix.
+    handle_path /api/* {
+        reverse_proxy api:4000
+    }
+
+    # AI Gateway. Same pattern — `/ai/v1/health` reaches `/v1/health` on the
+    # gateway, and the auto-generated Swagger at `/docs` is exposed as
+    # `https://digiuniversity.ir/ai/docs`.
+    handle_path /ai/* {
+        reverse_proxy ai-gateway:8000
+    }
+
+    # Frontend / SPA fallback. Anything not matched above goes to nginx,
+    # which serves the built Vite bundle with an HTML5-history fallback.
+    handle {
+        reverse_proxy digiuniversity-app:80
+    }
 
     log {
         output file /var/log/caddy/digiuniversity.log {
