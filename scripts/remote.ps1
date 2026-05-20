@@ -65,7 +65,7 @@ switch ($Action) {
 
     "domain-probe" {
         # Run from the VPS itself so we bypass any Windows TLS quirks.
-        Remote "echo '--- direct container (host port 8090) ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1:8090/ ; echo '--- via host Caddy on :80 ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1/ ; echo '--- public https:// ---' && curl -sSI https://digiuniversity.ir/ ; echo '--- /healthz ---' && curl -sS https://digiuniversity.ir/healthz"
+        Remote "echo '--- DNS ---' && (getent hosts digiuniversity.ir || echo 'no DNS resolution from VPS') ; echo '--- direct container (host port 8090) ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1:8090/ ; echo '--- via host Caddy on :80 ---' && curl -sSI -H 'Host: digiuniversity.ir' http://127.0.0.1/ ; echo '--- via host Caddy on :443 with Host hdr ---' && curl -k -sSI --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/ ; echo '--- /healthz via local :443 ---' && curl -k -sS --resolve digiuniversity.ir:443:127.0.0.1 https://digiuniversity.ir/healthz"
     }
 
     "caddy-install" {
