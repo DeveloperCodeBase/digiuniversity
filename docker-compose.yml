@@ -65,6 +65,11 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
+      # IMPORTANT: pin to the runtime stage. Without this, Docker uses
+      # the LAST stage in the Dockerfile, which since Phase 10 is the
+      # `test` stage — and the api service would silently boot into
+      # `jest --runInBand`, exit clean when tests pass, and crash-loop.
+      target: runtime
     image: digiuniversity-api:latest
     container_name: digiuniversity-api
     restart: unless-stopped
