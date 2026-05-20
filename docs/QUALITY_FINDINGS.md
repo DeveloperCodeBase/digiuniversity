@@ -166,5 +166,17 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-80 ✓ | P1 | More.Calendar | Calendar event chips were `<div onClick>`. | Converted to `<button>` with full event description in `aria-label`. |
 | F-81 ✓ | P1 | Search | Result rows were `<div onClick>`. | Added `role="link"`, `tabIndex`, `aria-label`, Enter/Space key handler. |
 
+---
+
+## Phase 12 — Round 4: Responsive sweep (mobile / tablet collapses)
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-82 ✓ | P1 | Global grids | 80+ pages used inline `style={{gridTemplateColumns: "..."}}` with no responsive collapse. Hardcoded two-/three-/four-column patterns overflowed at tablet/phone. | `styles.css` — added a comprehensive `@media (max-width: 980px)` + `@media (max-width: 720px)` block that uses CSS attribute selectors (`[style*="grid-template-columns: 1.4fr 1fr"]`, etc.) to override inline grids on narrow screens. Catches the common patterns: `1.6/1.4/1.2/1.1fr + 1fr`, fixed-pixel sidebars (320/340/360/380px), `1fr 1fr 1fr 1fr`, `repeat(4/5/6, 1fr)`, three-pane messages, calendar 60px+repeat(7), analytics 28-col heatmap. |
+| F-83 ✓ | P1 | Calendar | Weekly 60px+repeat(7) grid squashed cells at mobile. | Wrapped in `.calendar-week-scroll` (overflow-x: auto) and forced a `min-width: 720px` on the inner grid so cells stay readable while the user scrolls. |
+| F-84 ✓ | P1 | Analytics | 28-col heatmap squashed at tablet+mobile. | Same `.calendar-week-scroll` wrapper + min-width fallback. |
+| F-85 ✓ | P1 | Messages | 3-pane (`240px 1fr 280px`) was unusable below 980px. | Tablet: drop the right meta pane. Phone: drop the folder pane too, leave just the thread. `height: calc(100vh - 64px)` is also released at phone width so the stacked layout can breathe. |
+
+
 
 

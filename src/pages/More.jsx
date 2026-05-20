@@ -55,7 +55,7 @@ export const CalendarPage = ({ go }) => {
             </div>
           </div>
 
-          <div className="card p-0 overflow-hidden" >
+          <div className="card p-0 overflow-hidden calendar-week-scroll" >
             <div className="grid"  style={{ gridTemplateColumns: "60px repeat(7, 1fr)", borderBottom: "1px solid var(--line)"}}>
               <div style={{ padding: "16px 12px" }}></div>
               {days.map((d, i) => (

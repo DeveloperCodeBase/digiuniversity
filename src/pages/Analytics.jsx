@@ -59,7 +59,7 @@ export const AnalyticsPage = ({ go }) => {
                 <span>زیاد</span>
               </div>
             </div>
-            <div className="grid gap-2.5 items-center"  style={{ gridTemplateColumns: "60px 1fr"}}>
+            <div className="grid gap-2.5 items-center calendar-week-scroll"  style={{ gridTemplateColumns: "60px 1fr"}}>
               {["ش", "ی", "د", "س", "چ", "پ", "ج"].map((day, di) => (
                 <React.Fragment key={day}>
                   <div className="text-center"  style={{fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)"}}>{day}</div>
