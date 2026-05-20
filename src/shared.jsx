@@ -203,11 +203,17 @@ const UserDropdown = ({ go, role, setRole, auth }) => {
         await auth.logout();
       }
     } finally {
-      // Clear local role so the next visitor sees the default.
+      // Clear local role so the next visitor sees the default. Also
+      // reset the in-memory role so the navbar avatar updates in the
+      // same frame as the logout (F-38). Otherwise the previous
+      // user's initials persist until a route change.
       try {
         localStorage.removeItem("digiu_role");
       } catch {
         // ignore
+      }
+      if (typeof setRole === "function") {
+        setRole("student");
       }
       setLoggingOut(false);
       go("login");

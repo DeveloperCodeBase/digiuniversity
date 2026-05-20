@@ -102,6 +102,51 @@ async function main(): Promise<void> {
     }
   }
 
+  // ---------- Phase 11: demo users for instructor + student roles ----------
+  // The demo tenant ships with three role-representative users so the
+  // audit / smoke flows can exercise every nav set without admin
+  // having to create them by hand. Idempotent on (tenantId, email).
+  const instructorRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "instructor" } },
+  });
+  const studentRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "student" } },
+  });
+  const demoUsers: Array<{ email: string; fullName: string; password: string; roleId?: string }> = [
+    {
+      email: "instructor1@digiuniversity.ir",
+      fullName: "استاد علی رضایی",
+      password: process.env.SEED_INSTRUCTOR_PASSWORD ?? "InstructorPass!1",
+      roleId: instructorRole?.id,
+    },
+    {
+      email: "student1@digiuniversity.ir",
+      fullName: "نرگس رضوی",
+      password: process.env.SEED_STUDENT_PASSWORD ?? "StudentPass!1",
+      roleId: studentRole?.id,
+    },
+  ];
+  for (const u of demoUsers) {
+    const existingUser = await prisma.user.findUnique({
+      where: { tenantId_email: { tenantId: tenant.id, email: u.email } },
+    });
+    if (existingUser) {
+      console.log(`[seed] demo user ${u.email} already exists; skipping`);
+      continue;
+    }
+    const hash = await bcrypt.hash(u.password, 12);
+    await prisma.user.create({
+      data: {
+        tenantId: tenant.id,
+        email: u.email,
+        passwordHash: hash,
+        fullName: u.fullName,
+        userRoles: u.roleId ? { create: [{ roleId: u.roleId }] } : undefined,
+      },
+    });
+    console.log(`[seed] created demo user ${u.email}`);
+  }
+
   // ---------- Phase 3: university domain demo data ----------
   // Idempotent: every upsert keys on a tenant-scoped natural id. Re-runs
   // are no-ops once the demo content exists.

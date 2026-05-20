@@ -335,6 +335,39 @@ const TutorPage = ({ go }) => {
                 <p className="mt-3" style={{ fontSize: 14 }}>
                   هر پرسشی که دارید بپرسید — از مفاهیم درس تا تمرین‌های عملی.
                 </p>
+                {/* F-36: starter prompts so first-time users have a click-to-ask path */}
+                <div
+                  className="mt-5"
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    justifyContent: "center",
+                  }}
+                >
+                  {[
+                    "تفاوت overfitting و underfitting چیست؟",
+                    "الگوریتم درخت تصمیم را با مثال توضیح بده.",
+                    "ساختمان داده پشته را با مثال شرح بده.",
+                  ].map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      className="pill"
+                      onClick={() => setInput(q)}
+                      style={{
+                        cursor: "pointer",
+                        border: "1px solid var(--line)",
+                        background: "var(--surface)",
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        color: "var(--fg)",
+                      }}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : (
               messages.map((m) => <Message key={m.id} m={m} />)
@@ -394,6 +427,7 @@ const TutorPage = ({ go }) => {
                 className="btn btn-primary"
                 onClick={send}
                 disabled={pending || !input.trim()}
+                aria-label="ارسال پرسش به دستیار AI"
                 style={{ alignSelf: "stretch" }}
               >
                 ارسال

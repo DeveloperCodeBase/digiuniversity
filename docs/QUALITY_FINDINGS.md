@@ -100,3 +100,15 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-43 | **P1** | Assessment touch | Radio rows had ~38px height — below WCAG 2.5.5 (target 44px). | `AssessmentLive.jsx` — added `.assessment-option` class. `styles.css` — `@media (pointer: coarse), (max-width: 720px) .assessment-option { min-height: 44px; }` + 20px radio. |
 | F-44 | **P1** | Login mobile | Role-tab strip was 5 tabs in `repeat(5, 1fr)` — each tab ~64px at 320px viewport. Below WCAG tap-target. | `Auth.jsx` — added `.login-role-tabs` class. `styles.css` — `@media (max-width: 480px)` collapses to 3 columns (2 rows). |
 | F-45 | P1 | Headers responsive | Live-page headers used `flex items-end justify-between flex-wrap` which is good in theory but the inline-block child width can overflow at <720px. | `styles.css` — `@media (max-width: 720px) .shell > header.flex { flex-direction: column; align-items: flex-start }`. |
+
+---
+
+## Round 4 — Polish + seed completeness
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-35 ✓ | P2 | A11y | Tutor "ارسال" button had no `aria-label`; screen readers said only "button". | `Tutor.jsx` — `aria-label="ارسال پرسش به دستیار AI"`. |
+| F-36 ✓ | P2 | UX | Tutor empty state said only "هر پرسشی که دارید بپرسید". | `Tutor.jsx` — added 3 starter prompts as clickable pills that prefill the input. |
+| F-37 ✓ | P2 | A11y | Assessment radio rows used the browser default focus ring (often invisible). | `styles.css` — `.assessment-option:focus-within { outline: 2px solid var(--accent); outline-offset: 2px }`. |
+| F-38 ✓ | P1 | Auth/Nav | After logout the navbar avatar persisted (showed previous user's initials) until next route change. | `shared.jsx` — `handleLogout` now calls `setRole("student")` so RoleProvider state resets in the same frame. |
+| F-46 ✓ | P1 | Seed | Demo tenant only had an admin user; the audit had no built-in instructor / student to walk through role-aware flows. | `apps/api/src/prisma/seed.ts` — added idempotent demo users `instructor1@digiuniversity.ir` (InstructorPass!1) + `student1@digiuniversity.ir` (StudentPass!1). |
