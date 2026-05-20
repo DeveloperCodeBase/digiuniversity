@@ -1,6 +1,7 @@
 /** @type { import('@storybook/react-vite').StorybookConfig } */
 const config = {
-  stories: ["../src/**/*.stories.@(js|jsx|mjs)"],
+  // Phase-14 R2: pick up .ts/.tsx stories alongside .js/.jsx.
+  stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [],
   framework: {
     name: "@storybook/react-vite",

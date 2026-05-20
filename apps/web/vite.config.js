@@ -53,7 +53,8 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setup.js"],
-    include: ["tests/**/*.test.{js,jsx}"],
+    // Phase-14 R2: accept .ts/.tsx test files alongside .js/.jsx.
+    include: ["tests/**/*.test.{js,jsx,ts,tsx}"],
     exclude: ["tests/e2e/**", "node_modules", "dist", "storybook-static"],
   },
 });

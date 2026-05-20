@@ -37,6 +37,14 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
+      - name: Typecheck (tsc --noEmit)
+        # Phase-14 R2: every .tsx still has @ts-nocheck at line 1, so
+        # this should be clean today. As files lose their @ts-nocheck
+        # in future PRs, typecheck will surface real errors and gate
+        # the PR. Always run — never `continue-on-error` — once we're
+        # off the @ts-nocheck escape hatch.
+        run: npm run typecheck
+
       - name: Vitest
         run: npm test
 

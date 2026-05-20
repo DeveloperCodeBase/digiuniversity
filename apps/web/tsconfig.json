@@ -1,0 +1,68 @@
+{
+  // Phase-14 R2 — initial TS config.
+  //
+  // Strategy per the plan:
+  //   - strict: true sets the long-term direction.
+  //   - allowJs: true lets the few remaining .js files (data.js, api/
+  //     client.js, etc.) sit alongside .tsx without immediate rewrite.
+  //   - checkJs: false so .js files aren't typechecked yet.
+  //   - Every renamed .tsx file currently has `// @ts-nocheck` at
+  //     line 1. As each file gets typed in later sprints, the directive
+  //     is removed file-by-file. Hard target: zero @ts-nocheck by end
+  //     of Phase 18.
+  //
+  // Vite already transpiles .tsx via esbuild — we don't use tsc for
+  // emit, only `tsc --noEmit` for typechecking. That's why noEmit is
+  // true: a typecheck CI step will run `tsc --noEmit`; production
+  // builds go through Vite.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+
+    // Type checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,           // re-enable in a polish round
+    "noUnusedParameters": false,       // re-enable in a polish round
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false, // too aggressive for now
+
+    // Interop
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "resolveJsonModule": true,
+
+    // JS interop
+    "allowJs": true,
+    "checkJs": false,
+
+    // Build
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    // Paths
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // Don't pollute compilation with build artefacts
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/**/*", "tests/**/*", "vite.config.js", "playwright.config.js"],
+  "exclude": ["node_modules", "dist", "storybook-static", "playwright-report", "test-results"]
+}

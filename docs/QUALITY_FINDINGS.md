@@ -265,6 +265,16 @@ Plan-file Phase 14 step 1. apps/api/ + apps/ai-gateway/ already lived under apps
 | --- | --- | --- | --- | --- |
 | F-112 ✓ | P1 | Monorepo layout | The web SPA lived at the repo root (src/, public/, vite.config.js, package.json, Dockerfile, nginx.conf, tests/, .storybook/, index.html, styles.css, tailwind/postcss configs, playwright.config.js, .dockerignore) while api + ai-gateway were already under apps/. Inconsistent layout blocked the rest of Phase 14 (TS migration, BrowserRouter) from being a focused subdirectory diff. | `git mv` all 15 SPA files/dirs into `apps/web/`. Updated `docker-compose.yml` app service: `context: ./apps/web`, `dockerfile: Dockerfile` (Dockerfile + nginx.conf moved alongside the source so paths are still relative to context). Updated `.github/workflows/ci.yml` web job: `defaults.run.working-directory: apps/web`, `cache-dependency-path: apps/web/package-lock.json`, `path: apps/web/dist` for the artifact. Image tag / compose service identity / network bindings unchanged so the deploy is byte-identical (verified via build digest comparison). |
 
+---
+
+## Phase 14 — Round 2: TypeScript migration (.jsx → .tsx, allowJs, @ts-nocheck escape hatch)
+
+Plan-file Phase 14 step 2. Mechanical rename of every .jsx to .tsx, drop a `tsconfig.json` with `strict: true` + `allowJs: true`, and prepend `// @ts-nocheck` to every renamed file so the build stays green. As each file gets typed in subsequent sprints, the directive is removed file-by-file. Hard target: zero `@ts-nocheck` by end of Phase 18.
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-113 ✓ | P1 | Frontend types | 100% .jsx, zero TypeScript. Backend was already TS; frontend was the only untyped surface. Component props passed positionally, refactors broke at runtime. | Bulk rename 55 .jsx → .tsx (preserves 49 source files + 9 storybook stories + ErrorBoundary + 2 auth). 140 explicit `.jsx` imports stripped to extensionless so Vite/TS resolve. `// @ts-nocheck` prepended to all 55 .tsx as the escape hatch. Added `apps/web/tsconfig.json` with `strict: true`, `allowJs: true`, `checkJs: false`, `moduleResolution: bundler`, `jsx: react-jsx`. Added `typescript@^5.6.3` + `@types/{react,react-dom,node}` devDeps. Added `typecheck` script (`tsc --noEmit`) + CI step that gates PRs on it. `apps/web/index.html` switched `/src/main.jsx` → `/src/main.tsx`. `vite.config.js`, `tailwind.config.js`, `.storybook/main.js` globs all extended to include `ts,tsx`. Vite build produces byte-identical dist (same `index-CwDNjEst.css` + `index-BhXNDvOo.js` hashes as pre-R2). package.json `name` renamed `digiuniversity` → `@digiuniversity/web` to match the `@digiuniversity/api` workspace naming convention (still no actual npm workspace; deferred). |
+
 
 
 

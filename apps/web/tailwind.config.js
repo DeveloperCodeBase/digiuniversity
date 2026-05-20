@@ -2,8 +2,10 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx}",
-    "./.storybook/**/*.{js,jsx}",
+    // Phase-14 R2: scan .ts/.tsx alongside .js/.jsx so the renamed
+    // components keep getting Tailwind utility class detection.
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./.storybook/**/*.{js,jsx,ts,tsx}",
   ],
   darkMode: ["selector", "[data-theme='dark']"],
   theme: {
