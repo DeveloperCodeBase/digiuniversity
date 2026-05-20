@@ -575,7 +575,10 @@ echo "OK: $(grep -cE '^[A-Z_]+=' "$ENV_FILE") env vars set."
         # push (future deploy.yml) is the durable answer.
         $shortSha = (git rev-parse --short HEAD).Trim()
         Write-Host "Pinning current images to tag :$shortSha"
-        Remote "docker tag digiuniversity:latest digiuniversity:$shortSha && docker tag digiuniversity-api:latest digiuniversity-api:$shortSha && docker tag digiuniversity-ai-gateway:latest digiuniversity-ai-gateway:$shortSha && echo 'Pinned:' && docker images --format '{{.Repository}}:{{.Tag}} ({{.Size}})' | grep -E '^(digiuniversity|digiuniversity-api|digiuniversity-ai-gateway):$shortSha\$'"
+        # Verification grep uses TWO columns: repository tag — that's
+        # the `table` format with whitespace-separated fields. Match on
+        # the tag exactly (word boundary) without anchoring to EOL.
+        Remote "docker tag digiuniversity:latest digiuniversity:$shortSha && docker tag digiuniversity-api:latest digiuniversity-api:$shortSha && docker tag digiuniversity-ai-gateway:latest digiuniversity-ai-gateway:$shortSha && echo 'Pinned:' && docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' | grep -E '^(digiuniversity|digiuniversity-api|digiuniversity-ai-gateway)[[:space:]]+$shortSha[[:space:]]'"
     }
 
     "list-images" {
