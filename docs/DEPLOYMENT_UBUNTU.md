@@ -59,13 +59,27 @@ Do not edit files on the VPS by hand.
 
 ## 3. Day-to-day workflow (from Windows)
 
+App lifecycle:
+
 ```powershell
-.\scripts\remote.ps1 up          # build + start
+.\scripts\remote.ps1 up          # build + start (push, pull, compose up)
 .\scripts\remote.ps1 restart     # full down/up cycle
-.\scripts\remote.ps1 logs        # last 200 lines
+.\scripts\remote.ps1 logs        # last 200 lines from app
 .\scripts\remote.ps1 logs-live   # follow
 .\scripts\remote.ps1 test        # run vitest in a one-off container
 .\scripts\remote.ps1 status      # git + docker compose ps + docker ps
+```
+
+Domain + reverse proxy:
+
+```powershell
+.\scripts\remote.ps1 caddy-install        # bring the host Caddy into sync
+.\scripts\remote.ps1 caddy-reload         # reload Caddy from /etc/caddy/Caddyfile
+.\scripts\remote.ps1 caddy-verify         # sanity-check Caddyfile + reachability
+.\scripts\remote.ps1 caddy-logs           # tail Caddy log lines that mention digi
+.\scripts\remote.ps1 caddy-which-config   # show the path Caddy is actually loading
+.\scripts\remote.ps1 caddy-probe-and-logs # force a request, then read the resulting log
+.\scripts\remote.ps1 domain-probe         # nginx direct + Caddy :80 + Caddy :443 + /healthz
 ```
 
 Hard rules (see `AGENT_RUNBOOK.md`):
@@ -99,16 +113,44 @@ VPS. The remaining work on the VPS is the **reverse proxy + TLS** layer.
 
 ### Adding the site to the host Caddy
 
-The reverse-proxy block lives in `infra/Caddyfile.snippet`. Paste its
-contents into the host Caddy's main `Caddyfile`, then reload:
+The reverse-proxy block lives in `infra/Caddyfile.snippet`. The
+recommended path is:
 
-```bash
-# inside the VPS, as the deployer user
-docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile
+```powershell
+.\scripts\remote.ps1 caddy-install
 ```
 
-Caddy will obtain and renew the Let's Encrypt certificate automatically as
-long as DNS / CDN forwards :80 and :443 to this VPS.
+This action, from Windows:
+
+1. pushes any local changes and pulls them on the VPS,
+2. brings `digiuniversity-app` up (and creates the `digiuniversity_web`
+   docker network),
+3. attaches `hooshgate_caddy` to `digiuniversity_web` so it can resolve
+   `digiuniversity-app` by service name,
+4. removes any prior managed or unmanaged digiuniversity site block from
+   the host Caddyfile,
+5. appends the snippet between `# >>> digiuniversity site block` markers
+   while preserving the host file's inode (important — see "bind-mount
+   gotcha" below),
+6. reloads Caddy. If the bind mount's inode is orphaned (legacy `sed -i`
+   damage), the reload reads the canonical config via stdin so the orphan
+   is bypassed until the host Caddy is next restarted.
+
+Caddy obtains and renews the Let's Encrypt certificate automatically as
+long as public DNS for `digiuniversity.ir` resolves to this VPS and ports
+80/443 are reachable.
+
+### Bind-mount gotcha (read this once)
+
+`hooshgate_caddy` bind-mounts a single file (`Caddyfile`) read-only from
+the host. Single-file bind mounts in Docker track the **inode**, not the
+path. Tools that "edit in place" by writing to a temp file and renaming
+(`sed -i`, `cp` with an existing target on some filesystems) replace the
+inode atomically — the container keeps seeing the old file and your
+config changes silently fail to apply on reload. Always edit the
+Caddyfile through `caddy-install` (which writes via a pipeline + `tee` to
+keep the inode stable), or use `caddy reload --config -` to feed
+content via stdin.
 
 ### Verifying
 
@@ -157,5 +199,6 @@ Only `app` exists today. The rest land as the implementation phases listed in
 | `address already in use` on `up`              | another container holds `APP_PORT` — pick a free port        |
 | `npm error Missing script: "build"`           | `package.json` not committed; run `remote.ps1 push` first    |
 | `npm ci` fails for missing lockfile           | `package-lock.json` must be committed                        |
-| `tlsv1 alert internal error` from the domain  | host Caddy has no site block for the domain yet — see §4     |
+| `tlsv1 alert internal error` from the domain  | host Caddy has no site block for the domain yet — `caddy-install` |
+| Caddy returns 502 even though config is right | bind-mount inode drift — `caddy-install` re-syncs via stdin reload |
 | `308 Permanent Redirect` loop                 | CDN is forcing HTTPS while origin redirects HTTP→HTTPS too — set CDN to talk HTTPS to origin |
