@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import type { Prisma } from "@prisma/client";
 import {
   IsBoolean,
   IsInt,
@@ -71,8 +72,8 @@ export class AiLogsController {
         mode: dto.mode,
         confidence: dto.confidence,
         humanReviewRequired: dto.humanReviewRequired,
-        request: dto.request,
-        response: dto.response,
+        request: dto.request as Prisma.InputJsonValue,
+        response: dto.response as Prisma.InputJsonValue,
         latencyMs: dto.latencyMs,
       },
       select: { id: true, requestId: true, createdAt: true },
