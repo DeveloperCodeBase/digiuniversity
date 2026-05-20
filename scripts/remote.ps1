@@ -21,6 +21,31 @@ function Remote($cmd) {
     ssh $Server "cd $ProjectPath && $cmd"
 }
 
+function Invoke-RemoteBash([string]$bashScript) {
+    # Execute a multi-line bash script on the VPS without any UTF-8 BOM
+    # or CRLF leaking in. We base64-encode the script on the Windows
+    # side and have bash decode + exec it remotely — that sidesteps
+    # every stdin encoding pitfall (Process.StandardInput writes a BOM,
+    # CRLF normalisation, code-page mangling, etc.).
+    #
+    # Returns the bash exit code so callers can propagate via `exit`.
+    $normalised = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($normalised)
+    $b64 = [Convert]::ToBase64String($bytes)
+    ssh $Server "echo $b64 | base64 -d | bash -s"
+    return $LASTEXITCODE
+}
+
+function Invoke-RemoteBashWithArg([string]$bashScript, [string]$arg) {
+    # Same as Invoke-RemoteBash but passes one positional arg to bash,
+    # readable as $1. Used by provision-env for the force/noforce flag.
+    $normalised = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($normalised)
+    $b64 = [Convert]::ToBase64String($bytes)
+    ssh $Server "echo $b64 | base64 -d | bash -s -- $arg"
+    return $LASTEXITCODE
+}
+
 switch ($Action) {
     "push" {
         git add .
@@ -407,6 +432,8 @@ ls -1tlh /var/backups/digiuniversity/*.sql.gz 2>/dev/null | head -5
         $forceArg = if ($Force) { "force" } else { "noforce" }
         # Literal here-string @'...'@ — PowerShell does NOT interpolate
         # any $ or backtick inside, so the bash below is verbatim.
+        # Invoke-RemoteBashWithArg pipes it through bash -s with a
+        # UTF-8-no-BOM stream so `set -eu` actually takes effect on line 1.
         $bash = @'
 set -eu
 ENV_FILE=/var/www/digiuniversity/.env
@@ -480,18 +507,7 @@ chmod 0600 "$ENV_FILE"
 ls -l "$ENV_FILE"
 echo "OK: $(grep -cE '^[A-Z_]+=' "$ENV_FILE") env vars set."
 '@
-        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
-        $si = New-Object System.Diagnostics.ProcessStartInfo
-        $si.FileName = "ssh"
-        $si.Arguments = "$Server `"bash -s $forceArg`""
-        $si.UseShellExecute = $false
-        $si.RedirectStandardInput = $true
-        $p = [System.Diagnostics.Process]::Start($si)
-        $p.StandardInput.NewLine = "`n"
-        $p.StandardInput.Write($bash)
-        $p.StandardInput.Close()
-        $p.WaitForExit()
-        exit $p.ExitCode
+        exit (Invoke-RemoteBashWithArg $bash $forceArg)
     }
 
     "show-env" {
