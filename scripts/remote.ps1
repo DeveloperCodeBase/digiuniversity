@@ -1,11 +1,18 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config")]
-    [string]$Action
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback")]
+    [string]$Action,
+
+    # Optional positional args for the new ops actions:
+    #   restore -File <path-on-vps>
+    #   rollout -Service <compose-service-name>
+    [string]$File,
+    [string]$Service
 )
 
 $Server = "my-vps"
 $ProjectPath = "/var/www/digiuniversity"
+$BackupDir = "/var/backups/digiuniversity"
 $Branch = "main"
 
 function Remote($cmd) {
@@ -296,5 +303,114 @@ for sname,srv in cfg.items():
         $p.StandardInput.Close()
         $p.WaitForExit()
         exit $p.ExitCode
+    }
+
+    "health" {
+        # Probe the three internal services + nginx healthz from the VPS
+        # itself (bypasses any Cloudflare / Caddy / DNS quirk). Each curl
+        # uses -f so a non-2xx fails the action, and -sS for compact
+        # output. Run sequentially so the failure of one is obvious.
+        Remote "set -e; echo '--- nginx (digiuniversity-app) /healthz ---'; curl -fsS http://127.0.0.1:8090/healthz || echo 'FAILED'; echo; echo '--- api /v1/health (via docker exec — container not host-exposed) ---'; docker exec digiuniversity-api curl -fsS http://127.0.0.1:4000/v1/health || echo 'FAILED'; echo; echo '--- ai-gateway /v1/health ---'; docker exec digiuniversity-ai-gateway curl -fsS http://127.0.0.1:8000/v1/health || echo 'FAILED'; echo; echo '--- postgres pg_isready ---'; docker exec digiuniversity-postgres pg_isready -U digiuniversity -d digiuniversity || echo 'FAILED'"
+    }
+
+    "migrate" {
+        # Apply pending Prisma migrations against the live database.
+        # Safe to run on each deploy; `migrate deploy` is idempotent and
+        # never resets data (unlike `migrate dev`). Kept separate from
+        # `up` so we can run it standalone after a schema change.
+        Remote "docker compose exec -T api npx prisma migrate deploy"
+    }
+
+    "seed" {
+        # Re-run the seeder explicitly. RUN_SEED at boot is opt-in
+        # (phase-13 default), so production starts without seeding. Use
+        # this to populate the demo tenant on a freshly migrated DB.
+        Remote "docker compose exec -T api npm run seed"
+    }
+
+    "backup" {
+        # Stream a compressed pg_dump straight to a timestamped file on
+        # the VPS. Keep last 14. We use docker exec (not exec -T) because
+        # there's no stdin involved. The dump runs as the postgres user
+        # inside the container to avoid host-side auth surprises.
+        $bash = @'
+set -eu
+mkdir -p /var/backups/digiuniversity
+chmod 0750 /var/backups/digiuniversity
+TS=$(date +%F-%H%M%S)
+OUT=/var/backups/digiuniversity/digi-$TS.sql.gz
+docker exec digiuniversity-postgres pg_dump -U digiuniversity -d digiuniversity --no-owner --no-privileges | gzip -9 > "$OUT"
+SIZE=$(du -h "$OUT" | cut -f1)
+echo "Wrote $OUT ($SIZE)"
+# Rotation: keep the 14 most recent .sql.gz, delete the rest.
+ls -1t /var/backups/digiuniversity/*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm -v
+ls -1tlh /var/backups/digiuniversity/*.sql.gz 2>/dev/null | head -5
+'@
+        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
+        $si = New-Object System.Diagnostics.ProcessStartInfo
+        $si.FileName = "ssh"
+        $si.Arguments = "$Server `"bash -s`""
+        $si.UseShellExecute = $false
+        $si.RedirectStandardInput = $true
+        $p = [System.Diagnostics.Process]::Start($si)
+        $p.StandardInput.NewLine = "`n"
+        $p.StandardInput.Write($bash)
+        $p.StandardInput.Close()
+        $p.WaitForExit()
+        exit $p.ExitCode
+    }
+
+    "restore" {
+        # Restore a previously-created backup. Required: -File <abs-path>.
+        # Refuse if no file path; we will not guess.
+        if ([string]::IsNullOrWhiteSpace($File)) {
+            Write-Error "restore requires -File <path>. Run 'remote.ps1 backup' first, then pick a file from /var/backups/digiuniversity/."
+            exit 2
+        }
+        Write-Host "About to restore from: $File"
+        Write-Host "This will DROP and re-create every table in the digiuniversity database."
+        $confirm = Read-Host "Type 'restore' to confirm"
+        if ($confirm -ne 'restore') {
+            Write-Host "Aborted."
+            exit 1
+        }
+        # Drop + recreate the public schema, then pipe the gzip through psql.
+        Remote "set -e; test -f '$File' || { echo 'No such file: $File'; exit 2; }; docker exec -i digiuniversity-postgres psql -U digiuniversity -d digiuniversity -c 'DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;'; gunzip -c '$File' | docker exec -i digiuniversity-postgres psql -U digiuniversity -d digiuniversity"
+    }
+
+    "rollout" {
+        # Zero-downtime update of a single service via wowu/docker-rollout.
+        # The plugin must already be installed on the VPS (see
+        # scripts/bootstrap-vps.sh). Without it, this falls back to a
+        # plain `docker compose up -d --build $Service`, which DOES drop
+        # connections briefly — so we detect the plugin first.
+        if ([string]::IsNullOrWhiteSpace($Service)) {
+            Write-Error "rollout requires -Service <name>. Valid: app | api | ai-gateway | postgres"
+            exit 2
+        }
+        git push origin $Branch
+        Remote "git pull origin $Branch && docker compose build $Service && (docker rollout --help >/dev/null 2>&1 && docker rollout $Service || (echo 'docker-rollout plugin not installed; falling back to compose up (NOT zero-downtime). Run scripts/bootstrap-vps.sh to install.' && docker compose up -d --no-deps $Service))"
+    }
+
+    "rollback" {
+        # Safe rollback: revert the current commit (creates a new commit
+        # that undoes the last one) and redeploy. Never `git reset --hard`
+        # on shared history — that rewrites main and any other agent
+        # pulling will pick up the bad state again on next fetch.
+        Write-Host "Rolling back HEAD on origin/main by reverting the last commit."
+        $head = git rev-parse --short HEAD
+        Write-Host "Current HEAD: $head"
+        $confirm = Read-Host "Type 'rollback' to confirm git revert + redeploy"
+        if ($confirm -ne 'rollback') {
+            Write-Host "Aborted."
+            exit 1
+        }
+        git revert --no-edit HEAD
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "git revert failed (likely a merge commit; fix manually). Aborting."
+            exit $LASTEXITCODE
+        }
+        git push origin $Branch
+        Remote "git pull origin $Branch && docker compose up -d --build"
     }
 }

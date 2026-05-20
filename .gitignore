@@ -23,3 +23,21 @@ yarn-debug.log*
 pnpm-debug.log*
 # MS Office lock files
 ~$*
+
+# Internal artefacts kept locally but never shipped to repo or image
+project-run.docx
+uploads/
+*.docx
+!docs/**/*.docx
+
+# Production secrets (per phase-13 hardening). Real values live on VPS
+# only and are loaded from /var/www/digiuniversity/.env.production
+# (chmod 600). .env.example stays whitelisted above as the contract.
+.env.production
+.env.production.*
+*.env.local
+*.env.backup
+
+# Database dumps (created by `remote.ps1 backup`, stored on VPS)
+*.sql
+*.sql.gz

@@ -189,6 +189,20 @@ After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live p
 | F-89 ✓ | P2 | A11y | Windows High Contrast (`forced-colors: active`) hid the .btn / .pill / .nav-link borders. | Added explicit `border: 1px solid CanvasText` defence. |
 | F-90 ✓ | P2 | A11y | New shimmer-skeleton animation could trigger motion-sensitivity. | Added a catch-all `prefers-reduced-motion` rule that flattens animation + transition durations across every element. |
 
+---
+
+## Phase 13 — Round 1: Foundation hardening (security headers + ops actions + untrack internal artefacts)
+
+External audit (compass-artifact, May 2026) flagged several P0 infra items still open after Phase 12. R1 closes the lowest-risk subset: secret-leaking docx in git, missing HSTS + COOP + CORP, missing ops actions on `remote.ps1`, and the absence of a one-off VPS bootstrap script for `docker-rollout`. CSP, secret rotation, image versioning, and `RUN_SEED=false` are deliberately deferred to subsequent rounds (each can break prod if rolled too aggressively).
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-91 ✓ | P0 | Security / hygiene | `project-run.docx` (root) and two files under `uploads/` were tracked in git, shipping internal Word docs to every clone of the repo. | `.gitignore` extended (`project-run.docx`, `uploads/`, `*.docx` allow-listing only `docs/**/*.docx`). `git rm --cached` for all three files; locally retained but no longer in repo. |
+| F-92 ✓ | P1 | Security headers | `nginx.conf` was missing HSTS, Cross-Origin-Opener-Policy, and Cross-Origin-Resource-Policy. | Added all three `add_header ... always` lines. `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` enables eventual HSTS-preload submission. COOP `same-origin` + CORP `same-site` close the Spectre / cross-origin-isolation gap. CSP is intentionally deferred to a later round (needs report-only soak first to avoid breaking the SPA + Sentry + future Stripe iframes). |
+| F-93 ✓ | P1 | Ops | `scripts/remote.ps1` had no `backup`, `restore`, `migrate`, `seed`, `health`, `rollout`, or `rollback` actions — a phase-12 deploy couldn't be observed or recovered without manual SSH. | Extended `ValidateSet` and switch with the seven actions. `backup` pipes `pg_dump` to a gzipped timestamped file in `/var/backups/digiuniversity/` with 14-day rotation. `restore -File <path>` is gated behind a `restore` confirmation prompt. `rollout -Service <name>` uses the `wowu/docker-rollout` plugin when present (zero downtime) and falls back to `docker compose up -d --no-deps` with a clear warning otherwise. `rollback` does a safe `git revert` (NOT `reset --hard`) then redeploys — confirmed via prompt. |
+| F-94 ✓ | P1 | Ops bootstrap | No documented way to install `docker-rollout` on a fresh VPS, prepare `/var/backups`, or schedule nightly backups. | New `scripts/bootstrap-vps.sh` — idempotent, run once on the VPS. Installs the plugin into `~/.docker/cli-plugins/`, creates `/var/backups/digiuniversity/` mode 0750, drops `/etc/cron.d/digiuniversity-backup` for a 03:15 nightly `pg_dump` with 14-day rotation. Sanity-checks the docker engine + compose plugin before doing anything destructive. |
+| F-95 ✓ | P0 | Secrets hygiene | `.gitignore` allowed `.env.production` and `*.sql.gz` to be accidentally committed because the existing `.env.*` glob is paired with `!.env.example` (which only protects `.env.example`, not the production file's actual safety). | Added explicit `.env.production`, `.env.production.*`, `*.env.local`, `*.env.backup`, `*.sql`, `*.sql.gz` lines to make the policy unmistakable — no future `git add -A` can sweep them in. |
+
 
 
 
