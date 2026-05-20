@@ -1,0 +1,33 @@
+name: digiuniversity
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: digiuniversity:latest
+    container_name: digiuniversity-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      - TZ=${TZ:-UTC}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  web:
+    driver: bridge

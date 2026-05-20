@@ -1,0 +1,51 @@
+# VCS
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist
+storybook-static
+.vite
+.cache
+
+# Test artifacts
+coverage
+.nyc_output
+playwright-report
+test-results
+
+# Local env / editor
+.env
+.env.*
+!.env.example
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Claude / agent state
+.claude
+AGENT_RUNBOOK.md
+
+# CI / docs that don't belong in the image
+.github
+*.md
+!README.md
+
+# Docker (avoid recursive copies)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Uploads (server-side data)
+uploads
