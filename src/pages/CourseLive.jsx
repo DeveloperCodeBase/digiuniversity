@@ -5,7 +5,7 @@
 import React from "react";
 import { Icon } from "../icons.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { catalogApi, enrollmentsApi } from "../api/endpoints.js";
+import { catalogApi, classSessionsApi, enrollmentsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared.jsx";
 
@@ -33,12 +33,16 @@ const SignInPrompt = ({ go }) => (
 );
 
 const CourseLivePage = ({ go, courseId }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasRole } = useAuth();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [course, setCourse] = React.useState(null);
   const [enrolled, setEnrolled] = React.useState(false);
   const [enrolling, setEnrolling] = React.useState(false);
+  const [sessions, setSessions] = React.useState([]);
+  const [joiningId, setJoiningId] = React.useState(null);
+  const [analyzing, setAnalyzing] = React.useState(null);
+  const [analysisBySession, setAnalysisBySession] = React.useState({});
 
   React.useEffect(() => {
     if (!isAuthenticated || !courseId) return;
@@ -48,13 +52,15 @@ const CourseLivePage = ({ go, courseId }) => {
     Promise.all([
       catalogApi.getCourse(courseId),
       enrollmentsApi.listMine().catch(() => []),
+      classSessionsApi.list({ courseId }).catch(() => []),
     ])
-      .then(([c, mine]) => {
+      .then(([c, mine, sess]) => {
         if (cancelled) return;
         setCourse(c);
         setEnrolled(
           mine.some((e) => e.courseId === courseId && e.status === "active"),
         );
+        setSessions(sess);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -67,6 +73,44 @@ const CourseLivePage = ({ go, courseId }) => {
       cancelled = true;
     };
   }, [isAuthenticated, courseId]);
+
+  const handleJoin = async (sessionId) => {
+    setJoiningId(sessionId);
+    try {
+      const res = await classSessionsApi.join(sessionId);
+      window.toast?.({
+        title: "ورود به کلاس",
+        msg: "حضور شما ثبت شد.",
+        kind: "success",
+      });
+      // Open the provider join URL in a new tab — the mock provider
+      // returns a deep link back into the SPA so this works locally too.
+      if (res.joinUrl) window.open(res.joinUrl, "_blank", "noopener");
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      window.toast?.({ title: "ورود ناموفق", msg, kind: "warn" });
+    } finally {
+      setJoiningId(null);
+    }
+  };
+
+  const handleAnalyze = async (sessionId, task = "analyze") => {
+    setAnalyzing(sessionId);
+    try {
+      const envelope = await classSessionsApi.analyze(sessionId, { task });
+      setAnalysisBySession((prev) => ({ ...prev, [sessionId]: envelope }));
+      window.toast?.({
+        title: "تحلیل AI آماده شد",
+        msg: `اعتماد: ${envelope.confidence.toFixed(2)}`,
+        kind: envelope.human_review_required ? "info" : "success",
+      });
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      window.toast?.({ title: "تحلیل ناموفق", msg, kind: "warn" });
+    } finally {
+      setAnalyzing(null);
+    }
+  };
 
   if (!isAuthenticated) return <SignInPrompt go={go} />;
 
@@ -157,6 +201,120 @@ const CourseLivePage = ({ go, courseId }) => {
               </button>
             )}
           </div>
+
+          <section className="mt-12">
+            <div className="flex items-end justify-between flex-wrap gap-2">
+              <h2 className="h-2">جلسات زنده</h2>
+              <span className="mono" style={{ fontSize: 11, color: "var(--fg-mute)" }}>
+                {toFa(String(sessions.length))} جلسه
+              </span>
+            </div>
+            {sessions.length === 0 ? (
+              <p style={{ color: "var(--fg-mute)", marginTop: 12 }}>
+                هنوز جلسه‌ای برای این درس برنامه‌ریزی نشده است.
+              </p>
+            ) : (
+              <ul className="mt-5" style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+                {sessions.map((s) => {
+                  const envelope = analysisBySession[s.id];
+                  const isJoining = joiningId === s.id;
+                  const isAnalyzing = analyzing === s.id;
+                  return (
+                    <li
+                      key={s.id}
+                      className="rounded-2xl"
+                      style={{ padding: 20, background: "var(--surface)", border: "1px solid var(--line)" }}
+                    >
+                      <div className="flex items-start justify-between flex-wrap gap-3">
+                        <div>
+                          <div className="mono" style={{ fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.12em" }}>
+                            {new Date(s.scheduledStart).toLocaleString("fa-IR")} → {new Date(s.scheduledEnd).toLocaleTimeString("fa-IR")}
+                          </div>
+                          <h3 style={{ fontSize: 17, fontWeight: 600, marginTop: 6 }}>{s.title}</h3>
+                          {s.host && (
+                            <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 4 }}>
+                              میزبان: {s.host.fullName || s.host.email}
+                            </div>
+                          )}
+                          <div className="flex gap-2 flex-wrap mt-3">
+                            <span className="pill" style={{ fontSize: 11 }}>{s.status}</span>
+                            <span className="pill" style={{ fontSize: 11 }}>{s.joinPolicy}</span>
+                            <span className="pill" style={{ fontSize: 11 }}>{s.provider}</span>
+                            {s.recording?.status && s.recording.status !== "none" && (
+                              <span className="pill pill-cyan" style={{ fontSize: 11 }}>
+                                ضبط: {s.recording.status}
+                              </span>
+                            )}
+                            <span className="pill" style={{ fontSize: 11 }}>
+                              {toFa(String(s._count?.attendance ?? 0))} حضور
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            className="btn btn-primary"
+                            disabled={isJoining}
+                            onClick={() => handleJoin(s.id)}
+                          >
+                            {isJoining ? "..." : "ورود به کلاس"}
+                          </button>
+                          {hasRole("admin", "instructor") && (
+                            <button
+                              className="btn btn-outline"
+                              disabled={isAnalyzing}
+                              onClick={() => handleAnalyze(s.id, "analyze")}
+                            >
+                              {isAnalyzing ? "در حال تحلیل..." : "تحلیل AI"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {envelope && (
+                        <div
+                          className="mt-4 rounded-xl"
+                          style={{
+                            padding: 16,
+                            background: "color-mix(in oklch, var(--accent) 8%, var(--surface))",
+                            border: "1px solid var(--accent)",
+                          }}
+                        >
+                          <div className="flex items-baseline justify-between flex-wrap gap-2">
+                            <strong style={{ color: "var(--accent)" }}>تحلیل AI</strong>
+                            <span className="mono" style={{ fontSize: 11, color: "var(--fg-mute)" }}>
+                              {envelope.model} · {envelope.provider} · {envelope.mode}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex gap-3 flex-wrap" style={{ fontSize: 12 }}>
+                            <span>اعتماد: <strong>{envelope.confidence.toFixed(2)}</strong></span>
+                            {envelope.human_review_required && (
+                              <span style={{ color: "var(--warn)" }}>
+                                نیاز به بازبینی انسانی
+                              </span>
+                            )}
+                            <span className="mono" style={{ color: "var(--fg-mute)" }}>
+                              {envelope.request_id}
+                            </span>
+                          </div>
+                          {envelope.payload?.summary && (
+                            <p style={{ marginTop: 12, lineHeight: 1.8 }}>{envelope.payload.summary}</p>
+                          )}
+                          {Array.isArray(envelope.payload?.concepts) && envelope.payload.concepts.length > 0 && (
+                            <div className="mt-3 flex gap-2 flex-wrap">
+                              {envelope.payload.concepts.map((c, i) => (
+                                <span key={i} className="pill" style={{ fontSize: 11 }}>
+                                  {c.name}{c.level ? ` · ${c.level}` : ""}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
 
           <section className="mt-12">
             <h2 className="h-2">سرفصل‌ها</h2>

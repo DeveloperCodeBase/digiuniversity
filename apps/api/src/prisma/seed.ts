@@ -220,6 +220,49 @@ async function main(): Promise<void> {
       `program=${program.slug}, cohort=${cohort.slug}, course=${course.code}`,
   );
 
+  // ---------- Phase 6: a demo upcoming class session + recording ----------
+  // The session is anchored to a deterministic id so re-seeding is a no-op.
+  const sessionId = `seed_${tenant.id}_${course.id}_s1`;
+  const start = new Date(Date.now() + 24 * 60 * 60 * 1000); // tomorrow
+  const end = new Date(start.getTime() + 90 * 60 * 1000);   // +90 min
+
+  await prisma.classSession.upsert({
+    where: { id: sessionId },
+    update: {},
+    create: {
+      id: sessionId,
+      tenantId: tenant.id,
+      courseId: course.id,
+      title: "جلسه افتتاحیه — مقدمه‌ای بر علوم کامپیوتر",
+      description:
+        "مرور سرفصل‌ها، معرفی استاد، روش ارزیابی و معرفی پروژه نیمسال.",
+      scheduledStart: start,
+      scheduledEnd: end,
+      status: "scheduled",
+      joinPolicy: "enrolled",
+      provider: "mock",
+      providerMeetingId: "mock_seed_cs101_s1",
+      joinUrl: "https://digiuniversity.ir/#classroom/mock_seed_cs101_s1",
+    },
+  });
+
+  const recordingId = `seed_${tenant.id}_${sessionId}_rec`;
+  await prisma.recording.upsert({
+    where: { classSessionId: sessionId },
+    update: {},
+    create: {
+      id: recordingId,
+      tenantId: tenant.id,
+      classSessionId: sessionId,
+      status: "ready",
+      mediaUrl: "s3://recordings/demo/cs101-s1.mp4",
+      transcriptUrl: "s3://transcripts/demo/cs101-s1.json",
+      durationSeconds: 5400,
+    },
+  });
+
+  console.log(`[seed] class session ${sessionId} scheduled at ${start.toISOString()}`);
+
   console.log("[seed] done");
 }
 

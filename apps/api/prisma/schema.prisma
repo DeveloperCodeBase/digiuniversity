@@ -40,6 +40,9 @@ model Tenant {
   lessons         Lesson[]
   cohorts         Cohort[]
   enrollments     Enrollment[]
+  classSessions   ClassSession[]
+  recordings      Recording[]
+  attendance      Attendance[]
 
   @@index([slug])
 }
@@ -62,6 +65,8 @@ model User {
   refreshTokens  RefreshToken[]
   aiInteractions AiInteractionLog[]
   enrollments    Enrollment[]
+  attendance     Attendance[]
+  hostedSessions ClassSession[]     @relation("ClassSessionHost")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -244,10 +249,11 @@ model Course {
   createdBy String?
   updatedBy String?
 
-  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  program     Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
-  modules     CourseModule[]
-  enrollments Enrollment[]
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program        Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
+  modules        CourseModule[]
+  enrollments    Enrollment[]
+  classSessions  ClassSession[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -352,6 +358,98 @@ model Enrollment {
   @@index([userId])
   @@index([courseId])
   @@index([deletedAt])
+}
+
+// ---------- Class sessions, recordings, attendance ----------
+//
+// A ClassSession is one scheduled instance of a course meeting. It owns
+// at most one Recording row (file metadata only — actual media lives in
+// the storage abstraction described in docs/architecture/LIVE_CLASS.md).
+// Attendance rows are appended when a user joins/leaves.
+//
+// `provider` + `providerMeetingId` + `joinUrl` are filled by whichever
+// LiveClassProvider Nest resolves at boot (Phase 6 ships only the mock
+// provider; LiveKit/BBB will plug in behind the same interface).
+
+model ClassSession {
+  id                String    @id @default(cuid())
+  tenantId          String
+  courseId          String
+  hostUserId        String?   // instructor scheduling/leading the session
+  title             String
+  description       String?
+  scheduledStart    DateTime
+  scheduledEnd      DateTime
+  actualStart       DateTime?
+  actualEnd         DateTime?
+  status            String    @default("scheduled") // scheduled | live | ended | cancelled
+  joinPolicy        String    @default("enrolled")  // enrolled | public | invite
+  provider          String    @default("mock")      // mock | livekit | bbb
+  providerMeetingId String?
+  joinUrl           String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  host       User?        @relation("ClassSessionHost", fields: [hostUserId], references: [id], onDelete: SetNull)
+  recording  Recording?
+  attendance Attendance[]
+
+  @@index([tenantId])
+  @@index([courseId])
+  @@index([scheduledStart])
+  @@index([deletedAt])
+}
+
+model Recording {
+  id              String    @id @default(cuid())
+  tenantId        String
+  classSessionId  String    @unique
+  status          String    @default("none")   // none | processing | ready | failed
+  mediaUrl        String?
+  transcriptUrl   String?
+  durationSeconds Int?
+  // AI products are NOT persisted as Recording fields — they live in
+  // AiInteractionLog and are joined via the session id, so we never lie
+  // about provenance.
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([deletedAt])
+}
+
+model Attendance {
+  id             String    @id @default(cuid())
+  tenantId       String
+  classSessionId String
+  userId         String
+  joinedAt       DateTime  @default(now())
+  leftAt         DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  classSession ClassSession @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([classSessionId, userId, joinedAt])
+  @@index([tenantId])
+  @@index([classSessionId])
+  @@index([userId])
 }
 
 // ---------- AI audit log ----------

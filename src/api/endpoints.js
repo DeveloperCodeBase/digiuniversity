@@ -45,6 +45,21 @@ export const catalogApi = {
     ),
 };
 
+// ---------- class sessions ----------
+export const classSessionsApi = {
+  list: ({ courseId, status } = {}) => {
+    const q = [];
+    if (courseId) q.push("courseId=" + encodeURIComponent(courseId));
+    if (status) q.push("status=" + encodeURIComponent(status));
+    return api.get("/v1/class-sessions" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/class-sessions/" + encodeURIComponent(id)),
+  join: (id) => api.post("/v1/class-sessions/" + encodeURIComponent(id) + "/join"),
+  leave: (id) => api.post("/v1/class-sessions/" + encodeURIComponent(id) + "/leave"),
+  analyze: (id, { task = "analyze", language = "fa" } = {}) =>
+    api.post("/v1/class-sessions/" + encodeURIComponent(id) + "/analyze", { task, language }),
+};
+
 // ---------- enrollments ----------
 export const enrollmentsApi = {
   enrol: ({ courseId, cohortId } = {}) =>

@@ -2,11 +2,13 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 
+import { AiBridgeModule } from "./ai-bridge/ai-bridge.module";
 import { AiLogsModule } from "./ai-logs/ai-logs.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RolesGuard } from "./auth/guards/roles.guard";
 import { HealthController } from "./health/health.controller";
+import { LiveClassModule } from "./live-class/live-class.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { CohortsModule } from "./university/cohorts/cohorts.module";
@@ -32,6 +34,9 @@ import { UsersModule } from "./users/users.module";
     CoursesModule,
     CohortsModule,
     EnrollmentsModule,
+    // Live class + AI bridge (Phase 6).
+    AiBridgeModule,
+    LiveClassModule,
   ],
   controllers: [HealthController],
   providers: [
