@@ -51,8 +51,11 @@ switch ($Action) {
     }
 
     "test" {
+        # Builds and runs the api test image against the live postgres
+        # + ai-gateway services. Each spec creates its own tenant slug
+        # so test data never collides with the demo seed.
         git push origin $Branch
-        Remote "git pull origin $Branch && docker compose run --rm app npm test"
+        Remote "git pull origin $Branch && docker compose --profile test build api-test && docker compose --profile test run --rm api-test"
     }
 
     "status" {

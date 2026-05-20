@@ -135,6 +135,38 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  # One-off test runner. Opt-in via `--profile test` so a normal
+  # `docker compose up` never starts it. Reuses postgres + ai-gateway
+  # so tests hit the real downstream services. Each spec creates its
+  # own throwaway tenant slug so data never collides.
+  api-test:
+    profiles: ["test"]
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: test
+    image: digiuniversity-api-test:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-gateway:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - CI=true
+      - TZ=${TZ:-UTC}
+      - APP_VERSION=0.2.0
+      - AI_GATEWAY_URL=http://ai-gateway:8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-digiuniversity}:${POSTGRES_PASSWORD:-digiuniversity_dev}@postgres:5432/${POSTGRES_DB:-digiuniversity}?schema=public
+      - JWT_SECRET=test-only-jwt-secret-min-32-chars-test-only-jwt
+      - JWT_ACCESS_TTL=15m
+      - JWT_REFRESH_TTL=30d
+      - RUN_SEED=false
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+
 networks:
   web:
     driver: bridge

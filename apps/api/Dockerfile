@@ -63,3 +63,21 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 
 USER node
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+
+# ---------- Stage 3: test ----------
+# Keeps devDeps + source + jest config so `docker compose run --rm
+# api-test` can exec the test suite against the live postgres without
+# bloating the production runtime image.
+FROM builder AS test
+
+WORKDIR /app
+
+ENV NODE_ENV=test \
+    CI=true
+
+COPY test ./test
+COPY jest.config.cjs tsconfig.test.json ./
+
+# Tests run as root inside the container — fine for the throwaway
+# test image, never used to serve traffic.
+CMD ["npx", "jest", "--runInBand", "--forceExit"]
