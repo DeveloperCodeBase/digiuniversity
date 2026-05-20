@@ -237,10 +237,9 @@ const TutorPage = ({ go }) => {
       </header>
 
       <section
-        className="mt-7"
+        className="mt-7 tutor-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "260px 1fr",
           gap: 20,
           minHeight: 540,
         }}

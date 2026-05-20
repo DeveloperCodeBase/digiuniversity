@@ -123,7 +123,7 @@ export const LoginPage = ({ go }) => {
     >
       {/* Role tabs — 5 roles */}
       <div className="mono mb-2.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>من به عنوان...</div>
-      <div className="grid gap-1 p-1 rounded-xl mb-6"  style={{ gridTemplateColumns: "repeat(5, 1fr)", background: "var(--surface-2)", border: "1px solid var(--line)"}}>
+      <div className="grid gap-1 p-1 rounded-xl mb-6 login-role-tabs"  style={{ gridTemplateColumns: "repeat(5, 1fr)", background: "var(--surface-2)", border: "1px solid var(--line)"}}>
         {[
           ["student", "دانشجو", "user"],
           ["instructor", "استاد", "grad"],

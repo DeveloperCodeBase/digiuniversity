@@ -251,7 +251,7 @@ const AssessmentLivePage = ({ go, assessmentId }) => {
                         {q.options.map((opt, idx) => (
                           <label
                             key={idx}
-                            className="rounded-lg"
+                            className="rounded-lg assessment-option"
                             style={{
                               padding: "12px 14px",
                               border: "1px solid " + (a.selectedIndex === idx ? "var(--accent)" : "var(--line)"),

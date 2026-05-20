@@ -4200,6 +4200,57 @@ main[data-screen-label*="کلاس زنده"] + * .ai-fab {
   color: var(--accent);
 }
 
+/* ================================================================
+   Live-page responsive overrides (Phase 11)
+   ================================================================ */
+
+/* Tutor: 260px sidebar + chat. Collapses below 820px into stacked
+   sessions list (above) + chat (below). Was F-09 in QUALITY_FINDINGS.md.
+   At >=820px we keep the 2-col layout; below we collapse. */
+.tutor-grid {
+  grid-template-columns: 260px 1fr;
+}
+@media (max-width: 820px) {
+  .tutor-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .tutor-grid aside {
+    max-height: 160px;
+    overflow-y: auto;
+  }
+}
+
+/* Assessment radio rows: ensure 44px tap targets per WCAG 2.5.5.
+   The default label has padding 12px so total height is ~38px;
+   bump min-height to 44px on touch-coarse pointers. */
+@media (pointer: coarse), (max-width: 720px) {
+  .assessment-option {
+    min-height: 44px;
+    padding: 12px 14px;
+  }
+  .assessment-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Login role tabs: 5-tab strip (دانشجو · استاد · مدیر · والد · سازمان)
+   crams into <50px per cell at 320px. Wrap to 2 rows below 480px. */
+@media (max-width: 480px) {
+  .login-role-tabs {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+}
+
+/* Catalog / Progress / MyCourses headers: enforce flex-wrap so the
+   role-badge stack doesn't collide with the title on narrow screens. */
+@media (max-width: 720px) {
+  .shell > header.flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 
 
 .page-shell, main, #root { overflow: visible; transform: none !important; }

@@ -68,3 +68,35 @@ Out of scope (tracked in `docs/TECH_DEBT.md`):
 - Lighthouse perf score — we know the bundle is 600KB unsplit
   (TECH_DEBT.md). Code-split is Phase 11.2.
 - Real Playwright e2e — Phase 11.3.
+
+---
+
+## Round 2 — Browser audit @ 1415x840 (admin role)
+
+After F-30 fix landed (Tailwind `.h-*` height collision), re-walked every live page as `admin@digiuniversity.ir`.
+
+| ID | Severity | Area | Finding |
+| --- | --- | --- | --- |
+| F-31 | ✓ PASS | Catalog | `#catalog` renders 2 seed courses (CS101, CS102). Stats bar (faculties 1, programs 1, courses 2, my enrollments 0) renders. h1=70px. |
+| F-32 | ✓ PASS | Course detail | `#course-live/<id>` renders 2 live sessions + 1 quiz + 2 modules × 2 lessons. CTAs (`ثبت‌نام`, `پرسش از دستیار AI`, `ورود به کلاس`, `تحلیل AI`, `شروع آزمون`) all visible. |
+| F-33 | ✓ PASS | Assessment | `#assessment-live/<id>` renders title + description + 3 MCQs (12 radios) + draft/submit buttons. h1=70px. |
+| F-34 | ✓ PASS | Tutor | `#tutor` accepts a question and renders assistant turn with 2 sources, confidence (0.74), `humanReviewRequired` banner, `request_id` shown for audit log lookup. Live API → ai-gateway path works end-to-end. |
+| F-35 | P2 | A11y | Send/Save buttons in chat input row have no `aria-label`; screen readers announce only icon. |
+| F-36 | P2 | UX | Empty chat area says only "هر پرسشی که دارید بپرسید…". Could add 2-3 starter prompts (سوال نمونه از CS101) for new users. |
+| F-37 | P2 | A11y | Assessment radios use default browser styling; focus ring is the platform default. Custom focus ring would pass WCAG 2.4.7 better. |
+
+---
+
+## Round 3 — Student role + responsive
+
+| ID | Severity | Area | Finding | Fix |
+| --- | --- | --- | --- | --- |
+| F-38 | **P1** | Nav | After logout the route is correctly `#login` and tokens are cleared, but the navbar avatar still renders the previous user ("AM محمدی") for one frame because `UserDropdown` reads from a different source than `AuthContext`. The avatar refreshes after the next route hit, so impact is cosmetic; flagged for a unified store. | TBD (RoleProvider unification — Phase 12). |
+| F-39 | ✓ PASS | Student role | Student login via `student1@digiuniversity.ir` lands on `#progress` and shows live data: 1 enrollment (CS101), 1 graded quiz (95/100), 2 Attendance rows, 2 AI requests, risk LOW (no factors). |
+| F-40 | ✓ PASS | Student nav | Nav strip for `student` role contains: پیشرفت من ●, کاتالوگ ●, دوره‌های من ●, دستیار AI ●, تقویم, جامعه. Four live items (●) match expected route map. |
+| F-41 | ✓ PASS | Student catalog | `#catalog` as student shows the 2 seed courses + active-enrollment flag on CS101. |
+| F-42 | ✓ PASS | Student my-courses | `#my-courses` shows the active CS101 card + active/completed/inactive stat counters. |
+| F-09b | **P1** | Tutor responsive | Tutor used inline `gridTemplateColumns: "260px 1fr"` — does NOT collapse at narrow viewports. The 260px sidebar would eat 70% of a 375px screen. | `Tutor.jsx` — replaced inline grid with `.tutor-grid` class. `styles.css` — added `@media (max-width: 820px)` rule that stacks sessions list above chat with `max-height: 160px` scroll. |
+| F-43 | **P1** | Assessment touch | Radio rows had ~38px height — below WCAG 2.5.5 (target 44px). | `AssessmentLive.jsx` — added `.assessment-option` class. `styles.css` — `@media (pointer: coarse), (max-width: 720px) .assessment-option { min-height: 44px; }` + 20px radio. |
+| F-44 | **P1** | Login mobile | Role-tab strip was 5 tabs in `repeat(5, 1fr)` — each tab ~64px at 320px viewport. Below WCAG tap-target. | `Auth.jsx` — added `.login-role-tabs` class. `styles.css` — `@media (max-width: 480px)` collapses to 3 columns (2 rows). |
+| F-45 | P1 | Headers responsive | Live-page headers used `flex items-end justify-between flex-wrap` which is good in theory but the inline-block child width can overflow at <720px. | `styles.css` — `@media (max-width: 720px) .shell > header.flex { flex-direction: column; align-items: flex-start }`. |
