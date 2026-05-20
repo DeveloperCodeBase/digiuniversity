@@ -28,11 +28,16 @@ function Invoke-RemoteBash([string]$bashScript) {
     # every stdin encoding pitfall (Process.StandardInput writes a BOM,
     # CRLF normalisation, code-page mangling, etc.).
     #
+    # `| Out-Host` forces ssh's output to render on the user's terminal
+    # rather than being captured into the function's pipeline output
+    # (which would happen with `(Invoke-RemoteBash ...)` callers and
+    # silence everything ssh wrote).
+    #
     # Returns the bash exit code so callers can propagate via `exit`.
     $normalised = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($normalised)
     $b64 = [Convert]::ToBase64String($bytes)
-    ssh $Server "echo $b64 | base64 -d | bash -s"
+    ssh $Server "echo $b64 | base64 -d | bash -s" | Out-Host
     return $LASTEXITCODE
 }
 
@@ -42,7 +47,7 @@ function Invoke-RemoteBashWithArg([string]$bashScript, [string]$arg) {
     $normalised = $bashScript -replace "`r`n", "`n" -replace "`r", "`n"
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($normalised)
     $b64 = [Convert]::ToBase64String($bytes)
-    ssh $Server "echo $b64 | base64 -d | bash -s -- $arg"
+    ssh $Server "echo $b64 | base64 -d | bash -s -- $arg" | Out-Host
     return $LASTEXITCODE
 }
 
@@ -356,35 +361,34 @@ for sname,srv in cfg.items():
     }
 
     "backup" {
-        # Stream a compressed pg_dump straight to a timestamped file on
-        # the VPS. Keep last 14. We use docker exec (not exec -T) because
-        # there's no stdin involved. The dump runs as the postgres user
-        # inside the container to avoid host-side auth surprises.
+        # Stream a compressed pg_dump to a timestamped file on the VPS,
+        # keep the last 14. Prefers /var/backups/digiuniversity (the
+        # bootstrap-vps.sh target) but falls back to ~/backups/digi-
+        # university when it isn't writable — so the action works on a
+        # fresh VPS before bootstrap has been run.
         $bash = @'
 set -eu
-mkdir -p /var/backups/digiuniversity
-chmod 0750 /var/backups/digiuniversity
+BACKUP_DIR=/var/backups/digiuniversity
+if ! ( [ -d "$BACKUP_DIR" ] && [ -w "$BACKUP_DIR" ] ); then
+    if ! mkdir -p "$BACKUP_DIR" 2>/dev/null; then
+        BACKUP_DIR="$HOME/backups/digiuniversity"
+        mkdir -p "$BACKUP_DIR"
+        echo "Note: /var/backups/digiuniversity unavailable; using $BACKUP_DIR."
+        echo "      Run scripts/bootstrap-vps.sh on the VPS to get the system-wide path."
+    fi
+fi
+chmod 0700 "$BACKUP_DIR" 2>/dev/null || true
 TS=$(date +%F-%H%M%S)
-OUT=/var/backups/digiuniversity/digi-$TS.sql.gz
+OUT="$BACKUP_DIR/digi-$TS.sql.gz"
 docker exec digiuniversity-postgres pg_dump -U digiuniversity -d digiuniversity --no-owner --no-privileges | gzip -9 > "$OUT"
 SIZE=$(du -h "$OUT" | cut -f1)
 echo "Wrote $OUT ($SIZE)"
 # Rotation: keep the 14 most recent .sql.gz, delete the rest.
-ls -1t /var/backups/digiuniversity/*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm -v
-ls -1tlh /var/backups/digiuniversity/*.sql.gz 2>/dev/null | head -5
+ls -1t "$BACKUP_DIR"/*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm -v
+echo "--- last 5 backups ---"
+ls -1tlh "$BACKUP_DIR"/*.sql.gz 2>/dev/null | head -5
 '@
-        $bash = $bash -replace "`r`n", "`n" -replace "`r", "`n"
-        $si = New-Object System.Diagnostics.ProcessStartInfo
-        $si.FileName = "ssh"
-        $si.Arguments = "$Server `"bash -s`""
-        $si.UseShellExecute = $false
-        $si.RedirectStandardInput = $true
-        $p = [System.Diagnostics.Process]::Start($si)
-        $p.StandardInput.NewLine = "`n"
-        $p.StandardInput.Write($bash)
-        $p.StandardInput.Close()
-        $p.WaitForExit()
-        exit $p.ExitCode
+        exit (Invoke-RemoteBash $bash)
     }
 
     "restore" {
