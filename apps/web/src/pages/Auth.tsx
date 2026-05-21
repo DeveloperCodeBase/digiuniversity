@@ -1,26 +1,42 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
 // =====================================================
 // Auth — Login, Register, Forgot, Role Select
+//
+// Phase-14.5 C6: dropped @ts-nocheck. All 6 exported pages plus the
+// internal AuthShell / AuthField / AuthVisual* helpers + the 4
+// Onboarding step components are typed. The form-state interfaces
+// (LoginErrors, register inputs) live close to the component that
+// owns them rather than at the top so reviewers don't have to chase.
 // =====================================================
 
 import React from "react";
 import { Icon } from "../icons";
-import { useRole, ROLES } from "../role";
+import { useRole, ROLES, type RoleId, type Role } from "../role";
 import { toFa } from "../shared";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client.js";
+import type { Go } from "../router";
 
 // Map API role names → local RoleProvider role IDs. The seed gives the
 // admin user the "admin" role; self-registered accounts get "student".
-const apiRoleToLocal = (roles) => {
+const apiRoleToLocal = (roles: readonly string[] | undefined): RoleId => {
   if (!roles || roles.length === 0) return "student";
   if (roles.includes("admin")) return "admin";
   if (roles.includes("instructor")) return "instructor";
   if (roles.includes("student")) return "student";
-  return roles[0];
+  // Fall back to student if the api returns a role we don't model
+  // locally (parent/org will join when Phase 15 wires them through).
+  return "student";
 };
 
-const AuthShell = ({ children, eyebrow, title, sub, side }) => (
+interface AuthShellProps {
+  children: React.ReactNode;
+  eyebrow: string;
+  title: string;
+  sub: string;
+  side: React.ReactNode;
+}
+
+const AuthShell = ({ children, eyebrow, title, sub, side }: AuthShellProps): React.ReactElement => (
   <main data-screen-label="Auth" style={{ minHeight: "calc(100vh - 64px)" }}>
     <div  style={{ gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 64px)"}}>
       {/* form side */}
@@ -48,7 +64,11 @@ const AuthShell = ({ children, eyebrow, title, sub, side }) => (
   </main>
 );
 
-const SocialBtn = ({ icon, label }) => (
+interface SocialBtnProps {
+  icon: string;
+  label: string;
+}
+const SocialBtn = ({ icon, label }: SocialBtnProps): React.ReactElement => (
   <button className="btn btn-outline justify-center flex-1"  style={{ padding: "12px 14px"}}>
     <span className="rounded grid"  style={{width: 18, height: 18, background: "var(--fg)", color: "var(--bg)", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700}}>{icon}</span>
     {label}
@@ -58,18 +78,29 @@ const SocialBtn = ({ icon, label }) => (
 // =====================================================
 // Login
 // =====================================================
-export const LoginPage = ({ go }) => {
+export interface AuthPageProps {
+  go: Go;
+}
+
+interface LoginErrors {
+  tenantSlug?: string;
+  email?: string;
+  password?: string;
+  general?: string;
+}
+
+export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {
   const { setRole } = useRole();
   const auth = useAuth();
-  const [roleId, setRoleId] = React.useState("student");
+  const [roleId, setRoleId] = React.useState<RoleId>("student");
   const [tenantSlug, setTenantSlug] = React.useState("demo");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [errors, setErrors] = React.useState({});
+  const [errors, setErrors] = React.useState<LoginErrors>({});
   const [pending, setPending] = React.useState(false);
 
-  const validate = () => {
-    const e = {};
+  const validate = (): LoginErrors => {
+    const e: LoginErrors = {};
     if (!tenantSlug.trim()) e.tenantSlug = "شناسه سازمان الزامی است.";
     if (!email.trim()) e.email = "ایمیل/کد کاربری الزامی است.";
     else if (email.includes("@") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "فرمت ایمیل صحیح نیست.";
@@ -78,12 +109,16 @@ export const LoginPage = ({ go }) => {
     return e;
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length) {
-      window.toast?.({ title: "خطا در ورود", msg: Object.values(errs)[0], kind: "warn" });
+      window.toast?.({
+        title: "خطا در ورود",
+        msg: Object.values(errs)[0] ?? "ورودی نامعتبر است.",
+        kind: "warn",
+      });
       return;
     }
     setPending(true);
@@ -99,7 +134,15 @@ export const LoginPage = ({ go }) => {
       const target = ROLES[localRole]?.homeRoute || "dashboard";
       go(target);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : (err?.message || "خطای ناشناخته");
+      // TS sees `err` as `unknown` under strict mode. Narrow before
+      // reading `.message`. ApiError comes from api/client.js (untyped
+      // .js) so we trust its `.displayMessage` field by isinstance.
+      let msg = "خطای ناشناخته";
+      if (err instanceof ApiError) {
+        msg = (err as { displayMessage?: string }).displayMessage ?? msg;
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
       setErrors({ general: msg });
       window.toast?.({ title: "ورود ناموفق", msg, kind: "warn" });
     } finally {
@@ -107,7 +150,7 @@ export const LoginPage = ({ go }) => {
     }
   };
 
-  const handleSocial = (id) => {
+  const handleSocial = (id: string): void => {
     window.toast?.({
       title: "هنوز فعال نیست",
       msg: "ورود اجتماعی از " + id + " در فاز بعد پیاده‌سازی می‌شود.",
@@ -132,7 +175,7 @@ export const LoginPage = ({ go }) => {
           ["parent", "والد", "users"],
           ["org", "سازمان", "shield"],
         ].map(([id, lbl, ic]) => (
-          <button className="rounded-lg cursor-pointer flex items-center justify-center" key={id} onClick={() => setRoleId(id)} type="button"  style={{padding: "10px 4px",
+          <button className="rounded-lg cursor-pointer flex items-center justify-center" key={id} onClick={() => setRoleId(id as RoleId)} type="button"  style={{padding: "10px 4px",
             background: roleId === id ? "var(--surface)" : "transparent",
             border: "1px solid " + (roleId === id ? "var(--line-2)" : "transparent"),
             color: roleId === id ? "var(--fg)" : "var(--fg-mute)",
@@ -252,7 +295,7 @@ export const LoginPage = ({ go }) => {
   );
 };
 
-const AuthVisualLogin = () => (
+const AuthVisualLogin = (): React.ReactElement => (
   <div className="p-15 flex flex-col justify-between relative"  style={{ height: "100%"}}>
     {/* Floating quote card */}
     <div className="rounded-2xl p-7"  style={{background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-paper)", maxWidth: 420}}>
@@ -293,11 +336,11 @@ const AuthVisualLogin = () => (
 // =====================================================
 // Register
 // =====================================================
-export const RegisterPage = ({ go }) => {
+export const RegisterPage = ({ go }: AuthPageProps): React.ReactElement => {
   const { setRole } = useRole();
-  const [roleId, setRoleId] = React.useState("student");
+  const [roleId, setRoleId] = React.useState<RoleId>("student");
 
-  const handleRegister = (e) => {
+  const handleRegister = (e: React.FormEvent): void => {
     e.preventDefault();
     setRole(roleId);
     go("verify-email");
@@ -319,7 +362,7 @@ export const RegisterPage = ({ go }) => {
           { id: "org", t: "سازمان", d: "آموزش تیم با مدیریت مرکزی", ic: "shield" },
           { id: "parent", t: "والد", d: "نظارت بر یادگیری فرزند", ic: "users" },
         ].map((r) => (
-          <button className="p-4.5 rounded-xl text-right cursor-pointer flex items-start gap-3" key={r.id} onClick={() => setRoleId(r.id)} type="button"  style={{
+          <button className="p-4.5 rounded-xl text-right cursor-pointer flex items-start gap-3" key={r.id} onClick={() => setRoleId(r.id as RoleId)} type="button"  style={{
             background: roleId === r.id ? "var(--accent-soft)" : "var(--surface)",
             border: "1px solid " + (roleId === r.id ? "var(--accent)" : "var(--line)"),
             fontFamily: "inherit",
@@ -379,7 +422,7 @@ export const RegisterPage = ({ go }) => {
   );
 };
 
-const AuthVisualRegister = () => (
+const AuthVisualRegister = (): React.ReactElement => (
   <div className="p-15 flex flex-col justify-center gap-8"  style={{ height: "100%"}}>
     <div>
       <div style={{ fontFamily: "var(--f-display)", fontSize: "clamp(36px, 4vw, 56px)", fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--fg)" }}>
@@ -415,7 +458,7 @@ const AuthVisualRegister = () => (
   </div>
 );
 
-const PasswordStrength = () => (
+const PasswordStrength = (): React.ReactElement => (
   <div>
     <div className="flex gap-1 mt-1.5" >
       {[1, 2, 3, 4].map((i) => (
@@ -432,7 +475,7 @@ const PasswordStrength = () => (
 // =====================================================
 // Forgot password
 // =====================================================
-export const ForgotPage = ({ go }) => (
+export const ForgotPage = ({ go }: AuthPageProps): React.ReactElement => (
   <AuthShell
     eyebrow="RECOVERY · بازیابی"
     title="رمز را فراموش کرده‌اید؟"
@@ -461,7 +504,34 @@ export const ForgotPage = ({ go }) => (
 // =====================================================
 // Shared Auth Field
 // =====================================================
-const AuthField = ({ label, placeholder, type = "text", icon, rightAction, onAction, value, onChange, required, error, name, autoComplete }) => {
+interface AuthFieldProps {
+  label: string;
+  placeholder?: string;
+  type?: string;
+  icon?: string;
+  rightAction?: string;
+  onAction?: () => void;
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  required?: boolean;
+  error?: string;
+  name?: string;
+  autoComplete?: string;
+}
+const AuthField = ({
+  label,
+  placeholder,
+  type = "text",
+  icon,
+  rightAction,
+  onAction,
+  value,
+  onChange,
+  required,
+  error,
+  name,
+  autoComplete,
+}: AuthFieldProps): React.ReactElement => {
   const id = "f-" + (name || label.replace(/\s+/g, "-"));
   return (
     <label className="block"  htmlFor={id}>
@@ -503,11 +573,11 @@ const AuthField = ({ label, placeholder, type = "text", icon, rightAction, onAct
 // =====================================================
 // Email Verification
 // =====================================================
-export const VerifyEmailPage = ({ go }) => {
-  const [code, setCode] = React.useState(["", "", "", "", "", ""]);
-  const inputs = React.useRef([]);
+export const VerifyEmailPage = ({ go }: AuthPageProps): React.ReactElement => {
+  const [code, setCode] = React.useState<string[]>(["", "", "", "", "", ""]);
+  const inputs = React.useRef<Array<HTMLInputElement | null>>([]);
 
-  const handleChange = (i, v) => {
+  const handleChange = (i: number, v: string): void => {
     const cleaned = v.replace(/\D/g, "").slice(-1);
     const next = [...code];
     next[i] = cleaned;
@@ -515,7 +585,7 @@ export const VerifyEmailPage = ({ go }) => {
     if (cleaned && i < 5) inputs.current[i + 1]?.focus();
   };
 
-  const handleKey = (i, e) => {
+  const handleKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === "Backspace" && !code[i] && i > 0) inputs.current[i - 1]?.focus();
   };
 
@@ -583,8 +653,10 @@ export const VerifyEmailPage = ({ go }) => {
 // =====================================================
 // 2FA Setup
 // =====================================================
-export const TwoFactorPage = ({ go }) => {
-  const [method, setMethod] = React.useState("app");
+type TwoFactorMethod = "app" | "key" | "sms";
+
+export const TwoFactorPage = ({ go }: AuthPageProps): React.ReactElement => {
+  const [method, setMethod] = React.useState<TwoFactorMethod>("app");
 
   return (
     <AuthShell
@@ -600,7 +672,7 @@ export const TwoFactorPage = ({ go }) => {
           { id: "key", t: "کلید سخت‌افزاری FIDO2", d: "YubiKey، SoloKey — بالاترین سطح امنیت", ic: "shield" },
           { id: "sms", t: "پیامک", d: "کد یک‌بار مصرف به شماره تماس شما", ic: "bell" },
         ].map((m) => (
-          <button className="p-4.5 rounded-xl flex items-center gap-3.5 text-right cursor-pointer" key={m.id} onClick={() => setMethod(m.id)} type="button"  style={{
+          <button className="p-4.5 rounded-xl flex items-center gap-3.5 text-right cursor-pointer" key={m.id} onClick={() => setMethod(m.id as TwoFactorMethod)} type="button"  style={{
             background: method === m.id ? "var(--accent-soft)" : "var(--surface)",
             border: "1px solid " + (method === m.id ? "var(--accent)" : "var(--line)"), fontFamily: "inherit", color: "var(--fg)"}}>
             <div className="rounded-lg grid"  style={{width: 40, height: 40, background: method === m.id ? "var(--accent)" : "var(--surface-2)", color: method === m.id ? "var(--accent-on)" : "var(--fg-mute)", placeItems: "center", flexShrink: 0}}>
@@ -660,7 +732,7 @@ export const TwoFactorPage = ({ go }) => {
   );
 };
 
-const AuthVisualSecurity = () => (
+const AuthVisualSecurity = (): React.ReactElement => (
   <div className="p-15 flex flex-col justify-center gap-8"  style={{ height: "100%"}}>
     <div>
       <div className="rounded-2xl grid mb-8"  style={{width: 80, height: 80, background: "var(--accent)", placeItems: "center"}}>
@@ -678,7 +750,9 @@ const AuthVisualSecurity = () => (
         ["گزارش امنیتی هفتگی", "خلاصه‌ی فعالیت‌های مشکوک به ایمیل"],
       ].map(([t, d], i) => (
         <div key={i} className="card-flat p-3.5 flex items-start gap-2.5" >
-          <Icon name="check" size={14} stroke={3} style={{ color: "var(--accent)", marginTop: 3 }} />
+          <span style={{ color: "var(--accent)", marginTop: 3, display: "inline-flex" }}>
+            <Icon name="check" size={14} stroke={3} />
+          </span>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>{t}</div>
             <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)"}}>{d}</div>
@@ -692,12 +766,12 @@ const AuthVisualSecurity = () => (
 // =====================================================
 // Onboarding Wizard — after register, before dashboard
 // =====================================================
-export const OnboardingPage = ({ go }) => {
+export const OnboardingPage = ({ go }: AuthPageProps): React.ReactElement => {
   const { role } = useRole();
   const [step, setStep] = React.useState(1);
-  const steps = ["تعیین سطح", "علایق", "هدف‌گذاری", "آماده‌ایم"];
+  const steps: readonly string[] = ["تعیین سطح", "علایق", "هدف‌گذاری", "آماده‌ایم"];
 
-  const handleNext = () => {
+  const handleNext = (): void => {
     if (step < steps.length) setStep(step + 1);
     else go(role.homeRoute);
   };
@@ -726,7 +800,11 @@ export const OnboardingPage = ({ go }) => {
   );
 };
 
-const OnboardLevel = ({ onNext }) => {
+interface OnboardStepProps {
+  onNext: () => void;
+}
+
+const OnboardLevel = ({ onNext }: OnboardStepProps): React.ReactElement => {
   const [level, setLevel] = React.useState(2);
   return (
     <div>
@@ -763,7 +841,7 @@ const OnboardLevel = ({ onNext }) => {
   );
 };
 
-const OnboardInterests = ({ onNext }) => {
+const OnboardInterests = ({ onNext }: OnboardStepProps): React.ReactElement => {
   const [selected, setSelected] = React.useState(["nlp", "data"]);
   const tags = [
     { id: "nlp", t: "پردازش زبان طبیعی" },
@@ -779,7 +857,7 @@ const OnboardInterests = ({ onNext }) => {
     { id: "math", t: "ریاضیات کاربردی" },
     { id: "lin", t: "زبان‌شناسی محاسباتی" },
   ];
-  const toggle = (id) => setSelected(selected.includes(id) ? selected.filter(s => s !== id) : [...selected, id]);
+  const toggle = (id: string): void => setSelected(selected.includes(id) ? selected.filter(s => s !== id) : [...selected, id]);
   return (
     <div>
       <h1 className="h-1 mb-3.5" >چه چیزی برای شما جذاب است؟</h1>
@@ -807,7 +885,7 @@ const OnboardInterests = ({ onNext }) => {
   );
 };
 
-const OnboardGoals = ({ onNext }) => {
+const OnboardGoals = ({ onNext }: OnboardStepProps): React.ReactElement => {
   const [goal, setGoal] = React.useState("career");
   return (
     <div>
@@ -845,7 +923,10 @@ const OnboardGoals = ({ onNext }) => {
   );
 };
 
-const OnboardReady = ({ onNext, role }) => (
+interface OnboardReadyProps extends OnboardStepProps {
+  role: Role;
+}
+const OnboardReady = ({ onNext, role }: OnboardReadyProps): React.ReactElement => (
   <div className="text-center"  style={{ padding: "40px 0"}}>
     <div className="rounded-full grid"  style={{width: 100, height: 100, margin: "0 auto",
       background: "var(--accent)",
