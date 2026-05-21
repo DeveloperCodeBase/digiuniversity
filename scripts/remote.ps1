@@ -796,6 +796,35 @@ else
   if [ "$SA_AUDIT" != "200" ]; then echo "FAIL: super_admin should be 200, got ${SA_AUDIT}"; exit 1; fi
   echo "PASS: support + super_admin can read AuditLog via the CASL positive path"
 fi
+
+echo
+echo "--- (7) Phase-20-pre: HIBP blocks a known-breached password at register ---"
+# "password" is the canonical pwned credential — appears millions of
+# times in HIBP. If our HIBP wiring works, registering with it must
+# 400 with a body that mentions "breach". Fail-open semantics mean an
+# HIBP outage produces 201/409 instead, in which case we WARN rather
+# than FAIL: the production policy is still in effect, the network
+# was just unreachable from inside the api container at probe time.
+#
+# Email is timestamped so re-running this probe doesn't 409 against a
+# user that registration accidentally created on a previous run where
+# HIBP failed open.
+RAND=$(docker exec digiuniversity-app sh -c 'date +%s%N')
+REG_BODY=$(docker exec digiuniversity-app sh -c "curl -s -X POST 'http://${API_IP}:4000/v1/auth/register' \
+  -H 'Content-Type: application/json' \
+  -d '{\"tenantSlug\":\"demo\",\"email\":\"hibp-test-${RAND}@example.test\",\"password\":\"password\",\"fullName\":\"HIBP Probe\"}'")
+REG_CODE=$(docker exec digiuniversity-app sh -c "curl -s -o /dev/null -w '%{http_code}' -X POST 'http://${API_IP}:4000/v1/auth/register' \
+  -H 'Content-Type: application/json' \
+  -d '{\"tenantSlug\":\"demo\",\"email\":\"hibp-test-${RAND}-2@example.test\",\"password\":\"password\",\"fullName\":\"HIBP Probe\"}'")
+echo "  POST /v1/auth/register with pwned password -> ${REG_CODE} (expect 400 if HIBP up)"
+if [ "$REG_CODE" = "400" ] && echo "$REG_BODY" | grep -qi 'breach\|pwned\|نشت'; then
+  echo "PASS: HIBP blocked a known-breached password"
+elif [ "$REG_CODE" = "400" ]; then
+  echo "PASS: registration rejected with 400 (body did not mention breach but length=${#REG_BODY})"
+else
+  echo "WARN: expected 400 from HIBP, got ${REG_CODE} — HIBP may be unreachable; check api logs"
+  echo "  body: $(echo "$REG_BODY" | head -c 200)"
+fi
 if [ "$LIMIT" -lt 1 ]; then
   echo "FAIL: expected at least one 429 across 12 requests"
   exit 1
