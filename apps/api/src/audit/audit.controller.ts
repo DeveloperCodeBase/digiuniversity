@@ -5,6 +5,7 @@ import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validato
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
 import type { AuthenticatedUser } from "../auth/auth.types";
+import { CheckPolicies } from "../authz/check-policies.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 class ListAuditLogsQuery {
@@ -31,8 +32,14 @@ class ListAuditLogsQuery {
  * bounded. Phase 21 (security) extends this with retention policy +
  * SIEM export.
  *
- * Role gate: admin, super_admin, and support (read-only — phase 15 R3
- * narrows via CASL but the @Roles guard is a working baseline today).
+ * Authorization:
+ *   - @Roles is the coarse layer — keeps the route off any random
+ *     student even if @CheckPolicies were misconfigured.
+ *   - @CheckPolicies is the fine layer — the CASL ability set says
+ *     who can `read` AuditLog. Today it's admin, super_admin, support.
+ *     Tomorrow we might split into "admin reads own-tenant only,
+ *     super_admin reads any-tenant" via a relationship-aware policy;
+ *     the controller doesn't change, only the AbilityFactory does.
  */
 @Controller("audit-logs")
 @Roles("admin", "super_admin", "support")
@@ -40,6 +47,7 @@ export class AuditController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
+  @CheckPolicies((ability) => ability.can("read", "AuditLog"))
   async list(
     @CurrentUser() user: AuthenticatedUser,
     @Query() q: ListAuditLogsQuery,

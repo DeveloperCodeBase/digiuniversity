@@ -8,6 +8,8 @@ import { AiLogsModule } from "./ai-logs/ai-logs.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { AssessmentsModule } from "./assessments/assessments.module";
 import { AuditModule } from "./audit/audit.module";
+import { AuthzModule } from "./authz/authz.module";
+import { PoliciesGuard } from "./authz/policies.guard";
 import { TutorModule } from "./tutor/tutor.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
@@ -43,6 +45,12 @@ import { UsersModule } from "./users/users.module";
     // Phase-15 R2: audit-log infra. Global so AuditLogService is
     // injectable everywhere; APP_INTERCEPTOR auto-captures mutations.
     AuditModule,
+    // Phase-15 R6: fine-grained authorization. Global so AbilityFactory
+    // is injectable everywhere; PoliciesGuard runs after RolesGuard in
+    // the APP_GUARD chain and only fires when a handler declares
+    // @CheckPolicies. Migration-safe: endpoints without the decorator
+    // pass through unaffected.
+    AuthzModule,
     TenantsModule,
     UsersModule,
     AiLogsModule,
@@ -72,10 +80,15 @@ import { UsersModule } from "./users/users.module";
     //      bcrypt loop. Auth endpoints override to a tighter bucket
     //      via @Throttle on the handler.
     //   2. JwtAuthGuard  — populate req.user (skipped on @Public).
-    //   3. RolesGuard    — read resolved roles from req.user.
+    //   3. RolesGuard    — read resolved roles from req.user; coarse
+    //                      gate by role name.
+    //   4. PoliciesGuard — Phase-15 R6 fine-grained gate, fires only
+    //                      when a handler declares @CheckPolicies.
+    //                      Routes without the decorator pass through.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: PoliciesGuard },
   ],
 })
 export class AppModule {}

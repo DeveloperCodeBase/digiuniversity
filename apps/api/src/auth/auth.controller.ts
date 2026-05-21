@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import { packRules } from "@casl/ability/extra";
 import type { Request } from "express";
 
 import { AuthService } from "./auth.service";
@@ -10,6 +11,7 @@ import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { AuditAction } from "../audit/audit-action.decorator";
+import { AbilityFactory } from "../authz/ability.factory";
 
 // Phase-15 R4: auth endpoints are the front door to a bcrypt verify +
 // JWT mint. Without a tight bucket an attacker can pin one CPU forever
@@ -21,7 +23,10 @@ const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly abilityFactory: AbilityFactory,
+  ) {}
 
   @Public()
   @Throttle(AUTH_THROTTLE)
@@ -54,9 +59,26 @@ export class AuthController {
     return this.auth.logout(dto.refreshToken);
   }
 
+  /**
+   * Returns the resolved JWT user plus a packed list of CASL ability
+   * rules so the SPA can render `<Can>` without doing a round-trip
+   * for every render. `packRules()` serialises the ability set to a
+   * tiny JSON array that the web side rehydrates with
+   * `createMongoAbility(unpacked)`. The packed form omits the verb
+   * keywords for `manage` / `all` so a super_admin payload is on the
+   * order of bytes, not kilobytes.
+   *
+   * The shape stays backward-compatible: `user.*` keeps the old
+   * fields, `abilities` is the new addition. Web clients pre-R7 just
+   * ignore the new field.
+   */
   @Get("me")
   me(@CurrentUser() user: AuthenticatedUser) {
-    return user;
+    const ability = this.abilityFactory.createForUser(user);
+    return {
+      ...user,
+      abilities: packRules(ability.rules),
+    };
   }
 }
 
