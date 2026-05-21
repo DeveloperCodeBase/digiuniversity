@@ -6,6 +6,7 @@ import { AiBridgeModule } from "./ai-bridge/ai-bridge.module";
 import { AiLogsModule } from "./ai-logs/ai-logs.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { AssessmentsModule } from "./assessments/assessments.module";
+import { AuditModule } from "./audit/audit.module";
 import { TutorModule } from "./tutor/tutor.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
@@ -27,6 +28,9 @@ import { UsersModule } from "./users/users.module";
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     PrismaModule,
     AuthModule,
+    // Phase-15 R2: audit-log infra. Global so AuditLogService is
+    // injectable everywhere; APP_INTERCEPTOR auto-captures mutations.
+    AuditModule,
     TenantsModule,
     UsersModule,
     AiLogsModule,

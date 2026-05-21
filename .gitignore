@@ -38,6 +38,9 @@ uploads/
 *.env.local
 *.env.backup
 
+# TypeScript incremental build artefact (regenerated on every tsc run)
+*.tsbuildinfo
+
 # Database dumps (created by `remote.ps1 backup`, stored on VPS).
 # Phase-15 R1 carve-out: Prisma migration .sql files MUST be tracked
 # (they're the source-of-truth for schema changes). The negation must
