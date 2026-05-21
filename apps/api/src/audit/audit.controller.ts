@@ -1,10 +1,5 @@
-import {
-  Controller,
-  DefaultValuePipe,
-  Get,
-  ParseIntPipe,
-  Query,
-} from "@nestjs/common";
+import { Controller, Get, Query } from "@nestjs/common";
+import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
@@ -19,8 +14,12 @@ class ListAuditLogsQuery {
   @IsOptional() @IsString() @MaxLength(64) requestId?: string;
   // ISO date string; if present, returns rows AFTER this timestamp.
   @IsOptional() @IsString() @MaxLength(40) since?: string;
-  @IsOptional() @IsInt() @Min(1) @Max(200) limit?: number;
-  @IsOptional() @IsInt() @Min(0) offset?: number;
+  // @Type runs first to coerce the query-string "5" → number 5, THEN
+  // @IsInt + range validators run. Without @Type the global
+  // ValidationPipe's transform:true skips number coercion for query
+  // params and the validator rejects the string.
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(200) limit?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) offset?: number;
 }
 
 /**
@@ -44,9 +43,9 @@ export class AuditController {
   async list(
     @CurrentUser() user: AuthenticatedUser,
     @Query() q: ListAuditLogsQuery,
-    @Query("limit", new DefaultValuePipe(50), ParseIntPipe) limit: number,
-    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ) {
+    const limit = q.limit ?? 50;
+    const offset = q.offset ?? 0;
     const cappedLimit = Math.min(Math.max(limit, 1), 200);
     const where: Record<string, unknown> = { tenantId: user.tenantId };
     if (q.action) where.action = { contains: q.action };
