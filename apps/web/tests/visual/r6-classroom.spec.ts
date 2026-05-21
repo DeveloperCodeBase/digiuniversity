@@ -8,7 +8,7 @@
 //
 // Output: docs/gate-2-evidence/r6-classroom/ via the same bind-mount
 // pipeline as gate-1.
-import { test, expect } from "@playwright/test";
+import { test, expect, type Browser } from "@playwright/test";
 
 const OUT = "/screenshots/gate-2-evidence/r6-classroom";
 
@@ -25,7 +25,7 @@ const viewports = [
 ];
 
 // Helper: log in once, then return a context for the test to reuse.
-async function loginContext(browser, vp: { width: number; height: number }) {
+async function loginContext(browser: Browser, vp: { width: number; height: number }) {
   const ctx = await browser.newContext({ viewport: vp });
   const page = await ctx.newPage();
   await page.goto("/login", { waitUntil: "networkidle" });
@@ -37,7 +37,7 @@ async function loginContext(browser, vp: { width: number; height: number }) {
   await page.locator('input[name="email"]').fill(STUDENT.email);
   await page.locator('input[name="password"]').fill(STUDENT.password);
   await page.locator('button[type="submit"]').click();
-  await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 25_000 });
+  await page.waitForURL((u: URL) => !u.pathname.includes("/login"), { timeout: 25_000 });
   return { ctx, page };
 }
 

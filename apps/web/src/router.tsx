@@ -39,7 +39,7 @@ import {
 import { ErrorBoundary } from "./auth/ErrorBoundary";
 import { useAuth } from "./auth/AuthContext";
 import { AuthLoadingSkeleton } from "./components/AuthLoadingSkeleton";
-import { UIRoot } from "./ui";
+import { UIRoot, BottomNav, cn } from "./ui";
 import { ScrollProgress } from "./motion";
 import { Nav, Footer } from "./shared";
 import { RoleSideNav } from "./sidenav";
@@ -303,7 +303,16 @@ const Layout: React.FC = () => {
       <ScrollProgress />
       <Nav current={route} go={go} />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
-        <main id="main-content" className="page-shell" tabIndex={-1}>
+        <main
+          id="main-content"
+          className={cn(
+            "page-shell",
+            // Phase-16 R8 — leave room for the bottom nav on mobile
+            // (h-16 + safe-area-inset). Desktop unaffected by md:pb-0.
+            "pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0",
+          )}
+          tabIndex={-1}
+        >
           {isWorkspace ? (
             <div className="workspace-grid">
               <RoleSideNav active={route} go={go} />
@@ -321,6 +330,11 @@ const Layout: React.FC = () => {
             its own visual). Pages that still import Footer themselves
             are deprecated — to be removed file-by-file. */}
         {isPublicRoute(route) && <Footer go={go} />}
+        {/* Phase-16 R8 — mobile bottom nav. Visible on `<md` only and
+            only when the visitor is authenticated (anonymous visitors
+            on the landing don't need a workspace nav). The component
+            hides itself on /classroom and the auth shell routes. */}
+        {auth.isAuthenticated ? <BottomNav /> : null}
       </ErrorBoundary>
     </UIRoot>
   );
