@@ -72,6 +72,37 @@ const NAV_ITEMS_BY_ROLE: Record<RoleId, NavItem[]> = {
     { id: "pricing", label: "پلن‌ها" },
     { id: "help", label: "پشتیبانی" },
   ],
+  // Phase-15 R7: nav for the 5 roles added in R1's seed.
+  ta: [
+    { id: "classroom", label: "کلاس", live: true },
+    { id: "my-courses", label: "دوره‌های من", live: true },
+    { id: "progress", label: "پیشرفت", live: true },
+    { id: "tutor", label: "دستیار AI", live: true },
+  ],
+  content_manager: [
+    { id: "catalog", label: "کاتالوگ", live: true },
+    { id: "authoring", label: "استودیو" },
+    { id: "analytics", label: "تحلیل" },
+    { id: "help", label: "پشتیبانی" },
+  ],
+  support: [
+    { id: "admin", label: "میز پشتیبانی" },
+    { id: "audit", label: "گزارش حسابرسی", live: true },
+    { id: "messages", label: "پیام‌ها" },
+    { id: "help", label: "پشتیبانی" },
+  ],
+  moderator: [
+    { id: "community", label: "جامعه" },
+    { id: "messages", label: "پیام‌ها" },
+    { id: "help", label: "پشتیبانی" },
+  ],
+  super_admin: [
+    { id: "progress", label: "داشبورد", live: true },
+    { id: "admin", label: "مدیریت" },
+    { id: "audit", label: "گزارش حسابرسی", live: true },
+    { id: "analytics", label: "تحلیل" },
+    { id: "tutor", label: "دستیار AI", live: true },
+  ],
 };
 
 export interface NavProps {
@@ -395,6 +426,14 @@ const ROLE_WORKSPACE_LINK: Record<RoleId, { route: string; label: string }> = {
   admin: { route: "admin", label: "میز مدیریت" },
   parent: { route: "parent", label: "پورتال والد" },
   org: { route: "admin", label: "میز سازمان" },
+  // Phase-15 R7: the 5 roles added in R1 each get their primary
+  // workspace destination. Footer surfaces only the logged-in user's
+  // entry, so a TA never sees the admin link and vice-versa.
+  ta: { route: "classroom", label: "کلاس دستیار" },
+  content_manager: { route: "authoring", label: "استودیو محتوا" },
+  support: { route: "audit", label: "گزارش حسابرسی" },
+  moderator: { route: "community", label: "میز نظارت" },
+  super_admin: { route: "admin", label: "میز ابرمدیر" },
 };
 
 export const Footer = ({ go }: FooterProps): React.ReactElement => {

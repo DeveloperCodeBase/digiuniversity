@@ -20,6 +20,11 @@ All users live in the `demo` tenant.
 | **Admin** (مدیر) | `admin@digiuniversity.ir` | `ChangeMe!2026` | `/progress` (live data) |
 | **Parent** (والد) | `parent1@digiuniversity.ir` | `ParentPass!1` | `/parent` (mock) |
 | **Org** (سازمان) | `org1@digiuniversity.ir` | `OrgPass!1` | `/admin` (mock) |
+| **TA** (دستیار آموزشی) | `ta1@digiuniversity.ir` | `TaPass!1` | `/classroom` (live data) |
+| **Content Manager** (مدیر محتوا) | `cm1@digiuniversity.ir` | `ContentPass!1` | `/authoring` (mock) |
+| **Support** (پشتیبانی) | `support1@digiuniversity.ir` | `SupportPass!1` | `/messages` (mock) → `/audit` (live data) |
+| **Moderator** (ناظر) | `moderator1@digiuniversity.ir` | `ModeratorPass!1` | `/community` (mock) |
+| **Super Admin** (ابرمدیر) | `superadmin@digiuniversity.ir` | `SuperAdminPass!1` | `/admin` (mock) + `/audit` (live data) |
 
 ## Where these are defined
 
@@ -47,6 +52,11 @@ The seed file's password env vars are:
 - `SEED_STUDENT_PASSWORD` (default `StudentPass!1`)
 - `SEED_PARENT_PASSWORD` (default `ParentPass!1`)
 - `SEED_ORG_PASSWORD` (default `OrgPass!1`)
+- `SEED_TA_PASSWORD` (default `TaPass!1`)
+- `SEED_CONTENT_MANAGER_PASSWORD` (default `ContentPass!1`)
+- `SEED_SUPPORT_PASSWORD` (default `SupportPass!1`)
+- `SEED_MODERATOR_PASSWORD` (default `ModeratorPass!1`)
+- `SEED_SUPER_ADMIN_PASSWORD` (default `SuperAdminPass!1`)
 
 But `seed.ts` is also explicit that **it never overwrites an existing
 user's password** — passwords are rotated through the API's

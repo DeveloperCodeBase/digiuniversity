@@ -137,6 +137,24 @@ async function main(): Promise<void> {
   const orgRole = await prisma.role.findUnique({
     where: { tenantId_name: { tenantId: tenant.id, name: "org" } },
   });
+  // Phase-15 R7: lookup the 5 roles added in R1 so we can seed a demo
+  // user for each. Without these, the LoginPage role-tab demo creds
+  // panel would have entries for roles with no actual user to log in.
+  const taRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "ta" } },
+  });
+  const contentManagerRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "content_manager" } },
+  });
+  const supportRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "support" } },
+  });
+  const moderatorRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "moderator" } },
+  });
+  const superAdminRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "super_admin" } },
+  });
   const demoUsers: Array<{ email: string; fullName: string; password: string; roleId?: string }> = [
     {
       email: "instructor1@digiuniversity.ir",
@@ -161,6 +179,36 @@ async function main(): Promise<void> {
       fullName: "شرکت دانش‌بنیان فردا",
       password: process.env.SEED_ORG_PASSWORD ?? "OrgPass!1",
       roleId: orgRole?.id,
+    },
+    {
+      email: "ta1@digiuniversity.ir",
+      fullName: "سینا کریمی",
+      password: process.env.SEED_TA_PASSWORD ?? "TaPass!1",
+      roleId: taRole?.id,
+    },
+    {
+      email: "cm1@digiuniversity.ir",
+      fullName: "ندا رحمانی",
+      password: process.env.SEED_CONTENT_MANAGER_PASSWORD ?? "ContentPass!1",
+      roleId: contentManagerRole?.id,
+    },
+    {
+      email: "support1@digiuniversity.ir",
+      fullName: "حسین مرادی",
+      password: process.env.SEED_SUPPORT_PASSWORD ?? "SupportPass!1",
+      roleId: supportRole?.id,
+    },
+    {
+      email: "moderator1@digiuniversity.ir",
+      fullName: "زهرا فرجی",
+      password: process.env.SEED_MODERATOR_PASSWORD ?? "ModeratorPass!1",
+      roleId: moderatorRole?.id,
+    },
+    {
+      email: "superadmin@digiuniversity.ir",
+      fullName: "علی هاشمی",
+      password: process.env.SEED_SUPER_ADMIN_PASSWORD ?? "SuperAdminPass!1",
+      roleId: superAdminRole?.id,
     },
   ];
   for (const u of demoUsers) {

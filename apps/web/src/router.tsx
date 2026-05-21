@@ -63,6 +63,7 @@ import CommunityPage from "./pages/Community";
 import AnalyticsPage from "./pages/Analytics";
 import AuthoringPage from "./pages/Authoring";
 import RecordingsPage from "./pages/Recordings";
+import AuditPage from "./pages/Audit";
 import {
   LoginPage,
   RegisterPage,
@@ -360,6 +361,11 @@ const routes = [
   { path: "/analytics", element: <RouteShell Component={AnalyticsPage} /> },
   { path: "/authoring", element: <RouteShell Component={AuthoringPage} /> },
   { path: "/recordings", element: <RouteShell Component={RecordingsPage} /> },
+  // Phase-15 R7: audit-log viewer. The page itself uses useAbility()
+  // to render a denial state for users without read access, and the
+  // api enforces the same gate via @Roles + @CheckPolicies. Both
+  // layers must agree — defence in depth.
+  { path: "/audit", element: <RouteShell Component={AuditPage} /> },
   { path: "/login", element: <RouteShell Component={LoginPage} /> },
   { path: "/register", element: <RouteShell Component={RegisterPage} /> },
   { path: "/forgot", element: <RouteShell Component={ForgotPage} /> },

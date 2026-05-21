@@ -96,11 +96,19 @@ interface LoginErrors {
 //
 // Documented at docs/DEMO_USERS.md.
 const DEMO_CREDS: Record<RoleId, { email: string; password: string }> = {
-  student:    { email: "student1@digiuniversity.ir",    password: "StudentPass!1" },
-  instructor: { email: "instructor1@digiuniversity.ir", password: "InstructorPass!1" },
-  admin:      { email: "admin@digiuniversity.ir",       password: "ChangeMe!2026" },
-  parent:     { email: "parent1@digiuniversity.ir",     password: "ParentPass!1" },
-  org:        { email: "org1@digiuniversity.ir",        password: "OrgPass!1" },
+  student:         { email: "student1@digiuniversity.ir",     password: "StudentPass!1" },
+  instructor:      { email: "instructor1@digiuniversity.ir",  password: "InstructorPass!1" },
+  admin:           { email: "admin@digiuniversity.ir",        password: "ChangeMe!2026" },
+  parent:          { email: "parent1@digiuniversity.ir",      password: "ParentPass!1" },
+  org:             { email: "org1@digiuniversity.ir",         password: "OrgPass!1" },
+  // Phase-15 R7: seed.ts now ships demo users for the 5 new roles.
+  // Documented at docs/DEMO_USERS.md (keep that in sync if you rotate
+  // any of these — production .env overrides via SEED_*_PASSWORD).
+  ta:              { email: "ta1@digiuniversity.ir",          password: "TaPass!1" },
+  content_manager: { email: "cm1@digiuniversity.ir",          password: "ContentPass!1" },
+  support:         { email: "support1@digiuniversity.ir",     password: "SupportPass!1" },
+  moderator:       { email: "moderator1@digiuniversity.ir",   password: "ModeratorPass!1" },
+  super_admin:     { email: "superadmin@digiuniversity.ir",   password: "SuperAdminPass!1" },
 };
 
 export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {

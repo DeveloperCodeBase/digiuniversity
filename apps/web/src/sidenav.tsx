@@ -130,6 +130,68 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     { id: "settings", t: "تنظیمات سازمان", ic: "settings" },
     { id: "help", t: "پشتیبانی", ic: "headset" },
   ],
+
+  // Phase-15 R7: sidebars for the 5 new roles added in R1's seed.
+  ta: [
+    { h: "تدریس" },
+    { id: "classroom", t: "کلاس زنده", ic: "live" },
+    { id: "course", t: "دروس من", ic: "book" },
+    { id: "officehours", t: "Office Hours", ic: "headset" },
+    { h: "دانشجویان" },
+    { id: "submission", t: "تصحیح تمرین", ic: "check" },
+    { id: "messages", t: "پیام‌ها", ic: "chat" },
+    { id: "analytics", t: "تحلیل کلاس", ic: "chart" },
+    { h: "حساب" },
+    { id: "profile", t: "پروفایل", ic: "user" },
+    { id: "settings", t: "تنظیمات", ic: "settings" },
+  ],
+
+  content_manager: [
+    { h: "محتوا" },
+    { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
+    { id: "course", t: "دروس منتشرشده", ic: "book" },
+    { id: "library", t: "کتابخانه", ic: "folder" },
+    { h: "تحلیل" },
+    { id: "analytics", t: "تحلیل کاتالوگ", ic: "chart" },
+    { h: "حساب" },
+    { id: "profile", t: "پروفایل", ic: "user" },
+    { id: "settings", t: "تنظیمات", ic: "settings" },
+    { id: "help", t: "پشتیبانی", ic: "headset" },
+  ],
+
+  support: [
+    { h: "پشتیبانی" },
+    { id: "admin", t: "میز پشتیبانی", ic: "home" },
+    { id: "audit", t: "گزارش حسابرسی", ic: "shield" },
+    { id: "messages", t: "پیام‌های ورودی", ic: "chat" },
+    { id: "inbox", t: "اعلان‌ها", ic: "bell" },
+    { h: "حساب" },
+    { id: "profile", t: "پروفایل", ic: "user" },
+    { id: "settings", t: "تنظیمات", ic: "settings" },
+  ],
+
+  moderator: [
+    { h: "نظارت" },
+    { id: "community", t: "انجمن و بحث", ic: "users" },
+    { id: "messages", t: "گزارش‌ها", ic: "chat" },
+    { h: "حساب" },
+    { id: "profile", t: "پروفایل", ic: "user" },
+    { id: "settings", t: "تنظیمات", ic: "settings" },
+    { id: "help", t: "پشتیبانی", ic: "headset" },
+  ],
+
+  super_admin: [
+    { h: "ابرمدیریت" },
+    { id: "admin", t: "نمای کلی", ic: "home" },
+    { id: "analytics", t: "تحلیل سامانه", ic: "chart" },
+    { id: "audit", t: "گزارش حسابرسی", ic: "shield" },
+    { h: "ساختار" },
+    { id: "schools", t: "دانشکده‌ها", ic: "grad" },
+    { id: "faculty", t: "هیات علمی", ic: "users" },
+    { id: "events", t: "رویدادها", ic: "live" },
+    { h: "حساب" },
+    { id: "settings", t: "تنظیمات سامانه", ic: "settings" },
+  ],
 };
 
 // Wrap a list in <ul> if it isn't already (compat with existing CSS).

@@ -16,6 +16,8 @@
     "build-storybook": "storybook build -o storybook-static"
   },
   "dependencies": {
+    "@casl/ability": "^6.7.3",
+    "@casl/react": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.3"
