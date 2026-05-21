@@ -200,6 +200,7 @@ services:
     volumes:
       - ./apps/web:/work
       - web-visual-node-modules:/work/node_modules
+      - web-visual-storybook-static:/work/storybook-static
       - ./docs:/screenshots
     networks:
       - web
@@ -254,4 +255,9 @@ volumes:
   # First run installs deps, subsequent runs reuse the volume so the
   # `remote.ps1 visual` round-trip stays under 30s.
   web-visual-node-modules:
+    driver: local
+  # Phase-16 R3 — cache the static Storybook build between runs so we
+  # don't pay 30+ seconds rebuilding it every time we re-capture.
+  # Invalidate with `docker volume rm digiuniversity_web-visual-storybook-static`.
+  web-visual-storybook-static:
     driver: local

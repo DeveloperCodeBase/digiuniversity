@@ -858,6 +858,29 @@ echo "PASS: rate limit fired after the configured bucket size"
         $specPath = "tests/visual/$gate.spec.ts"
         $hostEvidenceDir = "docs/$gate-evidence"
 
+        # Phase-16 R3 — Storybook snapshots are a special mode: we
+        # need to build the static Storybook before the playwright test
+        # runs, and use a different config file (with a python webServer
+        # block). Detected by the spec name.
+        $isStorybook = $gate -like "*storybook*"
+        $playwrightConfig = if ($isStorybook) {
+          "playwright.storybook.config.js"
+        } else {
+          "playwright.visual.config.js"
+        }
+        $prebuildCmd = if ($isStorybook) {
+          "&& npm run build-storybook"
+        } else {
+          ""
+        }
+        # Storybook spec writes into docs/gate-2-evidence/r3-storybook/,
+        # not docs/<gate>-evidence/. Override the host dir + scp source.
+        $hostEvidenceDir = if ($isStorybook) {
+          "docs/gate-2-evidence/r3-storybook"
+        } else {
+          "docs/$gate-evidence"
+        }
+
         # Push current work so the VPS sees the spec + config.
         git push origin $Branch
 
@@ -880,7 +903,7 @@ docker compose --profile visual build web-visual >/dev/null 2>&1 || true
 # which gate's spec we are capturing this round.
 docker compose --profile visual run --rm \
   --workdir /work \
-  web-visual bash -c "npm install --no-audit --no-fund --silent && npx playwright test --config playwright.visual.config.js $specPath"
+  web-visual bash -c "npm install --no-audit --no-fund --silent $prebuildCmd && npx playwright test --config $playwrightConfig $specPath"
 echo "--- artefacts on VPS ---"
 ls -la $hostEvidenceDir
 "@
@@ -894,7 +917,11 @@ ls -la $hostEvidenceDir
         # `git add` picks them up. Use forward slashes for ssh; the
         # VPS path is the same regardless of platform.
         $repoRoot = (Resolve-Path "$PSScriptRoot\..").Path
-        $localDir = Join-Path $repoRoot "docs\$gate-evidence"
+        $localDir = if ($isStorybook) {
+          Join-Path $repoRoot "docs\gate-2-evidence\r3-storybook"
+        } else {
+          Join-Path $repoRoot "docs\$gate-evidence"
+        }
         New-Item -ItemType Directory -Force -Path $localDir | Out-Null
         Write-Host "Pulling $hostEvidenceDir/*.png from $Server -> $localDir"
         # `scp -p` preserves mtimes; `-r` recurses subdirs if a future
