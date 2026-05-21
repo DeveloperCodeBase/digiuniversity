@@ -191,13 +191,14 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
             <button className="user-btn" onClick={() => setUserOpen(!userOpen)}>
               <div className={"avatar " + role.color} style={{ width: 32, height: 32, fontSize: 11 }}>{role.avatar}</div>
               <span className="user-name">{
-                // Phase-14.7 R2: real authed user's first name.
-                // Falls back to email-local (e.g. "student1") for users
-                // without a fullName, then to the mock role name as a
-                // last resort (demo-mode without login).
+                // Phase-14.8: NEVER fall back to mock role.name. If the
+                // user isn't authenticated (or has a stale session
+                // without name/email), show the role label instead of
+                // a fake identity. The mock "رضوی" used to show here
+                // for unauthenticated visitors which was misleading.
                 (auth.user?.fullName?.split(" ")[0])
                   || auth.user?.email?.split("@")[0]
-                  || role.name.split(" ").slice(-1)[0]
+                  || role.label
               }</span>
             </button>
             {userOpen && <UserDropdown go={go} role={role} setRole={setRole} auth={auth} />}
@@ -297,14 +298,16 @@ const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.Rea
     window.location.search.includes("demo=1") ||
     window.location.hash.includes("demo=1")
   );
-  // Phase-14.7 R2: prefer real auth user details over the role mock.
-  // displayName: auth.user.fullName → email local-part → role mock name.
-  // identifier: auth.user.email if logged in, else role.code (demo mock).
-  const displayName =
-    auth?.user?.fullName ||
-    auth?.user?.email?.split("@")[0] ||
-    role.name;
-  const identifier = auth?.user?.email || role.code;
+  // Phase-14.8: real authed user only, never the mock identity.
+  // - If authenticated: full name → email local-part.
+  // - If NOT authenticated: role label ("دانشجو" / "استاد" / …) —
+  //   never role.name (which is the mock "نسرین رضوی" for student).
+  // - Same for identifier: email if authed, else "مهمان" (guest).
+  const isAuthed = !!auth?.user;
+  const displayName = isAuthed
+    ? (auth.user?.fullName || auth.user?.email?.split("@")[0] || role.label)
+    : role.label;
+  const identifier = isAuthed ? (auth.user?.email ?? role.label) : "مهمان · بدون ورود";
   return (
   <div className="dropdown" style={{ width: 300 }}>
     <div className="p-4.5"  style={{ borderBottom: "1px solid var(--line)"}}>

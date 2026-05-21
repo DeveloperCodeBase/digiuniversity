@@ -7,6 +7,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      // Phase-14.8: never let HTTP cache the SW file itself or its
+      // imports. Some users were stuck on a pre-Phase-14.6 SW that
+      // didn't have skipWaiting; with updateViaCache: "none", the
+      // browser always asks the network for sw.js (bypassing its own
+      // HTTP cache), so a new SW reaches the user on the next visit.
+      // Pairs with the inline controllerchange listener in index.html
+      // to reload the page once the new SW claims.
+      updateViaCache: "none",
       includeAssets: ["favicon.svg"],
       manifest: {
         name: "دیجی‌یونیورسیتی",

@@ -15,32 +15,29 @@ import { useAuth } from "../auth/AuthContext";
 export const DashboardPage = ({ go }) => {
   const { role } = useRole();
   const auth = useAuth();
-  // Phase-14.7 R2: greeting uses the REAL logged-in user, not the mock
-  // ROLES.student.name fallback ("نسرین رضوی" — that's the demo-data
-  // identity for the role tab, not the actual user's name). Order of
-  // preference:
-  //   1) auth.user.fullName  (api now returns this; see backend change)
-  //   2) auth.user.email's local-part  (e.g. "student1" from
-  //      "student1@digiuniversity.ir") — friendly fallback when fullName
-  //      isn't set yet.
-  //   3) role.name first word  — only ever shown to demo-mode visitors
-  //      who switched roles via the user-dropdown without logging in.
+  // Phase-14.8: greeting NEVER falls back to ROLES.student.name (which
+  // is the mock "نسرین رضوی"). The chain is real-auth-only:
+  //   1) auth.user.fullName    (api returns it; preferred)
+  //   2) auth.user.email local-part (e.g. "student1") as fallback
+  //   3) "خوش آمدید" — generic Persian greeting with NO name
+  //
+  // Without auth (auth.user === null), we shouldn't be rendering this
+  // page at all (Layout auth-gates /dashboard). But if a user somehow
+  // lands here with a stale session that lacks both fullName + email,
+  // the generic greeting is still readable and doesn't lie.
   const userFullName = auth.user?.fullName ?? undefined;
   const userEmail = auth.user?.email;
   const emailLocal = userEmail?.split("@")[0];
-  const firstName =
-    (userFullName?.split(" ")[0]) ||
-    emailLocal ||
-    role?.name?.split(" ")[0] ||
-    "کاربر";
+  const firstName = (userFullName?.split(" ")[0]) || emailLocal || null;
+  const greeting = firstName ? `سلام ${firstName}` : "خوش آمدید";
   return (
     <main data-screen-label="04 میز کار من">
       <div className="dash-main">
           {/* Greeting */}
           <div className="dash-greet">
             <div>
-              <span className="eyebrow">پنل {role?.label || "دانشجو"} · شناسه {role?.code || "۸۴۰۲۱۷"}</span>
-              <h1 className="mt-2.5" >سلام {firstName}، امروز روی <span style={{ color: "var(--cyan)" }}>بهینه‌سازی</span> تمرکز کن.</h1>
+              <span className="eyebrow">پنل {role?.label || "دانشجو"}{auth.user ? "" : (role?.code ? " · شناسه " + role.code : "")}</span>
+              <h1 className="mt-2.5" >{greeting}، امروز روی <span style={{ color: "var(--cyan)" }}>بهینه‌سازی</span> تمرکز کن.</h1>
               <p className="muted">۳ کار باز · جلسه‌ی بعدی ۹۰ دقیقه دیگر · پروفایل شناختی به‌روز.</p>
             </div>
             <div className="flex gap-2.5" >
