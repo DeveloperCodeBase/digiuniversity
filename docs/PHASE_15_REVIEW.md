@@ -94,38 +94,78 @@ Single command. Asserts in this order:
 
 Failure exits non-zero so the script can gate CI later.
 
-## Verification — full live run
+## Verification — full live run after R7
 
 ```
 > .\scripts\remote.ps1 security-probe
 
 --- (1) CSP header on / ---
-content-security-policy-report-only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
+content-security-policy-report-only: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; …
 
 --- (2) /sw-recovery.js cache + existence ---
 HTTP/2 200
 cache-control: no-cache, no-store, must-revalidate
 
 --- (3) /api/v1/auth/login rate limit via Caddy (front-door) ---
-  req 01 -> 400
-  ...
-  req 10 -> 400
-  req 11 -> 429
-  req 12 -> 429
 summary: 10 x 400|401 (rejected creds), 2 x 429 (rate-limited), 0 x 502 (caddy upstream stale)
 PASS: rate limit fired after the configured bucket size
 
 --- (4) sanity: api container reachable on internal network ---
 direct GET http://172.22.0.6:4000/v1/health -> 200
+
+--- (5) Phase-15 R6: CASL gate + /v1/auth/me ships abilities ---
+  student GET /v1/audit-logs -> 403 (expect 403 from CASL/Roles)
+  student GET /v1/auth/me     -> abilities field present? yes
+PASS: CASL gate denies non-admin AND /v1/auth/me ships role-shaped ability rules
+
+--- (6) Phase-15 R7: support + super_admin can read /v1/audit-logs ---
+  support     GET /v1/audit-logs -> 200 (expect 200)
+  super_admin GET /v1/audit-logs -> 200  (expect 200)
+PASS: support + super_admin can read AuditLog via the CASL positive path
 ```
+
+### R6 — CASL AbilityFactory + PoliciesGuard backend (commit [`c264c94`](https://github.com/DeveloperCodeBase/digiuniversity/commit/c264c94))
+
+Replaces nothing — drops a second authorization layer beside `@Roles`. The two cooperate: `RolesGuard` is the coarse gate (route is admin-only), `PoliciesGuard` is the fine gate (this admin can read AuditLog but cannot delete Tenant). Migration-safe: endpoints without `@CheckPolicies` pass through PoliciesGuard unaffected.
+
+What shipped:
+
+- `apps/api/src/authz/ability.types.ts` — `Actions × Subjects` union; `AppAbility` alias over CASL's `PureAbility`. Verbs include CRUD primitives plus `publish`, `enroll`, `grade`, `moderate` so policies read like English in controllers.
+- `apps/api/src/authz/ability.factory.ts` — per-role rule builder modeled role-first from the audit fase-2 matrix. `super_admin` manages all but cannot `delete AuditLog` (forensic continuity even for break-glass). `admin` is full-control within tenant. `instructor` / `ta` / `content_manager` / `support` / `moderator` / `parent` / `org` / `student` each get scoped verb+subject grants.
+- `apps/api/src/authz/policies.guard.ts` — `APP_GUARD` after `RolesGuard`. Reads `@CheckPolicies` metadata, builds the user's ability, calls each policy handler, throws `ForbiddenException` on denial. Empty `@CheckPolicies` ≡ pass.
+- `apps/api/src/authz/check-policies.decorator.ts` — `@CheckPolicies(...handlers)` decorator + `PolicyHandler` type.
+- `apps/api/src/authz/authz.module.ts` — `@Global()` so `AbilityFactory` injects anywhere.
+
+First adopter: `audit-logs` viewer now declares `@CheckPolicies((ab) => ab.can("read", "AuditLog"))` alongside the existing `@Roles("admin", "super_admin", "support")`. Both must agree today; the value is that we can later split admin into "admin reads own-tenant only, super_admin reads any-tenant" via AbilityFactory without touching the controller.
+
+`/v1/auth/me` now returns `abilities` — the user's CASL rule set packed with `@casl/ability/extra` `packRules()`. The SPA rehydrates in R7. Backward-compat: the rest of `/me` is unchanged; pre-R7 clients ignore the new field.
+
+### R7 — CASL on the SPA + 5 new roles in nav + live `/audit` page (commit [`2ff8f96`](https://github.com/DeveloperCodeBase/digiuniversity/commit/2ff8f96))
+
+Brings the CASL layer to the browser, surfaces the 10-role catalogue end-to-end, and ships the first production-quality audit-log viewer.
+
+`apps/web/src/auth/`:
+- `ability.ts` — `AppAbility` alias, `buildAbility()` rehydration via `@casl/ability/extra unpackRules`. Empty-ability fallback returns a CASL instance where every `can(...)` is false, so callers never need a null check.
+- `Can.tsx` — `<Can I="action" a="Subject">` wrapper around `@casl/react createContextualCan`; also exports `useAbility()` for non-JSX checks.
+- `AuthContext.tsx` — fetches `/v1/auth/me` on mount + after `login` + after `register` so `abilities` is always fresh. Persisted via `sessionStore` so a hard reload doesn't briefly drop the ability set. Published via `AbilityContext` alongside the existing `AuthContext`.
+
+`apps/web/src/pages/Audit.tsx` (new) — production AuditLog viewer at `/audit`. Calls `useAbility()` at the top to render a denial state when the user cannot read AuditLog; the api enforces the same gate via R6's `@CheckPolicies`. Table view with action filter, pagination counter, Persian datetime, and 8-char request-id snippet for forensic joins to the api logs.
+
+`apps/web/src/role.tsx` — `RoleId` union widened from 5 to 10. The 5 original entries (`student` / `instructor` / `admin` / `parent` / `org`) are byte-identical; the 5 new entries (`ta` / `content_manager` / `support` / `moderator` / `super_admin`) each get a Persian label, an avatar string, a `homeRoute`, and a tailored `nav` list. `RolePermission` union extended with `tutor-students`, `publish-content`, `audit-read`, `reset-passwords`, `moderate-discussions`, `cross-tenant`.
+
+`apps/web/src/shared.tsx` + `apps/web/src/sidenav.tsx` — `NAV_ITEMS_BY_ROLE`, `ROLE_WORKSPACE_LINK`, and `SIDEBAR_BY_ROLE` each gained 5 entries shaped to what the new role can actually do. Support's sidebar centers on audit + inbox; super_admin gets cross-cutting overview + audit + analytics; TA mirrors instructor but trimmed; content manager owns the authoring studio; moderator centers on community.
+
+`apps/api/src/prisma/seed.ts` — 5 new demo users (`ta1@`, `cm1@`, `support1@`, `moderator1@`, `superadmin@`). Each has a `SEED_*_PASSWORD` env override. Idempotent on `(tenantId, email)`.
+
+`apps/web/src/pages/Auth.tsx` `DEMO_CREDS` and `docs/DEMO_USERS.md` — refreshed canonical list of all 10 demo logins so the LoginPage one-click "پر کردن خودکار" panel works for every role on the demo tenant.
 
 ## What did NOT change
 
-- No CASL `AbilityFactory` yet — moved to R6 because it touches every controller AND every page-level `<Can>` guard, and that's a separate soak cycle.
 - No 2FA TOTP — Phase 20 work.
 - No Argon2id — Phase 20 work (the auth.service Argon2id path is gated on the password-hash field in the User schema, which we'll add then).
 - No CSP report-uri / report-to endpoint — collecting violation reports needs Sentry (Phase 17). For now the browser console + DevTools is the soak channel.
 - No `X-Forwarded-For` whitelist on the throttler — the express `trust proxy: true` setting already lets it resolve the real client IP through Caddy + nginx. We don't need a custom getTracker.
+- No record-level CASL scoping yet (e.g. "instructor can update courseX but not courseY"). CASL supports it via `subject("Course", row)`; the sweep across 17 controllers is its own follow-up so the diff stays reviewable. The verb+subject layer that R6+R7 ship is what the UI needs to render `<Can>` correctly for every common case.
 
 ## Risk + follow-ups
 
@@ -139,10 +179,13 @@ direct GET http://172.22.0.6:4000/v1/health -> 200
 Backend:
 - `apps/api/prisma/schema.prisma`
 - `apps/api/prisma/migrations/20260521000000_audit_log/migration.sql`
-- `apps/api/src/prisma/seed.ts`
+- `apps/api/src/prisma/seed.ts` (+ 5 new demo users for R7 roles)
 - `apps/api/src/audit/*` (new)
+- `apps/api/src/authz/*` (new — R6 CASL backend)
 - `apps/api/src/app.module.ts`
-- `apps/api/package.json` (+ `@nestjs/throttler`)
+- `apps/api/src/auth/auth.controller.ts` (R6: /me ships packed abilities)
+- `apps/api/src/audit/audit.controller.ts` (R6: @CheckPolicies adopter)
+- `apps/api/package.json` (+ `@nestjs/throttler`, `@casl/ability`)
 - 17 controllers gained `@AuditAction` / `@AuditSkip` / `@Throttle` / `@SkipThrottle` decorators (no behaviour change beyond declared metadata).
 
 Web:
@@ -151,8 +194,21 @@ Web:
 - `apps/web/snippets/security-headers.conf` (new)
 - `apps/web/nginx.conf` (8 location blocks switched to `include`)
 - `apps/web/Dockerfile` (`COPY snippets/`)
+- `apps/web/src/auth/ability.ts` (new — R7 SPA ability rehydration)
+- `apps/web/src/auth/Can.tsx` (new — R7 `<Can>` + `useAbility()`)
+- `apps/web/src/auth/AuthContext.tsx` (R7: fetches /me, ships abilities)
+- `apps/web/src/role.tsx` (R7: 5 → 10 RoleId entries)
+- `apps/web/src/shared.tsx` + `apps/web/src/sidenav.tsx` (R7: nav for 5 new roles)
+- `apps/web/src/pages/Audit.tsx` (new — live audit-log viewer at `/audit`)
+- `apps/web/src/pages/Auth.tsx` (R7: DEMO_CREDS extended)
+- `apps/web/src/router.tsx` (R7: `/audit` route)
+- `apps/web/package.json` (+ `@casl/ability`, `@casl/react`)
 
 Infra + ops:
 - `infra/Caddyfile.snippet` (`api:4000` → `digiuniversity-api:4000`)
-- `scripts/remote.ps1` (`caddy-reload` via stdin; `security-probe` action)
+- `scripts/remote.ps1` (`caddy-reload` via stdin; `security-probe` action with CASL positive + negative paths)
 - `.gitignore` (negation for Prisma migration.sql)
+
+Docs:
+- `docs/DEMO_USERS.md` (R7: 10 demo logins, 10 SEED_* env vars)
+- `docs/PHASE_15_REVIEW.md` (this file)
