@@ -186,12 +186,15 @@ services:
     image: mcr.microsoft.com/playwright:v1.49.1-noble
     container_name: digiuniversity-web-visual
     working_dir: /work
-    depends_on:
-      app:
-        condition: service_healthy
+    # No depends_on — visual tests target the live production URL by
+    # default, so the local app container does not need to be up. If
+    # you point PLAYWRIGHT_BASE_URL at http://app for staging tests,
+    # `docker compose up -d app` first.
     environment:
       - CI=true
-      - PLAYWRIGHT_BASE_URL=http://app
+      # PLAYWRIGHT_BASE_URL is unset; the visual config defaults to
+      # https://digiuniversity.ir (production). Override at run time
+      # if you need to point at a staging environment.
       - NPM_CONFIG_FUND=false
       - NPM_CONFIG_AUDIT=false
     volumes:

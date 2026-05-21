@@ -879,7 +879,6 @@ docker compose --profile visual build web-visual >/dev/null 2>&1 || true
 # Run the targeted spec. Override the default `command` so we can pick
 # which gate's spec we are capturing this round.
 docker compose --profile visual run --rm \
-  -e PLAYWRIGHT_BASE_URL=http://app \
   --workdir /work \
   web-visual bash -c "npm install --no-audit --no-fund --silent && npx playwright test --config playwright.visual.config.js $specPath"
 echo "--- artefacts on VPS ---"

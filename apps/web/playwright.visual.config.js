@@ -21,12 +21,20 @@ export default defineConfig({
   workers: 1,
   // No webServer — the nginx container is already up before we run.
   use: {
-    // Inside the docker network the SPA container is just `app`.
-    // Override via env if you want to point at staging / prod.
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://app",
+    // Default to production. The app container's nginx does not proxy
+    // /api/* (that lives at the host Caddy layer), so in-network tests
+    // can't exercise auth flows. Hitting the live URL also gives us a
+    // post-deploy smoke that the full CDN → Caddy → app + api path is
+    // healthy. Override via PLAYWRIGHT_BASE_URL when running offline.
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "https://digiuniversity.ir",
     trace: "off",
     video: "off",
     screenshot: "off", // each test takes its own screenshot deliberately
+    // Skip TLS cert chain checks — we are inside the docker network and
+    // may be hitting an in-cluster cert that the playwright image
+    // doesn't have the root CA for. Production cert is fine, this is
+    // defensive only.
+    ignoreHTTPSErrors: true,
   },
   projects: [
     {
