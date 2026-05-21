@@ -716,6 +716,55 @@ DIRECT=$(docker exec digiuniversity-app curl -s -o /dev/null -w '%{http_code}' \
   "http://${API_IP}:4000/v1/health")
 echo "direct GET http://${API_IP}:4000/v1/health -> ${DIRECT}"
 [ "$DIRECT" = "200" ] || { echo "FAIL: api unhealthy on internal network"; exit 1; }
+
+echo
+echo "--- (5) Phase-15 R6: CASL gate + /v1/auth/me ships abilities ---"
+# We assert the *negative* CASL case (student gets 403 on admin-only
+# audit-logs) and that /v1/auth/me ships the packed ability set the
+# SPA needs to render <Can> in R7. Both checks use the demo student
+# whose password is fixed in the seed, so we don't need to read any
+# production secret to probe.
+#
+# Logins fire from the digiuniversity-app container against api on
+# the docker bridge — that path bypasses the front-door throttler so
+# this probe is safe to run repeatedly during dev iteration.
+STUDENT_PASS="StudentPass!1"
+
+STU_BODY=$(docker exec digiuniversity-app sh -c "curl -s -X POST 'http://${API_IP}:4000/v1/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{\"tenantSlug\":\"demo\",\"email\":\"student1@digiuniversity.ir\",\"password\":\"${STUDENT_PASS}\"}'")
+STU_TOK=$(echo "$STU_BODY" | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
+if [ -z "$STU_TOK" ]; then
+  echo "FAIL: student login did not return a token"
+  echo "$STU_BODY"
+  exit 1
+fi
+
+STU_AUDIT=$(docker exec digiuniversity-app curl -s -o /dev/null -w '%{http_code}' \
+  -H "Authorization: Bearer $STU_TOK" "http://${API_IP}:4000/v1/audit-logs?limit=1")
+STU_ME=$(docker exec digiuniversity-app curl -s \
+  -H "Authorization: Bearer $STU_TOK" "http://${API_IP}:4000/v1/auth/me")
+
+echo "  student GET /v1/audit-logs -> ${STU_AUDIT} (expect 403 from CASL/Roles)"
+echo "  student GET /v1/auth/me     -> abilities field present? $(echo "$STU_ME" | grep -q '\"abilities\":\[' && echo yes || echo no)"
+
+if [ "$STU_AUDIT" != "403" ]; then
+  echo "FAIL: student should be 403 on /v1/audit-logs, got ${STU_AUDIT}"
+  exit 1
+fi
+if ! echo "$STU_ME" | grep -q '"abilities":\['; then
+  echo "FAIL: /v1/auth/me missing the abilities array — R6 plumbing not active"
+  exit 1
+fi
+
+# Confirm the student's ability rules actually contain a read-Course
+# entry (proves AbilityFactory ran, not just an empty array).
+if ! echo "$STU_ME" | grep -qE '"abilities":\[[^]]*Course'; then
+  echo "FAIL: student ability rules do not mention Course — factory not wired"
+  exit 1
+fi
+
+echo "PASS: CASL gate denies non-admin AND /v1/auth/me ships role-shaped ability rules"
 if [ "$LIMIT" -lt 1 ]; then
   echo "FAIL: expected at least one 429 across 12 requests"
   exit 1
