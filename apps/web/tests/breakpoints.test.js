@@ -22,8 +22,11 @@ describe("Tailwind config — Phase-16 breakpoints", () => {
     ]);
   });
 
-  it("starts mobile-first at xs=375px (iPhone SE/mini coverage)", () => {
-    expect(screens.xs).toBe("375px");
+  it("starts mobile-first at xs=320px (iPhone SE 1st gen coverage)", () => {
+    // Gate-1 correction: was 375 originally; owner pointed out iPhone SE
+    // (320 px) is still common in Iran and the 320×568 capture confirmed
+    // a 56-px overflow needing a dedicated breakpoint.
+    expect(screens.xs).toBe("320px");
   });
 
   it("maps sm/md/lg/xl/2xl to the documented px values", () => {

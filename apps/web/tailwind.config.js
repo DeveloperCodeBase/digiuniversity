@@ -11,10 +11,15 @@ export default {
   theme: {
     // Phase-16 R1: mobile-first breakpoint scale. Replaces Tailwind's
     // default (sm=640) which left a dead zone for iPhone SE-class phones.
-    // xs=375 covers iPhone SE/mini, sm=480 small phones, md=768 iPad,
-    // lg=1024 tablet landscape/laptop, xl=1280 desktop, 2xl=1536 large.
+    // xs=320 covers iPhone SE 1st gen (still common in Iran per owner),
+    // sm=480 small phones, md=768 iPad, lg=1024 tablet landscape/laptop,
+    // xl=1280 desktop, 2xl=1536 large.
+    //
+    // Gate-1 correction: was xs=375 first round, but Gate-1 visual
+    // evidence at 320×568 confirmed the iPhone SE audience still hits
+    // a 56-px overflow we need to handle. Lowering xs catches them.
     screens: {
-      xs: "375px",
+      xs: "320px",
       sm: "480px",
       md: "768px",
       lg: "1024px",
