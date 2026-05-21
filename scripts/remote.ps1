@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe","visual")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
@@ -832,5 +832,76 @@ fi
 echo "PASS: rate limit fired after the configured bucket size"
 '@
         exit (Invoke-RemoteBash $bash)
+    }
+
+    "visual" {
+        # Phase-16 — capture Playwright screenshots from a docker-bound
+        # browser against the live `app` nginx container, then bring the
+        # PNGs back to Windows for commit.
+        #
+        # Usage:
+        #   .\scripts\remote.ps1 visual -Service gate-1
+        #   .\scripts\remote.ps1 visual -Service gate-2
+        #
+        # -Service is the spec stem (apps/web/tests/visual/<Service>.spec.ts)
+        # AND the host evidence dir (docs/<Service>-evidence/). They are
+        # tied so a single arg drives both ends.
+        #
+        # First run takes ~90s while it npm-installs into the volume.
+        # Subsequent runs are <30s; cache lives in the
+        # digiuniversity_web-visual-node-modules docker volume.
+        if ([string]::IsNullOrWhiteSpace($Service)) {
+            Write-Error "visual requires -Service <gate-name>. e.g. -Service gate-1"
+            exit 2
+        }
+        $gate = $Service
+        $specPath = "tests/visual/$gate.spec.ts"
+        $hostEvidenceDir = "docs/$gate-evidence"
+
+        # Push current work so the VPS sees the spec + config.
+        git push origin $Branch
+
+        $bash = @"
+set -eu
+cd /var/www/digiuniversity
+git pull origin main
+# Host-side output dir. Container writes here via the ./docs bind mount.
+# 0777 is intentional — the playwright image runs as a non-root user
+# whose UID won't match the VPS user; world-writable lets it land files.
+mkdir -p $hostEvidenceDir
+chmod 777 $hostEvidenceDir
+# Pull the image up front so the first compose invocation doesn't time out.
+docker pull mcr.microsoft.com/playwright:v1.49.1-noble >/dev/null 2>&1 || true
+# Make sure the app service is up — visual tests run against the live SPA.
+docker compose up -d app
+# Build the visual profile (no-op if image already pulled).
+docker compose --profile visual build web-visual >/dev/null 2>&1 || true
+# Run the targeted spec. Override the default `command` so we can pick
+# which gate's spec we are capturing this round.
+docker compose --profile visual run --rm \
+  -e PLAYWRIGHT_BASE_URL=http://app \
+  --workdir /work \
+  web-visual bash -c "npm install --no-audit --no-fund --silent && npx playwright test --config playwright.visual.config.js $specPath"
+echo "--- artefacts on VPS ---"
+ls -la $hostEvidenceDir
+"@
+        $exitCode = Invoke-RemoteBash $bash
+        if ($exitCode -ne 0) {
+            Write-Warning "Visual run exit=$exitCode — leaving any partial artefacts on the VPS for inspection."
+            exit $exitCode
+        }
+
+        # Bring the screenshots back. We scp into the repo so the next
+        # `git add` picks them up. Use forward slashes for ssh; the
+        # VPS path is the same regardless of platform.
+        $repoRoot = (Resolve-Path "$PSScriptRoot\..").Path
+        $localDir = Join-Path $repoRoot "docs\$gate-evidence"
+        New-Item -ItemType Directory -Force -Path $localDir | Out-Null
+        Write-Host "Pulling $hostEvidenceDir/*.png from $Server -> $localDir"
+        # `scp -p` preserves mtimes; `-r` recurses subdirs if a future
+        # spec creates them. The trailing /. copies contents only.
+        & scp -pr "${Server}:/var/www/digiuniversity/$hostEvidenceDir/." "$localDir"
+        Write-Host "Done. Files:"
+        Get-ChildItem $localDir -File | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
     }
 }

@@ -170,6 +170,44 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  # Phase-16 — one-off visual evidence runner. Captures Playwright
+  # screenshots of the live `app` nginx container at gate-specific
+  # viewports. Opt-in via `--profile visual` so a normal `compose up`
+  # never starts it. Used by `scripts/remote.ps1 visual -Service <gate>`.
+  #
+  # node_modules is persisted in a docker volume so subsequent runs are
+  # fast (~5s start instead of ~45s npm install). To bust the cache,
+  # `docker volume rm digiuniversity_web-visual-node-modules`.
+  #
+  # /screenshots is bind-mounted to ./docs on the host so each gate spec
+  # can write directly into the repository under docs/<gate>-evidence/.
+  web-visual:
+    profiles: ["visual"]
+    image: mcr.microsoft.com/playwright:v1.49.1-noble
+    container_name: digiuniversity-web-visual
+    working_dir: /work
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      - CI=true
+      - PLAYWRIGHT_BASE_URL=http://app
+      - NPM_CONFIG_FUND=false
+      - NPM_CONFIG_AUDIT=false
+    volumes:
+      - ./apps/web:/work
+      - web-visual-node-modules:/work/node_modules
+      - ./docs:/screenshots
+    networks:
+      - web
+    security_opt:
+      - no-new-privileges:true
+    # Default command — overridden per-invocation by remote.ps1 visual.
+    command:
+      - bash
+      - -c
+      - "npm install --no-audit --no-fund --silent && npx playwright test --config playwright.visual.config.js"
+
   # One-off test runner. Opt-in via `--profile test` so a normal
   # `docker compose up` never starts it. Reuses postgres + ai-gateway
   # so tests hit the real downstream services. Each spec creates its
@@ -208,4 +246,9 @@ networks:
 
 volumes:
   postgres-data:
+    driver: local
+  # Phase-16 — persistent node_modules cache for the web-visual runner.
+  # First run installs deps, subsequent runs reuse the volume so the
+  # `remote.ps1 visual` round-trip stays under 30s.
+  web-visual-node-modules:
     driver: local
