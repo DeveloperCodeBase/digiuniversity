@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
@@ -585,5 +585,26 @@ echo "OK: $(grep -cE '^[A-Z_]+=' "$ENV_FILE") env vars set."
         # Show all SHA-tagged digiuniversity images on the VPS, newest
         # first. Useful to pick a -Sha for rollback.
         Remote "docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.CreatedSince}}\t{{.Size}}' | grep -E '^(digiuniversity|digiuniversity-api|digiuniversity-ai-gateway)' | head -30"
+    }
+
+    "spa-probe" {
+        # Phase-14 R3 verification: confirm BrowserRouter URLs resolve
+        # end-to-end through Caddy + nginx. Each path should return
+        # HTTP 200 with the SPA shell HTML (Content-Type: text/html).
+        # If any path returns a 404, the SPA fallback is broken.
+        $bash = @'
+set -eu
+HOST=digiuniversity.ir
+for P in / /home /catalog /course/abc-123 /tutor /labs/nonexistent-path; do
+  STATUS=$(curl -k -s -o /dev/null -w '%{http_code}' --resolve "$HOST:443:127.0.0.1" "https://$HOST$P")
+  TYPE=$(curl -k -s -I --resolve "$HOST:443:127.0.0.1" "https://$HOST$P" | grep -i '^content-type:' | tr -d '\r')
+  if [ "$STATUS" = "200" ]; then
+    printf "OK   %3s  %-40s %s\n" "$STATUS" "$P" "$TYPE"
+  else
+    printf "FAIL %3s  %-40s %s\n" "$STATUS" "$P" "$TYPE"
+  fi
+done
+'@
+        exit (Invoke-RemoteBash $bash)
     }
 }
