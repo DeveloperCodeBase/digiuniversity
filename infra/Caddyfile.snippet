@@ -2,10 +2,19 @@
 # docker network. The remote.ps1 `caddy-install` action attaches
 # hooshgate_caddy to that network so service hostnames resolve here.
 #
+# Container-name vs service-alias: the host Caddy participates in several
+# stack networks, including ones that have their OWN `api` / `ai-gateway`
+# service alias (ainu-api, algal-blooms-api, …). Docker's embedded DNS
+# returns the first match it finds across Caddy's joined networks, so a
+# bare `reverse_proxy api:4000` silently routed to ainu-api (172.25.0.4)
+# instead of digiuniversity-api (172.22.0.6), 502ing every /api/* call.
+# Use the full container name to make resolution unambiguous regardless
+# of how many other "api" services live in Caddy's view.
+#
 # Path layout:
-#   /api/*    →  api          (NestJS,  :4000)   /api prefix stripped → /v1/...
-#   /ai/*     →  ai-gateway   (FastAPI, :8000)   /ai  prefix stripped → /v1/...
-#   /*        →  digiuniversity-app (nginx, :80)
+#   /api/*    →  digiuniversity-api          (NestJS,  :4000)  /api stripped → /v1/...
+#   /ai/*     →  digiuniversity-ai-gateway   (FastAPI, :8000)  /ai  stripped → /v1/...
+#   /*        →  digiuniversity-app          (nginx,   :80)
 digiuniversity.ir, www.digiuniversity.ir {
     encode zstd gzip
 
@@ -14,14 +23,14 @@ digiuniversity.ir, www.digiuniversity.ir {
 
     # Core API. The trailing `*` in `handle_path` strips the `/api` prefix.
     handle_path /api/* {
-        reverse_proxy api:4000
+        reverse_proxy digiuniversity-api:4000
     }
 
     # AI Gateway. Same pattern — `/ai/v1/health` reaches `/v1/health` on the
     # gateway, and the auto-generated Swagger at `/docs` is exposed as
     # `https://digiuniversity.ir/ai/docs`.
     handle_path /ai/* {
-        reverse_proxy ai-gateway:8000
+        reverse_proxy digiuniversity-ai-gateway:8000
     }
 
     # Frontend / SPA fallback. Anything not matched above goes to nginx,
