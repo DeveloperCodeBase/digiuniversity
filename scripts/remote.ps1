@@ -887,6 +887,13 @@ echo "PASS: rate limit fired after the configured bucket size"
         $bash = @"
 set -eu
 cd /var/www/digiuniversity
+# Phase-16 R3 — the docs/ dir is bind-mounted into the visual docker
+# container, so previous captures land PNGs directly into the VPS's
+# working tree. If those PNGs are later committed AND pushed (as
+# gate-1-evidence is), `git pull` refuses to overwrite the still-
+# present untracked files. Sweep any untracked evidence files before
+# pulling so we always converge on origin/main.
+git clean -fd docs/ 2>/dev/null || true
 git pull origin main
 # Host-side output dir. Container writes here via the ./docs bind mount.
 # 0777 is intentional — the playwright image runs as a non-root user
