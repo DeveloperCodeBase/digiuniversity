@@ -1,10 +1,11 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post } from "@nestjs/common";
 import { IsString, MaxLength, MinLength } from "class-validator";
-import * as bcrypt from "bcryptjs";
 
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { hashPassword, verifyPassword } from "../auth/password";
+import { rejectPwnedPassword } from "../auth/password-breach";
 import { AuditAction } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -66,14 +67,20 @@ export class UsersController {
     if (!row) {
       throw new BadRequestException("user not found");
     }
-    const ok = await bcrypt.compare(dto.currentPassword, row.passwordHash);
+    // Phase-20 password helper handles both Argon2id and legacy bcrypt
+    // current-password checks. The NEW password always lands as
+    // Argon2id regardless of the previous algorithm.
+    const ok = await verifyPassword(row.passwordHash, dto.currentPassword);
     if (!ok) {
       throw new BadRequestException("current password is wrong");
     }
     if (dto.currentPassword === dto.newPassword) {
       throw new BadRequestException("new password must differ from current");
     }
-    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    // Block known-breached passwords on rotation too — same policy
+    // as registration. Fails open on HIBP outage.
+    await rejectPwnedPassword(dto.newPassword);
+    const passwordHash = await hashPassword(dto.newPassword);
     await this.prisma.user.update({
       where: { id: user.userId },
       data: { passwordHash },

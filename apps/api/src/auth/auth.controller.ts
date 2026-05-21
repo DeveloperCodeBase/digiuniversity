@@ -13,13 +13,23 @@ import { RegisterDto } from "./dto/register.dto";
 import { AuditAction } from "../audit/audit-action.decorator";
 import { AbilityFactory } from "../authz/ability.factory";
 
-// Phase-15 R4: auth endpoints are the front door to a bcrypt verify +
-// JWT mint. Without a tight bucket an attacker can pin one CPU forever
-// trying user-enumeration or credential-stuffing. 10 requests per minute
-// per IP is fine for a human (login retry, typo recovery) and is hard
-// to brute-force from a single source. The global 600/min bucket still
-// catches distributed floods at the IP level.
-const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
+// Phase-15 R4: auth endpoints are the front door to a hash verify +
+// JWT mint. Without a tight bucket an attacker can pin one CPU
+// forever trying user-enumeration or credential-stuffing. 10
+// requests per minute per IP is fine for a human (login retry,
+// typo recovery) and is hard to brute-force from a single source.
+// The global 600/min bucket still catches distributed floods at the
+// IP level.
+//
+// NODE_ENV=test bumps to 1000/min so the supertest suite (which
+// fires many logins per spec from one IP) doesn't 429 itself. The
+// production bucket is unaffected.
+const AUTH_THROTTLE = {
+  default: {
+    limit: process.env.NODE_ENV === "test" ? 1000 : 10,
+    ttl: 60_000,
+  },
+};
 
 @Controller("auth")
 export class AuthController {

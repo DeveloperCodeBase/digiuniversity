@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
+import { hashPassword } from "../auth/password";
 
 const prisma = new PrismaClient();
 
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
   if (existing) {
     console.log(`[seed] admin user already exists (id=${existing.id}); skipping password set`);
   } else {
-    const passwordHash = await bcrypt.hash(adminPassword, 12);
+    const passwordHash = await hashPassword(adminPassword);
     const user = await prisma.user.create({
       data: {
         tenantId: tenant.id,
@@ -219,7 +219,7 @@ async function main(): Promise<void> {
       console.log(`[seed] demo user ${u.email} already exists; skipping`);
       continue;
     }
-    const hash = await bcrypt.hash(u.password, 12);
+    const hash = await hashPassword(u.password);
     await prisma.user.create({
       data: {
         tenantId: tenant.id,

@@ -8,7 +8,6 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import * as bcrypt from "bcryptjs";
 
 import { PrismaService } from "../prisma/prisma.service";
 import type {
@@ -17,6 +16,13 @@ import type {
   RefreshTokenPayload,
 } from "./auth.types";
 import { LoginDto } from "./dto/login.dto";
+import {
+  hashPassword,
+  needsRehash,
+  passwordAlgorithm,
+  verifyPassword,
+} from "./password";
+import { rejectPwnedPassword } from "./password-breach";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 
@@ -68,7 +74,15 @@ export class AuthService {
       throw new UnauthorizedException("tenant has no student role configured");
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+    // Phase-20 (brought forward): block known-breached passwords via
+    // HIBP k-anonymity. Throws BadRequest 400 if the password has
+    // ever appeared in a public breach. Fail-open if HIBP is
+    // unreachable so a network blip never blocks registration.
+    await rejectPwnedPassword(dto.password);
+
+    // Argon2id from the start for every new user. Pre-existing bcrypt
+    // users keep working via the lazy-migration path in login() below.
+    const passwordHash = await hashPassword(dto.password);
 
     const user = await this.prisma.user.create({
       data: {
@@ -103,9 +117,38 @@ export class AuthService {
       throw new UnauthorizedException("invalid credentials");
     }
 
-    const ok = await bcrypt.compare(dto.password, user.passwordHash);
+    // Phase-20 lazy migration: verifyPassword auto-detects bcrypt vs
+    // argon2id by hash prefix, so legacy users keep authenticating.
+    const ok = await verifyPassword(user.passwordHash, dto.password);
     if (!ok) {
       throw new UnauthorizedException("invalid credentials");
+    }
+
+    // Re-hash legacy bcrypt passwords with Argon2id on successful
+    // login. Best-effort: a failed rehash never blocks the user from
+    // logging in (their credentials are still valid). We log the
+    // upgrade for ops visibility; over time, the population of
+    // bcrypt users monotonically shrinks until the legacy branch is
+    // empty and can be retired.
+    if (needsRehash(user.passwordHash)) {
+      const previousAlgo = passwordAlgorithm(user.passwordHash);
+      try {
+        const rehashed = await hashPassword(dto.password);
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { passwordHash: rehashed },
+        });
+        this.logger.log(
+          `password rehashed ${previousAlgo} → argon2id for user=${user.id} tenant=${tenant.id}`,
+        );
+      } catch (err) {
+        // Never throw — the user's login already succeeded.
+        this.logger.warn(
+          `password rehash failed for user=${user.id}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
     }
 
     const roles = user.userRoles.map((ur) => ur.role.name);
