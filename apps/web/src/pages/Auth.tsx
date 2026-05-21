@@ -89,6 +89,20 @@ interface LoginErrors {
   general?: string;
 }
 
+// Demo credentials seeded into the `demo` tenant. One user per role.
+// Real credentials live in apps/api/src/prisma/seed.ts — these mirror
+// it. If you rotate a password there, mirror it here. If you ship a
+// non-demo tenant, the panel hides automatically (gated on tenantSlug).
+//
+// Documented at docs/DEMO_USERS.md.
+const DEMO_CREDS: Record<RoleId, { email: string; password: string }> = {
+  student:    { email: "student1@digiuniversity.ir",    password: "StudentPass!1" },
+  instructor: { email: "instructor1@digiuniversity.ir", password: "InstructorPass!1" },
+  admin:      { email: "admin@digiuniversity.ir",       password: "ChangeMe!2026" },
+  parent:     { email: "parent1@digiuniversity.ir",     password: "ParentPass!1" },
+  org:        { email: "org1@digiuniversity.ir",        password: "OrgPass!1" },
+};
+
 export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {
   const { setRole } = useRole();
   const auth = useAuth();
@@ -196,6 +210,65 @@ export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {
         {roleId === "parent" && "پس از ورود به پورتال والد می‌روید."}
         {roleId === "org" && "پس از ورود به میز سازمان می‌روید."}
       </div>
+
+      {/* Phase-14.6 demo credentials panel. Only shown when the user
+          is on the demo tenant — production tenants don't see it.
+          One-click fills the email + password for the active role. */}
+      {tenantSlug.trim().toLowerCase() === "demo" && (
+        <div
+          className="mb-6 rounded-xl"
+          style={{
+            padding: "14px 16px",
+            background: "var(--surface-2)",
+            border: "1px dashed var(--line-2)",
+            fontSize: 12,
+          }}
+        >
+          <div className="flex items-center justify-between mb-2.5">
+            <span
+              className="mono uppercase"
+              style={{ color: "var(--fg-mute)", letterSpacing: "0.1em", fontSize: 10 }}
+            >
+              DEMO · حساب نمایشی برای {ROLES[roleId]?.label ?? roleId}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const creds = DEMO_CREDS[roleId];
+                setEmail(creds.email);
+                setPassword(creds.password);
+                setErrors({});
+              }}
+              style={{
+                background: "var(--accent)",
+                color: "var(--accent-on)",
+                border: "none",
+                borderRadius: 6,
+                padding: "4px 10px",
+                fontSize: 11,
+                fontFamily: "inherit",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              پر کردن خودکار ←
+            </button>
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--f-mono)",
+              fontSize: 11,
+              color: "var(--fg-mute)",
+              direction: "ltr",
+              textAlign: "left",
+              lineHeight: 1.7,
+            }}
+          >
+            <div>email · <strong style={{ color: "var(--fg)" }}>{DEMO_CREDS[roleId].email}</strong></div>
+            <div>pass &nbsp;· <strong style={{ color: "var(--fg)" }}>{DEMO_CREDS[roleId].password}</strong></div>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form className="flex flex-col gap-3.5" onSubmit={handleLogin}  noValidate>

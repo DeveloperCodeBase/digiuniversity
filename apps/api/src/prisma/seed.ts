@@ -27,11 +27,16 @@ async function main(): Promise<void> {
   });
 
   // Default roles for every tenant.
+  // Phase-14.6 add parent + org so the LoginPage role tabs are not
+  // dead. Phase 15 will extend to TA + ContentManager + Support +
+  // Moderator + SuperAdmin per the RBAC plan.
   console.log(`[seed] ensuring default roles for tenant=${tenant.id}`);
   const defaults = [
     { name: "admin", label: "مدیر سامانه" },
     { name: "instructor", label: "استاد" },
     { name: "student", label: "دانشجو" },
+    { name: "parent", label: "والد" },
+    { name: "org", label: "سازمان" },
   ] as const;
   for (const r of defaults) {
     await prisma.role.upsert({
@@ -102,15 +107,24 @@ async function main(): Promise<void> {
     }
   }
 
-  // ---------- Phase 11: demo users for instructor + student roles ----------
-  // The demo tenant ships with three role-representative users so the
-  // audit / smoke flows can exercise every nav set without admin
-  // having to create them by hand. Idempotent on (tenantId, email).
+  // ---------- Phase 11 + 14.6: demo users for every role ----------
+  // The demo tenant ships with one user per role so the LoginPage
+  // role tabs are all live and an auditor can exercise every nav set
+  // without admin having to create them by hand. Idempotent on
+  // (tenantId, email).
+  //
+  // ALL credentials are documented in docs/DEMO_USERS.md.
   const instructorRole = await prisma.role.findUnique({
     where: { tenantId_name: { tenantId: tenant.id, name: "instructor" } },
   });
   const studentRole = await prisma.role.findUnique({
     where: { tenantId_name: { tenantId: tenant.id, name: "student" } },
+  });
+  const parentRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "parent" } },
+  });
+  const orgRole = await prisma.role.findUnique({
+    where: { tenantId_name: { tenantId: tenant.id, name: "org" } },
   });
   const demoUsers: Array<{ email: string; fullName: string; password: string; roleId?: string }> = [
     {
@@ -124,6 +138,18 @@ async function main(): Promise<void> {
       fullName: "نرگس رضوی",
       password: process.env.SEED_STUDENT_PASSWORD ?? "StudentPass!1",
       roleId: studentRole?.id,
+    },
+    {
+      email: "parent1@digiuniversity.ir",
+      fullName: "محمد رضوی",
+      password: process.env.SEED_PARENT_PASSWORD ?? "ParentPass!1",
+      roleId: parentRole?.id,
+    },
+    {
+      email: "org1@digiuniversity.ir",
+      fullName: "شرکت دانش‌بنیان فردا",
+      password: process.env.SEED_ORG_PASSWORD ?? "OrgPass!1",
+      roleId: orgRole?.id,
     },
   ];
   for (const u of demoUsers) {

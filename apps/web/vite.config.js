@@ -27,6 +27,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+        // Phase-14.6 — take effect IMMEDIATELY after a new deploy.
+        // Without skipWaiting + clientsClaim, the new SW installs in
+        // the background but only activates when every tab of the
+        // site is closed and reopened. Users on long-lived LMS tabs
+        // (the entire point of this product) would see the OLD SPA
+        // for hours after a deploy. Real complaint from the owner
+        // after the Phase-14 ship: "I don't see any changes". This
+        // forces the new SW to claim control of every open tab on
+        // activation; the cleanupOutdatedCaches sweep also evicts
+        // any stale precache entries from prior builds.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com",
@@ -36,6 +49,20 @@ export default defineConfig({
               expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
+          // Never cache /api or /ai — those are dynamic and would
+          // serve stale auth state from the SW cache. Phase-14.6
+          // hardening; previously the SW's network-first default
+          // could intercept any request after the page registered.
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/api/") || url.pathname.startsWith("/ai/"),
+            handler: "NetworkOnly",
+          },
+        ],
+        navigateFallbackDenylist: [
+          // Don't let the SW intercept /api/* navigations (it shouldn't
+          // since those aren't `navigate` events, but defense in depth).
+          /^\/api\//,
+          /^\/ai\//,
         ],
       },
       devOptions: { enabled: false },
