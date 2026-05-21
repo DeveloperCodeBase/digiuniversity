@@ -1,4 +1,8 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename.
+// Phase-16 R2 deliberately leaves @ts-nocheck in place: the file is 530+
+// lines of inline JSX and the type sweep is scheduled for R16 (cleanup)
+// after the new sections + primitives land. R2 only adds the auth-aware
+// redirect + outcome-first headline.
 // =====================================================
 // Home / Landing page
 // =====================================================
@@ -6,9 +10,31 @@ import React from "react";
 import { Icon } from "../icons";
 import { Stagger, useMouseParallax } from "../motion";
 import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared";
+import { useAuth } from "../auth/AuthContext";
+import type { Go } from "../router";
 
-export const HomePage = ({ go }) => {
+interface HomePageProps {
+  go: Go;
+}
+
+export const HomePage = ({ go }: HomePageProps) => {
+  // Phase-16 R2 (B-01): a logged-in user landing on "/" is bounced to
+  // /dashboard. Without this, the public marketing page rendered on top
+  // of the authenticated shell — owner reported "اطلاعات یه یوزر لاگین
+  // کرده تو لندینگ هست". The early `return null` prevents the marketing
+  // flash before the navigate() takes effect.
+  const auth = useAuth();
+  React.useEffect(() => {
+    if (auth.isAuthenticated) {
+      go("dashboard");
+    }
+  }, [auth.isAuthenticated, go]);
+  // useMouseParallax MUST run unconditionally to satisfy the rules of
+  // hooks; the hook itself opts out at runtime when the marketing page
+  // isn't mounted (no `.hero-bg .aurora` in the DOM = no work).
   useMouseParallax();
+  if (auth.isAuthenticated) return null;
+
   return (
     <main data-screen-label="01 خانه">
       {/* ============== HERO ============== */}
@@ -25,12 +51,16 @@ export const HomePage = ({ go }) => {
               <span className="dot"></span>
               <span>EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE</span>
             </div>
+            {/* Phase-16 R2: outcome-first headline (audit B-08).
+                Previously a brand statement; now leads with what owner
+                gets: an accredited online university with 248 programs
+                and verifiable credentials. */}
             <h1 className="hero-title">
-              <span className="hero-title-line">دانشگاهی نسل جدید،</span>
-              <span className="hero-title-line">برای <span className="em">عصر هوشمندی</span></span>
+              <span className="hero-title-line">دانشگاه آنلاین هوشمند ایران،</span>
+              <span className="hero-title-line">با <span className="em">۲۴۸ برنامه</span> و گواهی قابل اثبات</span>
             </h1>
             <p className="hero-sub">
-              دانشگاه آنلاین معتبر با ۸ دانشکده، ۲۴۸ برنامه آکادمیک از کارشناسی تا دکتری، مدارک قابل راستی‌آزمایی، و زیرساخت یادگیری مبتنی بر هوش مصنوعی — همگام با استانداردهای جهانی LTI، xAPI، QTI و Open Badges 3.0.
+              از کلاس‌های زنده تا آزمایشگاه‌های مجازی، با همراهی هوش مصنوعی — همگام با استانداردهای جهانی LTI، xAPI، QTI و Open Badges 3.0. ۸ دانشکده، ۹۴ استاد، مدارک قابل راستی‌آزمایی.
             </p>
             <div className="hero-cta">
               <button className="btn btn-primary btn-lg" onClick={() => go("admissions")}>

@@ -4538,13 +4538,27 @@ html { scroll-padding-top: 80px; }
 }
 
 /* Reduce motion: respect prefers-reduced-motion across all our custom
-   animations (the older rules already covered some; this is a catch-all). */
+   animations (the older rules already covered some; this is a catch-all).
+   Phase-16 R2: explicitly pin landing-page parallax + reactions to
+   `animation: none`. The 0.001ms duration above is functionally enough,
+   but explicit `none` is bulletproof against new animations added later
+   without thinking about WCAG 2.3.3 motion. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .aurora,
+  .aurora-1, .aurora-2, .aurora-3,
+  .reaction-bubble,
+  .hero-3d,
+  .hero-3d *,
+  .credential-seal,
+  .float {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
