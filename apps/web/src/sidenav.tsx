@@ -114,11 +114,14 @@ export const SIDEBAR_BY_ROLE = {
 };
 
 // Wrap a list in <ul> if it isn't already (compat with existing CSS).
-// Phase 12: items are real <a href="#route"> + onClick so they:
+// Phase 12: items are real <a href> + onClick so they:
 //   1. show their destination in the status bar on hover,
 //   2. support Cmd-click / middle-click → background tab,
 //   3. expose aria-current="page" for screen readers and styling,
 //   4. are reachable via keyboard with the default focus ring (CSS).
+// Phase-14 R3: href changed from "#route" to "/route" alongside the
+// BrowserRouter migration. The status-bar hover, middle-click, and
+// keyboard semantics all still apply.
 export const RoleSideNav = ({ active, go }) => {
   const { role } = useRole();
   const items = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
@@ -139,7 +142,7 @@ export const RoleSideNav = ({ active, go }) => {
             {g.items.map(it => (
               <li key={it.id}>
                 <a
-                  href={"#" + it.id}
+                  href={"/" + it.id}
                   className={active === it.id ? "active" : ""}
                   aria-current={active === it.id ? "page" : undefined}
                   onClick={(e) => { e.preventDefault(); go(it.id); }}

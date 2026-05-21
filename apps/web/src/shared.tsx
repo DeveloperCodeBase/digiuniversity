@@ -104,7 +104,7 @@ export const Nav = ({ current, go }) => {
   return (
     <nav className="nav">
       <div className="nav-inner">
-        <a href="#home" onClick={(e) => { e.preventDefault(); go("home"); }} className="brand">
+        <a href="/home" onClick={(e) => { e.preventDefault(); go("home"); }} className="brand">
           <span className="brand-mark"></span>
           <span>
             دیجی‌یونیورسیتی
@@ -248,6 +248,10 @@ const UserDropdown = ({ go, role, setRole, auth }) => {
     }
   };
 
+  // Phase-14 R3: hash routing is gone; the `?demo=1` query flag is
+  // the only legitimate path now. We keep the hash check for any
+  // user with a saved `#demo=1` bookmark from before the migration —
+  // works for one release cycle, then can be removed.
   const isDemoMode = typeof window !== "undefined" && (
     window.location.search.includes("demo=1") ||
     window.location.hash.includes("demo=1")

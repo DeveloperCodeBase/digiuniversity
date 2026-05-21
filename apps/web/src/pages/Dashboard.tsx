@@ -101,7 +101,7 @@ export const DashboardPage = ({ go }) => {
               <div className="flex justify-between items-baseline mb-4" >
                 <h3 className="h-3">برنامه‌ی این هفته</h3>
                 <a
-                  href="#calendar"
+                  href="/calendar"
                   onClick={(e) => { e.preventDefault(); go("calendar"); }}
                   style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}
                 >تقویم کامل ←</a>

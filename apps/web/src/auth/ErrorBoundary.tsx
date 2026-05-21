@@ -32,7 +32,12 @@ export class ErrorBoundary extends React.Component {
   reset = () => {
     this.setState({ error: null, info: null });
     try {
-      window.location.hash = "#home";
+      // Phase-14 R3: BrowserRouter migration. ErrorBoundary is a class
+      // component so it can't use the useNavigate hook. A hard
+      // navigation to "/" is fine here — we WANT a fresh React tree
+      // after an unhandled exception, and the new doc load also clears
+      // any half-mounted state from the failed render.
+      window.location.assign("/");
     } catch {
       // ignore
     }

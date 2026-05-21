@@ -243,7 +243,7 @@ export const LoginPage = ({ go }) => {
         <Icon name="sparkle" size={14} />
         <div>
           حساب کاربری ندارید؟{" "}
-          <a href="#register" onClick={(e) => { e.preventDefault(); go("register"); }} style={{ fontWeight: 600, textDecoration: "underline" }}>
+          <a href="/register" onClick={(e) => { e.preventDefault(); go("register"); }} style={{ fontWeight: 600, textDecoration: "underline" }}>
             همین حالا بسازید
           </a>
         </div>
@@ -350,13 +350,13 @@ export const RegisterPage = ({ go }) => {
           <input className="mt-0.5" type="checkbox" defaultChecked  style={{accentColor: "var(--accent)", width: 16, height: 16, flexShrink: 0}} />
           با{" "}
           <a
-            href="#honor-code"
+            href="/honor-code"
             onClick={(e) => { e.preventDefault(); go("honor-code"); }}
             style={{ color: "var(--accent)", textDecoration: "underline" }}
           >قوانین استفاده</a>
           {" "}و{" "}
           <a
-            href="#help"
+            href="/help"
             onClick={(e) => { e.preventDefault(); go("help"); }}
             style={{ color: "var(--accent)", textDecoration: "underline" }}
           >سیاست حریم خصوصی</a>
@@ -371,7 +371,7 @@ export const RegisterPage = ({ go }) => {
 
       <div className="mt-6 text-center"  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
         قبلاً ثبت‌نام کرده‌اید؟{" "}
-        <a href="#login" onClick={(e) => { e.preventDefault(); go("login"); }} style={{ color: "var(--accent)", fontWeight: 500 }}>
+        <a href="/login" onClick={(e) => { e.preventDefault(); go("login"); }} style={{ color: "var(--accent)", fontWeight: 500 }}>
           ورود به حساب
         </a>
       </div>
@@ -451,7 +451,7 @@ export const ForgotPage = ({ go }) => (
     </div>
     <div className="mt-5 text-center"  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
       رمز خود را به یاد آوردید؟{" "}
-      <a href="#login" onClick={(e) => { e.preventDefault(); go("login"); }} style={{ color: "var(--accent)", fontWeight: 500 }}>
+      <a href="/login" onClick={(e) => { e.preventDefault(); go("login"); }} style={{ color: "var(--accent)", fontWeight: 500 }}>
         بازگشت به ورود
       </a>
     </div>

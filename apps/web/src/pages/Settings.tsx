@@ -345,7 +345,7 @@ const BillingTab = () => (
           <div className="mt-1.5"  style={{fontSize: 22, fontWeight: 700}}>۱۲ میلیون تومان</div>
           <div className="mt-1"  style={{fontSize: 13, color: "var(--fg-mute)"}}>تجدید خودکار: ۱۵ شهریور ۱۴۰۵</div>
         </div>
-        <button className="btn btn-outline" onClick={() => window.location.hash = "#pricing"}>ارتقاء پلن</button>
+        <button className="btn btn-outline" onClick={() => go("pricing")}>ارتقاء پلن</button>
       </div>
     </div>
 

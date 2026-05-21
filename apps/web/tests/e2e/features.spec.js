@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+// Phase-14 R3: paths are real URLs now (BrowserRouter), no `#`.
+
 test("AI FAB opens panel and accepts message", async ({ page }) => {
-  await page.goto("/#home");
+  await page.goto("/home");
   await page.locator(".ai-fab").click();
   await expect(page.locator(".ai-panel")).toBeVisible();
   await page.locator(".ai-panel input").fill("کلاس بعدی من کیه؟");
@@ -11,7 +13,7 @@ test("AI FAB opens panel and accepts message", async ({ page }) => {
 });
 
 test("Theme toggle switches data-theme", async ({ page }) => {
-  await page.goto("/#home");
+  await page.goto("/home");
   const before = await page.evaluate(() => document.documentElement.dataset.theme);
   await page.locator('button[aria-label*="تم"]').first().click();
   await page.waitForTimeout(200);
@@ -20,7 +22,7 @@ test("Theme toggle switches data-theme", async ({ page }) => {
 });
 
 test("Command palette opens on Ctrl+K and navigates", async ({ page }) => {
-  await page.goto("/#home");
+  await page.goto("/home");
   await page.keyboard.press("Control+K");
   await expect(page.locator(".cmdk-panel")).toBeVisible();
   await page.locator(".cmdk-input-wrap input").fill("کلاس");
@@ -30,7 +32,7 @@ test("Command palette opens on Ctrl+K and navigates", async ({ page }) => {
 });
 
 test("Classroom shows lobby then transitions to live", async ({ page }) => {
-  await page.goto("/#classroom");
+  await page.goto("/classroom");
   await expect(page.locator(".lobby-card")).toBeVisible();
   await page.locator("button:has-text('ورود به کلاس')").click();
   await expect(page.locator(".stage-screen")).toBeVisible();
