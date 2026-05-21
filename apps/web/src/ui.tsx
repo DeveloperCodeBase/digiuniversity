@@ -1,20 +1,109 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
 // =====================================================
 // Shared UI primitives: Toast, Modal, IconButton,
 // Theme Provider, Command Palette, AI Floating FAB.
 // All globally available via <UIRoot/>.
+//
+// Phase-14.5 C5: dropped @ts-nocheck. UseThemeReturn / UseToastReturn /
+// ToastMessage / ConfirmActionOptions are the typed surface other
+// chrome files (shared.tsx, pages) import. Window.toast and Window.
+// confirmAction are declared here (single source of truth) so any
+// page that calls them through ui.tsx's global setup gets typed
+// autocomplete.
 // =====================================================
 import React from "react";
 import { Icon } from "./icons";
 
-const ToastContext = React.createContext({ push: () => {} });
-const ThemeContext = React.createContext({ theme: "dark", setTheme: () => {} });
+// ---------- Theme ----------
+export type Theme = "dark" | "light";
 
-export const useToast = () => React.useContext(ToastContext);
-export const useTheme = () => React.useContext(ThemeContext);
+export interface UseThemeReturn {
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+}
+
+const ThemeContext = React.createContext<UseThemeReturn>({
+  theme: "dark",
+  setTheme: () => {
+    // overridden by ThemeProvider; default no-op for safety
+  },
+});
+
+export const useTheme = (): UseThemeReturn => React.useContext(ThemeContext);
+
+// ---------- Toast ----------
+export type ToastKind = "info" | "success" | "warn" | "danger";
+
+export interface ToastMessage {
+  msg: string;
+  title?: string;
+  kind?: ToastKind;
+  /** Milliseconds until auto-dismiss. Default 3200. */
+  ttl?: number;
+}
+
+export type ToastInput = string | ToastMessage;
+
+interface ToastItem extends ToastMessage {
+  id: string;
+}
+
+export interface UseToastReturn {
+  push: (t: ToastInput) => void;
+}
+
+const ToastContext = React.createContext<UseToastReturn>({
+  push: () => {
+    // overridden by UIRoot
+  },
+});
+
+export const useToast = (): UseToastReturn => React.useContext(ToastContext);
+
+// ---------- Confirm modal ----------
+export interface ConfirmActionOptions {
+  title?: string;
+  body?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+}
+
+interface ModalState extends ConfirmActionOptions {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+// ---------- Globals exposed by <UIRoot> ----------
+declare global {
+  interface Window {
+    /** Show a toast — pass a string for a quick info toast, or a full ToastMessage. */
+    toast?: (input: ToastInput, opts?: Partial<ToastMessage>) => void;
+    /** Show a confirm modal; resolves true if confirmed. */
+    confirmAction?: (opts: ConfirmActionOptions) => Promise<boolean>;
+    /** Open the Ctrl/Cmd+K command palette. */
+    openCommandPalette?: () => void;
+  }
+}
 
 // ---------- IconButton ----------
-export const IconButton = ({ icon, label, onClick, variant = "ghost", size = 14, className = "", ...rest }) => (
+export interface IconButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "className"> {
+  icon: string;
+  label: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  variant?: "ghost" | "primary" | "outline" | "danger";
+  size?: number;
+  className?: string;
+}
+
+export const IconButton = ({
+  icon,
+  label,
+  onClick,
+  variant = "ghost",
+  size = 14,
+  className = "",
+  ...rest
+}: IconButtonProps): React.ReactElement => (
   <button
     type="button"
     className={`btn btn-${variant} icon-btn ${className}`}
@@ -27,25 +116,52 @@ export const IconButton = ({ icon, label, onClick, variant = "ghost", size = 14,
   </button>
 );
 
-export const stubAction = (msg) => () => window.toast?.(msg || "این عملیات در نسخه‌ی نمایشی فعال نیست.");
+export const stubAction = (msg?: string): (() => void) => () =>
+  window.toast?.(msg || "این عملیات در نسخه‌ی نمایشی فعال نیست.");
 
 // ---------- ThemeProvider ----------
-export const ThemeProvider = ({ children }) => {
-  const [theme, setThemeState] = React.useState(() => {
-    try { return localStorage.getItem("digiu_theme") || "dark"; } catch { return "dark"; }
-  });
+export interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+const readPersistedTheme = (): Theme => {
+  try {
+    const raw = localStorage.getItem("digiu_theme");
+    if (raw === "dark" || raw === "light") return raw;
+  } catch {
+    /* localStorage blocked */
+  }
+  return "dark";
+};
+
+export const ThemeProvider = ({ children }: ThemeProviderProps): React.ReactElement => {
+  const [theme, setThemeState] = React.useState<Theme>(readPersistedTheme);
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-  const setTheme = (t) => {
+  const setTheme = React.useCallback((t: Theme): void => {
     setThemeState(t);
-    try { localStorage.setItem("digiu_theme", t); } catch {}
-  };
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+    try {
+      localStorage.setItem("digiu_theme", t);
+    } catch {
+      /* localStorage blocked */
+    }
+  }, []);
+  const value = React.useMemo<UseThemeReturn>(() => ({ theme, setTheme }), [theme, setTheme]);
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 // ---------- Command Palette ----------
-const COMMANDS = [
+interface Command {
+  id: string;
+  label: string;
+  icon: string;
+  route?: string;
+  action?: "theme-light" | "theme-dark";
+  hint?: string;
+}
+
+const COMMANDS: Command[] = [
   { id: "home", label: "خانه", icon: "home", route: "home", hint: "صفحه اصلی" },
   { id: "dashboard", label: "میز کار دانشجو", icon: "home", route: "dashboard" },
   { id: "classroom", label: "کلاس زنده", icon: "live", route: "classroom" },
@@ -93,17 +209,28 @@ const COMMANDS = [
   { id: "theme-dark", label: "تم تیره", icon: "sparkle", action: "theme-dark" },
 ];
 
-const CommandPalette = ({ open, onClose, onNavigate, setTheme }) => {
+interface CommandPaletteProps {
+  open: boolean;
+  onClose: () => void;
+  onNavigate: (route: string) => void;
+  setTheme: (t: Theme) => void;
+}
+
+const CommandPalette = ({
+  open,
+  onClose,
+  onNavigate,
+  setTheme,
+}: CommandPaletteProps): React.ReactElement | null => {
   const [q, setQ] = React.useState("");
   const [sel, setSel] = React.useState(0);
-  const inputRef = React.useRef(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const filtered = React.useMemo(() => {
+  const filtered = React.useMemo<Command[]>(() => {
     if (!q.trim()) return COMMANDS.slice(0, 12);
     const lower = q.toLowerCase();
-    return COMMANDS.filter((c) =>
-      c.label.toLowerCase().includes(lower) ||
-      c.id.toLowerCase().includes(lower)
+    return COMMANDS.filter(
+      (c) => c.label.toLowerCase().includes(lower) || c.id.toLowerCase().includes(lower)
     ).slice(0, 20);
   }, [q]);
 
@@ -115,20 +242,31 @@ const CommandPalette = ({ open, onClose, onNavigate, setTheme }) => {
     }
   }, [open]);
 
-  React.useEffect(() => { setSel(0); }, [q]);
+  React.useEffect(() => {
+    setSel(0);
+  }, [q]);
 
-  const exec = (c) => {
+  const exec = (c: Command): void => {
     onClose();
     if (c.action === "theme-light") setTheme("light");
     else if (c.action === "theme-dark") setTheme("dark");
     else if (c.route) onNavigate(c.route);
   };
 
-  const onKey = (e) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); setSel((s) => Math.min(s + 1, filtered.length - 1)); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)); }
-    else if (e.key === "Enter") { e.preventDefault(); if (filtered[sel]) exec(filtered[sel]); }
-    else if (e.key === "Escape") { e.preventDefault(); onClose(); }
+  const onKey = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSel((s) => Math.min(s + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSel((s) => Math.max(s - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (filtered[sel]) exec(filtered[sel]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      onClose();
+    }
   };
 
   if (!open) return null;
@@ -145,7 +283,7 @@ const CommandPalette = ({ open, onClose, onNavigate, setTheme }) => {
             onKeyDown={onKey}
             placeholder="جستجوی صفحه، دستور یا تنظیم… (مثلا: کلاس، تم، گواهی)"
             aria-label="جستجوی دستورات"
-            spellCheck="false"
+            spellCheck={false}
             autoComplete="off"
           />
           <kbd className="cmdk-kbd">ESC</kbd>
@@ -180,23 +318,35 @@ const CommandPalette = ({ open, onClose, onNavigate, setTheme }) => {
 };
 
 // ---------- AI Floating FAB (chat) ----------
-const AIFloatingFAB = ({ onNavigate }) => {
+interface ChatMessage {
+  from: "ai" | "me";
+  t: string;
+}
+
+interface AIFloatingFABProps {
+  onNavigate: (route: string) => void;
+}
+
+const AIFloatingFAB = ({ onNavigate }: AIFloatingFABProps): React.ReactElement => {
   const [open, setOpen] = React.useState(false);
-  const [messages, setMessages] = React.useState([
+  const [messages, setMessages] = React.useState<ChatMessage[]>([
     { from: "ai", t: "سلام! من دستیار AI دیجی‌یونیورسیتی هستم. هر سوالی داری بپرس — درباره دروس، تمرین‌ها یا مسیر تحصیلی." },
   ]);
   const [input, setInput] = React.useState("");
-  const bodyRef = React.useRef(null);
+  const bodyRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [messages, open]);
 
-  const send = (e) => {
-    e?.preventDefault();
+  // Accepts a React.FormEvent (submit handler) or a synthetic Event
+  // (the canned-question buttons fire `send(new Event("submit"))`).
+  // Both expose `preventDefault()`, so we just narrow on availability.
+  const send = (e?: React.FormEvent | Event): void => {
+    e?.preventDefault?.();
     const q = input.trim();
     if (!q) return;
-    const next = [...messages, { from: "me", t: q }];
+    const next: ChatMessage[] = [...messages, { from: "me", t: q }];
     setMessages(next);
     setInput("");
     // Simulated AI reply
@@ -265,28 +415,37 @@ const AIFloatingFAB = ({ onNavigate }) => {
 };
 
 // ---------- UIRoot ----------
-export const UIRoot = ({ children, onNavigate }) => {
-  const [toasts, setToasts] = React.useState([]);
-  const [modal, setModal] = React.useState(null);
-  const [cmdOpen, setCmdOpen] = React.useState(false);
-  const { setTheme, theme } = useTheme();
+export interface UIRootProps {
+  children: React.ReactNode;
+  onNavigate?: (route: string) => void;
+}
 
-  const push = React.useCallback((t) => {
+export const UIRoot = ({ children, onNavigate }: UIRootProps): React.ReactElement => {
+  const [toasts, setToasts] = React.useState<ToastItem[]>([]);
+  const [modal, setModal] = React.useState<ModalState | null>(null);
+  const [cmdOpen, setCmdOpen] = React.useState(false);
+  const { setTheme } = useTheme();
+
+  const push = React.useCallback((input: ToastInput): void => {
     const id = Math.random().toString(36).slice(2);
-    const item = (t && typeof t === "object" && !Array.isArray(t)) ? t : { msg: t };
+    const item: ToastMessage =
+      typeof input === "object" && input !== null && !Array.isArray(input)
+        ? input
+        : { msg: String(input) };
     setToasts((arr) => [...arr, { id, kind: "info", ...item }]);
     const ttl = item.ttl ?? 3200;
     setTimeout(() => setToasts((arr) => arr.filter((x) => x.id !== id)), ttl);
   }, []);
-  const dismiss = (id) => setToasts((arr) => arr.filter((x) => x.id !== id));
+  const dismiss = (id: string): void =>
+    setToasts((arr) => arr.filter((x) => x.id !== id));
 
-  // global helpers
+  // global helpers — exposed on window for non-React call sites
   React.useEffect(() => {
     window.toast = (m, opts = {}) => {
-      if (m && typeof m === "object" && !Array.isArray(m)) push({ ...m, ...opts });
-      else push({ msg: m, ...opts });
+      if (typeof m === "object" && m !== null && !Array.isArray(m)) push({ ...m, ...opts });
+      else push({ msg: String(m), ...opts });
     };
-    window.confirmAction = (opts) =>
+    window.confirmAction = (opts: ConfirmActionOptions): Promise<boolean> =>
       new Promise((resolve) => {
         setModal({
           ...opts,
@@ -299,7 +458,7 @@ export const UIRoot = ({ children, onNavigate }) => {
 
   // Cmd+K / Ctrl+K to open palette
   React.useEffect(() => {
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent): void => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCmdOpen((o) => !o);
@@ -309,8 +468,10 @@ export const UIRoot = ({ children, onNavigate }) => {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const toastValue = React.useMemo<UseToastReturn>(() => ({ push }), [push]);
+
   return (
-    <ToastContext.Provider value={{ push }}>
+    <ToastContext.Provider value={toastValue}>
       {children}
       <div className="toast-stack" aria-live="polite" aria-atomic="true">
         {toasts.map((t) => (

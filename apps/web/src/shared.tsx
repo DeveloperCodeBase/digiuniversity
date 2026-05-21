@@ -14,16 +14,9 @@ import { useAuth, type AuthContextValue } from "./auth/AuthContext";
 import { useTheme } from "./ui";
 import type { Go } from "./router";
 
-// Phase-14.5 C4: window.openCommandPalette is set by ui.tsx <UIRoot>.
-// Declare it so consumers (Nav's search button) can call it safely.
-declare global {
-  interface Window {
-    openCommandPalette?: () => void;
-    /** Test polyfills set by tests/setup.js. */
-    toast?: (msg: string) => void;
-    confirmAction?: (msg: string) => Promise<boolean>;
-  }
-}
+// (Window.toast / Window.confirmAction / Window.openCommandPalette
+// types live in ui.tsx — the file that actually assigns them. Both
+// declarations would merge if duplicated; keeping a single source.)
 
 interface NavItem {
   id: string;
@@ -89,10 +82,7 @@ export interface NavProps {
 export const Nav = ({ current, go }: NavProps): React.ReactElement => {
   const { role, setRole } = useRole();
   const auth = useAuth();
-  // Phase-14.5 C4: useTheme is still @ts-nocheck'd (C5 fixes). Cast
-  // inline so this file can lose its own @ts-nocheck now; remove the
-  // cast in C5 when useTheme exports a proper return type.
-  const { theme, setTheme } = useTheme() as { theme: string; setTheme: (t: string) => void };
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = React.useState(false);
   const [notifsOpen, setNotifsOpen] = React.useState(false);
   const [userOpen, setUserOpen] = React.useState(false);
