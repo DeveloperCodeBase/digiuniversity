@@ -102,6 +102,15 @@ export const HomePage = ({ go }: HomePageProps) => {
       {/* ============== STATS BAND (R9 §3) ============== */}
       <StatsBand />
 
+      {/* ============== FACULTY SHOWCASE (R10 §4) ============== */}
+      <FacultyShowcase go={go} />
+
+      {/* ============== CATALOG TEASER (R10 §5) ============== */}
+      <CatalogTeaser go={go} />
+
+      {/* ============== TESTIMONIALS + DUAL CTA (R10 §6) ============== */}
+      <Testimonials go={go} />
+
       {/* ============== AGENT SYSTEM ============== */}
       <section className="section">
         <div className="shell">
@@ -674,6 +683,220 @@ const StatsBand = () => {
     </section>
   );
 };
+
+// ====== Phase-16 R10 §4 — Faculty showcase ======
+//
+// 6 instructor cards in a responsive grid. Each card reuses the
+// existing 3D treatment (paper shadow + accent border on hover). The
+// data is hardcoded here for now — TODO(phase-17) pull from
+// /v1/users?role=instructor.
+const FACULTY_SHOWCASE = [
+  {
+    initials: "د. ع",
+    name: "دکتر سپیده عظیمی",
+    affiliation: "صنعتی شریف",
+    bio: "یادگیری ماشین · ۱۸ سال سابقه تدریس",
+  },
+  {
+    initials: "م. ک",
+    name: "مهندس آرش کیانی",
+    affiliation: "تهران",
+    bio: "معماری سامانه‌های مقیاس‌پذیر · ۱۲ سال صنعت",
+  },
+  {
+    initials: "د. ر",
+    name: "دکتر مهرنوش رضوی",
+    affiliation: "علم و صنعت",
+    bio: "طراحی محصول داده‌محور · پژوهش ارشد در گوگل",
+  },
+  {
+    initials: "د. م",
+    name: "دکتر بابک موسوی",
+    affiliation: "امیرکبیر",
+    bio: "پردازش زبان طبیعی · مؤلف ۴ کتاب",
+  },
+  {
+    initials: "د. ط",
+    name: "دکتر فاطمه طاهری",
+    affiliation: "خوارزمی",
+    bio: "اخلاق و حاکمیت هوش مصنوعی",
+  },
+  {
+    initials: "د. ف",
+    name: "دکتر بهنام فرهادی",
+    affiliation: "صنعتی اصفهان",
+    bio: "آمار بیزی کاربردی · ۲۰ سال پژوهش",
+  },
+];
+
+const FacultyShowcase = ({ go }) => (
+  <section className="section faculty-showcase" aria-label="استادان">
+    <div className="shell">
+      <div className="section-head reveal">
+        <div className="text">
+          <span className="eyebrow">FACULTY</span>
+          <h2 className="h-1">استادانی از <span style={{ color: "var(--accent)" }}>دانشگاه‌های برتر</span></h2>
+        </div>
+        <p className="lead">
+          ۹۴ عضو هیات علمی از صنعتی شریف، تهران، علم و صنعت، امیرکبیر و خوارزمی — کنار همکاران بین‌المللی از MIT، Stanford و ETH.
+        </p>
+      </div>
+      <div className="faculty-grid">
+        {FACULTY_SHOWCASE.map((f) => (
+          <article key={f.name} className="faculty-card reveal">
+            <div className="faculty-avatar" aria-hidden="true">{f.initials}</div>
+            <h3 className="faculty-name">{f.name}</h3>
+            <span className="faculty-affiliation">{f.affiliation}</span>
+            <p className="faculty-bio">{f.bio}</p>
+          </article>
+        ))}
+      </div>
+      <div className="faculty-cta">
+        <button className="btn btn-outline" onClick={() => go("schools")}>
+          مشاهده همه‌ی استادان
+          <Icon name="arrow" size={14} />
+        </button>
+      </div>
+    </div>
+  </section>
+);
+
+// ====== Phase-16 R10 §5 — Catalog teaser ======
+//
+// 6 featured courses in a responsive grid. On `<sm` they switch to a
+// horizontal scroll-snap carousel so the user sees one course at a
+// time without crammed half-cards. Container query inside the grid
+// item makes the inner layout adapt to the slot, not just the
+// viewport (so a course card in a sidebar elsewhere stacks
+// vertically instead of overflowing).
+const CATALOG_TEASER = [
+  { code: "CS-410", title: "مبانی یادگیری ماشین", by: "دکتر عظیمی", desc: "از رگرسیون تا شبکه‌های عمیق.", weeks: "۱۲", glyph: "ML" },
+  { code: "CS-580", title: "معماری سامانه‌های مقیاس‌پذیر", by: "مهندس کیانی", desc: "میکروسرویس · Kafka · Kubernetes.", weeks: "۱۰", glyph: "SYS" },
+  { code: "PM-310", title: "طراحی محصول داده‌محور", by: "دکتر رضوی", desc: "متریک‌ها و آزمایش‌های A/B.", weeks: "۸", glyph: "PM" },
+  { code: "CS-620", title: "NLP پیشرفته", by: "دکتر موسوی", desc: "ترنسفورمرها، RAG، ارزیابی LLM.", weeks: "۱۴", glyph: "NLP" },
+  { code: "PHIL-220", title: "اخلاق هوش مصنوعی", by: "دکتر طاهری", desc: "تعصب، عاملیت و حاکمیت داده.", weeks: "۶", glyph: "AI⁺" },
+  { code: "STAT-440", title: "آمار بیزی کاربردی", by: "دکتر فرهادی", desc: "از قانون بیز تا MCMC.", weeks: "۱۰", glyph: "Σ" },
+];
+
+const CatalogTeaser = ({ go }) => (
+  <section className="section catalog-teaser" aria-label="درس‌های برگزیده">
+    <div className="shell">
+      <div className="section-head reveal">
+        <div className="text">
+          <span className="eyebrow">FEATURED COURSES</span>
+          <h2 className="h-1">از پیشنهادهای <span style={{ color: "var(--navy)" }}>دانشجویان فعلی</span></h2>
+        </div>
+        <p className="lead">
+          شش درس پربازدید ترم. هر کدام به‌صورت کامل قابل اعتبارسنجی است، با گواهی Open Badges 3.0.
+        </p>
+      </div>
+      <div className="catalog-teaser-rail">
+        {CATALOG_TEASER.map((c) => (
+          <article key={c.code} className="catalog-teaser-card reveal">
+            <div className={"catalog-teaser-glyph"}>{c.glyph}</div>
+            <div className="catalog-teaser-body">
+              <div className="catalog-teaser-code">{c.code}</div>
+              <h3 className="catalog-teaser-title">{c.title}</h3>
+              <p className="catalog-teaser-by">{c.by}</p>
+              <p className="catalog-teaser-desc">{c.desc}</p>
+              <div className="catalog-teaser-meta">
+                <span>{c.weeks} هفته</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="catalog-teaser-cta">
+        <button className="btn btn-outline" onClick={() => go("catalog")}>
+          همه‌ی ۲۴۸ برنامه
+          <Icon name="arrow" size={14} />
+        </button>
+      </div>
+    </div>
+  </section>
+);
+
+// ====== Phase-16 R10 §6 — Testimonials + dual CTA ======
+const TESTIMONIALS = [
+  {
+    initials: "ن. ر",
+    name: "نسرین رضوی",
+    role: "دانشجو · صنعتی اصفهان · فارغ‌التحصیل CS-410",
+    quote:
+      "من از ترم اول این دانشگاه استفاده می‌کنم. کلاس‌های زنده، آزمایشگاه مجازی و تدریس‌یار AI کنار هم یه تجربه‌ای رو می‌ساختن که قبلاً تجربه نکرده بودم.",
+  },
+  {
+    initials: "ع. ج",
+    name: "علی جوادی",
+    role: "Senior SWE · Snapp · فارغ‌التحصیل CS-580",
+    quote:
+      "گواهی Open Badges که گرفتم رو روی LinkedIn زدم و سه‌تا offer گرفتم. اعتبار پلتفرم خیلی فرق می‌کنه با دوره‌های آنلاین رایج.",
+  },
+  {
+    initials: "م. ک",
+    name: "مهسا کیانی",
+    role: "پدر و مادر · فرزند در پایه‌ی دوم دبیرستان",
+    quote:
+      "بخش والدین رو دارم پیگیری می‌کنم. به‌جای صد نوع پیام‌رسان، همه‌ی نمرات و حضور و غیاب و پیام معلم رو یه‌جا می‌بینم.",
+  },
+];
+
+const Testimonials = ({ go }) => (
+  <section className="section testimonials" aria-label="نظرات کاربران">
+    <div className="shell">
+      <div className="section-head reveal">
+        <div className="text">
+          <span className="eyebrow">ALUMNI</span>
+          <h2 className="h-1">از کسانی که اینجا <span style={{ color: "var(--sage)" }}>ساخته شدند</span></h2>
+        </div>
+        <p className="lead">
+          سه روایت کوتاه از دانشجو، فارغ‌التحصیل، و والدین — درباره‌ی این که چرا اینجا ماندند.
+        </p>
+      </div>
+      <div className="testimonials-grid">
+        {TESTIMONIALS.map((t) => (
+          <article key={t.name} className="testimonial-card reveal">
+            <svg
+              className="testimonial-mark"
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              aria-hidden="true"
+              fill="currentColor"
+            >
+              <path d="M9 8c-3 1-5 4-5 8v8h8v-9H7c0-2 1-4 3-5l-1-2zm14 0c-3 1-5 4-5 8v8h8v-9h-5c0-2 1-4 3-5l-1-2z" />
+            </svg>
+            <p className="testimonial-quote">«{t.quote}»</p>
+            <footer className="testimonial-footer">
+              <span className="testimonial-avatar" aria-hidden="true">{t.initials}</span>
+              <span>
+                <strong>{t.name}</strong>
+                <br />
+                <span>{t.role}</span>
+              </span>
+            </footer>
+          </article>
+        ))}
+      </div>
+      <div className="testimonials-cta-row">
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={() => go("admissions")}
+        >
+          شروع رایگان
+          <Icon name="arrow" size={16} />
+        </button>
+        <button
+          className="btn btn-outline btn-lg"
+          onClick={() => go("programs")}
+        >
+          مشاهده برنامه‌ها
+          <Icon name="grad" size={16} />
+        </button>
+      </div>
+    </div>
+  </section>
+);
 
 // ====== Course catalog data ======
 const COURSES = [
