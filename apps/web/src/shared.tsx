@@ -359,7 +359,31 @@ const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.Rea
 export interface FooterProps {
   go: Go;
 }
-export const Footer = ({ go }: FooterProps): React.ReactElement => (
+
+// Per-role workspace link in the footer's "برای کاربران" column.
+// Phase-14.7 (F-123): the footer used to list every role's workspace
+// link (student desk + instructor console + parent portal + admin
+// desk) to every visitor, even unauthenticated ones. A student saw
+// links to /instructor /admin /parent and clicking them landed on
+// the wrong-role page with no permission check. After Phase-14.7
+// router.tsx auth-gates workspace routes, but those links still
+// shouldn't be visible to the wrong roles — clicking them just
+// bounces to /login, which is confusing UX. Now we show ONLY the
+// link for the logged-in user's role, and only when authenticated.
+const ROLE_WORKSPACE_LINK: Record<RoleId, { route: string; label: string }> = {
+  student: { route: "dashboard", label: "میز کار دانشجو" },
+  instructor: { route: "instructor", label: "کنسول استاد" },
+  admin: { route: "admin", label: "میز مدیریت" },
+  parent: { route: "parent", label: "پورتال والد" },
+  org: { route: "admin", label: "میز سازمان" },
+};
+
+export const Footer = ({ go }: FooterProps): React.ReactElement => {
+  const auth = useAuth();
+  const { role } = useRole();
+  const isAuthed = auth.isAuthenticated;
+  const myWorkspace = ROLE_WORKSPACE_LINK[role.id];
+  return (
   <footer className="footer">
     <div className="shell">
       <div className="footer-grid">
@@ -405,12 +429,26 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => (
         <div>
           <h5>برای کاربران</h5>
           <ul>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("dashboard")}}>میز کار دانشجو</a></li>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("instructor")}}>کنسول استاد</a></li>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("parent")}}>پورتال والد</a></li>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("admin")}}>میز مدیریت</a></li>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("community")}}>جامعه</a></li>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("credential")}}>گواهی دیجیتال</a></li>
+            {isAuthed ? (
+              <>
+                {/* Phase-14.7: only the logged-in user's own workspace
+                    link. Other roles' portals would auth-redirect to
+                    /login anyway, so showing them here was misleading. */}
+                <li><a href={"/" + myWorkspace.route} onClick={(e)=>{e.preventDefault();go(myWorkspace.route)}}>{myWorkspace.label}</a></li>
+                <li><a href="/community" onClick={(e)=>{e.preventDefault();go("community")}}>جامعه</a></li>
+                <li><a href="/credential" onClick={(e)=>{e.preventDefault();go("credential")}}>گواهی دیجیتال</a></li>
+                <li><a href="/settings" onClick={(e)=>{e.preventDefault();go("settings")}}>تنظیمات</a></li>
+              </>
+            ) : (
+              <>
+                {/* Unauthenticated visitors see public CTAs, not
+                    role-specific portal links. */}
+                <li><a href="/login" onClick={(e)=>{e.preventDefault();go("login")}}>ورود به حساب</a></li>
+                <li><a href="/register" onClick={(e)=>{e.preventDefault();go("register")}}>ساخت حساب</a></li>
+                <li><a href="/admissions" onClick={(e)=>{e.preventDefault();go("admissions")}}>پذیرش</a></li>
+                <li><a href="/honor-code" onClick={(e)=>{e.preventDefault();go("honor-code")}}>صداقت علمی</a></li>
+              </>
+            )}
           </ul>
         </div>
         <div>
@@ -431,7 +469,8 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => (
       </div>
     </div>
   </footer>
-);
+  );
+};
 
 // =====================================================
 // Persian numerals helper

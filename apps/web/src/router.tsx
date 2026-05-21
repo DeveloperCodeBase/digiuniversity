@@ -37,9 +37,11 @@ import {
 } from "react-router-dom";
 
 import { ErrorBoundary } from "./auth/ErrorBoundary";
+import { useAuth } from "./auth/AuthContext";
 import { UIRoot } from "./ui";
 import { ScrollProgress } from "./motion";
 import { Nav } from "./shared";
+import { RoleSideNav } from "./sidenav";
 
 import HomePage from "./pages/Home";
 import AssessmentLivePage from "./pages/AssessmentLive";
@@ -203,6 +205,51 @@ const RouteShell = ({ Component, paramKey }: RouteShellProps): React.ReactElemen
 };
 
 // =====================================================
+// Route classification
+// =====================================================
+//
+// Phase-14.7: routes are partitioned into three groups so the Layout
+// can choose the right chrome (and gate authentication):
+//
+//   PUBLIC      — anyone can view, no sidebar, footer shows
+//                 (home, programs, about, pricing, admissions, help)
+//   AUTH_FLOW   — login/register/forgot/verify/2fa/onboarding
+//                 (anyone can view, but no sidebar + no footer —
+//                 the auth shell has its own visual)
+//   WORKSPACE   — everything else (dashboard, course, settings, ...)
+//                 requires authentication, renders RoleSideNav,
+//                 no footer (sidebar replaces footer nav for these)
+//
+// A route id is workspace by elimination: if it's NOT in PUBLIC and
+// NOT in AUTH_FLOW, it's workspace. That's the deny-by-default
+// behaviour Phase 15 RBAC will extend with CASL per-action.
+
+const PUBLIC_ROUTE_IDS: ReadonlySet<string> = new Set([
+  "",
+  "home",
+  "programs",
+  "about",
+  "pricing",
+  "admissions",
+  "help",
+  "honor-code",
+]);
+
+const AUTH_FLOW_ROUTE_IDS: ReadonlySet<string> = new Set([
+  "login",
+  "register",
+  "forgot",
+  "verify-email",
+  "2fa-setup",
+  "onboarding",
+]);
+
+const isPublicRoute = (id: string): boolean => PUBLIC_ROUTE_IDS.has(id);
+const isAuthFlowRoute = (id: string): boolean => AUTH_FLOW_ROUTE_IDS.has(id);
+const isWorkspaceRoute = (id: string): boolean =>
+  !isPublicRoute(id) && !isAuthFlowRoute(id);
+
+// =====================================================
 // Layout — chrome that wraps every route
 // =====================================================
 //
@@ -210,9 +257,32 @@ const RouteShell = ({ Component, paramKey }: RouteShellProps): React.ReactElemen
 // item and ErrorBoundary can reset on route change (key changes →
 // React unmounts + remounts the subtree, clearing any latent error
 // state from the previous page).
+//
+// Phase-14.7:
+//   - workspace routes render RoleSideNav alongside <Outlet/> in a
+//     `.workspace-grid` two-column layout. Sidebar stays present
+//     across navigations between workspace pages — no more
+//     "click sidebar item → sidebar disappears" because each page
+//     used to render its own sidebar inconsistently.
+//   - workspace routes are auth-gated: an unauthenticated user is
+//     redirected to /login. Closes the "anyone can visit /instructor
+//     without logging in" reporter F-122.
 const Layout: React.FC = () => {
   const { id: route, param: routeParam } = useCurrentRoute();
   const go = useGo();
+  const auth = useAuth();
+
+  const isWorkspace = isWorkspaceRoute(route);
+
+  // Phase-14.7 auth gate — redirect to /login when a non-authenticated
+  // visitor hits a workspace route. Effect runs after the render so the
+  // initial paint is the spinner-free shell (acceptable for a moment);
+  // a tighter implementation pre-renders a "checking session" splash.
+  React.useEffect(() => {
+    if (isWorkspace && !auth.isAuthenticated) {
+      go("login");
+    }
+  }, [isWorkspace, auth.isAuthenticated, go]);
 
   return (
     <UIRoot onNavigate={go}>
@@ -223,7 +293,16 @@ const Layout: React.FC = () => {
       <Nav current={route} go={go} />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
         <main id="main-content" className="page-shell" tabIndex={-1}>
-          <Outlet />
+          {isWorkspace ? (
+            <div className="workspace-grid">
+              <RoleSideNav active={route} go={go} />
+              <div className="workspace-content">
+                <Outlet />
+              </div>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </ErrorBoundary>
     </UIRoot>
