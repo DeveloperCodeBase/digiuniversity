@@ -50,7 +50,10 @@ const STORIES: Story[] = [
   {
     id: "ui-dropdown-menu--default",
     name: "12-dropdown-default",
-    openSelector: 'button:has-text("اقدامات درس")',
+    // Use aria-haspopup=menu — that's set by Radix on the trigger
+    // regardless of inner text content, so the selector survives
+    // localisation changes.
+    openSelector: 'button[aria-haspopup="menu"]',
   },
   { id: "ui-badge--all-variants", name: "13-badge-all-variants" },
   { id: "ui-avatar--sizes", name: "14-avatar-sizes" },
