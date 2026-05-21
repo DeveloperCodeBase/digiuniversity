@@ -3,7 +3,10 @@ import { EmptyState } from "./EmptyState";
 import { Button } from "./Button";
 
 const meta: Meta<typeof EmptyState> = {
-  title: "UI/EmptyState",
+  // Use a space in the segment so Storybook generates the kebab ID
+  // `ui-empty-state` (deterministic across Storybook versions). With a
+  // bare CamelCase title some versions yield `ui-emptystate` instead.
+  title: "UI/Empty State",
   component: EmptyState,
   parameters: { layout: "padded" },
 };
