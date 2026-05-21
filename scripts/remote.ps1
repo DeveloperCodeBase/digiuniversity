@@ -873,10 +873,14 @@ echo "PASS: rate limit fired after the configured bucket size"
         } else {
           ""
         }
-        # Storybook spec writes into docs/gate-2-evidence/r3-storybook/,
-        # not docs/<gate>-evidence/. Override the host dir + scp source.
-        $hostEvidenceDir = if ($isStorybook) {
-          "docs/gate-2-evidence/r3-storybook"
+        # Path routing:
+        #   - gate-N → docs/gate-N-evidence/                (Gate 1, 2 reviews)
+        #   - rN-*   → docs/gate-2-evidence/rN-*/           (per-sprint evidence
+        #             so Gate 2 review can embed everything from R3 onwards
+        #             under one parent dir)
+        $isSprintEvidence = $gate -match "^r[0-9]+-"
+        $hostEvidenceDir = if ($isSprintEvidence) {
+          "docs/gate-2-evidence/$gate"
         } else {
           "docs/$gate-evidence"
         }
@@ -924,8 +928,8 @@ ls -la $hostEvidenceDir
         # `git add` picks them up. Use forward slashes for ssh; the
         # VPS path is the same regardless of platform.
         $repoRoot = (Resolve-Path "$PSScriptRoot\..").Path
-        $localDir = if ($isStorybook) {
-          Join-Path $repoRoot "docs\gate-2-evidence\r3-storybook"
+        $localDir = if ($isSprintEvidence) {
+          Join-Path $repoRoot "docs\gate-2-evidence\$gate"
         } else {
           Join-Path $repoRoot "docs\$gate-evidence"
         }

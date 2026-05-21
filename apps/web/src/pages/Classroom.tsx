@@ -1,4 +1,8 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename.
+// Phase-16 R6 leaves @ts-nocheck in place per the Phase 16.5 ruling
+// (docs/MEMORY.md). The poll + breakout overlays were swapped to
+// Radix-backed Dialog / Sheet in this commit; the rest of the file
+// remains untyped.
 // =====================================================
 // Live Classroom — full workflow with lobby, polls,
 // reactions, breakout rooms, transcript, and AI tutor.
@@ -7,6 +11,19 @@ import React from "react";
 import { Icon } from "../icons";
 import { toFa } from "../shared";
 import { findCourse, findFaculty, CURRENT_USER, CLASSMATES } from "../data.js";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  Button,
+} from "../ui";
 
 export const ClassroomPage = ({ go }) => {
   // Lobby / Live phase
@@ -153,15 +170,36 @@ export const ClassroomPage = ({ go }) => {
                   ))}
                 </div>
 
-                {/* Active poll overlay */}
-                {activePoll && (
-                  <div className="poll-overlay">
-                    <div className="poll-card">
-                      <div className="poll-eyebrow">
-                        <Icon name="chip" size={11} />
-                        <span className="mono">LIVE POLL · {toFa(activePoll.votes.reduce((a, b) => a + b, 0))} رای</span>
-                      </div>
-                      <h4 className="poll-q">{activePoll.question}</h4>
+                {/* Phase-16 R6 — poll moved out of the .stage-screen
+                    layer (was position:absolute, which clipped on
+                    mobile when stage-side reflowed below). Now a
+                    proper Radix Dialog: focus trapped, Escape
+                    dismissable, full-screen on <md with
+                    safe-area-inset-bottom, screen-readers announce
+                    role=dialog. */}
+                <Dialog
+                  open={!!activePoll}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setActivePoll(null);
+                      setPollAnswered(false);
+                    }
+                  }}
+                >
+                  {activePoll && (
+                    <DialogContent>
+                      <DialogHeader>
+                        <div className="poll-eyebrow">
+                          <Icon name="chip" size={11} />
+                          <span className="mono">
+                            LIVE POLL · {toFa(activePoll.votes.reduce((a, b) => a + b, 0))} رای
+                          </span>
+                        </div>
+                        <DialogTitle>{activePoll.question}</DialogTitle>
+                        <DialogDescription className="sr-only">
+                          نظرسنجی زنده در کلاس. یک گزینه را انتخاب کنید.
+                        </DialogDescription>
+                      </DialogHeader>
                       <div className="poll-options">
                         {activePoll.options.map((opt, i) => {
                           const totalVotes = activePoll.votes.reduce((a, b) => a + b, 0);
@@ -184,40 +222,57 @@ export const ClassroomPage = ({ go }) => {
                         })}
                       </div>
                       {pollAnswered && (
-                        <button className="btn btn-ghost btn-sm mt-2.5"  onClick={() => { setActivePoll(null); setPollAnswered(false); }}>
-                          بستن نظرسنجی
-                        </button>
+                        <div className="mt-3.5 flex justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => { setActivePoll(null); setPollAnswered(false); }}
+                          >
+                            بستن نظرسنجی
+                          </Button>
+                        </div>
                       )}
-                    </div>
-                  </div>
-                )}
+                    </DialogContent>
+                  )}
+                </Dialog>
 
-                {/* Breakout overlay */}
-                {showBreakout && (
-                  <div className="breakout-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowBreakout(false); }}>
-                    <div className="breakout-card">
-                      <h4 className="poll-q">گروه‌های breakout</h4>
-                      <p className="mb-4.5"  style={{fontSize: 13, color: "var(--fg-mute)"}}>به یکی از این ۴ گروه بپیوندید؛ هر گروه ۴-۵ نفر است و ۱۰ دقیقه فرصت بحث دارد.</p>
-                      <div className="breakout-grid">
-                        {[
-                          { name: "گروه ۱ — نظری", participants: ["ساره", "علی", "مهرداد", "نسرین"] },
-                          { name: "گروه ۲ — کاربردی", participants: ["بهنام", "مهسا", "ساغر"] },
-                          { name: "گروه ۳ — کد", participants: ["نگار", "آرین", "نیکا", "علی"] },
-                          { name: "گروه ۴ — مقاله", participants: ["شیوا", "سحر", "محمد"] },
-                        ].map((g, i) => (
-                          <button key={i} className="breakout-room" onClick={() => {
-                            setShowBreakout(false);
-                            window.toast?.({ title: "وارد " + g.name + " شدید", msg: g.participants.length + " نفر در این گروه هستند.", kind: "success" });
-                          }}>
-                            <strong>{g.name}</strong>
-                            <div className="mt-1"  style={{fontSize: 11, color: "var(--fg-mute)"}}>{g.participants.join(" · ")}</div>
-                          </button>
-                        ))}
-                      </div>
-                      <button className="btn btn-ghost mt-3.5"  onClick={() => setShowBreakout(false)}>بستن</button>
+                {/* Phase-16 R6 — breakout overlay → Sheet from bottom.
+                    Was position:absolute inside .stage-screen; on
+                    mobile the stage-screen shrinks and the overlay
+                    clipped into the participant grid below. Sheet
+                    is a portal-mounted bottom drawer, which on >=md
+                    gracefully fills more of the screen and on <md
+                    becomes a true bottom-anchored sheet with the
+                    safe-area-inset-bottom padding wired in. */}
+                <Sheet
+                  open={showBreakout}
+                  onOpenChange={(open) => setShowBreakout(open)}
+                >
+                  <SheetContent side="bottom" className="max-w-[640px] mx-auto rounded-t-[var(--r-xl)]">
+                    <SheetHeader>
+                      <SheetTitle>گروه‌های breakout</SheetTitle>
+                      <SheetDescription>
+                        به یکی از این ۴ گروه بپیوندید؛ هر گروه ۴-۵ نفر است و ۱۰ دقیقه فرصت بحث دارد.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="breakout-grid">
+                      {[
+                        { name: "گروه ۱ — نظری", participants: ["ساره", "علی", "مهرداد", "نسرین"] },
+                        { name: "گروه ۲ — کاربردی", participants: ["بهنام", "مهسا", "ساغر"] },
+                        { name: "گروه ۳ — کد", participants: ["نگار", "آرین", "نیکا", "علی"] },
+                        { name: "گروه ۴ — مقاله", participants: ["شیوا", "سحر", "محمد"] },
+                      ].map((g, i) => (
+                        <button key={i} className="breakout-room" onClick={() => {
+                          setShowBreakout(false);
+                          window.toast?.({ title: "وارد " + g.name + " شدید", msg: g.participants.length + " نفر در این گروه هستند.", kind: "success" });
+                        }}>
+                          <strong>{g.name}</strong>
+                          <div className="mt-1" style={{ fontSize: 11, color: "var(--fg-mute)" }}>{g.participants.join(" · ")}</div>
+                        </button>
+                      ))}
                     </div>
-                  </div>
-                )}
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
 

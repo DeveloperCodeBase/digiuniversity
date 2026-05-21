@@ -4106,11 +4106,23 @@ main[data-screen-label*="کلاس زنده"] + * .ai-fab {
   .classroom-meta .pill { font-size: 9px; padding: 3px 6px; }
 }
 
+/* Phase-16 R6 — `.stage-screen` becomes a container so the reaction
+   layer + any future overlay can use container queries to adapt to
+   the stage size rather than the viewport. On <md the stage-screen
+   shrinks (CSS .classroom-shell collapses to 1fr) but reactions
+   should still scale to the stage, not the page. */
+.stage-screen { container-type: inline-size; container-name: stage; }
+
 .reaction-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
+}
+@container stage (max-width: 480px) {
+  /* Smaller emoji on a tiny stage so the floating layer doesn't
+     dominate the slide content behind it. */
+  .reaction-bubble { font-size: 20px; }
 }
 .reaction-bubble {
   position: absolute;
@@ -4141,25 +4153,11 @@ main[data-screen-label*="کلاس زنده"] + * .ai-fab {
 }
 .reaction-btn:hover { transform: translateY(-3px) scale(1.1); background: var(--surface-2); }
 
-.poll-overlay, .breakout-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(5, 8, 18, 0.55);
-  backdrop-filter: blur(6px);
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  z-index: 5;
-  animation: backdrop-in 200ms ease both;
-}
-.poll-card, .breakout-card {
-  width: min(440px, 100%);
-  background: var(--surface);
-  border: 1px solid var(--line-2);
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: var(--shadow-paper);
-}
+/* Phase-16 R6 — `.poll-overlay`, `.breakout-overlay`, `.poll-card`,
+   `.breakout-card` removed. The poll and breakout interactions now
+   use the Radix-backed <Dialog/> and <Sheet/> primitives from
+   apps/web/src/ui/, which handle backdrop, focus trap, portal
+   mounting, and safe-area-inset on mobile. */
 .poll-eyebrow {
   display: flex;
   align-items: center;

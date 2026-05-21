@@ -8,7 +8,7 @@
 //
 // These run in jsdom via vitest and DO NOT require the dev server
 // or Playwright. They run on every `npm test`.
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
