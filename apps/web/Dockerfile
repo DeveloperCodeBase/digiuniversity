@@ -23,6 +23,10 @@ RUN apk add --no-cache curl tini \
     && rm -rf /usr/share/nginx/html/*
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Phase-15 R5: security-headers snippet is `include`d by nginx.conf in
+# every location. Must be present at runtime, hence copied separately
+# from the dist bundle.
+COPY snippets/ /etc/nginx/snippets/
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 RUN chown -R nginx:nginx /usr/share/nginx/html \

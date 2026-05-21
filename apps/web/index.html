@@ -15,76 +15,16 @@
   <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
   <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
 
-  <!-- Phase-14.8 PWA recovery bootstrap. Runs inline before the main
-       bundle. Two jobs:
-         1) controllerchange listener: when a new service worker takes
-            over the page (skipWaiting + clientsClaim from a newer
-            deploy), reload once so the page picks up the new precache.
-            Without this, users stay on stale assets even after the new
-            SW activates.
-         2) one-time stale-SW kill: the very first time a client loads
-            this version of the HTML, unregister any existing SWs and
-            clear all caches, then reload. Gated by localStorage so it
-            only runs once per device. This is the escape hatch for
-            users stuck on pre-Phase-14.6 SWs that never had
-            skipWaiting+clientsClaim.
-
-       Tiny, dependency-free, in HEAD so it runs before the SPA mounts.
-       Wrapped in try/catch so a private-browsing localStorage failure
-       can't break the page bootstrap. -->
-  <script>
-  (function () {
-    try {
-      if (!("serviceWorker" in navigator)) return;
-
-      // 1) Auto-reload on SW takeover so new assets render immediately.
-      var reloading = false;
-      navigator.serviceWorker.addEventListener("controllerchange", function () {
-        if (reloading) return;
-        reloading = true;
-        // Tiny defer so the new SW finishes claiming clients before the
-        // navigation; otherwise some browsers race the reload against
-        // the claim and get the OLD SW one more time.
-        setTimeout(function () { window.location.reload(); }, 50);
-      });
-
-      // 2) One-time kill switch. The flag includes a version so future
-      // deploys can re-trigger by bumping it.
-      var KILL_FLAG = "digiu_sw_reset_v3";
-      if (localStorage.getItem(KILL_FLAG)) return;
-
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        if (regs.length === 0) {
-          localStorage.setItem(KILL_FLAG, String(Date.now()));
-          return;
-        }
-        // There's at least one SW registered. Unregister all, clear
-        // caches, then reload. The new SW will register fresh from the
-        // new bundle on the next page load.
-        var unreg = Promise.all(regs.map(function (r) { return r.unregister(); }));
-        var clear = (typeof caches !== "undefined" && caches.keys)
-          ? caches.keys().then(function (keys) {
-              return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-            })
-          : Promise.resolve();
-        Promise.all([unreg, clear]).then(function () {
-          localStorage.setItem(KILL_FLAG, String(Date.now()));
-          // Bypass HTTP cache via a query param to force network fetch
-          // of every resource on this hard-reload.
-          var url = new URL(window.location.href);
-          url.searchParams.set("_swReset", String(Date.now()));
-          window.location.replace(url.toString());
-        }).catch(function () {
-          // If anything fails, mark the flag so we don't loop, then
-          // continue the boot with whatever state we have.
-          localStorage.setItem(KILL_FLAG, "error");
-        });
-      });
-    } catch (e) {
-      // localStorage / serviceWorker / caches API blocked — ignore.
-    }
-  })();
-  </script>
+  <!--
+    Phase-15 R5: PWA recovery bootstrap moved out of the HTML so the
+    site can ship a strict Content-Security-Policy without
+    'unsafe-inline' in script-src. The script still loads from <head>
+    (before the main module bundle) and runs synchronously, so the
+    controllerchange listener and one-time stale-SW kill switch still
+    fire pre-paint. Nginx serves /sw-recovery.js with no-cache so each
+    deploy gets fresh logic. See apps/web/public/sw-recovery.js.
+  -->
+  <script src="/sw-recovery.js"></script>
 </head>
 <body>
   <div id="root"></div>
