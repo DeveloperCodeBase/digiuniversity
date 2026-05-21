@@ -8,9 +8,11 @@
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
-import { Footer, toFa } from "../shared";
+import { toFa } from "../shared";
 import { FACULTY as FACULTY_DATA, SCHOOLS, LIBRARY_RESOURCES, WEEKLY_SCHEDULE, WEEK_DAYS } from "../data.js";
-import { RoleSideNav } from "../sidenav";
+// Phase-14.7 R2: sidebar + footer come from Layout (router.tsx). The
+// per-page <Footer/> calls below are gone — CSS used to hide them on
+// workspace routes; now we just don't render them.
 
 export const CalendarPage = ({ go }) => {
   const [view, setView] = React.useState("week");
@@ -30,9 +32,7 @@ export const CalendarPage = ({ go }) => {
 
   return (
     <main data-screen-label="16 تقویم">
-      <div className="dash">
-        <RoleSideNav active="calendar" go={go} />
-        <div className="dash-main">
+      <div className="dash-main">
           <div className="dash-greet">
             <div>
               <span className="eyebrow">CALENDAR · هفته‌ی جاری</span>
@@ -130,8 +130,6 @@ export const CalendarPage = ({ go }) => {
             ))}
           </div>
         </div>
-      </div>
-      <Footer go={go} />
     </main>
   );
 };
@@ -286,8 +284,6 @@ export const LibraryPage = ({ go }) => {
           </div>
         </div>
       </section>
-
-      <Footer go={go} />
     </main>
   );
 };
@@ -407,8 +403,6 @@ export const HelpPage = ({ go }) => (
         </aside>
       </div>
     </section>
-
-    <Footer go={go} />
   </main>
 );
 
@@ -543,8 +537,6 @@ export const PricingPage = ({ go }) => {
         </div>
       </div>
     </section>
-
-    <Footer go={go} />
   </main>
   );
 };
@@ -609,7 +601,6 @@ export const FacultyPage = ({ go }) => {
         ))}
       </div>
     </section>
-    <Footer go={go} />
   </main>
   );
 };

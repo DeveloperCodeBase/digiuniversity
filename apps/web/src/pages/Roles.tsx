@@ -8,18 +8,15 @@
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
-import { Footer, toFa } from "../shared";
-import { RoleSideNav } from "../sidenav";
+import { toFa } from "../shared";
+// Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard, Toggle } from "../components/widgets";
 import { EVENTS } from "../data.js";
 
 export const AdminPage = ({ go }) => {
   return (
     <main data-screen-label="21 میز مدیریت">
-      <div className="dash">
-        <RoleSideNav active="admin" go={go} />
-
-        <div className="dash-main">
+      <div className="dash-main">
           <div className="dash-greet">
             <div>
               <span className="eyebrow">ADMIN CONSOLE · CONTROL CENTER</span>
@@ -189,8 +186,6 @@ export const AdminPage = ({ go }) => {
             </div>
           </div>
         </div>
-      </div>
-      <Footer go={go} />
     </main>
   );
 };
@@ -200,9 +195,6 @@ export const AdminPage = ({ go }) => {
 // =====================================================
 export const ParentPage = ({ go }) => (
   <main data-screen-label="22 میز والد">
-    <div className="dash">
-      <RoleSideNav active="parent" go={go} />
-
       <div className="dash-main">
         <div className="dash-greet">
           <div>
@@ -291,8 +283,6 @@ export const ParentPage = ({ go }) => (
           </div>
         </div>
       </div>
-    </div>
-    <Footer go={go} />
   </main>
 );
 
@@ -452,7 +442,6 @@ export const OfficeHoursPage = ({ go }) => {
           </div>
         </div>
       </section>
-      <Footer go={go} />
     </main>
   );
 };
@@ -571,7 +560,6 @@ export const EventsPage = ({ go }) => (
         })}
       </div>
     </section>
-    <Footer go={go} />
   </main>
 );
 
@@ -655,8 +643,6 @@ export const AboutPage = ({ go }) => (
         </div>
       </div>
     </section>
-
-    <Footer go={go} />
   </main>
 );
 

@@ -409,8 +409,6 @@ export const HomePage = ({ go }) => {
           </div>
         </div>
       </section>
-
-      <Footer go={go} />
     </main>
   );
 };

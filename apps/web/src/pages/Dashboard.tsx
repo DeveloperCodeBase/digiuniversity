@@ -4,22 +4,38 @@
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
-import { Footer, Sparkline, CognitiveRadar } from "../shared";
-import { RoleSideNav } from "../sidenav";
+import { Sparkline, CognitiveRadar } from "../shared";
+// Phase-14.7 R2: RoleSideNav + Footer removed — Layout (router.tsx)
+// now renders the sidebar for every workspace route. Footer is hidden
+// on workspace routes by the centralised chrome.
 import { StatCard } from "../components/widgets";
 import { useRole } from "../role";
+import { useAuth } from "../auth/AuthContext";
 
 export const DashboardPage = ({ go }) => {
   const { role } = useRole();
-  // First-name greeting from the active role; falls back to "نسرین" if the
-  // role record happens to be missing one (it shouldn't).
-  const firstName = role?.name?.split(" ")[0] || "نسرین";
+  const auth = useAuth();
+  // Phase-14.7 R2: greeting uses the REAL logged-in user, not the mock
+  // ROLES.student.name fallback ("نسرین رضوی" — that's the demo-data
+  // identity for the role tab, not the actual user's name). Order of
+  // preference:
+  //   1) auth.user.fullName  (api now returns this; see backend change)
+  //   2) auth.user.email's local-part  (e.g. "student1" from
+  //      "student1@digiuniversity.ir") — friendly fallback when fullName
+  //      isn't set yet.
+  //   3) role.name first word  — only ever shown to demo-mode visitors
+  //      who switched roles via the user-dropdown without logging in.
+  const userFullName = auth.user?.fullName ?? undefined;
+  const userEmail = auth.user?.email;
+  const emailLocal = userEmail?.split("@")[0];
+  const firstName =
+    (userFullName?.split(" ")[0]) ||
+    emailLocal ||
+    role?.name?.split(" ")[0] ||
+    "کاربر";
   return (
     <main data-screen-label="04 میز کار من">
-      <div className="dash">
-        <RoleSideNav active="dashboard" go={go} />
-
-        <div className="dash-main">
+      <div className="dash-main">
           {/* Greeting */}
           <div className="dash-greet">
             <div>
@@ -164,10 +180,7 @@ export const DashboardPage = ({ go }) => {
             </div>
           </div>
         </div>
-      </div>
-
-      <Footer go={go} />
-    </main>
+      </main>
   );
 };
 

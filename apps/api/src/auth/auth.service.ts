@@ -196,7 +196,11 @@ export class AuthService {
 
   private async issueTokens(input: {
     tenant: { id: string; slug: string };
-    user: { id: string; email: string };
+    // Phase-14.7 R2: fullName flows into the response so the web client
+    // can greet the actual logged-in user instead of the mock role
+    // identity ("نسرین رضوی"). Optional because the column is nullable
+    // on legacy users.
+    user: { id: string; email: string; fullName?: string | null };
     roles: string[];
     meta: { userAgent?: string; ip?: string };
   }): Promise<AuthSuccess> {
@@ -250,6 +254,7 @@ export class AuthService {
         tenantId: input.tenant.id,
         tenantSlug: input.tenant.slug,
         email: input.user.email,
+        fullName: input.user.fullName ?? null,
         roles: input.roles,
       },
     };

@@ -28,6 +28,12 @@ export interface AuthUser {
   tenantId: string;
   tenantSlug: string;
   email: string;
+  /**
+   * Phase-14.7 R2: full display name from User.fullName on the api.
+   * Optional + nullable because legacy users may have an empty value.
+   * Consumers should fall back to the email local-part.
+   */
+  fullName?: string | null;
   /** Tenant-scoped role names. Phase 15 adds 6 more values to this list. */
   roles: string[];
 }

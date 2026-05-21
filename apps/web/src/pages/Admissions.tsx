@@ -121,8 +121,6 @@ export const AdmissionsPage = ({ go }) => {
           </aside>
         </div>
       </section>
-
-      <Footer go={go} />
     </main>
   );
 };

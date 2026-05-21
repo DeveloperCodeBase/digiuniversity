@@ -108,8 +108,6 @@ export const ProgramsPage = ({ go }) => {
           </div>
         </div>
       </section>
-
-      <Footer go={go} />
     </main>
   );
 };

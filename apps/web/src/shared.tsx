@@ -190,7 +190,15 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
           <div className="user-wrap relative" >
             <button className="user-btn" onClick={() => setUserOpen(!userOpen)}>
               <div className={"avatar " + role.color} style={{ width: 32, height: 32, fontSize: 11 }}>{role.avatar}</div>
-              <span className="user-name">{role.name.split(" ").slice(-1)[0]}</span>
+              <span className="user-name">{
+                // Phase-14.7 R2: real authed user's first name.
+                // Falls back to email-local (e.g. "student1") for users
+                // without a fullName, then to the mock role name as a
+                // last resort (demo-mode without login).
+                (auth.user?.fullName?.split(" ")[0])
+                  || auth.user?.email?.split("@")[0]
+                  || role.name.split(" ").slice(-1)[0]
+              }</span>
             </button>
             {userOpen && <UserDropdown go={go} role={role} setRole={setRole} auth={auth} />}
           </div>
@@ -289,14 +297,22 @@ const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.Rea
     window.location.search.includes("demo=1") ||
     window.location.hash.includes("demo=1")
   );
+  // Phase-14.7 R2: prefer real auth user details over the role mock.
+  // displayName: auth.user.fullName → email local-part → role mock name.
+  // identifier: auth.user.email if logged in, else role.code (demo mock).
+  const displayName =
+    auth?.user?.fullName ||
+    auth?.user?.email?.split("@")[0] ||
+    role.name;
+  const identifier = auth?.user?.email || role.code;
   return (
   <div className="dropdown" style={{ width: 300 }}>
     <div className="p-4.5"  style={{ borderBottom: "1px solid var(--line)"}}>
       <div className="flex items-center gap-3" >
         <div className={"avatar " + role.color} style={{ width: 44, height: 44 }}>{role.avatar}</div>
         <div className="flex-1"  style={{ minWidth: 0}}>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>{role.name}</div>
-          <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)"}}>{role.code}</div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{displayName}</div>
+          <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"}}>{identifier}</div>
         </div>
       </div>
       <div className="flex gap-1.5 mt-3" >

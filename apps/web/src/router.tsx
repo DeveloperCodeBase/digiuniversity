@@ -40,7 +40,7 @@ import { ErrorBoundary } from "./auth/ErrorBoundary";
 import { useAuth } from "./auth/AuthContext";
 import { UIRoot } from "./ui";
 import { ScrollProgress } from "./motion";
-import { Nav } from "./shared";
+import { Nav, Footer } from "./shared";
 import { RoleSideNav } from "./sidenav";
 
 import HomePage from "./pages/Home";
@@ -304,6 +304,12 @@ const Layout: React.FC = () => {
             <Outlet />
           )}
         </main>
+        {/* Phase-14.7 R2: footer is centralised here, not per-page.
+            Public marketing pages get it; auth-flow + workspace
+            routes don't (sidebar is the workspace nav, auth shell has
+            its own visual). Pages that still import Footer themselves
+            are deprecated — to be removed file-by-file. */}
+        {isPublicRoute(route) && <Footer go={go} />}
       </ErrorBoundary>
     </UIRoot>
   );

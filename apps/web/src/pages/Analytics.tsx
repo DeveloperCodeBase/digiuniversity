@@ -4,17 +4,14 @@
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
-import { Footer, toFa } from "../shared";
-import { RoleSideNav } from "../sidenav";
+import { toFa } from "../shared";
+// Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard } from "../components/widgets";
 
 export const AnalyticsPage = ({ go }) => {
   return (
     <main data-screen-label="12 تحلیل‌گری">
-      <div className="dash">
-        <RoleSideNav active="analytics" go={go} />
-
-        <div className="dash-main">
+      <div className="dash-main">
           {/* Header */}
           <div className="dash-greet">
             <div>
@@ -194,10 +191,7 @@ export const AnalyticsPage = ({ go }) => {
             </div>
           </div>
         </div>
-      </div>
-
-      <Footer go={go} />
-    </main>
+      </main>
   );
 };
 

@@ -7,6 +7,13 @@ export interface AuthenticatedUser {
   tenantId: string;
   tenantSlug: string;
   email: string;
+  /**
+   * Phase-14.7 R2: full display name (matches User.fullName). Optional
+   * because the JWT may not carry it (legacy tokens) and because some
+   * users may have a null fullName. Web clients should fall back to
+   * the email local-part when this is empty.
+   */
+  fullName?: string | null;
   roles: string[];
 }
 
