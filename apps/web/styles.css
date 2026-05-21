@@ -44,12 +44,12 @@
   --gold: oklch(0.5 0.16 30);
   --gold-soft: oklch(0.94 0.04 30);
 
-  /* Back-compat */
+  /* Back-compat aliases. `--cyan-2` and `--amber-2` were removed in
+     R3a as orphans (nothing read them); `--accent-2` / `--navy-2` are
+     used directly. */
   --cyan: var(--accent);
-  --cyan-2: var(--accent-2);
   --cyan-dim: var(--accent-dim);
   --amber: var(--navy);
-  --amber-2: var(--navy-2);
   --violet: var(--sage);
   --rose: var(--gold);
 
@@ -58,8 +58,9 @@
   --f-mono: "JetBrains Mono", ui-monospace, monospace;
   --f-display: "Bricolage Grotesque", "Vazirmatn", system-ui, serif;
 
-  /* — radii (minimal, sharp) — */
-  --r-sm: 3px;
+  /* — radii (minimal, sharp). `--r-sm` removed in R3a as orphan
+     (Tailwind's `rounded-sm` is a static 3px in tailwind.config.js,
+     not a var(--r-sm) reference). */
   --r: 6px;
   --r-lg: 10px;
   --r-xl: 14px;
@@ -104,10 +105,8 @@
   --gold-soft: oklch(0.3 0.08 30 / 0.25);
 
   --cyan: var(--accent);
-  --cyan-2: var(--accent-2);
   --cyan-dim: var(--accent-dim);
   --amber: var(--navy);
-  --amber-2: var(--navy-2);
   --violet: oklch(0.7 0.18 285);
   --rose: oklch(0.7 0.22 25);
 
