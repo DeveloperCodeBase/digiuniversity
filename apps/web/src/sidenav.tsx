@@ -1,12 +1,31 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
 // =====================================================
 // Master role-aware sidebar — used in all dashboards
+//
+// Phase-14.5 C4: dropped @ts-nocheck. The SIDEBAR_BY_ROLE structure
+// is two-dimensional: each role's array is a flat list of items, with
+// "header" items (`{ h: "..." }`) interleaved between "link" items
+// (`{ id, t, ic }`). The discriminated union below makes that explicit
+// for both TS and future readers.
 // =====================================================
 import React from "react";
 import { Icon } from "./icons";
-import { useRole } from "./role";
+import { useRole, type RoleId } from "./role";
+import type { Go } from "./router";
 
-export const SIDEBAR_BY_ROLE = {
+interface SidebarHeader {
+  h: string;
+}
+interface SidebarLink {
+  id: string;
+  t: string;
+  ic: string;
+}
+type SidebarEntry = SidebarHeader | SidebarLink;
+
+const isHeader = (e: SidebarEntry): e is SidebarHeader =>
+  (e as SidebarHeader).h !== undefined;
+
+export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
   student: [
     { h: "یادگیری" },
     { id: "dashboard", t: "میز کار", ic: "home" },
@@ -122,16 +141,32 @@ export const SIDEBAR_BY_ROLE = {
 // Phase-14 R3: href changed from "#route" to "/route" alongside the
 // BrowserRouter migration. The status-bar hover, middle-click, and
 // keyboard semantics all still apply.
-export const RoleSideNav = ({ active, go }) => {
+export interface RoleSideNavProps {
+  active: string;
+  go: Go;
+}
+
+interface SidebarGroup {
+  h: string;
+  items: SidebarLink[];
+}
+
+export const RoleSideNav = ({ active, go }: RoleSideNavProps): React.ReactElement => {
   const { role } = useRole();
-  const items = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
-  // Group items: each h: starts a new group
-  const groups = [];
-  let current = null;
-  items.forEach(it => {
-    if (it.h) { current = { h: it.h, items: [] }; groups.push(current); }
-    else if (current) current.items.push(it);
-    else { current = { h: "", items: [it] }; groups.push(current); }
+  const items: SidebarEntry[] = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
+  // Group items: each `{ h: ... }` starts a new group
+  const groups: SidebarGroup[] = [];
+  let current: SidebarGroup | null = null;
+  items.forEach((it) => {
+    if (isHeader(it)) {
+      current = { h: it.h, items: [] };
+      groups.push(current);
+    } else if (current) {
+      current.items.push(it);
+    } else {
+      current = { h: "", items: [it] };
+      groups.push(current);
+    }
   });
   return (
     <aside className="side-nav" aria-label={`ناوبری نقش ${role.label}`}>
@@ -139,13 +174,16 @@ export const RoleSideNav = ({ active, go }) => {
         <React.Fragment key={gi}>
           {g.h && <h6>{g.h}</h6>}
           <ul>
-            {g.items.map(it => (
+            {g.items.map((it) => (
               <li key={it.id}>
                 <a
                   href={"/" + it.id}
                   className={active === it.id ? "active" : ""}
                   aria-current={active === it.id ? "page" : undefined}
-                  onClick={(e) => { e.preventDefault(); go(it.id); }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    go(it.id);
+                  }}
                 >
                   <Icon name={it.ic} size={14} />
                   {it.t}

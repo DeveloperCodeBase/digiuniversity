@@ -1,17 +1,41 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
 // =====================================================
 // Shared: Nav, Footer, common widgets
+//
+// Phase-14.5 C4: dropped @ts-nocheck. Components were the priority
+// (Nav + dropdowns drive every page); the SVG helpers further down
+// (Sparkline, CognitiveRadar, KnowledgeGraph, ArchStack) got
+// function-signature typing but not deep type-safety on every SVG
+// path expression — that's pure-render math, not RBAC-critical.
 // =====================================================
 import React from "react";
 import { Icon } from "./icons";
-import { useRole, ROLES } from "./role";
-import { useAuth } from "./auth/AuthContext";
+import { useRole, ROLES, type RoleId, type Role } from "./role";
+import { useAuth, type AuthContextValue } from "./auth/AuthContext";
 import { useTheme } from "./ui";
+import type { Go } from "./router";
+
+// Phase-14.5 C4: window.openCommandPalette is set by ui.tsx <UIRoot>.
+// Declare it so consumers (Nav's search button) can call it safely.
+declare global {
+  interface Window {
+    openCommandPalette?: () => void;
+    /** Test polyfills set by tests/setup.js. */
+    toast?: (msg: string) => void;
+    confirmAction?: (msg: string) => Promise<boolean>;
+  }
+}
+
+interface NavItem {
+  id: string;
+  label: string;
+  /** Marks routes that hit the real API; renders the pulse dot. */
+  live?: boolean;
+}
 
 // Nav highlights the LIVE routes that actually talk to the API (Phase 4-9).
 // Mocked routes from the original SPA still hash-route alongside but are
 // no longer the default landing surface for any role.
-const NAV_ITEMS_BY_ROLE = {
+const NAV_ITEMS_BY_ROLE: Record<RoleId, NavItem[]> = {
   student: [
     { id: "progress", label: "پیشرفت من", live: true },
     { id: "catalog", label: "کاتالوگ", live: true },
@@ -57,10 +81,18 @@ const NAV_ITEMS_BY_ROLE = {
   ],
 };
 
-export const Nav = ({ current, go }) => {
+export interface NavProps {
+  current: string;
+  go: Go;
+}
+
+export const Nav = ({ current, go }: NavProps): React.ReactElement => {
   const { role, setRole } = useRole();
   const auth = useAuth();
-  const { theme, setTheme } = useTheme();
+  // Phase-14.5 C4: useTheme is still @ts-nocheck'd (C5 fixes). Cast
+  // inline so this file can lose its own @ts-nocheck now; remove the
+  // cast in C5 when useTheme exports a proper return type.
+  const { theme, setTheme } = useTheme() as { theme: string; setTheme: (t: string) => void };
   const [open, setOpen] = React.useState(false);
   const [notifsOpen, setNotifsOpen] = React.useState(false);
   const [userOpen, setUserOpen] = React.useState(false);
@@ -68,9 +100,10 @@ export const Nav = ({ current, go }) => {
 
   // close popovers on outside click
   React.useEffect(() => {
-    const onClick = (e) => {
-      if (!e.target.closest(".notif-wrap")) setNotifsOpen(false);
-      if (!e.target.closest(".user-wrap")) setUserOpen(false);
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (!target?.closest(".notif-wrap")) setNotifsOpen(false);
+      if (!target?.closest(".user-wrap")) setUserOpen(false);
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
@@ -79,7 +112,7 @@ export const Nav = ({ current, go }) => {
   // Esc closes the mobile drawer + any popover.
   React.useEffect(() => {
     if (!open && !notifsOpen && !userOpen) return;
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
         setNotifsOpen(false);
@@ -186,7 +219,10 @@ export const Nav = ({ current, go }) => {
   );
 };
 
-const NotificationsDropdown = ({ go }) => (
+interface NotificationsDropdownProps {
+  go: Go;
+}
+const NotificationsDropdown = ({ go }: NotificationsDropdownProps): React.ReactElement => (
   <div className="dropdown" style={{ width: 380 }}>
     <div className="dropdown-head">
       <h4>اعلان‌ها</h4>
@@ -220,9 +256,16 @@ const NotificationsDropdown = ({ go }) => (
   </div>
 );
 
-const UserDropdown = ({ go, role, setRole, auth }) => {
+interface UserDropdownProps {
+  go: Go;
+  role: Role;
+  setRole: (id: RoleId) => void;
+  auth: AuthContextValue;
+}
+
+const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.ReactElement => {
   const [loggingOut, setLoggingOut] = React.useState(false);
-  const handleLogout = async (e) => {
+  const handleLogout = async (e?: React.MouseEvent): Promise<void> => {
     e?.preventDefault?.();
     if (loggingOut) return;
     setLoggingOut(true);
@@ -323,7 +366,10 @@ const UserDropdown = ({ go, role, setRole, auth }) => {
   );
 };
 
-export const Footer = ({ go }) => (
+export interface FooterProps {
+  go: Go;
+}
+export const Footer = ({ go }: FooterProps): React.ReactElement => (
   <footer className="footer">
     <div className="shell">
       <div className="footer-grid">
@@ -400,12 +446,24 @@ export const Footer = ({ go }) => (
 // =====================================================
 // Persian numerals helper
 // =====================================================
-export const toFa = (n) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+export const toFa = (n: number | string): string =>
+  String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
 
 // =====================================================
 // Sparkline mini-chart (SVG)
 // =====================================================
-export const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 220 }) => {
+export interface SparklineProps {
+  values: number[];
+  color?: string;
+  height?: number;
+  width?: number;
+}
+export const Sparkline = ({
+  values,
+  color = "var(--cyan)",
+  height = 50,
+  width = 220,
+}: SparklineProps): React.ReactElement => {
   const max = Math.max(...values);
   const min = Math.min(...values);
   const range = max - min || 1;
@@ -433,12 +491,17 @@ export const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 
 // =====================================================
 // Cognitive radar (SVG) — for student profile
 // =====================================================
-export const CognitiveRadar = ({ values, labels, size = 280 }) => {
+export interface CognitiveRadarProps {
+  values: number[];
+  labels: string[];
+  size?: number;
+}
+export const CognitiveRadar = ({ values, labels, size = 280 }: CognitiveRadarProps): React.ReactElement => {
   const cx = size / 2, cy = size / 2;
   const radius = size * 0.4;
   const n = values.length;
-  const angle = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
-  const point = (i, r) => [cx + Math.cos(angle(i)) * r, cy + Math.sin(angle(i)) * r];
+  const angle = (i: number): number => (Math.PI * 2 * i) / n - Math.PI / 2;
+  const point = (i: number, r: number): [number, number] => [cx + Math.cos(angle(i)) * r, cy + Math.sin(angle(i)) * r];
 
   const rings = [0.25, 0.5, 0.75, 1].map((f) => {
     const pts = Array.from({ length: n }, (_, i) => point(i, radius * f).join(",")).join(" ");
@@ -475,7 +538,7 @@ export const CognitiveRadar = ({ values, labels, size = 280 }) => {
 // =====================================================
 // Knowledge Graph visualization (SVG)
 // =====================================================
-export const KnowledgeGraph = () => {
+export const KnowledgeGraph = (): React.ReactElement => {
   const nodes = [
     { id: "ml", x: 50, y: 40, r: 36, kind: "core", label: "یادگیری ماشین" },
     { id: "sup", x: 22, y: 22, r: 24, kind: "topic", label: "نظارت‌شده" },
@@ -493,7 +556,8 @@ export const KnowledgeGraph = () => {
     ["uns", "cl"], ["uns", "nn"], ["rl", "q"],
   ];
   const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
-  const colorFor = (kind) => kind === "core" ? "var(--cyan)" : kind === "topic" ? "var(--amber)" : "var(--violet)";
+  const colorFor = (kind: string): string =>
+    kind === "core" ? "var(--cyan)" : kind === "topic" ? "var(--amber)" : "var(--violet)";
 
   return (
     <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
@@ -525,7 +589,7 @@ export const KnowledgeGraph = () => {
 // =====================================================
 // 3D-ish architecture diagram (isometric stack)
 // =====================================================
-export const ArchStack = () => {
+export const ArchStack = (): React.ReactElement => {
   const layers = [
     { name: "Experience Layer", sub: "وب · موبایل · کلاس آنلاین · داشبورد", color: "var(--cyan)" },
     { name: "Agent Orchestration", sub: "AI Tutor · Coach · Critic · Mentor · Grader", color: "var(--violet)" },
