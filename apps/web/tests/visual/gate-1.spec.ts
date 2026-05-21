@@ -20,7 +20,10 @@
 // host to `docs/gate-1-evidence/` by the web-visual compose service.
 import { test, expect } from "@playwright/test";
 
-const OUT = "/screenshots/gate-1"; // container path → docs/gate-1-evidence/
+// Container path. The docker-compose web-visual service bind-mounts
+// ./docs (repo) → /screenshots (container), so writing to
+// /screenshots/gate-1-evidence/ lands in docs/gate-1-evidence/ on the host.
+const OUT = "/screenshots/gate-1-evidence";
 
 const STUDENT = {
   tenantSlug: "demo",
