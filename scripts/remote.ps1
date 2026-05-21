@@ -765,6 +765,37 @@ if ! echo "$STU_ME" | grep -qE '"abilities":\[[^]]*Course'; then
 fi
 
 echo "PASS: CASL gate denies non-admin AND /v1/auth/me ships role-shaped ability rules"
+
+echo
+echo "--- (6) Phase-15 R7: support + super_admin can read /v1/audit-logs ---"
+# Phase-15 R7 seeded support1@ and superadmin@; the AbilityFactory
+# grants both roles read access to AuditLog. Verify the positive
+# case from two angles without needing the admin password.
+SUP_BODY=$(docker exec digiuniversity-app sh -c "curl -s -X POST 'http://${API_IP}:4000/v1/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{\"tenantSlug\":\"demo\",\"email\":\"support1@digiuniversity.ir\",\"password\":\"SupportPass!1\"}'")
+SUP_TOK=$(echo "$SUP_BODY" | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
+
+SA_BODY=$(docker exec digiuniversity-app sh -c "curl -s -X POST 'http://${API_IP}:4000/v1/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{\"tenantSlug\":\"demo\",\"email\":\"superadmin@digiuniversity.ir\",\"password\":\"SuperAdminPass!1\"}'")
+SA_TOK=$(echo "$SA_BODY" | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
+
+if [ -z "$SUP_TOK" ] || [ -z "$SA_TOK" ]; then
+  echo "WARN: support or super_admin login failed — was 'remote.ps1 seed' run after the R7 deploy?"
+  echo "  support body: ${SUP_BODY}"
+  echo "  super_admin body: ${SA_BODY}"
+else
+  SUP_AUDIT=$(docker exec digiuniversity-app curl -s -o /dev/null -w '%{http_code}' \
+    -H "Authorization: Bearer $SUP_TOK" "http://${API_IP}:4000/v1/audit-logs?limit=1")
+  SA_AUDIT=$(docker exec digiuniversity-app curl -s -o /dev/null -w '%{http_code}' \
+    -H "Authorization: Bearer $SA_TOK" "http://${API_IP}:4000/v1/audit-logs?limit=1")
+  echo "  support     GET /v1/audit-logs -> ${SUP_AUDIT} (expect 200)"
+  echo "  super_admin GET /v1/audit-logs -> ${SA_AUDIT}  (expect 200)"
+  if [ "$SUP_AUDIT" != "200" ]; then echo "FAIL: support should be 200, got ${SUP_AUDIT}"; exit 1; fi
+  if [ "$SA_AUDIT" != "200" ]; then echo "FAIL: super_admin should be 200, got ${SA_AUDIT}"; exit 1; fi
+  echo "PASS: support + super_admin can read AuditLog via the CASL positive path"
+fi
 if [ "$LIMIT" -lt 1 ]; then
   echo "FAIL: expected at least one 429 across 12 requests"
   exit 1
