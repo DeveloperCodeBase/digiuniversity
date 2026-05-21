@@ -1,4 +1,3 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
 // =====================================================
 // Top-level React error boundary.
 //
@@ -7,29 +6,41 @@
 // throw, shows a Persian "something went wrong" message with the
 // real Error.message + stack (in dev), and a button to reset back
 // to the home route.
+//
+// Phase-14.5 C2: dropped @ts-nocheck. Class component now properly
+// extends React.Component<Props, State> so future Sentry wiring
+// (Phase 17) has a typed surface to attach to.
 // =====================================================
 
 import React from "react";
 
-export class ErrorBoundary extends React.Component {
-  constructor(props) {
+export interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+export interface ErrorBoundaryState {
+  error: Error | null;
+  info: React.ErrorInfo | null;
+}
+
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { error: null, info: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { error };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
     this.setState({ info });
-    // Surfaced to ops via the browser console; future Phase 11.2 wires
-    // a Sentry sink.
+    // Surfaced to ops via the browser console; Phase 17 wires Sentry.
     // eslint-disable-next-line no-console
     console.error("[ErrorBoundary]", error, info);
   }
 
-  reset = () => {
+  reset = (): void => {
     this.setState({ error: null, info: null });
     try {
       // Phase-14 R3: BrowserRouter migration. ErrorBoundary is a class
@@ -43,7 +54,7 @@ export class ErrorBoundary extends React.Component {
     }
   };
 
-  render() {
+  render(): React.ReactNode {
     if (!this.state.error) return this.props.children;
 
     const isDev = typeof window !== "undefined" && window.location.hostname === "localhost";
