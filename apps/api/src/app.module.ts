@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AiBridgeModule } from "./ai-bridge/ai-bridge.module";
 import { AiLogsModule } from "./ai-logs/ai-logs.module";
@@ -26,6 +27,17 @@ import { UsersModule } from "./users/users.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
+    // Phase-15 R4: per-IP rate limit. One global "default" bucket of
+    // 600 requests/min handles authed and anonymous traffic alike; auth
+    // endpoints override to 10/min via @Throttle, and the high-frequency
+    // learning-events emit + health probe carry @SkipThrottle so they
+    // never get blocked. req.ip is the real client IP because
+    // `trust proxy: true` is set in main.ts (we sit behind Caddy +
+    // nginx). In-memory store is fine while we run a single api
+    // replica — swap to ThrottlerStorageRedisService once we scale out.
+    ThrottlerModule.forRoot([
+      { name: "default", ttl: 60_000, limit: 600 },
+    ]),
     PrismaModule,
     AuthModule,
     // Phase-15 R2: audit-log infra. Global so AuditLogService is
@@ -54,9 +66,14 @@ import { UsersModule } from "./users/users.module";
   ],
   controllers: [HealthController],
   providers: [
-    // Order matters: JwtAuthGuard runs first to populate req.user, then
-    // RolesGuard reads the resolved roles. APP_GUARD execution order
-    // follows declaration order.
+    // Order matters: APP_GUARD execution follows declaration order.
+    //   1. ThrottlerGuard — cap requests/IP before any DB work happens,
+    //      so a flood of unauth POST /v1/auth/login can't pin the
+    //      bcrypt loop. Auth endpoints override to a tighter bucket
+    //      via @Throttle on the handler.
+    //   2. JwtAuthGuard  — populate req.user (skipped on @Public).
+    //   3. RolesGuard    — read resolved roles from req.user.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

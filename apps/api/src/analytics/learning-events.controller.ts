@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 import { IsIn, IsObject, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 import type { AuthenticatedUser } from "../auth/auth.types";
@@ -35,9 +36,17 @@ class ListAllQueryDto {
 export class LearningEventsController {
   constructor(private readonly events: LearningEventsService) {}
 
-  /** Any authenticated user records one of their own events. */
+  /**
+   * Any authenticated user records one of their own events.
+   *
+   * @SkipThrottle: progress pings fire every ~15s during a video, plus
+   * page-view / question-answered events; the 600/min bucket would
+   * 429 an honest active learner. The endpoint is still gated by
+   * JwtAuthGuard, so it's not a generic open POST.
+   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @SkipThrottle()
   @AuditSkip() // High-frequency; LearningEvent table IS its own audit.
   async emit(@CurrentUser() user: AuthenticatedUser, @Body() dto: EmitEventDto) {
     await this.events.emit({

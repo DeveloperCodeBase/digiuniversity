@@ -1,4 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 
 import { Public } from "../auth/decorators/public.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -7,6 +8,9 @@ import { PrismaService } from "../prisma/prisma.service";
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Probe traffic (Caddy upstream check + remote.ps1 health) must
+  // never be rate-limited or our own monitoring would 429 us.
+  @SkipThrottle()
   @Public()
   @Get()
   async health(): Promise<{

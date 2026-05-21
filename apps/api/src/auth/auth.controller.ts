@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import type { Request } from "express";
 
 import { AuthService } from "./auth.service";
@@ -10,11 +11,20 @@ import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { AuditAction } from "../audit/audit-action.decorator";
 
+// Phase-15 R4: auth endpoints are the front door to a bcrypt verify +
+// JWT mint. Without a tight bucket an attacker can pin one CPU forever
+// trying user-enumeration or credential-stuffing. 10 requests per minute
+// per IP is fine for a human (login retry, typo recovery) and is hard
+// to brute-force from a single source. The global 600/min bucket still
+// catches distributed floods at the IP level.
+const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
+
 @Controller("auth")
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Public()
+  @Throttle(AUTH_THROTTLE)
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
   register(@Body() dto: RegisterDto, @Req() req: Request) {
@@ -22,6 +32,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(AUTH_THROTTLE)
   @Post("login")
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto, @Req() req: Request) {
@@ -29,6 +40,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(AUTH_THROTTLE)
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   refresh(@Body() dto: RefreshDto, @Req() req: Request) {
