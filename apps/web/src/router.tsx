@@ -38,6 +38,7 @@ import {
 
 import { ErrorBoundary } from "./auth/ErrorBoundary";
 import { useAuth } from "./auth/AuthContext";
+import { AuthLoadingSkeleton } from "./components/AuthLoadingSkeleton";
 import { UIRoot } from "./ui";
 import { ScrollProgress } from "./motion";
 import { Nav, Footer } from "./shared";
@@ -276,14 +277,23 @@ const Layout: React.FC = () => {
   const isWorkspace = isWorkspaceRoute(route);
 
   // Phase-14.7 auth gate — redirect to /login when a non-authenticated
-  // visitor hits a workspace route. Effect runs after the render so the
-  // initial paint is the spinner-free shell (acceptable for a moment);
-  // a tighter implementation pre-renders a "checking session" splash.
+  // visitor hits a workspace route. Effect runs after the render so a
+  // naive implementation would flash the workspace shell before the
+  // navigate() takes effect.
+  //
+  // Phase-16 Gate-1 Fix 2: when the visitor is unauthenticated on a
+  // workspace route, render <AuthLoadingSkeleton/> instead of the
+  // workspace UI. The skeleton is layout-stable so the swap to /login
+  // is silent. Same idea Home.tsx uses on the inverse path.
   React.useEffect(() => {
     if (isWorkspace && !auth.isAuthenticated) {
       go("login");
     }
   }, [isWorkspace, auth.isAuthenticated, go]);
+
+  if (isWorkspace && !auth.isAuthenticated) {
+    return <AuthLoadingSkeleton label="در حال انتقال به ورود..." />;
+  }
 
   return (
     <UIRoot onNavigate={go}>

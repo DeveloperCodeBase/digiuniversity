@@ -11,6 +11,7 @@ import { Icon } from "../icons";
 import { Stagger, useMouseParallax } from "../motion";
 import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared";
 import { useAuth } from "../auth/AuthContext";
+import { AuthLoadingSkeleton } from "../components/AuthLoadingSkeleton";
 import type { Go } from "../router";
 
 interface HomePageProps {
@@ -21,8 +22,12 @@ export const HomePage = ({ go }: HomePageProps) => {
   // Phase-16 R2 (B-01): a logged-in user landing on "/" is bounced to
   // /dashboard. Without this, the public marketing page rendered on top
   // of the authenticated shell — owner reported "اطلاعات یه یوزر لاگین
-  // کرده تو لندینگ هست". The early `return null` prevents the marketing
-  // flash before the navigate() takes effect.
+  // کرده تو لندینگ هست".
+  //
+  // Gate-1 Fix 2: render <AuthLoadingSkeleton/> during the one-frame
+  // interval between mount and useEffect firing, instead of `return null`
+  // (which flashed a blank background). The skeleton matches the nav
+  // chrome height so the swap to the real dashboard is layout-silent.
   const auth = useAuth();
   React.useEffect(() => {
     if (auth.isAuthenticated) {
@@ -33,7 +38,7 @@ export const HomePage = ({ go }: HomePageProps) => {
   // hooks; the hook itself opts out at runtime when the marketing page
   // isn't mounted (no `.hero-bg .aurora` in the DOM = no work).
   useMouseParallax();
-  if (auth.isAuthenticated) return null;
+  if (auth.isAuthenticated) return <AuthLoadingSkeleton />;
 
   return (
     <main data-screen-label="01 خانه">
