@@ -436,17 +436,39 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
   perspective-origin: 50% 50%;
 }
 
+/* Phase-16 R9 — aurora gradient orbs only render on `>=lg`. On
+   phones + tablets they (a) cost CPU on cheap devices, (b) the
+   parallax + blur produces motion sickness under gyroscope, and
+   (c) the layout already crowds the headline. Under `<lg` the
+   `.hero-bg` falls back to a static flat gradient (subtle paper
+   tint) defined below — preserves the visual mood without the
+   animated parallax. */
 .hero-bg {
   position: absolute;
   inset: -15% -10% -25% -10%;
   z-index: 0;
   pointer-events: none;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    color-mix(in oklch, var(--accent) 8%, transparent) 0%,
+    transparent 60%
+  ),
+  radial-gradient(
+    ellipse at 70% 80%,
+    color-mix(in oklch, var(--navy) 6%, transparent) 0%,
+    transparent 55%
+  );
 }
 .hero-bg .aurora {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
   mix-blend-mode: screen;
+  display: none; /* hide by default; lg+ opts in below */
+}
+@media (min-width: 1024px) {
+  .hero-bg { background: none; } /* lg+ uses real auroras instead */
+  .hero-bg .aurora { display: block; }
 }
 .aurora-1 { top: -10%; right: 8%; width: 640px; height: 640px; }
 .aurora-2 { top: 20%; left: 0%; width: 520px; height: 520px; }
@@ -503,13 +525,23 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
 }
 .hero-cta { margin-top: 44px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-/* 3D layered objects below headline */
+/* Phase-16 R9 — 3D layered preview only renders on `>=lg`. The
+   parallax + rotateX(8deg) layout collapses awkwardly under 1024 px
+   and the four floating cards (Classroom / Tutor / Analytics /
+   Credential) just don't fit. On `<lg` the JSX still renders but
+   `.hero-3d` is `display:none`, so the layout reflows clean. The
+   new R9 sections below the hero (TrustStrip + StatsBand + …)
+   carry the visual weight on mobile/tablet instead. */
 .hero-3d {
   position: relative;
   margin-top: 60px;
   height: 520px;
   transform-style: preserve-3d;
   transform: rotateX(8deg);
+  display: none;
+}
+@media (min-width: 1024px) {
+  .hero-3d { display: block; }
 }
 
 .hero-card {
@@ -4558,6 +4590,121 @@ html { scroll-padding-top: 80px; }
     animation: none !important;
     transform: none !important;
   }
+}
+
+/* ================================================================
+   Phase-16 R9 — Landing §2 Trust strip + §3 Stats band.
+   Both render after the hero, before the rest of the page. Tokens
+   only — no hardcoded colours. The band uses count-up animation
+   gated by the global prefers-reduced-motion guard above.
+   ================================================================ */
+.trust-strip {
+  padding: 32px 0 24px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.trust-strip-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-mute);
+}
+.trust-strip-eyebrow .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.trust-strip-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 12px;
+}
+@media (min-width: 480px) {
+  .trust-strip-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 768px) {
+  .trust-strip-row { grid-template-columns: repeat(6, 1fr); }
+}
+.trust-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: var(--r);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: filter 200ms ease, opacity 200ms ease, border-color 200ms ease;
+}
+.trust-strip-item:hover {
+  filter: grayscale(0);
+  opacity: 1;
+  border-color: var(--line-2);
+}
+.trust-strip-glyph {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r);
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 18px;
+  border: 1px solid var(--line);
+}
+.trust-strip-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-mute);
+  letter-spacing: 0.02em;
+}
+
+.stats-band {
+  padding: 56px 0 64px;
+}
+.stats-band-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .stats-band-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+}
+.stats-band-cell {
+  text-align: center;
+  padding: 24px 12px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+}
+.stats-band-value {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.stats-band-label {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--fg-mute);
 }
 
 /* ================================================================

@@ -96,6 +96,12 @@ export const HomePage = ({ go }: HomePageProps) => {
         </div>
       </section>
 
+      {/* ============== TRUST STRIP (R9 §2) ============== */}
+      <TrustStrip />
+
+      {/* ============== STATS BAND (R9 §3) ============== */}
+      <StatsBand />
+
       {/* ============== AGENT SYSTEM ============== */}
       <section className="section">
         <div className="shell">
@@ -557,6 +563,117 @@ const Hero3DCredential = () => (
     </div>
   </div>
 );
+
+// ====== Phase-16 R9 — Trust strip (§2) ======
+//
+// Six partner logos rendered as inline SVGs so we don't pay an extra
+// HTTP round-trip per logo. Grayscale by default — saturate on hover.
+// The placeholders are generic monograms; replace with real partners
+// in a future content sprint.
+const TRUST_PARTNERS = [
+  { id: "msa", name: "MSA", glyph: "M" },
+  { id: "ut", name: "UT", glyph: "ا" },
+  { id: "sharif", name: "Sharif", glyph: "ش" },
+  { id: "khu", name: "KHU", glyph: "خ" },
+  { id: "iut", name: "IUT", glyph: "ا" },
+  { id: "amir", name: "Amirkabir", glyph: "م" },
+];
+
+const TrustStrip = () => (
+  <section className="trust-strip" aria-label="سازمان‌های همکار">
+    <div className="shell">
+      <div className="trust-strip-eyebrow">
+        <span className="dot"></span>
+        <span>سازمان‌های همکار و دانشگاه‌های شریک</span>
+      </div>
+      <ul className="trust-strip-row">
+        {TRUST_PARTNERS.map((p) => (
+          <li key={p.id} className="trust-strip-item" title={p.name}>
+            <span className="trust-strip-glyph" aria-hidden="true">
+              {p.glyph}
+            </span>
+            <span className="trust-strip-name">{p.name}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+);
+
+// ====== Phase-16 R9 — Animated stats band (§3) ======
+//
+// Four numbers count up when the band scrolls into view. We honour
+// `prefers-reduced-motion: reduce` by skipping the animation and
+// rendering the final value immediately.
+const STATS_BAND = [
+  { value: 8, suffix: "", label: "دانشکده" },
+  { value: 248, suffix: "", label: "برنامه آکادمیک" },
+  { value: 94, suffix: "", label: "استاد" },
+  { value: 8400, suffix: "+", label: "دانشجو" },
+];
+
+// Persian numeral conversion — share with the existing `toFa` helper
+// in `shared.tsx` once we type that file, for now inline.
+const toFaDigits = (n: number) =>
+  String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+
+const StatsBand = () => {
+  const ref = React.useRef(null);
+  const [displayed, setDisplayed] = React.useState(() => STATS_BAND.map(() => 0));
+  const [hasRun, setHasRun] = React.useState(false);
+
+  React.useEffect(() => {
+    if (hasRun) return;
+    const el = ref.current;
+    if (!el) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setDisplayed(STATS_BAND.map((s) => s.value));
+      setHasRun(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.some((e) => e.isIntersecting);
+        if (!visible || hasRun) return;
+        setHasRun(true);
+        const start = performance.now();
+        const DURATION = 1400; // ms
+        const tick = (now) => {
+          const t = Math.min(1, (now - start) / DURATION);
+          // ease-out cubic for a friendly count-up
+          const eased = 1 - Math.pow(1 - t, 3);
+          setDisplayed(STATS_BAND.map((s) => Math.round(s.value * eased)));
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasRun]);
+
+  return (
+    <section className="stats-band" ref={ref} aria-label="اعداد دانشگاه">
+      <div className="shell">
+        <div className="stats-band-grid">
+          {STATS_BAND.map((s, i) => (
+            <div className="stats-band-cell" key={s.label}>
+              <div className="stats-band-value">
+                {toFaDigits(displayed[i])}
+                {s.suffix}
+              </div>
+              <div className="stats-band-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ====== Course catalog data ======
 const COURSES = [
