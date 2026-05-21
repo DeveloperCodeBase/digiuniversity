@@ -8,6 +8,7 @@ import { Public } from "./decorators/public.decorator";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { AuditAction } from "../audit/audit-action.decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -36,6 +37,7 @@ export class AuthController {
 
   @Post("logout")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("auth.logout")
   logout(@Body() dto: RefreshDto) {
     return this.auth.logout(dto.refreshToken);
   }

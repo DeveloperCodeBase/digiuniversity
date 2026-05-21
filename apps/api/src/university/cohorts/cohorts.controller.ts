@@ -17,6 +17,7 @@ import { IsISO8601, IsOptional, IsString, MaxLength, MinLength } from "class-val
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
+import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 
 class CreateCohortDto {
@@ -78,6 +79,7 @@ export class CohortsController {
   @Roles("admin")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("cohort.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCohortDto) {
     const program = await this.prisma.program.findFirst({
       where: { id: dto.programId, tenantId: user.tenantId, deletedAt: null },
@@ -101,6 +103,7 @@ export class CohortsController {
 
   @Roles("admin")
   @Patch(":id")
+  @AuditAction("cohort.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -127,6 +130,7 @@ export class CohortsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("cohort.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.cohort.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

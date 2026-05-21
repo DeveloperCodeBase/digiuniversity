@@ -17,6 +17,7 @@ import { IsIn, IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from "cl
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
+import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 
 const LEVELS = ["beginner", "intermediate", "advanced"] as const;
@@ -117,6 +118,7 @@ export class CoursesController {
   @Roles("admin", "instructor")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("course.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCourseDto) {
     const program = await this.prisma.program.findFirst({
       where: { id: dto.programId, tenantId: user.tenantId, deletedAt: null },
@@ -142,6 +144,7 @@ export class CoursesController {
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("course.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -163,6 +166,7 @@ export class CoursesController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("course.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.course.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

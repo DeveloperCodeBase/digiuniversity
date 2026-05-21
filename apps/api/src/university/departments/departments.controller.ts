@@ -17,6 +17,7 @@ import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
+import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 
 class CreateDepartmentDto {
@@ -76,6 +77,7 @@ export class DepartmentsController {
   @Roles("admin")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("department.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateDepartmentDto) {
     // Faculty must belong to the same tenant.
     const faculty = await this.prisma.faculty.findFirst({
@@ -99,6 +101,7 @@ export class DepartmentsController {
 
   @Roles("admin")
   @Patch(":id")
+  @AuditAction("department.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -120,6 +123,7 @@ export class DepartmentsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("department.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.department.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

@@ -4,6 +4,7 @@ import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from "class-val
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
 import type { AuthenticatedUser } from "../auth/auth.types";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 class CreateTenantDto {
@@ -53,6 +54,7 @@ export class TenantsController {
   @Roles("admin")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("tenant.create")
   async create(@Body() dto: CreateTenantDto) {
     return this.prisma.tenant.create({
       data: {

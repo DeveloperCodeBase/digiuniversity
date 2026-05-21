@@ -24,6 +24,7 @@ import { AiBridgeService } from "../ai-bridge/ai-bridge.service";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { ClassSessionsService } from "./class-sessions.service";
 
 const STATUSES = ["scheduled", "live", "ended", "cancelled"] as const;
@@ -79,12 +80,14 @@ export class ClassSessionsController {
   @Roles("admin", "instructor")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("class-session.create")
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateClassSessionDto) {
     return this.sessions.create(user, dto);
   }
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("class-session.update")
   update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -96,18 +99,21 @@ export class ClassSessionsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("class-session.delete")
   softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.sessions.softDelete(user, id);
   }
 
   @Post(":id/join")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("class-session.join")
   join(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.sessions.join(user, id);
   }
 
   @Post(":id/leave")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("class-session.leave")
   leave(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.sessions.leave(user, id);
   }
@@ -127,6 +133,7 @@ export class ClassSessionsController {
   @Roles("admin", "instructor")
   @Post(":id/analyze")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("class-session.analyze")
   async analyze(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,

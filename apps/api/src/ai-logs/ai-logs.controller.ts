@@ -25,6 +25,7 @@ import {
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditSkip } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 class CreateAiLogDto {
@@ -60,6 +61,7 @@ export class AiLogsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditSkip() // AiInteractionLog IS its own audit table; don't double-write.
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateAiLogDto) {
     return this.prisma.aiInteractionLog.create({
       data: {

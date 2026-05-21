@@ -5,6 +5,7 @@ import * as bcrypt from "bcryptjs";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 class ChangePasswordDto {
@@ -56,6 +57,7 @@ export class UsersController {
 
   @Post("me/change-password")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("user.password.change")
   async changePassword(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ChangePasswordDto,

@@ -25,6 +25,7 @@ import {
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 const STATUSES = ["none", "processing", "ready", "failed"] as const;
@@ -85,6 +86,7 @@ export class RecordingsController {
   @Roles("admin", "instructor")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("recording.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRecordingDto) {
     const session = await this.prisma.classSession.findFirst({
       where: { id: dto.classSessionId, tenantId: user.tenantId, deletedAt: null },
@@ -115,6 +117,7 @@ export class RecordingsController {
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("recording.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -136,6 +139,7 @@ export class RecordingsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("recording.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.recording.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

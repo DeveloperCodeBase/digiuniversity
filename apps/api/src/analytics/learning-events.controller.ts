@@ -4,6 +4,7 @@ import { IsIn, IsObject, IsOptional, IsString, MaxLength, MinLength } from "clas
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditSkip } from "../audit/audit-action.decorator";
 import { CLIENT_EVENTS } from "./event-types";
 import { LearningEventsService } from "./learning-events.service";
 
@@ -37,6 +38,7 @@ export class LearningEventsController {
   /** Any authenticated user records one of their own events. */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditSkip() // High-frequency; LearningEvent table IS its own audit.
   async emit(@CurrentUser() user: AuthenticatedUser, @Body() dto: EmitEventDto) {
     await this.events.emit({
       tenantId: user.tenantId,

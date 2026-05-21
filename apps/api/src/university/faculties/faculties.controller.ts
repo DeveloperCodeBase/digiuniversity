@@ -16,6 +16,7 @@ import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
+import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 
 class CreateFacultyDto {
@@ -62,6 +63,7 @@ export class FacultiesController {
   @Roles("admin")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("faculty.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateFacultyDto) {
     return this.prisma.faculty.create({
       data: {
@@ -77,6 +79,7 @@ export class FacultiesController {
 
   @Roles("admin")
   @Patch(":id")
+  @AuditAction("faculty.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -98,6 +101,7 @@ export class FacultiesController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("faculty.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.faculty.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

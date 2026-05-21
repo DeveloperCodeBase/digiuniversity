@@ -15,6 +15,7 @@ import { IsIn, IsOptional, IsString } from "class-validator";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import {
   GradeSubmissionDto,
   SUBMISSION_STATUSES,
@@ -36,6 +37,7 @@ export class SubmissionsController {
   /** Student writes their own submission (draft or finalise). */
   @Post()
   @HttpCode(HttpStatus.OK)
+  @AuditAction("submission.submit")
   submit(@CurrentUser() user: AuthenticatedUser, @Body() dto: SubmitDto) {
     return this.submissions.submit(user, dto);
   }
@@ -87,6 +89,7 @@ export class SubmissionsController {
   @Roles("admin", "instructor")
   @Patch(":id/grade")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("submission.grade")
   grade(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -102,6 +105,7 @@ export class SubmissionsController {
   @Roles("admin", "instructor")
   @Post(":id/ai-grade-draft")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("submission.ai-grade-draft")
   aiGradeDraft(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,

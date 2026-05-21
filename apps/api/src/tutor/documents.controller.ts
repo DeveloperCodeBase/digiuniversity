@@ -17,6 +17,7 @@ import { IsOptional, IsString } from "class-validator";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateDocumentDto, UpdateDocumentDto } from "./dto";
 
@@ -90,6 +91,7 @@ export class DocumentsController {
   @Roles("admin", "instructor")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("document.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateDocumentDto) {
     if (dto.courseId) {
       const course = await this.prisma.course.findFirst({
@@ -125,6 +127,7 @@ export class DocumentsController {
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("document.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -164,6 +167,7 @@ export class DocumentsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("document.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.document.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },

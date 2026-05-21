@@ -15,6 +15,7 @@ import { IsIn, IsOptional, IsString } from "class-validator";
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { AssessmentsService } from "./assessments.service";
 import {
   CreateAssessmentDto,
@@ -48,12 +49,14 @@ export class AssessmentsController {
   @Roles("admin", "instructor")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("assessment.create")
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateAssessmentDto) {
     return this.assessments.create(user, dto);
   }
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("assessment.update")
   update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -65,6 +68,7 @@ export class AssessmentsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("assessment.delete")
   softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.assessments.softDelete(user, id);
   }
@@ -74,6 +78,7 @@ export class AssessmentsController {
   @Roles("admin", "instructor")
   @Post(":id/questions")
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("assessment.question.add")
   addQuestion(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -89,6 +94,7 @@ export class QuestionsController {
 
   @Roles("admin", "instructor")
   @Patch(":id")
+  @AuditAction("question.update")
   update(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
@@ -100,6 +106,7 @@ export class QuestionsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("question.delete")
   remove(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.assessments.deleteQuestion(user, id);
   }

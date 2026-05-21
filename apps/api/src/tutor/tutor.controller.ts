@@ -11,6 +11,7 @@ import {
 
 import type { AuthenticatedUser } from "../auth/auth.types";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { AuditAction } from "../audit/audit-action.decorator";
 import { AskDto, CreateTutorSessionDto } from "./dto";
 import { TutorService } from "./tutor.service";
 
@@ -20,6 +21,7 @@ export class TutorController {
 
   @Post("sessions")
   @HttpCode(HttpStatus.CREATED)
+  @AuditAction("tutor.session.create")
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateTutorSessionDto) {
     return this.tutor.createSession(user, dto);
   }
@@ -36,12 +38,14 @@ export class TutorController {
 
   @Delete("sessions/:id")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("tutor.session.delete")
   remove(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.tutor.deleteSession(user, id);
   }
 
   @Post("sessions/:id/ask")
   @HttpCode(HttpStatus.OK)
+  @AuditAction("tutor.session.ask")
   ask(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") id: string,
