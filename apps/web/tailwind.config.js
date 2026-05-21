@@ -9,6 +9,18 @@ export default {
   ],
   darkMode: ["selector", "[data-theme='dark']"],
   theme: {
+    // Phase-16 R1: mobile-first breakpoint scale. Replaces Tailwind's
+    // default (sm=640) which left a dead zone for iPhone SE-class phones.
+    // xs=375 covers iPhone SE/mini, sm=480 small phones, md=768 iPad,
+    // lg=1024 tablet landscape/laptop, xl=1280 desktop, 2xl=1536 large.
+    screens: {
+      xs: "375px",
+      sm: "480px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+    },
     extend: {
       colors: {
         bg: "var(--bg)",
@@ -55,5 +67,9 @@ export default {
   },
   plugins: [
     require("tailwindcss-rtl"),
+    // Phase-16 R1: container queries (`@container`, `@sm:`, `@md:`) so
+    // cards adapt to their slot width, not just the viewport. Crucial
+    // for StatCard et al. when they appear inside a Sheet/Dialog/Sidebar.
+    require("@tailwindcss/container-queries"),
   ],
 };
