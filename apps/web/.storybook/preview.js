@@ -31,13 +31,30 @@ const preview = {
         ],
       },
     },
+    // Phase-16 R3 — RTL is the production default for digiuniversity.ir
+    // but every new primitive needs to be reviewable in LTR too, so we
+    // expose a toolbar switch. Stories that need a specific direction
+    // can pin it via parameters.dir = "rtl" | "ltr".
+    dir: {
+      description: "Text direction",
+      defaultValue: "rtl",
+      toolbar: {
+        title: "Direction",
+        icon: "transfer",
+        items: [
+          { value: "rtl", title: "RTL (Persian)" },
+          { value: "ltr", title: "LTR (English)" },
+        ],
+      },
+    },
   },
   decorators: [
     (Story, ctx) => {
       if (typeof document !== "undefined") {
         document.documentElement.setAttribute("data-theme", ctx.globals.theme || "light");
-        document.documentElement.setAttribute("dir", "rtl");
-        document.documentElement.setAttribute("lang", "fa");
+        const dir = ctx.parameters?.dir ?? ctx.globals.dir ?? "rtl";
+        document.documentElement.setAttribute("dir", dir);
+        document.documentElement.setAttribute("lang", dir === "rtl" ? "fa" : "en");
       }
       return Story();
     },
