@@ -27,9 +27,15 @@ async function main(): Promise<void> {
   });
 
   // Default roles for every tenant.
-  // Phase-14.6 add parent + org so the LoginPage role tabs are not
-  // dead. Phase 15 will extend to TA + ContentManager + Support +
-  // Moderator + SuperAdmin per the RBAC plan.
+  // Phase-15 R1: full 9-role set (was 5 after Phase 14.6). The 4 new
+  // ones extend RBAC for the audit's recommended hierarchy:
+  //   - ta              — teaching assistant; subset of instructor
+  //   - content_manager — author + publish lessons across courses
+  //   - support         — view-all + impersonate + refund (no schema changes)
+  //   - moderator       — flag/hide content, suspend users
+  //   - super_admin     — cross-tenant operations
+  // Role NAMES use snake_case (matches the api convention; user.roles[]
+  // exposes these to the frontend which maps them to RoleId).
   console.log(`[seed] ensuring default roles for tenant=${tenant.id}`);
   const defaults = [
     { name: "admin", label: "مدیر سامانه" },
@@ -37,6 +43,11 @@ async function main(): Promise<void> {
     { name: "student", label: "دانشجو" },
     { name: "parent", label: "والد" },
     { name: "org", label: "سازمان" },
+    { name: "ta", label: "دستیار آموزشی" },
+    { name: "content_manager", label: "مدیر محتوا" },
+    { name: "support", label: "پشتیبانی" },
+    { name: "moderator", label: "ناظر" },
+    { name: "super_admin", label: "ادمین کل" },
   ] as const;
   for (const r of defaults) {
     await prisma.role.upsert({

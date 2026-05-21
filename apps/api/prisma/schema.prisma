@@ -32,6 +32,7 @@ model Tenant {
   permissions     Permission[]
   refreshTokens   RefreshToken[]
   aiInteractions  AiInteractionLog[]
+  auditLogs       AuditLog[]
   faculties       Faculty[]
   departments     Department[]
   programs        Program[]
@@ -72,6 +73,7 @@ model User {
   userRoles      UserRole[]
   refreshTokens  RefreshToken[]
   aiInteractions AiInteractionLog[]
+  auditedActions AuditLog[]         @relation("AuditLogActor")
   enrollments    Enrollment[]
   attendance     Attendance[]
   hostedSessions ClassSession[]     @relation("ClassSessionHost")
@@ -725,4 +727,51 @@ model AiInteractionLog {
   @@index([userId])
   @@index([endpoint])
   @@index([createdAt])
+}
+
+// ---------- Generic audit log ----------
+//
+// Phase-15 R1. AiInteractionLog captures AI-specific calls;
+// LearningEvent captures user-facing learning events. This model is
+// the catch-all for SENSITIVE STATE-CHANGING ACTIONS — role grants,
+// course publish/delete, refunds, tenant config changes, anything
+// that should be reconstructable from the log if disputed.
+//
+// Written by the audit interceptor on every successful mutating
+// endpoint (Phase 15 R2). The `before`/`after` JSON columns hold the
+// resource snapshot pre/post mutation so the diff is reconstructable.
+// `requestId` joins to API access logs + AiInteractionLog so a
+// timeline can be reconstructed across the stack.
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  tenantId    String
+  /// null when the action is performed by the system (cron, seeder, etc.)
+  actorId     String?
+  /// Dotted resource:verb identifier, e.g. "course.create", "user.role.change",
+  /// "submission.grade", "tenant.delete".
+  action      String
+  /// Free-form subject identifier, e.g. "Course:abc123", "User:def456".
+  /// Two fields rather than (subjectType, subjectId) tuple so it can be
+  /// indexed as a single string and joined to whatever resource id format
+  /// the source domain uses.
+  subject     String
+  /// Pre-mutation snapshot (or null on create).
+  before      Json?
+  /// Post-mutation snapshot (or null on delete).
+  after       Json?
+  ip          String?  @db.VarChar(64)
+  userAgent   String?  @db.VarChar(512)
+  /// Joins to AiInteractionLog.requestId and the API access log.
+  requestId   String?
+  createdAt   DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actor  User?  @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([action])
+  @@index([subject])
+  @@index([requestId])
 }
