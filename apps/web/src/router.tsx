@@ -1,4 +1,3 @@
-// @ts-nocheck — Phase-14 R3 new file; types land when the route map gets typed in a later sprint.
 // =====================================================
 // App router — Phase-14 R3 BrowserRouter migration.
 //
@@ -20,6 +19,11 @@
 // once per render and forwards `go` + the route's path param (if any)
 // to the page. Param naming preserves the old prop names
 // (`courseId`, `assessmentId`, `labId`) so pages don't change.
+//
+// Phase-14.5 C3: dropped @ts-nocheck. useGo's signature is now the
+// authoritative typed contract for the 140 call sites; Phase 15
+// per-page TS cleanup will extend the page-component types to consume
+// it via `import type { Go } from "../router"`.
 // =====================================================
 
 import React from "react";
@@ -116,13 +120,24 @@ import {
 //
 // Future sprints can migrate call sites to useNavigate() directly,
 // but that's per-page polish, not the critical path here.
-export const useGo = () => {
+//
+// `param` is optional and accepts string | number for ergonomics
+// (route ids like course/abc-123 come from string ids; tutorial IDs
+// might be numeric in some pages). It's String()-coerced before use.
+
+/**
+ * Type of the navigation function passed as `go` prop throughout the
+ * app. Pages import this as `import type { Go } from "../router"`.
+ */
+export type Go = (id: string, param?: string | number | null) => void;
+
+export const useGo = (): Go => {
   const navigate = useNavigate();
-  return React.useCallback(
+  return React.useCallback<Go>(
     (id, param) => {
       const safe = String(id || "home").replace(/^[#/]+/, "");
       const path =
-        "/" + safe + (param ? "/" + encodeURIComponent(String(param)) : "");
+        "/" + safe + (param != null && param !== "" ? "/" + encodeURIComponent(String(param)) : "");
       navigate(path);
       // Mirror the old behaviour: scroll to top on every nav so pages
       // start fresh, never inheriting the previous scroll position.
@@ -144,7 +159,12 @@ export const useGo = () => {
 // route id + param to drive aria-current / focus-reset semantics.
 // We compute it from useLocation() so it stays in sync with whatever
 // the router thinks the current URL is.
-export const useCurrentRoute = () => {
+export interface CurrentRoute {
+  id: string;
+  param: string | null;
+}
+
+export const useCurrentRoute = (): CurrentRoute => {
   const location = useLocation();
   const path = location.pathname.replace(/^\/+/, "");
   if (!path) return { id: "home", param: null };
@@ -163,10 +183,22 @@ export const useCurrentRoute = () => {
 // The shell calls hooks once, then renders the page with the same
 // prop names the page already uses. paramKey is omitted for routes
 // without a URL param.
-const RouteShell = ({ Component, paramKey }) => {
+//
+// `Component` is typed as `React.ComponentType<any>` rather than a
+// precise prop shape because pages haven't been individually typed
+// yet (Phase 15+ retires more @ts-nocheck per file). When the page
+// types land, swap to a generic-typed RouteShell<P>.
+interface RouteShellProps {
+  Component: React.ComponentType<any>;
+  paramKey?: string;
+}
+
+const RouteShell = ({ Component, paramKey }: RouteShellProps): React.ReactElement => {
   const go = useGo();
   const params = useParams();
-  const extra = paramKey ? { [paramKey]: params[paramKey] } : {};
+  const extra: Record<string, string | undefined> = paramKey
+    ? { [paramKey]: params[paramKey] }
+    : {};
   return <Component go={go} {...extra} />;
 };
 
@@ -178,7 +210,7 @@ const RouteShell = ({ Component, paramKey }) => {
 // item and ErrorBoundary can reset on route change (key changes →
 // React unmounts + remounts the subtree, clearing any latent error
 // state from the previous page).
-const Layout = () => {
+const Layout: React.FC = () => {
   const { id: route, param: routeParam } = useCurrentRoute();
   const go = useGo();
 
@@ -314,4 +346,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export const AppRouter = () => <RouterProvider router={router} />;
+export const AppRouter: React.FC = () => <RouterProvider router={router} />;
