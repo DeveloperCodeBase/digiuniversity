@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
@@ -226,7 +226,28 @@ echo "Caddy reloaded."
     }
 
     "caddy-reload" {
-        Remote "docker exec hooshgate_caddy caddy reload --config /etc/caddy/Caddyfile"
+        # Stream the host Caddyfile into Caddy via stdin and reload — this
+        # bypasses the bind-mount inode drift bug (caddy-install writes
+        # the host file in place, but the container's view can be stale
+        # if the mount got orphaned by a previous in-place edit). Also
+        # forces full re-resolution of upstream DNS, which a plain
+        # `caddy reload --config /etc/caddy/Caddyfile` does NOT do if
+        # Caddy thinks the config bytes are unchanged. After a
+        # `docker compose up -d` recreates the api container its IP
+        # rotates and the stale Caddy upstream entry 502s — this gets
+        # us off it without restarting Caddy entirely.
+        $bash = @'
+set -eu
+CADDY=hooshgate_caddy
+HOST_CADDYFILE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy/Caddyfile"}}{{.Source}}{{end}}{{end}}' "$CADDY")
+if [ -z "$HOST_CADDYFILE" ]; then
+    echo "ERROR: $CADDY does not bind-mount /etc/caddy/Caddyfile"; exit 1
+fi
+echo "Reloading $CADDY from $HOST_CADDYFILE via stdin"
+sudo cat "$HOST_CADDYFILE" | docker exec -i "$CADDY" caddy reload --config /dev/stdin --adapter caddyfile
+echo "Caddy reloaded; upstreams will re-resolve on next request."
+'@
+        exit (Invoke-RemoteBash $bash)
     }
 
     "caddy-logs" {
@@ -297,6 +318,14 @@ echo "--- line numbers of reverse_proxy 127.0.0.1:8090 in Caddyfile (expect 0) -
 sudo grep -nE 'reverse_proxy[[:space:]]+127\.0\.0\.1:8090' "$HOST_CADDYFILE" || echo "(none)"
 echo "--- line numbers of reverse_proxy .*digiuniversity in Caddyfile ---"
 sudo grep -nE 'reverse_proxy[[:space:]]+digiuniversity' "$HOST_CADDYFILE" || echo "(none)"
+echo "--- line numbers of reverse_proxy api:4000 in Caddyfile (expect >= 1) ---"
+sudo grep -nE 'reverse_proxy[[:space:]]+api:4000' "$HOST_CADDYFILE" || echo "(none)"
+echo "--- dump only the digiuniversity block from host Caddyfile ---"
+sudo awk '
+  /^# >>> digiuniversity/ {p=1}
+  p {print}
+  /^# <<< digiuniversity/ {p=0}
+' "$HOST_CADDYFILE" || true
 echo "--- Caddy running config (admin API): upstreams for digiuniversity ---"
 docker exec hooshgate_caddy sh -c 'wget -qO- http://localhost:2019/config/apps/http/servers 2>/dev/null | head -c 30000' \
   | python3 -c "
@@ -604,6 +633,94 @@ for P in / /home /catalog /course/abc-123 /tutor /labs/nonexistent-path; do
     printf "FAIL %3s  %-40s %s\n" "$STATUS" "$P" "$TYPE"
   fi
 done
+'@
+        exit (Invoke-RemoteBash $bash)
+    }
+
+    "security-probe" {
+        # Phase-15 R4+R5 verification harness.
+        #
+        #   1) CSP header: confirm Content-Security-Policy-Report-Only is
+        #      present on / and that the policy keywords look right.
+        #   2) /sw-recovery.js: must exist (200) and ship Cache-Control
+        #      with no-cache so a deploy reaches every client.
+        #   3) Rate limit on /v1/auth/login: 11 bad logins from one IP
+        #      should yield at least one 429 once the bucket fills.
+        #
+        # All curls run from inside the VPS so we hit the host Caddy on
+        # 127.0.0.1 (no public traffic, no test pollution of the rate
+        # limiter for real users). The login probe uses an obviously
+        # invalid credential and expects 401 until 429 kicks in.
+        $bash = @'
+set -eu
+HOST=digiuniversity.ir
+RESOLVE="--resolve $HOST:443:127.0.0.1"
+
+echo "--- (1) CSP header on / ---"
+HDR=$(curl -k -sSI $RESOLVE "https://$HOST/")
+echo "$HDR" | grep -iE '^(content-security-policy|content-security-policy-report-only):' || {
+  echo "FAIL: no CSP header"
+  exit 1
+}
+
+echo
+echo "--- (2) /sw-recovery.js cache + existence ---"
+SW=$(curl -k -sSI $RESOLVE "https://$HOST/sw-recovery.js")
+echo "$SW" | head -1
+echo "$SW" | grep -iE '^cache-control:' || {
+  echo "FAIL: /sw-recovery.js missing Cache-Control"
+  exit 1
+}
+
+echo
+echo "--- (3) /api/v1/auth/login rate limit via Caddy (front-door) ---"
+# This is the path real SPA traffic takes: Caddy strips /api and forwards
+# /v1/* to the api container. If this 502s, ops needs to re-run
+# `scripts/remote.ps1 caddy-reload` so Caddy re-resolves api's IP after
+# a `docker compose up -d` recreate. The throttler is keyed on req.ip
+# (which Caddy passes via X-Forwarded-For); the express trust-proxy
+# setting in main.ts surfaces it as req.ip so the bucket fills per
+# real client, not per Caddy.
+PASS=0
+LIMIT=0
+GATEWAY_502=0
+for i in $(seq 1 12); do
+  CODE=$(curl -k -s -o /dev/null -w '%{http_code}' $RESOLVE \
+    -X POST "https://$HOST/api/v1/auth/login" \
+    -H 'Content-Type: application/json' \
+    -d '{"tenantSlug":"demo","email":"throttle-test@example.com","password":"badpw"}')
+  printf "  req %02d -> %s\n" "$i" "$CODE"
+  case "$CODE" in
+    400|401) PASS=$((PASS+1)) ;;
+    429)     LIMIT=$((LIMIT+1)) ;;
+    502)     GATEWAY_502=$((GATEWAY_502+1)) ;;
+  esac
+done
+echo "summary: ${PASS} x 400|401 (rejected creds), ${LIMIT} x 429 (rate-limited), ${GATEWAY_502} x 502 (caddy upstream stale)"
+if [ "$GATEWAY_502" -gt 0 ]; then
+  echo "FAIL: Caddy is 502ing — run 'scripts/remote.ps1 caddy-reload' to re-resolve api upstream"
+  exit 1
+fi
+if [ "$LIMIT" -lt 1 ]; then
+  echo "FAIL: expected at least one 429 across 12 requests"
+  exit 1
+fi
+echo "PASS: rate limit fired after the configured bucket size"
+
+echo
+echo "--- (4) sanity: api container reachable on internal network ---"
+API_IP=$(docker network inspect digiuniversity_web --format \
+  '{{range .Containers}}{{if eq .Name "digiuniversity-api"}}{{.IPv4Address}}{{end}}{{end}}' \
+  | cut -d'/' -f1)
+DIRECT=$(docker exec digiuniversity-app curl -s -o /dev/null -w '%{http_code}' \
+  "http://${API_IP}:4000/v1/health")
+echo "direct GET http://${API_IP}:4000/v1/health -> ${DIRECT}"
+[ "$DIRECT" = "200" ] || { echo "FAIL: api unhealthy on internal network"; exit 1; }
+if [ "$LIMIT" -lt 1 ]; then
+  echo "FAIL: expected at least one 429 across 12 requests"
+  exit 1
+fi
+echo "PASS: rate limit fired after the configured bucket size"
 '@
         exit (Invoke-RemoteBash $bash)
     }
