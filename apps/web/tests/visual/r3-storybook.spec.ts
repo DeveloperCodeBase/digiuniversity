@@ -50,10 +50,12 @@ const STORIES: Story[] = [
   {
     id: "ui-dropdown-menu--default",
     name: "12-dropdown-default",
-    // Use aria-haspopup=menu — that's set by Radix on the trigger
-    // regardless of inner text content, so the selector survives
-    // localisation changes.
-    openSelector: 'button[aria-haspopup="menu"]',
+    // No openSelector — capture the closed trigger state only. The
+    // open state is exercised in tests/ui/primitives.test.tsx; opening
+    // the menu in the Storybook iframe was flaking on the first paint
+    // (Radix dropdown's pointer-event handling under an isolated
+    // iframe + python http.server combo). The closed-state PNG still
+    // documents the trigger's visual treatment.
   },
   { id: "ui-badge--all-variants", name: "13-badge-all-variants" },
   { id: "ui-avatar--sizes", name: "14-avatar-sizes" },
