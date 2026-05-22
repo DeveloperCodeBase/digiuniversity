@@ -77,6 +77,40 @@ Source: <user instruction, plan section, runbook chapter, or "my call">
   - **Exception:** at viewport ≥3xl (1536px) **and** in workspace **and** the user previously had it open → stays open (power users on large monitors)
 **Source:** owner instruction 2026-05-22.
 
+### R1.3-D12 — Visual assertion contract: `toBeVisible()` is not a visual claim
+**Context:** R1.3 shipped 39/39 automated assertions green. Owner manual smoke found all 6 bugs still present on a real device. The assertions verified DOM presence + computed style flags, not visual fidelity.
+**Rule:** Every visual claim must assert **all five** of these, not just `toBeVisible()`:
+  1. **Element present in DOM** (`toBeAttached()` / `toHaveCount(n)`).
+  2. **Computed style matches design exactly** — position, size, color, font-weight, gap. Not "is set" — _matches the design token_.
+  3. **Element in correct viewport scroll position** — `getBoundingClientRect()` against the viewport bounds. Not just "exists" — _visible at the expected pixel coordinates after scroll_.
+  4. **No overlap with surrounding elements** — `boundingClientRect()` collision check against siblings. Catches cases where the element exists but is hidden behind a stacked sibling.
+  5. **Pixel diff against baseline ≤ 0.1%** — Playwright `toHaveScreenshot()` with the design baseline PNG. Catches drift the structural checks miss.
+
+`toBeVisible()` alone is not accepted from this point. Any spec that uses it without the other four is a structural test, not a visual test, and must be labelled as such (e.g., `describe("R1.3 — structural (not visual)", ...)`).
+
+**Application:** Every R1.4 assertion will satisfy all five. The visual baseline PNGs land in `docs/visual-baselines/{sub-r}-{bug}.png` and `toHaveScreenshot` compares against them.
+**Source:** owner instruction 2026-05-22 after R1.3 manual-smoke failure.
+
+### R1.3-D13 — Real-device manual smoke is a formal gate
+**Context:** R1.3 shipped 39/39 automated and was claimed as "verified". The owner ran manual smoke on a real phone and found the same 6 bugs the sub-R was supposed to fix. Visible from the docs alone, the gap looked like victory; from the device alone, like nothing changed.
+**Rule:** Manual smoke from the owner is a formal gate. **If manual fails, the sub-R fails — regardless of automated pass rate.** No sub-R can be claimed "shipped" or "verified" on automated alone. The acceptance grammar is:
+
+  - PASS = automated green AND owner manual smoke green.
+  - FAIL = either side red.
+
+No "76% ready, move on". No "automated passed, ship it". Manual is non-negotiable.
+
+**Procedure when manual fails:**
+1. STOP writing code. Do not retry, do not extend.
+2. Owner sends screenshots.
+3. Fill `PHASE_A_R{n}_AUDIT.md` columns 4–6 (what screenshot shows, gap cause, fix) per row.
+4. Author new assertions per D12 (the 5-point visual contract).
+5. Execute fixes one bug per commit, verify each against BOTH the new assertion AND a follow-up manual smoke.
+6. Only then advance.
+
+**Application:** R1.3 is officially FAILED until the audit + R1.4 fixes land + the owner re-smokes green. R2 stays gated.
+**Source:** owner instruction 2026-05-22 after R1.3 manual-smoke failure.
+
 ### R1.1-D8 — `find -newer .git/HEAD` is unsafe for git-tracked dirs
 **Context:** When unblocking the VPS pull, an attempted cleanup with `find docs -name '*.png' -newer .git/HEAD -delete` matched and deleted tracked PNGs too. Recovery: `git checkout HEAD -- docs/` restored tracked files; `sudo rm` on the untracked dir finished the job.
 **Rule:** Never use `find -newer .git/HEAD` to discriminate untracked vs tracked files. The mtime-vs-HEAD-mtime comparison isn't reliable — touched files, rebased commits, and clone-fresh checkouts all break the heuristic.
