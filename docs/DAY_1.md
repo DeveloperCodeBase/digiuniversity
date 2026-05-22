@@ -31,6 +31,22 @@ Working on: Phase A Foundation Repair
 
 Awaiting owner ack on R1 review (60-second smoke checklist). R2 starts after green-light.
 
+## R1.3 — post-smoke fixes + sidebar redesign + brand (shipped)
+
+R1 NOT approved — owner found 6 bugs in manual smoke + 1 architectural change (D9 hamburger-everywhere). R1.3 spawned:
+
+- 7 commits for B1–B5 + D9 + Brand, total ~900 lines of fixes
+- 11 total commits including memo + test refactors after 3 verification rounds
+- 39 total assertions across R1.1/R1.2/R1.3 specs all pass (1 intentional skip in R1.2)
+- New OrgAttribution component wired across Footer + AppShell + AboutPage
+- D9 architectural shift: sidebar Sheet drawer at every viewport, localStorage `digiu_sidebar_pref`, ≥3xl pinned-inline exception
+- B5 privacy: AppShell now short-circuits authed visitors on / to AuthLoadingSkeleton before Nav mounts
+- B1 sticky nav: existing CSS was correct; added scroll-aware shadow + opacity boost for visual depth
+- New memory: feedback_manual_smoke_required.md (R1.3-D10 — Playwright toBeVisible is necessary but not sufficient)
+- Logos NOT YET dropped by owner; integration wired with min-height to reserve layout space
+
+`docs/PHASE_A_R1_3_REVIEW.md` written. PAUSE for owner re-smoke before R2.
+
 ## Blockers (resolved during day)
 
 - VPS deploy blocked on `git pull` because the audit PNG dir was untracked but conflicted with origin's tracked PNGs. `remote.ps1`'s docs sweep silently failed (Playwright container UID owned the files; VPS user couldn't unlink). Logged the underlying `remote.ps1` flaw in `PHASE_A_OUT_OF_SCOPE.md` (infra PR after Gate A). User ran a permanent fix and confirmed git status clean; deploy retried successfully.
