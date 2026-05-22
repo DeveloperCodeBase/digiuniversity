@@ -3858,7 +3858,13 @@ a:not([href]):not([role]) { cursor: pointer; }
    Sidebar collapse to chip-row on mobile (instead of huge stacked list)
    ================================================================ */
 @media (max-width: 720px) {
-  .side-nav {
+  /* Phase-A R1.4 B4 — scoped to `.dash .side-nav` (LEGACY inline sidebar
+     on pre-AppShell .dash pages). The Sheet-drawer `.side-nav` rendered
+     by AppShell needs vertical layout regardless of viewport; that case
+     is handled by `.appshell-sidebar-drawer .side-nav` below. Without
+     this scope, the drawer inherits the horizontal-pill transform and
+     becomes unusable (screenshot 1 of R1.3 manual smoke). */
+  .dash .side-nav {
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
@@ -3874,10 +3880,10 @@ a:not([href]):not([role]) { cursor: pointer; }
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
   }
-  .side-nav h6 {
+  .dash .side-nav h6 {
     display: none !important;
   }
-  .side-nav ul {
+  .dash .side-nav ul {
     display: flex !important;
     flex-direction: row !important;
     gap: 4px !important;
@@ -3885,22 +3891,88 @@ a:not([href]):not([role]) { cursor: pointer; }
     padding: 0 !important;
     list-style: none !important;
   }
-  .side-nav li {
+  .dash .side-nav li {
     flex-shrink: 0 !important;
   }
-  .side-nav li a {
+  .dash .side-nav li a {
     padding: 8px 12px !important;
     font-size: 12px !important;
     border-radius: 999px !important;
     background: var(--surface-2) !important;
     border: 1px solid var(--line) !important;
   }
-  .side-nav li a.active {
+  .dash .side-nav li a.active {
     background: var(--accent-soft) !important;
     color: var(--accent) !important;
     border-color: color-mix(in oklch, var(--accent) 40%, transparent) !important;
   }
-  .side-nav li a.active::before { display: none !important; }
+  .dash .side-nav li a.active::before { display: none !important; }
+}
+
+/* Phase-A R1.4 B4 — Sheet drawer's RoleSideNav must use vertical layout
+   regardless of viewport. Undoes any inherited mobile pill transforms
+   from rules that pre-date the AppShell drawer pattern. */
+.appshell-sidebar-drawer .side-nav,
+.appshell-sidebar-drawer .side-nav ul {
+  display: block !important;
+  flex-direction: column !important;
+  overflow-x: visible !important;
+  overflow-y: auto !important;
+  max-height: none !important;
+  position: static !important;
+  top: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  white-space: normal !important;
+  border-radius: 0 !important;
+}
+.appshell-sidebar-drawer .side-nav h6 {
+  display: block !important;
+  padding: 8px 12px !important;
+  font-size: 10px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--fg-dim) !important;
+  font-family: var(--f-mono) !important;
+  margin: 0 !important;
+}
+.appshell-sidebar-drawer .side-nav ul {
+  margin-bottom: 12px !important;
+}
+.appshell-sidebar-drawer .side-nav li {
+  flex-shrink: 1 !important;
+}
+.appshell-sidebar-drawer .side-nav li a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 14px !important;
+  color: var(--fg-mute) !important;
+  min-height: 44px !important;
+}
+.appshell-sidebar-drawer .side-nav li a:hover {
+  background: var(--surface-2) !important;
+  color: var(--fg) !important;
+}
+.appshell-sidebar-drawer .side-nav li a.active {
+  background: color-mix(in oklch, var(--cyan) 12%, var(--surface-2)) !important;
+  color: var(--fg) !important;
+  border-color: transparent !important;
+}
+.appshell-sidebar-drawer .side-nav li a.active::before {
+  display: inline-block !important;
+  content: "" !important;
+  width: 3px !important;
+  height: 14px !important;
+  background: var(--cyan) !important;
+  border-radius: 2px !important;
 }
 
 /* ================================================================
