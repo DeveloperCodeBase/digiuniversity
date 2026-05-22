@@ -4584,21 +4584,17 @@ main[data-screen-label*="کلاس زنده"] + * .ai-fab {
   outline-offset: 2px;
 }
 
-/* Login role tabs: 5-tab strip (دانشجو · استاد · مدیر · والد · سازمان)
-   crams into <50px per cell at 320px. Phase-A R1.3 B2: wrap to 2 cols
-   at <md (was 3-cols at <480). User spec said "2-column grid not
-   vertical list" — 5 tabs in 2 cols = 3 rows of 2+2+1, which reads
-   cleanly. Final polish (cleaner role-chip design) lands in R5. */
+/* Phase-A R1.3 B2 — login role tabs (5-chip strip: دانشجو · استاد ·
+   مدیر · والد · سازمان). Columns driven by THIS class only — Auth.tsx
+   no longer sets gridTemplateColumns inline, which avoids the attribute-
+   selector flock in styles.css that overrode the earlier attempt.
+   Layout: 5 cols on desktop, 2 cols on mobile (≤md), 3 cols at small
+   tablet (481-767). Final polish (cleaner chip visuals) lands in R5. */
+.login-role-tabs {
+  grid-template-columns: repeat(5, 1fr);
+}
 @media (max-width: 767px) {
-  /* Specificity bump: a later generic rule
-     `[style*="grid-template-columns: repeat(5, 1fr)"]` at line ~5511
-     maps to 3-col with !important. We override here by combining the
-     class + attribute selector (specificity 0,2,0) so the role-tab
-     strip lands on 2 cols at <md regardless of source order. */
-  .login-role-tabs[style*="grid-template-columns"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-  }
+  .login-role-tabs { grid-template-columns: repeat(2, 1fr); gap: 6px; }
 }
 
 /* Phase-A R1.3 B2 — login form side at <lg: tighter horizontal padding
