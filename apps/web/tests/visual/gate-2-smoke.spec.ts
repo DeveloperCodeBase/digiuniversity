@@ -30,9 +30,11 @@ import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
-// Phase-16 Gate-2: docs/gate-2-smoke-evidence is bind-mounted to
-// /screenshots inside the web-visual container — write directly there.
-const OUT = "/screenshots";
+// Phase-16 Gate-2: /screenshots → ./docs on the host (bind mount).
+// remote.ps1 `visual -Service gate-2-smoke` computes
+// $hostEvidenceDir = docs/gate-2-smoke-evidence and scp's that
+// folder back; write the PNGs into that folder so the pull lands.
+const OUT = "/screenshots/gate-2-smoke-evidence";
 
 interface SmokeFinding {
   item: string;
