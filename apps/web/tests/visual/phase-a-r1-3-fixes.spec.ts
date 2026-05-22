@@ -38,6 +38,34 @@ async function authedPage(browser: Browser): Promise<Page> {
 }
 test.afterAll(async () => { await authedContext?.close(); authedContext = null; });
 
+test.describe("R1.3 — B1 sticky navbar with scroll-aware shadow", () => {
+  test("nav has position: sticky and html[data-scrolled] toggles past 4px", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 600 });
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    // Sticky must be in the computed style — defended in styles.css.
+    const navPosition = await page.locator("nav.nav").first().evaluate(
+      (el: HTMLElement) => window.getComputedStyle(el).position,
+    );
+    expect(navPosition).toBe("sticky");
+    // At rest, html should NOT carry data-scrolled="true".
+    await expect.poll(async () =>
+      page.locator("html").getAttribute("data-scrolled"),
+    ).not.toBe("true");
+    // Scroll past 4px; the scroll listener should flip the attribute.
+    await page.evaluate(() => window.scrollTo(0, 200));
+    await expect.poll(async () =>
+      page.locator("html").getAttribute("data-scrolled"),
+      { timeout: 1000 },
+    ).toBe("true");
+    // Scroll back to top; attribute clears.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(async () =>
+      page.locator("html").getAttribute("data-scrolled"),
+      { timeout: 1000 },
+    ).not.toBe("true");
+  });
+});
+
 test.describe("R1.3 — B5 landing privacy leak", () => {
   test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
     const page = await authedPage(browser);

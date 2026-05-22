@@ -1325,6 +1325,19 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
 .nav[data-mode="auth_flow"] .nav-links,
 .nav[data-mode="auth_flow"] .nav-toggle { display: none; }
 
+/* Phase-A R1.3 B1 — scroll-aware nav depth. When AppShell's scroll
+   listener sets html[data-scrolled="true"], the nav gets a small
+   shadow + a slightly more opaque background so it doesn't visually
+   blend into the content scrolling below it. Transition keeps the
+   visual change from feeling abrupt at the 4px boundary. */
+.nav {
+  transition: box-shadow 180ms ease, background 180ms ease;
+}
+html[data-scrolled="true"] .nav {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: color-mix(in oklch, var(--bg) 92%, transparent) !important;
+}
+
 /* Phase-A R1.2: Breadcrumb row. 36px tall, sits between topbar and the
    workspace grid. Truncates to first › … › last-2 at <md via the
    component's logic; the … popover content is styled below. */

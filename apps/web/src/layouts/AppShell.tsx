@@ -47,6 +47,22 @@ export const AppShell: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   React.useEffect(() => { setSidebarOpen(false); }, [route, routeParam]);
 
+  // R1.3 B1 — sticky-navbar scroll-aware shadow. The nav has
+  // `position: sticky` already; what manual smoke flagged was that
+  // when scrolling past content the translucent nav blended into the
+  // page below. Toggle a data attribute on <html> when scrollY > 4 so
+  // CSS can boost the background opacity and add a small shadow,
+  // giving the nav clear depth without making it opaque.
+  React.useEffect(() => {
+    const onScroll = (): void => {
+      const scrolled = window.scrollY > 4;
+      document.documentElement.dataset.scrolled = scrolled ? "true" : "false";
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   // Auth gate (workspace + not authed → /login) + landing redirect
   // (landing + authed → /dashboard). Both run via the same effect to
   // keep the holding-skeleton render logic centralised.
