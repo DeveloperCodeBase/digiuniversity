@@ -24,35 +24,64 @@ type NavMode = "public" | "workspace" | "auth_flow";
 const navModeFor = (kind: RouteKind): NavMode =>
   kind === "WORKSPACE" ? "workspace" : kind === "AUTH_FLOW" ? "auth_flow" : "public";
 
+type SidebarPref = "open" | "closed";
+
+const readSidebarPref = (): SidebarPref => {
+  if (typeof window === "undefined") return "closed";
+  try {
+    return localStorage.getItem("digiu_sidebar_pref") === "open" ? "open" : "closed";
+  } catch { return "closed"; }
+};
+
+const writeSidebarPref = (pref: SidebarPref): void => {
+  try { localStorage.setItem("digiu_sidebar_pref", pref); } catch {}
+};
+
 export const AppShell: React.FC = () => {
   const { id: route, param: routeParam } = useCurrentRoute();
   const go = useGo();
   const auth = useAuth();
   const kind: RouteKind = getRouteKind(route);
   const isWorkspace = kind === "WORKSPACE";
-  // 1024px = tailwind `lg`. Below lg: sidebar is a Sheet drawer.
-  const isLg = useMediaQuery("(min-width: 1024px)");
 
   // R1.3 B5 — privacy: an authenticated visitor hitting the landing
   // (/ or /home) must NOT see any chrome rendered with their identity
-  // (e.g., the Nav user-menu showing their name) before the redirect
-  // takes effect. Gate the entire shell behind a skeleton until the
-  // navigate() lands. Home.tsx keeps its own useEffect as defence in
-  // depth but AppShell's gate is the primary mechanism now.
+  // before the redirect takes effect. Gate the shell behind a skeleton.
   const isLandingRoute = route === "" || route === "home";
   const redirectAuthedFromLanding = isLandingRoute && auth.isAuthenticated;
 
-  // Sidebar Sheet — workspace + <lg only. AppShell owns the open state;
-  // Nav calls onWorkspaceMenuClick to open. Closed on every navigation.
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  React.useEffect(() => { setSidebarOpen(false); }, [route, routeParam]);
+  // R1.3 D9 — sidebar is hamburger-toggle on every viewport. Sheet
+  // drawer at <3xl (slides from start edge = right under RTL). At
+  // ≥3xl + workspace + user pref="open", the sidebar pins inline
+  // beside content — the only "stays-open" case, for power users on
+  // big monitors. State is persisted as `digiu_sidebar_pref` in
+  // localStorage and survives across reloads.
+  const is3xl = useMediaQuery("(min-width: 1536px)");
+  const [sidebarPref, setSidebarPrefState] = React.useState<SidebarPref>(readSidebarPref);
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
+  const pinned = is3xl && isWorkspace && sidebarPref === "open";
 
-  // R1.3 B1 — sticky-navbar scroll-aware shadow. The nav has
-  // `position: sticky` already; what manual smoke flagged was that
-  // when scrolling past content the translucent nav blended into the
-  // page below. Toggle a data attribute on <html> when scrollY > 4 so
-  // CSS can boost the background opacity and add a small shadow,
-  // giving the nav clear depth without making it opaque.
+  // Mount + pref/viewport change: if pinned, render the sidebar open.
+  React.useEffect(() => {
+    if (pinned) setSidebarOpen(true);
+  }, [pinned]);
+
+  // Close transient drawer on every navigation — except when pinned
+  // (the 3xl exception keeps the sidebar visible across navigation).
+  React.useEffect(() => {
+    if (!pinned) setSidebarOpen(false);
+  }, [route, routeParam, pinned]);
+
+  const setSidebarOpenWithPersist = (next: boolean): void => {
+    setSidebarOpen(next);
+    const nextPref: SidebarPref = next ? "open" : "closed";
+    setSidebarPrefState(nextPref);
+    writeSidebarPref(nextPref);
+  };
+
+  // R1.3 B1 — sticky-navbar scroll-aware shadow. Toggle data-scrolled
+  // on <html> when scrollY > 4 so CSS can boost opacity + add depth
+  // without making the nav opaque.
   React.useEffect(() => {
     const onScroll = (): void => {
       const scrolled = window.scrollY > 4;
@@ -90,25 +119,23 @@ export const AppShell: React.FC = () => {
         current={route}
         go={go}
         mode={navMode}
-        onWorkspaceMenuClick={() => setSidebarOpen(true)}
+        onWorkspaceMenuClick={() => setSidebarOpenWithPersist(!sidebarOpen)}
       />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
         <main
           id="main-content"
           className={cn(
             "page-shell appshell-main",
-            // Leave room for the bottom nav on mobile (h-16 + safe-area).
             "pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0",
           )}
           tabIndex={-1}
           data-route-kind={kind}
         >
-          {/* Breadcrumb row — workspace routes only. PUBLIC + AUTH_FLOW
-              don't need a trail (the topbar's brand handles return-to-home). */}
+          {/* Breadcrumb row — workspace routes only. */}
           {isWorkspace ? <Breadcrumbs /> : null}
           {isWorkspace ? (
-            <div className="workspace-grid">
-              {isLg ? <RoleSideNav active={route} go={go} /> : null}
+            <div className="workspace-grid" data-sidebar-pinned={pinned ? "true" : "false"}>
+              {pinned ? <RoleSideNav active={route} go={go} /> : null}
               <div className="workspace-content"><Outlet /></div>
             </div>
           ) : (
@@ -116,12 +143,11 @@ export const AppShell: React.FC = () => {
           )}
         </main>
 
-        {/* Sidebar drawer at <lg. side="start" → right edge under RTL.
-            onCloseAutoFocus: Radix's default focus restore relies on tracking
-            the trigger element, but our trigger lives in Nav (not a Radix
-            DialogTrigger), so we restore focus manually via DOM lookup. */}
-        {isWorkspace && !isLg ? (
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        {/* Sidebar Sheet drawer — workspace mode, ANY viewport unless
+            pinned inline at ≥3xl. side="start" → right edge under RTL.
+            onCloseAutoFocus restores keyboard focus to the hamburger. */}
+        {isWorkspace && !pinned ? (
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpenWithPersist}>
             <SheetContent
               side="start"
               className="appshell-sidebar-drawer"

@@ -1282,23 +1282,25 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
    container that 5 pages still render directly (Dashboard, Analytics,
    Instructor, More, Roles); the inner duplicates are hidden via CSS
    below — R2 will physically remove the per-page wrappers. */
+/* Phase-A R1.3 D9 — workspace-grid is single-column by default at every
+   viewport. The sidebar is hamburger-toggled into a Sheet drawer. At
+   ≥3xl (1536px) + workspace + localStorage pref="open", AppShell sets
+   data-sidebar-pinned="true" and the grid becomes 280px + content,
+   rendering the sidebar inline beside the content (the only "stays
+   visible" exception, for power users on large monitors). */
 .workspace-grid {
   padding: 32px 40px;
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 1fr;
   gap: 32px;
   min-height: calc(100vh - 64px);
 }
-/* Phase-A R1.1: switch the grid at lg (1024px) to match tailwind's
-   token + AppShell's drawer breakpoint. Below lg, AppShell renders the
-   sidebar as a Sheet drawer instead of stacking it above the content
-   (which was the 981–1023px tablet-collapse bug). Above lg, the fixed
-   sidebar persists. */
-@media (max-width: 1023px) { .workspace-grid { grid-template-columns: 1fr; padding: 20px; } }
-/* Below lg the AppShell removes the inline RoleSideNav entirely (sidebar
-   moves into a Sheet drawer triggered by the topbar hamburger), so the
-   grid effectively becomes a single column of content. The above rule
-   handles it; this comment documents the intent. */
+@media (max-width: 1023px) { .workspace-grid { padding: 20px; } }
+@media (min-width: 1536px) {
+  .workspace-grid[data-sidebar-pinned="true"] {
+    grid-template-columns: 280px 1fr;
+  }
+}
 
 /* Phase-A R1.1: AppShell mobile/tablet sidebar Sheet drawer. The Sheet
    primitive supplies the chrome (overlay, focus trap, escape dismiss);
@@ -1324,6 +1326,13 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
 .nav[data-mode="workspace"] .nav-links { display: none; }
 .nav[data-mode="auth_flow"] .nav-links,
 .nav[data-mode="auth_flow"] .nav-toggle { display: none; }
+
+/* Phase-A R1.3 D9 — workspace hamburger is visible on EVERY viewport
+   (not just <lg). The button toggles the sidebar Sheet drawer or, at
+   ≥3xl, toggles the pinned-inline preference. The default `.nav-toggle`
+   rule above hides it at ≥1024px; this override re-enables it for
+   workspace mode at all sizes. Auth-flow keeps it hidden. */
+.nav[data-mode="workspace"] .nav-toggle { display: flex !important; }
 
 /* Phase-A R1.3 B1 — scroll-aware nav depth. When AppShell's scroll
    listener sets html[data-scrolled="true"], the nav gets a small

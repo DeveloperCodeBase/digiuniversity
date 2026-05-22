@@ -66,6 +66,79 @@ test.describe("R1.3 — B1 sticky navbar with scroll-aware shadow", () => {
   });
 });
 
+test.describe("R1.3 — B4 + D9 hamburger-toggle sidebar everywhere", () => {
+  test("B4: at 375px, hamburger opens the workspace drawer with sidebar items (not public nav-links)", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 375, height: 720 });
+    await page.goto("/dashboard");
+    // Drawer should be closed at mount.
+    await expect(page.locator("[aria-label='منوی workspace']")).toBeHidden();
+    // Tap hamburger.
+    await page.locator("button.nav-toggle").first().click();
+    // Drawer present + visible.
+    const drawer = page.locator("[aria-label='منوی workspace']");
+    await expect(drawer).toBeVisible();
+    // It contains role sidebar items (Persian labels from sidenav.tsx for student),
+    // NOT the public nav-links (which would show "خانه" / "کاتالوگ" without sidebar h6 sections).
+    await expect(drawer.locator(".side-nav")).toBeVisible();
+    // A representative student-sidebar label that is NOT in the public nav-links:
+    await expect(drawer.locator("text=کارنامه").first()).toBeVisible();
+  });
+
+  test("D9: at 1280 (lg) the workspace hamburger is also visible (not just <lg)", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/dashboard");
+    await expect(page.locator("button.nav-toggle").first()).toBeVisible();
+    // Sidebar is NOT pinned by default (no inline RoleSideNav next to content).
+    await expect(page.locator(".workspace-grid > .side-nav")).toHaveCount(0);
+  });
+
+  test("D9: localStorage `digiu_sidebar_pref` toggles on hamburger click", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.evaluate(() => localStorage.removeItem("digiu_sidebar_pref"));
+    await page.goto("/dashboard");
+    await page.locator("button.nav-toggle").first().click();
+    await expect.poll(async () =>
+      page.evaluate(() => localStorage.getItem("digiu_sidebar_pref")),
+    ).toBe("open");
+    // Close via Escape; pref persists as "closed".
+    await page.keyboard.press("Escape");
+    await expect.poll(async () =>
+      page.evaluate(() => localStorage.getItem("digiu_sidebar_pref")),
+    ).toBe("closed");
+  });
+
+  test("D9: at ≥3xl (1536) with localStorage pref='open', sidebar pins inline beside content", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 1536, height: 960 });
+    // Seed pref BEFORE the SPA mounts so AppShell reads it at first render.
+    await page.addInitScript(() => {
+      try { localStorage.setItem("digiu_sidebar_pref", "open"); } catch {}
+    });
+    await page.goto("/dashboard");
+    // Inline sidebar appears beside content (data-sidebar-pinned="true").
+    const grid = page.locator(".workspace-grid[data-sidebar-pinned='true']");
+    await expect(grid).toBeVisible();
+    await expect(grid.locator(".side-nav")).toBeVisible();
+    // The Sheet drawer should NOT render in pinned mode (pinned = the
+    // inline path; Sheet only renders when NOT pinned).
+    await expect(page.locator("[aria-label='منوی workspace']")).toHaveCount(0);
+  });
+
+  test("D9: at <3xl, even with pref='open', sidebar opens as Sheet drawer (not inline)", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.addInitScript(() => {
+      try { localStorage.setItem("digiu_sidebar_pref", "open"); } catch {}
+    });
+    await page.goto("/dashboard");
+    // No inline pinned grid at 1280 (below 1536).
+    await expect(page.locator(".workspace-grid[data-sidebar-pinned='true']")).toHaveCount(0);
+  });
+});
+
 test.describe("R1.3 — B5 landing privacy leak", () => {
   test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
     const page = await authedPage(browser);
