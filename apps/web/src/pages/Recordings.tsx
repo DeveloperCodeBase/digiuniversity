@@ -6,6 +6,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer } from "../shared";
 import { RECORDINGS as RECORDINGS_DATA, findCourse, findFaculty } from "../data.js";
+import { Button } from "../ui";
 
 export const RecordingsPage = ({ go }) => {
   return (
@@ -26,7 +27,7 @@ export const RecordingsPage = ({ go }) => {
                 <option>یادگیری ماشین</option>
                 <option>NLP پیشرفته</option>
               </select>
-              <button className="btn btn-outline" onClick={() => go("search")}><Icon name="search" size={14} />جستجو</button>
+              <Button variant="outline" onClick={() => go("search")}><Icon name="search" size={14} />جستجو</Button>
             </div>
           </div>
         </div>
@@ -82,13 +83,11 @@ export const RecordingsPage = ({ go }) => {
                 ["کوییز ۸ سوال", "check"],
                 ["FAQ", "chat"],
               ].map(([t, ic]) => (
-                <button
-                  key={t}
-                  className="btn btn-outline btn-sm"
+                <Button variant="outline" size="sm" key={t}
                   onClick={() => window.toast?.({ title: t, msg: "محتوای جلسه ۸ آماده‌ی نمایش است.", kind: "info" })}
                 >
                   <Icon name={ic} size={13} />{t}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

@@ -9,6 +9,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { toFa } from "../shared";
+import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard, Toggle } from "../components/widgets";
 import { EVENTS } from "../data.js";
@@ -25,7 +26,7 @@ export const AdminPage = ({ go }) => {
             </div>
             <div className="flex gap-2.5" >
               <span className="pill pill-violet"><span className="dot dot-live ms-1.5" ></span>SLA 99.94٪</span>
-              <button className="btn btn-primary" onClick={() => window.toast?.({ title: "گزارش تولید شد", msg: "فایل گزارش روزانه به ایمیل شما ارسال شد.", kind: "success" })}>گزارش روزانه</button>
+              <Button variant="primary" onClick={() => window.toast?.({ title: "گزارش تولید شد", msg: "فایل گزارش روزانه به ایمیل شما ارسال شد.", kind: "success" })}>گزارش روزانه</Button>
             </div>
           </div>
 
@@ -63,11 +64,9 @@ export const AdminPage = ({ go }) => {
                     <div style={{ fontSize: 12, color: "var(--fg-mute)", marginTop: 3 }}>{a.d}</div>
                     <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)"}}>{a.time}</div>
                   </div>
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => window.toast?.({ title: "در حال بررسی", msg: `«${a.t}» باز شد.`, kind: "info" })}
+                  <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "در حال بررسی", msg: `«${a.t}» باز شد.`, kind: "info" })}
                     aria-label={"بازبینی: " + a.t}
-                  >بازبینی</button>
+                  >بازبینی</Button>
                 </div>
               ))}
             </div>
@@ -117,12 +116,10 @@ export const AdminPage = ({ go }) => {
                         </td>
                         <td style={{ padding: "14px 18px", fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>{t}</td>
                         <td className="text-left"  style={{padding: "14px 18px"}}>
-                          <button
-                            className="btn btn-ghost btn-sm icon-btn"
-                            onClick={() => window.toast?.(`مدیریت کاربر: ${n}`)}
+                          <Button variant="ghost" size="sm" className="icon-btn" onClick={() => window.toast?.(`مدیریت کاربر: ${n}`)}
                             aria-label={"مدیریت کاربر " + n}
                             title="مدیریت کاربر"
-                          ><Icon name="settings" size={13} /></button>
+                          ><Icon name="settings" size={13} /></Button>
                         </td>
                       </tr>
                     ))}
@@ -163,7 +160,7 @@ export const AdminPage = ({ go }) => {
                 <span className="eyebrow">AI GOVERNANCE · حاکمیت</span>
                 <h3 className="h-3 mt-2.5" >سیاست‌ها و کنترل عامل‌های هوشمند</h3>
               </div>
-              <button className="btn btn-outline" onClick={() => go("settings")}>پیکربندی</button>
+              <Button variant="outline" onClick={() => go("settings")}>پیکربندی</Button>
             </div>
             <div className="grid grid-3">
               {[
@@ -202,7 +199,7 @@ export const ParentPage = ({ go }) => (
             <h1 className="mt-2.5" >سلام محمد، نسرین این هفته عملکرد خوبی داشته</h1>
             <p className="muted">۸ کلاس حضور · ۲ تمرین تحویل داده · میانگین تسلط ۸۲٪</p>
           </div>
-          <button className="btn btn-primary" onClick={() => go("messages")}><Icon name="chat" size={14} />تماس با مشاور</button>
+          <Button variant="primary" onClick={() => go("messages")}><Icon name="chat" size={14} />تماس با مشاور</Button>
         </div>
 
         {/* Child profile card */}
@@ -218,7 +215,7 @@ export const ParentPage = ({ go }) => (
                 <span className="pill pill-violet" style={{ fontSize: 10 }}>میانگین ۸۲٪</span>
               </div>
             </div>
-            <button className="btn btn-outline" onClick={() => go("profile")}>پروفایل کامل</button>
+            <Button variant="outline" onClick={() => go("profile")}>پروفایل کامل</Button>
           </div>
 
           <div className="stat-row mt-6" >
@@ -429,14 +426,12 @@ export const OfficeHoursPage = ({ go }) => {
               </label>
               <div className="flex justify-between items-center mt-4.5" >
                 <span style={{ fontSize: 12, color: "var(--fg-mute)" }}>تا ۲ ساعت قبل از جلسه قابل لغو</span>
-                <button
-                  className="btn btn-primary"
-                  disabled={selectedSlot === null}
+                <Button variant="primary" disabled={selectedSlot === null}
                   onClick={() => {
                     window.toast?.({ title: "جلسه ثبت شد", msg: `جلسه‌ی شما با دکتر عظیمی روز ${days[selectedDay].d} ساعت ${slots[selectedSlot].t} رزرو شد.`, kind: "success" });
                   }}
                   aria-label="رزرو جلسه"
-                >رزرو جلسه<Icon name="arrow" size={14} /></button>
+                >رزرو جلسه<Icon name="arrow" size={14} /></Button>
               </div>
             </div>
           </div>
@@ -507,14 +502,10 @@ export const EventsPage = ({ go }) => (
             </div>
           </div>
           <div className="flex gap-3 mt-7" >
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={() => window.toast?.({ title: "ثبت‌نام شد", msg: "ثبت‌نام شما در کنفرانس LLMs in Education انجام شد.", kind: "success" })}
-            >ثبت‌نام رایگان</button>
-            <button
-              className="btn btn-outline btn-lg"
-              onClick={() => { go("calendar"); window.toast?.("رویداد به تقویم اضافه شد"); }}
-            ><Icon name="calendar" size={14} />افزودن به تقویم</button>
+            <Button variant="primary" size="lg" onClick={() => window.toast?.({ title: "ثبت‌نام شد", msg: "ثبت‌نام شما در کنفرانس LLMs in Education انجام شد.", kind: "success" })}
+            >ثبت‌نام رایگان</Button>
+            <Button variant="outline" size="lg" onClick={() => { go("calendar"); window.toast?.("رویداد به تقویم اضافه شد"); }}
+            ><Icon name="calendar" size={14} />افزودن به تقویم</Button>
           </div>
         </div>
         <div className="rounded-2xl relative overflow-hidden p-6"  style={{aspectRatio: "4 / 5",
@@ -549,11 +540,9 @@ export const EventsPage = ({ go }) => (
             <div style={{ fontSize: 12, color: "var(--fg-mute)" }}>{e.by}</div>
             <div className="flex justify-between pt-3 mt-1"  style={{ borderTop: "1px solid var(--line)"}}>
               <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>{toFa(e.attendees)} نفر</span>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={() => window.toast?.({ title: "ثبت‌نام شد", msg: `ثبت‌نام در «${e.t}» انجام شد.`, kind: "success" })}
+              <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "ثبت‌نام شد", msg: `ثبت‌نام در «${e.t}» انجام شد.`, kind: "success" })}
                 aria-label={"ثبت‌نام در " + e.t}
-              >ثبت‌نام</button>
+              >ثبت‌نام</Button>
             </div>
           </div>
           );
@@ -633,7 +622,7 @@ export const AboutPage = ({ go }) => (
             <p className="mt-3.5"  style={{color: "var(--fg-mute)", fontSize: 14, lineHeight: 1.7}}>
               ۲۸ نفر تمام‌وقت، ۱۲ مشاور علمی، ۹۴ استاد در شبکه. متنوع از نظر تخصص، یکپارچه در ماموریت.
             </p>
-            <button className="btn btn-outline mt-6"  onClick={() => go("faculty")}>دیدن همه‌ی تیم</button>
+            <Button variant="outline" className="mt-6" onClick={() => go("faculty")}>دیدن همه‌ی تیم</Button>
           </div>
           <div className="grid gap-2"  style={{ gridTemplateColumns: "repeat(4, 1fr)"}}>
             {["AA","SM","MK","BF","RT","SR","AN","MK","JK","TT","NR","BN"].map((a, i) => (

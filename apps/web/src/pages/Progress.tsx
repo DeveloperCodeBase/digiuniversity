@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthContext";
 import { analyticsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
+import { Button } from "../ui";
 
 const BAND_COLOR = {
   low: { bg: "color-mix(in oklch, var(--accent) 14%, var(--bg))", fg: "var(--accent)" },
@@ -68,10 +69,10 @@ const SignInPrompt = ({ go }) => (
     >
       <Icon name="lock" size={28} />
       <h2 className="h-2 mt-4">برای دیدن داشبورد وارد شوید</h2>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );

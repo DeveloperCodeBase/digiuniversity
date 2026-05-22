@@ -16,6 +16,7 @@ import { assessmentsApi, submissionsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
+import { Button } from "../ui";
 
 const STATUS_LABEL = {
   draft: "پیش‌نویس",
@@ -38,10 +39,10 @@ const SignInPrompt = ({ go }) => (
     >
       <Icon name="lock" size={28} />
       <h2 className="h-2 mt-4">برای پاسخ به آزمون وارد شوید</h2>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );
@@ -160,10 +161,10 @@ const AssessmentLivePage = ({ go, assessmentId }) => {
 
   return (
     <main className="shell" style={{ paddingTop: 60, paddingBottom: 60 }}>
-      <button className="btn btn-outline" onClick={() => go("catalog")} style={{ marginBottom: 28 }}>
+      <Button variant="outline" onClick={() => go("catalog")} style={{ marginBottom: 28 }}>
         <Icon name="arrow" size={14} style={{ transform: "scaleX(-1)" }} />
         بازگشت به کاتالوگ
-      </button>
+      </Button>
 
       {loading && <p style={{ color: "var(--fg-mute)" }}>در حال بارگذاری...</p>}
       {error && (
@@ -310,20 +311,16 @@ const AssessmentLivePage = ({ go, assessmentId }) => {
 
           {!isFinal && assessment.questions && assessment.questions.length > 0 && (
             <div className="mt-9 flex gap-3 flex-wrap">
-              <button
-                className="btn btn-outline"
-                onClick={saveDraft}
+              <Button variant="outline" onClick={saveDraft}
                 disabled={savingDraft || pending}
               >
                 {savingDraft ? "..." : "ذخیره پیش‌نویس"}
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={finalize}
+              </Button>
+              <Button variant="primary" onClick={finalize}
                 disabled={pending || savingDraft}
               >
                 {pending ? "در حال ارسال..." : "ارسال نهایی"}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -340,13 +337,11 @@ const AssessmentLivePage = ({ go, assessmentId }) => {
                     این فقط یک پیشنهاد است — نمره نهایی نیاز به تأیید استاد دارد.
                   </p>
                 </div>
-                <button
-                  className="btn btn-outline"
-                  onClick={requestAiDraft}
+                <Button variant="outline" onClick={requestAiDraft}
                   disabled={aiPending}
                 >
                   {aiPending ? "..." : "درخواست پیش‌نویس"}
-                </button>
+                </Button>
               </div>
               {aiDraft && (
                 <div className="mt-4">

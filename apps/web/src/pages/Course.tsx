@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
+import { Button } from "../ui";
 
 export const CoursePage = ({ go }) => {
   const [activeModule, setActiveModule] = React.useState(2);
@@ -39,14 +40,14 @@ export const CoursePage = ({ go }) => {
                 <span className="pill">QTI · xAPI</span>
               </div>
               <div className="flex gap-3 mt-8" >
-                <button className="btn btn-primary btn-lg" onClick={() => go("classroom")}>
+                <Button variant="primary" size="lg" onClick={() => go("classroom")}>
                   <Icon name="play" size={14} />
                   ادامه از ماژول ۸
-                </button>
-                <button className="btn btn-outline btn-lg" onClick={() => go("library")}>
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => go("library")}>
                   <Icon name="folder" size={14} />
                   منابع درس
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -127,14 +128,12 @@ export const CoursePage = ({ go }) => {
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6 }}>
                 دستیار درس می‌داند کجای راه هستی. می‌توانی هر لحظه بپرسی، تمرین جبرانی بخواهی یا یک ویدئوی مرتبط را پیدا کنی.
               </p>
-              <button
-                className="btn btn-outline mt-4 justify-center"
-                 style={{width: "100%"}}
+              <Button variant="outline" className="mt-4 justify-center" style={{width: "100%"}}
                 onClick={() => go("tutor")}
               >
                 <Icon name="chat" size={14} />
                 شروع گفتگو
-              </button>
+              </Button>
             </div>
 
             <div className="card p-5"  style={{ background: "linear-gradient(135deg, color-mix(in oklch, var(--amber) 12%, var(--surface)), var(--surface))"}}>
@@ -144,9 +143,9 @@ export const CoursePage = ({ go }) => {
               </div>
               <div style={{ fontSize: 15, fontWeight: 600 }}>گواهی میانی · بهینه‌سازی</div>
               <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)"}}>۲ ماژول دیگر تا دریافت</div>
-              <button className="btn btn-amber btn-sm mt-4 justify-center"  style={{ width: "100%"}} onClick={() => go("credential")}>
+              <Button variant="secondary" size="sm" className="mt-4 justify-center" style={{ width: "100%"}} onClick={() => go("credential")}>
                 مشاهده پیش‌نمایش
-              </button>
+              </Button>
             </div>
           </aside>
         </div>

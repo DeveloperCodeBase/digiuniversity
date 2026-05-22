@@ -6,6 +6,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { Toggle, FormField } from "../components/widgets";
+import { Button } from "../ui";
 
 export const AuthoringPage = ({ go }) => {
   const [step, setStep] = React.useState("blueprint");
@@ -25,17 +26,11 @@ export const AuthoringPage = ({ go }) => {
             <h1 className="h-2">یادگیری تقویتی · سطح ارشد</h1>
           </div>
           <div className="flex gap-2" >
-            <button
-              className="btn btn-ghost"
-              onClick={() => { window.toast?.("پیش‌نمایش در پنجره جدید"); go("course"); }}
-            ><Icon name="eye" size={14} />پیش‌نمایش</button>
-            <button
-              className="btn btn-outline"
-              onClick={() => window.toast?.({ title: "پیش‌نویس ذخیره شد", msg: "تغییرات شما به‌صورت خودکار همگام شد.", kind: "success" })}
-            ><Icon name="download" size={14} />ذخیره پیش‌نویس</button>
-            <button
-              className="btn btn-primary"
-              onClick={async () => {
+            <Button variant="ghost" onClick={() => { window.toast?.("پیش‌نمایش در پنجره جدید"); go("course"); }}
+            ><Icon name="eye" size={14} />پیش‌نمایش</Button>
+            <Button variant="outline" onClick={() => window.toast?.({ title: "پیش‌نویس ذخیره شد", msg: "تغییرات شما به‌صورت خودکار همگام شد.", kind: "success" })}
+            ><Icon name="download" size={14} />ذخیره پیش‌نویس</Button>
+            <Button variant="primary" onClick={async () => {
                 const ok = await window.confirmAction?.({
                   title: "انتشار درس",
                   body: "پس از انتشار، درس به دانشجویان نمایش داده می‌شود. ادامه می‌دهید؟",
@@ -43,7 +38,7 @@ export const AuthoringPage = ({ go }) => {
                 });
                 if (ok) window.toast?.({ title: "درس منتشر شد", msg: "همه‌ی دانشجویان درس را در کاتالوگ می‌بینند.", kind: "success" });
               }}
-            >انتشار</button>
+            >انتشار</Button>
           </div>
         </div>
       </section>
@@ -92,14 +87,12 @@ export const AuthoringPage = ({ go }) => {
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
                 می‌توانم برای این درس، ۱۲ جلسه با اهداف یادگیری، نقشه‌ی مفهومی و کوییز پیشنهاد بدهم. شما نهایی می‌کنید.
               </p>
-              <button
-                className="btn btn-outline justify-center mt-3.5"
-                 style={{width: "100%"}}
+              <Button variant="outline" className="justify-center mt-3.5" style={{width: "100%"}}
                 onClick={() => window.toast?.({ title: "AI در حال تولید", msg: "ساختار اولیه‌ی درس در ۲۰ ثانیه آماده می‌شود…", kind: "info", ttl: 5000 })}
               >
                 <Icon name="bolt" size={13} />
                 تولید پیشنهاد اولیه
-              </button>
+              </Button>
             </div>
 
             <div className="card p-5" >
@@ -174,14 +167,12 @@ const BlueprintStep = () => (
             <span className="pill" style={{ fontSize: 10 }}>{["یادآوری", "فهم", "کاربرد", "تحلیل", "ساختن"][i]}</span>
           </div>
         ))}
-        <button
-          className="btn btn-ghost"
-          style={{ alignSelf: "flex-start" }}
+        <Button variant="ghost" style={{ alignSelf: "flex-start" }}
           onClick={() => window.toast?.({ title: "هدف یادگیری جدید", msg: "هدف به فهرست اضافه شد." })}
         >
           <Icon name="plus" size={14} />
           افزودن هدف یادگیری
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -212,22 +203,18 @@ const OutlineStep = () => (
           </div>
         </div>
         <div className="flex gap-1" >
-          <button
-            className="btn btn-ghost btn-sm icon-btn"
-            onClick={() => window.toast?.({ title: n, msg: t })}
+          <Button variant="ghost" size="sm" className="icon-btn" onClick={() => window.toast?.({ title: n, msg: t })}
             aria-label={"تنظیمات " + n}
             title="تنظیمات جلسه"
-          ><Icon name="settings" size={13} /></button>
+          ><Icon name="settings" size={13} /></Button>
         </div>
       </div>
     ))}
-    <button
-      className="btn btn-outline justify-center mt-3"
-       style={{width: "100%"}}
+    <Button variant="outline" className="justify-center mt-3" style={{width: "100%"}}
       onClick={() => window.toast?.({ title: "جلسه‌ی جدید اضافه شد", kind: "success" })}
     >
       <Icon name="plus" size={14} />افزودن جلسه
-    </button>
+    </Button>
   </div>
 );
 

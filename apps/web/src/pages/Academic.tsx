@@ -11,6 +11,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
+import { Button } from "../ui";
 import {
   TRANSCRIPT,
   JOBS,
@@ -31,14 +32,10 @@ export const TranscriptPage = ({ go }) => (
           <p className="lead mt-3" >نسرین رضوی · کد ۸۴-۰۲-۱۷ · کارشناسی ارشد علوم داده · ترم ۲</p>
         </div>
         <div className="flex gap-2" >
-          <button
-            className="btn btn-outline"
-            onClick={() => window.toast?.({ title: "در حال دانلود", msg: "فایل PDF کارنامه آماده‌سازی شد.", kind: "success" })}
-          ><Icon name="download" size={14} />PDF رسمی</button>
-          <button
-            className="btn btn-primary"
-            onClick={() => go("credential")}
-          ><Icon name="shield" size={14} />استعلام دیجیتال</button>
+          <Button variant="outline" onClick={() => window.toast?.({ title: "در حال دانلود", msg: "فایل PDF کارنامه آماده‌سازی شد.", kind: "success" })}
+          ><Icon name="download" size={14} />PDF رسمی</Button>
+          <Button variant="primary" onClick={() => go("credential")}
+          ><Icon name="shield" size={14} />استعلام دیجیتال</Button>
         </div>
       </div>
 
@@ -320,9 +317,7 @@ export const RegistrationPage = ({ go }) => {
               <div className="mt-3.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6}}>
                 حداقل ۹ واحد · حداکثر ۲۴ واحد در ترم تابستان
               </div>
-              <button
-                className="btn btn-primary justify-center mt-5"
-                 style={{width: "100%"}}
+              <Button variant="primary" className="justify-center mt-5" style={{width: "100%"}}
                 disabled={totalCredits < 3}
                 onClick={async () => {
                   const ok = await window.confirmAction?.({
@@ -335,7 +330,7 @@ export const RegistrationPage = ({ go }) => {
               >
                 نهایی‌سازی ثبت‌نام
                 <Icon name="arrow" size={14} />
-              </button>
+              </Button>
             </div>
 
             <div className="card p-5 mt-4" >
@@ -380,14 +375,10 @@ export const CareerPage = ({ go }) => (
           AI بر اساس مهارت‌ها، دوره‌ها، پروژه‌ها و علایق شما، موقعیت‌های متناسب پیدا می‌کند.
         </p>
         <div className="flex gap-3 mt-5" >
-          <button
-            className="btn btn-primary"
-            onClick={() => window.toast?.({ title: "۲۳ موقعیت مطابق پروفایل", msg: "نتایج زیر فهرست شده‌اند.", kind: "info" })}
-          >مشاهده تطابق‌ها<Icon name="arrow" size={14} /></button>
-          <button
-            className="btn btn-outline"
-            onClick={() => go("profile")}
-          >به‌روزرسانی رزومه</button>
+          <Button variant="primary" onClick={() => window.toast?.({ title: "۲۳ موقعیت مطابق پروفایل", msg: "نتایج زیر فهرست شده‌اند.", kind: "info" })}
+          >مشاهده تطابق‌ها<Icon name="arrow" size={14} /></Button>
+          <Button variant="outline" onClick={() => go("profile")}
+          >به‌روزرسانی رزومه</Button>
         </div>
       </div>
 
@@ -439,17 +430,13 @@ export const CareerPage = ({ go }) => (
                 </div>
               </div>
               <div className="flex flex-col gap-1.5" >
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={(e) => { e.stopPropagation(); window.toast?.({ title: "درخواست ارسال شد", msg: `درخواست شما برای موقعیت در ${j.co} ارسال شد.`, kind: "success" }); }}
+                <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); window.toast?.({ title: "درخواست ارسال شد", msg: `درخواست شما برای موقعیت در ${j.co} ارسال شد.`, kind: "success" }); }}
                   aria-label={"درخواست برای موقعیت در " + j.co}
-                >درخواست</button>
-                <button
-                  className="btn btn-ghost btn-sm icon-btn"
-                  onClick={(e) => { e.stopPropagation(); window.toast?.("به علاقه‌مندی‌ها افزوده شد"); }}
+                >درخواست</Button>
+                <Button variant="ghost" size="sm" className="icon-btn" onClick={(e) => { e.stopPropagation(); window.toast?.("به علاقه‌مندی‌ها افزوده شد"); }}
                   aria-label="افزودن به علاقه‌مندی‌ها"
                   title="ذخیره"
-                ><Icon name="star" size={13} /></button>
+                ><Icon name="star" size={13} /></Button>
               </div>
             </div>
             );
@@ -513,12 +500,10 @@ export const FinancialAidPage = ({ go }) => (
             <ul className="pe-4.5"  style={{ fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.7}}>
               {s.crit.map(c => <li key={c}>{c}</li>)}
             </ul>
-            <button
-              className="btn btn-primary justify-center mt-4"
-               style={{width: "100%"}}
+            <Button variant="primary" className="justify-center mt-4" style={{width: "100%"}}
               onClick={() => window.toast?.({ title: "درخواست ثبت شد", msg: `درخواست شما برای «${s.t}» در حال بررسی است.`, kind: "success" })}
               aria-label={"درخواست " + s.t}
-            >درخواست</button>
+            >درخواست</Button>
           </div>
           );
         })}
@@ -653,14 +638,12 @@ export const AlumniPage = ({ go }) => (
             <p className="m-0"  style={{fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.5}}>{a.role}</p>
             <div className="flex justify-between pt-3.5 mt-3.5"  style={{ borderTop: "1px solid var(--line)"}}>
               <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>{toFa(a.mentees)} mentee</span>
-              <button
-                className="btn btn-outline btn-sm"
-                disabled={!a.available}
+              <Button variant="outline" size="sm" disabled={!a.available}
                 onClick={() => window.toast?.({ title: "درخواست منتورینگ ارسال شد", msg: `درخواست شما به ${a.name} ارسال شد.`, kind: "success" })}
                 aria-label={"درخواست منتورینگ از " + a.name}
               >
                 {a.available ? "درخواست منتورینگ" : "ظرفیت تکمیل"}
-              </button>
+              </Button>
             </div>
           </div>
           );
@@ -703,14 +686,10 @@ export const HackathonsPage = ({ go }) => (
             <div><div className="mono" style={{ fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.08em" }}>ثبت‌نام تا</div><div className="mt-1"  style={{fontSize: 16, fontWeight: 600, color: "var(--gold)"}}>۲۰ شهریور</div></div>
           </div>
           <div className="flex gap-3 mt-6" >
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={() => window.toast?.({ title: "ثبت‌نام تیم", msg: "فرم ثبت‌نام تیم در حال بارگذاری است.", kind: "info" })}
-            >ثبت‌نام تیم</button>
-            <button
-              className="btn btn-outline btn-lg"
-              onClick={() => go("community")}
-            >یافتن هم‌تیمی</button>
+            <Button variant="primary" size="lg" onClick={() => window.toast?.({ title: "ثبت‌نام تیم", msg: "فرم ثبت‌نام تیم در حال بارگذاری است.", kind: "info" })}
+            >ثبت‌نام تیم</Button>
+            <Button variant="outline" size="lg" onClick={() => go("community")}
+            >یافتن هم‌تیمی</Button>
           </div>
         </div>
         <div className="rounded-2xl relative overflow-hidden p-6"  style={{aspectRatio: "1", background: "linear-gradient(135deg, oklch(0.3 0.14 25), oklch(0.5 0.18 30))"}}>
@@ -736,11 +715,9 @@ export const HackathonsPage = ({ go }) => (
             <div className="mt-2"  style={{fontSize: 13, color: c.c, fontWeight: 600}}>{c.prize}</div>
             <div className="flex justify-between pt-3.5 mt-3.5"  style={{ borderTop: "1px solid var(--line)"}}>
               <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>تا {c.deadline}</span>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => window.toast?.({ title: c.t, msg: `${c.typ} · جایزه: ${c.prize} · مهلت: ${c.deadline}` })}
+              <Button variant="ghost" size="sm" onClick={() => window.toast?.({ title: c.t, msg: `${c.typ} · جایزه: ${c.prize} · مهلت: ${c.deadline}` })}
                 aria-label={"جزئیات رقابت " + c.t}
-              >جزئیات ←</button>
+              >جزئیات ←</Button>
             </div>
           </div>
           );
@@ -819,9 +796,7 @@ export const HonorCodePage = ({ go }) => (
           هیچ تصمیمی نهایی نمی‌شود مگر با تأیید سه نفر از کمیته.
         </p>
         <div className="flex gap-3 mt-6" >
-          <button
-            className="btn btn-primary"
-            onClick={async () => {
+          <Button variant="primary" onClick={async () => {
               const ok = await window.confirmAction?.({
                 title: "گزارش محرمانه",
                 body: "این گزارش به کمیته‌ی صداقت علمی ارسال می‌شود. هویت شما محرمانه می‌ماند. ادامه می‌دهید؟",
@@ -830,10 +805,8 @@ export const HonorCodePage = ({ go }) => (
               });
               if (ok) window.toast?.({ title: "گزارش ارسال شد", msg: "کمیته ظرف ۷۲ ساعت رسیدگی می‌کند.", kind: "success" });
             }}
-          >گزارش محرمانه</button>
-          <button
-            className="btn btn-outline"
-            onClick={async () => {
+          >گزارش محرمانه</Button>
+          <Button variant="outline" onClick={async () => {
               const ok = await window.confirmAction?.({
                 title: "امضای منشور صداقت علمی",
                 body: "با امضای این منشور، تعهد می‌دهید همه‌ی اصول صداقت علمی را رعایت کنید.",
@@ -841,7 +814,7 @@ export const HonorCodePage = ({ go }) => (
               });
               if (ok) window.toast?.({ title: "منشور امضا شد", msg: "تاریخ امضا در پروفایل شما ثبت شد.", kind: "success" });
             }}
-          >امضای منشور</button>
+          >امضای منشور</Button>
         </div>
       </div>
     </section>

@@ -16,6 +16,7 @@ import { tutorApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
+import { Button } from "../ui";
 
 const SignInPrompt = ({ go }) => (
   <main className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
@@ -32,10 +33,10 @@ const SignInPrompt = ({ go }) => (
     >
       <Icon name="lock" size={28} />
       <h2 className="h-2 mt-4">برای استفاده از دستیار AI وارد شوید</h2>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );
@@ -232,10 +233,10 @@ const TutorPage = ({ go }) => {
             تحلیلی شما تولید می‌کند.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={newSession}>
+        <Button variant="primary" onClick={newSession}>
           <Icon name="sparkle" size={14} />
           گفت‌و‌گوی جدید
-        </button>
+        </Button>
       </header>
 
       <section
@@ -425,16 +426,14 @@ const TutorPage = ({ go }) => {
                 }}
                 disabled={pending}
               />
-              <button
-                className="btn btn-primary"
-                onClick={send}
+              <Button variant="primary" onClick={send}
                 disabled={pending || !input.trim()}
                 aria-label="ارسال پرسش به دستیار AI"
                 style={{ alignSelf: "stretch" }}
               >
                 ارسال
                 <Icon name="arrow" size={14} />
-              </button>
+              </Button>
             </div>
           )}
         </section>

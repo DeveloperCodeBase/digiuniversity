@@ -13,6 +13,7 @@ import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared";
 import { useAuth } from "../auth/AuthContext";
 import { AuthLoadingSkeleton } from "../components/AuthLoadingSkeleton";
 import type { Go } from "../router";
+import { Button } from "../ui";
 
 interface HomePageProps {
   go: Go;
@@ -68,14 +69,14 @@ export const HomePage = ({ go }: HomePageProps) => {
               از کلاس‌های زنده تا آزمایشگاه‌های مجازی، با همراهی هوش مصنوعی — همگام با استانداردهای جهانی LTI، xAPI، QTI و Open Badges 3.0. ۸ دانشکده، ۹۴ استاد، مدارک قابل راستی‌آزمایی.
             </p>
             <div className="hero-cta">
-              <button className="btn btn-primary btn-lg" onClick={() => go("admissions")}>
+              <Button variant="primary" size="lg" onClick={() => go("admissions")}>
                 درخواست پذیرش
                 <Icon name="arrow" size={16} />
-              </button>
-              <button className="btn btn-outline btn-lg" onClick={() => go("schools")}>
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => go("schools")}>
                 <Icon name="grad" size={16} />
                 دانشکده‌ها و برنامه‌ها
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -290,10 +291,10 @@ export const HomePage = ({ go }: HomePageProps) => {
               <span className="eyebrow">CATALOG</span>
               <h2 className="h-1 mt-4" >دروسی که با تو رشد می‌کنند</h2>
             </div>
-            <button className="btn btn-outline" onClick={() => go("programs")}>
+            <Button variant="outline" onClick={() => go("programs")}>
               همه‌ی دروس
               <Icon name="arrow" size={14} />
-            </button>
+            </Button>
           </div>
 
           <Stagger className="grid grid-3">
@@ -429,14 +430,14 @@ export const HomePage = ({ go }: HomePageProps) => {
                 در کمتر از ۳۰ روز، اولین ترم آنلاین خود را با کلاس زنده، ضبط هوشمند، آزمون تطبیقی و گواهی دیجیتال اجرا کنید.
               </p>
               <div className="flex gap-3 mt-8" >
-                <button className="btn btn-primary btn-lg" onClick={() => go("admissions")}>
+                <Button variant="primary" size="lg" onClick={() => go("admissions")}>
                   درخواست دموی نهادی
                   <Icon name="arrow" size={16} />
-                </button>
-                <button className="btn btn-outline btn-lg">
+                </Button>
+                <Button variant="outline" size="lg">
                   <Icon name="download" size={16} />
                   دانلود پروپوزال
-                </button>
+                </Button>
               </div>
             </div>
             <div className="flex flex-col gap-2.5" >
@@ -752,10 +753,10 @@ const FacultyShowcase = ({ go }) => (
         ))}
       </div>
       <div className="faculty-cta">
-        <button className="btn btn-outline" onClick={() => go("schools")}>
+        <Button variant="outline" onClick={() => go("schools")}>
           مشاهده همه‌ی استادان
           <Icon name="arrow" size={14} />
-        </button>
+        </Button>
       </div>
     </div>
   </section>
@@ -807,10 +808,10 @@ const CatalogTeaser = ({ go }) => (
         ))}
       </div>
       <div className="catalog-teaser-cta">
-        <button className="btn btn-outline" onClick={() => go("catalog")}>
+        <Button variant="outline" onClick={() => go("catalog")}>
           همه‌ی ۲۴۸ برنامه
           <Icon name="arrow" size={14} />
-        </button>
+        </Button>
       </div>
     </div>
   </section>
@@ -879,20 +880,16 @@ const Testimonials = ({ go }) => (
         ))}
       </div>
       <div className="testimonials-cta-row">
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={() => go("admissions")}
+        <Button variant="primary" size="lg" onClick={() => go("admissions")}
         >
           شروع رایگان
           <Icon name="arrow" size={16} />
-        </button>
-        <button
-          className="btn btn-outline btn-lg"
-          onClick={() => go("programs")}
+        </Button>
+        <Button variant="outline" size="lg" onClick={() => go("programs")}
         >
           مشاهده برنامه‌ها
           <Icon name="grad" size={16} />
-        </button>
+        </Button>
       </div>
     </div>
   </section>

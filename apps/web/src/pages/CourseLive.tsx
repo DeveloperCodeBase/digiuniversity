@@ -6,6 +6,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { useAuth } from "../auth/AuthContext";
+import { Button } from "../ui";
 import {
   assessmentsApi,
   catalogApi,
@@ -31,10 +32,10 @@ const SignInPrompt = ({ go }) => (
     >
       <Icon name="lock" size={28} />
       <h2 className="h-2 mt-4">برای دیدن این درس وارد شوید</h2>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );
@@ -144,14 +145,12 @@ const CourseLivePage = ({ go, courseId }) => {
 
   return (
     <main data-screen-label="درس زنده" className="shell" style={{ paddingTop: 60, paddingBottom: 60 }}>
-      <button
-        className="btn btn-outline"
-        style={{ marginBottom: 28 }}
+      <Button variant="outline" style={{ marginBottom: 28 }}
         onClick={() => go("catalog")}
       >
         <Icon name="arrow" size={14} style={{ transform: "scaleX(-1)" }} />
         بازگشت به کاتالوگ
-      </button>
+      </Button>
 
       {loading && (
         <p style={{ color: "var(--fg-mute)" }}>در حال بارگذاری از API...</p>
@@ -186,10 +185,10 @@ const CourseLivePage = ({ go, courseId }) => {
           </div>
 
           <div className="mt-7 flex gap-3 flex-wrap items-center">
-            <button className="btn btn-outline" onClick={() => go("tutor")}>
+            <Button variant="outline" onClick={() => go("tutor")}>
               <Icon name="sparkle" size={14} />
               پرسش از دستیار AI
-            </button>
+            </Button>
             {enrolled ? (
               <div
                 className="rounded-lg"
@@ -206,13 +205,11 @@ const CourseLivePage = ({ go, courseId }) => {
                 در این درس ثبت‌نام کرده‌اید
               </div>
             ) : (
-              <button
-                className="btn btn-primary"
-                disabled={enrolling}
+              <Button variant="primary" disabled={enrolling}
                 onClick={enrol}
               >
                 {enrolling ? "در حال ثبت‌نام..." : "ثبت‌نام در این درس"}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -265,21 +262,17 @@ const CourseLivePage = ({ go, courseId }) => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button
-                            className="btn btn-primary"
-                            disabled={isJoining}
+                          <Button variant="primary" disabled={isJoining}
                             onClick={() => handleJoin(s.id)}
                           >
                             {isJoining ? "..." : "ورود به کلاس"}
-                          </button>
+                          </Button>
                           {hasRole("admin", "instructor") && (
-                            <button
-                              className="btn btn-outline"
-                              disabled={isAnalyzing}
+                            <Button variant="outline" disabled={isAnalyzing}
                               onClick={() => handleAnalyze(s.id, "analyze")}
                             >
                               {isAnalyzing ? "در حال تحلیل..." : "تحلیل AI"}
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -386,12 +379,10 @@ const CourseLivePage = ({ go, courseId }) => {
                         <span className="pill" style={{ fontSize: 11 }}>{a.status}</span>
                       </div>
                     </div>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => go("assessment-live", a.id)}
+                    <Button variant="primary" onClick={() => go("assessment-live", a.id)}
                     >
                       {a.kind === "quiz" ? "شروع آزمون" : "مشاهده تکلیف"}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>

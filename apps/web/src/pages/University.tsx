@@ -12,6 +12,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { SCHOOLS as SCHOOLS_DATA, PROGRAMS, LABS as LABS_DATA, DEGREE_LEVELS } from "../data.js";
+import { Button } from "../ui";
 
 // Compose page-shape from data: include 3 featured programs per school.
 const SCHOOLS = SCHOOLS_DATA.map((s) => ({
@@ -77,7 +78,7 @@ export const SchoolsPage = ({ go }) => {
                   <span><strong style={{ color: "var(--fg)", fontWeight: 600 }}>{toFa(s.students)}</strong> دانشجو</span>
                   <span><strong style={{ color: "var(--fg)", fontWeight: 600 }}>{toFa(s.labs)}</strong> آزمایشگاه</span>
                 </div>
-                <button className="btn btn-ghost btn-sm">مشاهده ←</button>
+                <Button variant="ghost" size="sm">مشاهده ←</Button>
               </div>
             </div>
           ))}
@@ -623,7 +624,7 @@ export const ResearchPage = ({ go }) => (
                 <span className={"pill " + (m.s === "done" ? "pill-cyan" : m.s === "current" ? "pill-violet" : "")} style={{ fontSize: 9 }}>
                   {m.s === "done" ? "تکمیل" : m.s === "current" ? "فعال" : "آینده"}
                 </span>
-                <button className="btn btn-ghost btn-sm"><Icon name="arrow" size={13} /></button>
+                <Button variant="ghost" size="sm"><Icon name="arrow" size={13} /></Button>
               </div>
             ))}
           </div>
@@ -670,9 +671,9 @@ export const ResearchPage = ({ go }) => (
             <p className="mt-2.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.6}}>
               عضو گروه «زبان‌شناسی محاسباتی فارسی» — ۱۲ پژوهشگر فعال، جلسه‌ی هفتگی پنج‌شنبه‌ها.
             </p>
-            <button className="btn btn-outline justify-center mt-3.5"  style={{width: "100%", fontSize: 12}}>
+            <Button variant="outline" className="justify-center mt-3.5" style={{width: "100%", fontSize: 12}}>
               <Icon name="users" size={13} />ورود به فضای گروه
-            </button>
+            </Button>
           </div>
         </aside>
       </div>

@@ -10,6 +10,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
+import { Button } from "../ui";
 import {
   NOTIFICATIONS,
   CONVERSATIONS as CONVERSATIONS_DATA,
@@ -31,11 +32,9 @@ export const NotificationsPage = ({ go }) => {
             <p className="lead mt-3" >۳ اعلان جدید · ۴۲ اعلان در ۳۰ روز اخیر</p>
           </div>
           <div className="flex gap-2" >
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={() => window.toast?.({ title: "علامت‌گذاری شد", msg: "همه‌ی اعلان‌ها به‌عنوان خوانده‌شده ذخیره شدند.", kind: "success" })}
-            >علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
-            <button className="btn btn-outline btn-sm" onClick={() => go("settings")}><Icon name="settings" size={13} />تنظیمات</button>
+            <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "علامت‌گذاری شد", msg: "همه‌ی اعلان‌ها به‌عنوان خوانده‌شده ذخیره شدند.", kind: "success" })}
+            >علامت‌گذاری همه به‌عنوان خوانده‌شده</Button>
+            <Button variant="outline" size="sm" onClick={() => go("settings")}><Icon name="settings" size={13} />تنظیمات</Button>
           </div>
         </div>
 
@@ -228,9 +227,9 @@ export const MessagesPage = ({ go }) => {
               aria-label="متن پیام"
                style={{ padding: "10px 14px", background: "var(--bg)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}}
             />
-            <button type="submit" className="btn btn-primary p-3"  style={{minWidth: 0}} disabled={!draft.trim()} aria-label="ارسال پیام">
+            <Button variant="primary" className="p-3" type="submit"  style={{minWidth: 0}} disabled={!draft.trim()} aria-label="ارسال پیام">
               <Icon name="send" size={15} />
-            </button>
+            </Button>
           </form>
         </section>
       </div>
@@ -309,9 +308,7 @@ export const BookmarksPage = ({ go }) => {
               </li>
             ))}
             <li className="mt-2" >
-              <button
-                className="btn btn-outline btn-sm justify-center"
-                 style={{width: "100%"}}
+              <Button variant="outline" size="sm" className="justify-center" style={{width: "100%"}}
                 onClick={async () => {
                   const ok = await window.confirmAction?.({
                     title: "مجموعه جدید",
@@ -322,7 +319,7 @@ export const BookmarksPage = ({ go }) => {
                 }}
               >
                 <Icon name="plus" size={13} />مجموعه جدید
-              </button>
+              </Button>
             </li>
           </ul>
         </aside>
@@ -340,12 +337,10 @@ export const BookmarksPage = ({ go }) => {
               </div>
               <div className="flex flex-col items-end gap-2" >
                 <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)" }}>{s.saved}</span>
-                <button
-                  className="btn btn-ghost btn-sm icon-btn"
-                  onClick={(e) => { e.stopPropagation(); window.toast?.("از علاقه‌مندی‌ها حذف شد"); }}
+                <Button variant="ghost" size="sm" className="icon-btn" onClick={(e) => { e.stopPropagation(); window.toast?.("از علاقه‌مندی‌ها حذف شد"); }}
                   aria-label={"حذف از علاقه‌مندی‌ها: " + s.title}
                   title="حذف از علاقه‌مندی‌ها"
-                ><Icon name="star" size={13} /></button>
+                ><Icon name="star" size={13} /></Button>
               </div>
             </div>
           ))}
@@ -517,7 +512,7 @@ export const SubmissionPage = ({ go }) => {
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600 }}>فایل‌ها را اینجا رها کنید</div>
                   <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)"}}>یا کلیک کنید · حداکثر ۵۰MB · ipynb, py, pdf</div>
-                  <button className="btn btn-outline mt-5"  onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}><Icon name="folder" size={13} />انتخاب فایل</button>
+                  <Button variant="outline" className="mt-5" onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}><Icon name="folder" size={13} />انتخاب فایل</Button>
                 </div>
 
                 <div className="mono mt-7 mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>فایل‌های آپلود شده</div>
@@ -533,12 +528,10 @@ export const SubmissionPage = ({ go }) => {
                       <div className="mt-0.5"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>{f.size}</div>
                     </div>
                     <span className="pill pill-cyan" style={{ fontSize: 9 }}>آپلود شد</span>
-                    <button
-                      className="btn btn-ghost btn-sm icon-btn"
-                      onClick={() => window.toast?.({ title: "حذف فایل", msg: f.name + " حذف شد." })}
+                    <Button variant="ghost" size="sm" className="icon-btn" onClick={() => window.toast?.({ title: "حذف فایل", msg: f.name + " حذف شد." })}
                       aria-label={"حذف فایل " + f.name}
                       title="حذف"
-                    ><Icon name="end" size={13} /></button>
+                    ><Icon name="end" size={13} /></Button>
                   </div>
                 ))}
 
@@ -549,9 +542,7 @@ export const SubmissionPage = ({ go }) => {
 
                 <div className="flex justify-between items-center mt-6 pt-6"  style={{ borderTop: "1px solid var(--line)"}}>
                   <span style={{ fontSize: 12, color: "var(--fg-mute)" }}>قبل از تحویل، AI نسخه‌ی شما را برای تشابه احتمالی بررسی می‌کند.</span>
-                  <button
-                    className="btn btn-primary"
-                    onClick={async () => {
+                  <Button variant="primary" onClick={async () => {
                       const ok = await window.confirmAction?.({
                         title: "تحویل نهایی تمرین",
                         body: "پس از تحویل، امکان تغییر فایل‌ها وجود ندارد. ادامه می‌دهید؟",
@@ -559,7 +550,7 @@ export const SubmissionPage = ({ go }) => {
                       });
                       if (ok) window.toast?.({ title: "تحویل شد", msg: "تمرین شما برای ارزیابی ارسال شد.", kind: "success" });
                     }}
-                  >تحویل نهایی<Icon name="check" size={14} stroke={3} /></button>
+                  >تحویل نهایی<Icon name="check" size={14} stroke={3} /></Button>
                 </div>
               </div>
             )}
@@ -619,13 +610,11 @@ export const SubmissionPage = ({ go }) => {
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6 }}>
                 می‌توانم درباره‌ی اصول مومنتوم توضیح بدهم، اما در حین این تمرین پاسخ کد را به شما نمی‌دهم.
               </p>
-              <button
-                className="btn btn-outline justify-center mt-3"
-                 style={{width: "100%", fontSize: 12}}
+              <Button variant="outline" className="justify-center mt-3" style={{width: "100%", fontSize: 12}}
                 onClick={() => go("classroom")}
               >
                 <Icon name="chat" size={13} />شروع گفتگو
-              </button>
+              </Button>
             </div>
 
             <div className="card p-5" >
@@ -675,14 +664,12 @@ export const ProfilePage = ({ go }) => (
           </div>
         </div>
         <div className="flex gap-2" >
-          <button
-            className="btn btn-outline"
-            onClick={() => {
+          <Button variant="outline" onClick={() => {
               if (navigator.clipboard) navigator.clipboard.writeText("https://digiu.edu/u/nasrin").catch(() => {});
               window.toast?.({ title: "لینک کپی شد", msg: "digiu.edu/u/nasrin", kind: "success" });
             }}
-          ><Icon name="share" size={14} />اشتراک</button>
-          <button className="btn btn-primary" onClick={() => go("settings")}><Icon name="settings" size={14} />ویرایش</button>
+          ><Icon name="share" size={14} />اشتراک</Button>
+          <Button variant="primary" onClick={() => go("settings")}><Icon name="settings" size={14} />ویرایش</Button>
         </div>
       </div>
 
@@ -779,16 +766,14 @@ export const ProfilePage = ({ go }) => (
           <div className="card p-5"  style={{ background: "linear-gradient(135deg, var(--surface), var(--accent-soft))"}}>
             <div className="mono" style={{ color: "var(--accent)", fontSize: 11, letterSpacing: "0.08em" }}>پروفایل عمومی</div>
             <div className="mt-2 text-left"  style={{fontFamily: "var(--f-mono)", fontSize: 12, direction: "ltr"}}>digiu.edu/u/nasrin</div>
-            <button
-              className="btn btn-outline justify-center mt-3.5"
-               style={{width: "100%", fontSize: 12}}
+            <Button variant="outline" className="justify-center mt-3.5" style={{width: "100%", fontSize: 12}}
               onClick={() => {
                 if (navigator.clipboard) navigator.clipboard.writeText("https://digiu.edu/u/nasrin").catch(() => {});
                 window.toast?.({ title: "لینک کپی شد", msg: "digiu.edu/u/nasrin", kind: "success" });
               }}
             >
               <Icon name="share" size={12} />کپی لینک
-            </button>
+            </Button>
           </div>
         </aside>
       </div>

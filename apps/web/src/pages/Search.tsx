@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer } from "../shared";
+import { Button } from "../ui";
 
 export const SearchPage = ({ go }) => {
   const [query, setQuery] = React.useState("گرادیان نزولی با مومنتوم");
@@ -102,16 +103,12 @@ export const SearchPage = ({ go }) => {
                 </div>
               </div>
               <div className="flex flex-col gap-1.5" >
-                <button
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => go("recordings")}
+                <Button variant="ghost" size="sm" onClick={() => go("recordings")}
                   aria-label={"پخش " + r.title}
-                ><Icon name="play" size={13} /> پخش</button>
-                <button
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => window.toast?.({ title: "متن کامل", msg: r.excerpt })}
+                ><Icon name="play" size={13} /> پخش</Button>
+                <Button variant="ghost" size="sm" onClick={() => window.toast?.({ title: "متن کامل", msg: r.excerpt })}
                   aria-label={"متن " + r.title}
-                ><Icon name="file" size={13} /> متن</button>
+                ><Icon name="file" size={13} /> متن</Button>
               </div>
             </div>
           ))}

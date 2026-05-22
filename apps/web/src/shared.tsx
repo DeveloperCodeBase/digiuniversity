@@ -11,7 +11,7 @@ import React from "react";
 import { Icon } from "./icons";
 import { useRole, ROLES, type RoleId, type Role } from "./role";
 import { useAuth, type AuthContextValue } from "./auth/AuthContext";
-import { useTheme } from "./ui";
+import { Button, useTheme } from "./ui";
 import type { Go } from "./router";
 
 // (Window.toast / Window.confirmAction / Window.openCommandPalette
@@ -285,8 +285,8 @@ const NotificationsDropdown = ({ go }: NotificationsDropdownProps): React.ReactE
       ))}
     </div>
     <div className="dropdown-foot">
-      <button className="btn btn-ghost btn-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
-      <button className="btn btn-outline btn-sm" onClick={() => go("inbox")}>صندوق کامل</button>
+      <Button variant="ghost" size="sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</Button>
+      <Button variant="outline" size="sm" onClick={() => go("inbox")}>صندوق کامل</Button>
     </div>
   </div>
 );

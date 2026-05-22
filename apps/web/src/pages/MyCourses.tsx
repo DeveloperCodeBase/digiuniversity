@@ -14,6 +14,7 @@ import { enrollmentsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
+import { Button } from "../ui";
 
 const STATUS_LABEL = {
   active: "فعال",
@@ -44,10 +45,10 @@ const SignInPrompt = ({ go }) => (
     >
       <Icon name="lock" size={28} />
       <h2 className="h-2 mt-4">برای دیدن دوره‌های خود وارد شوید</h2>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );
@@ -144,10 +145,10 @@ const MyCoursesPage = ({ go }) => {
               }}
             >
               <p style={{ color: "var(--fg-mute)" }}>هنوز در هیچ دوره‌ای ثبت‌نام نکرده‌اید.</p>
-              <button className="btn btn-primary mt-5" onClick={() => go("catalog")}>
+              <Button variant="primary" className="mt-5" onClick={() => go("catalog")}>
                 مشاهده کاتالوگ
                 <Icon name="arrow" size={14} />
-              </button>
+              </Button>
             </div>
           ) : (
             <div
@@ -202,12 +203,10 @@ const MyCoursesPage = ({ go }) => {
                       {e.cohort?.name ? " · گروه: " + e.cohort.name : ""}
                     </div>
                     <div className="flex gap-2" style={{ marginTop: "auto" }}>
-                      <button
-                        className="btn btn-outline flex-1 justify-center"
-                        onClick={() => go("course-live", e.courseId)}
+                      <Button variant="outline" className="flex-1 justify-center" onClick={() => go("course-live", e.courseId)}
                       >
                         مشاهده درس
-                      </button>
+                      </Button>
                       {e.status === "active" && (
                         <button
                           className="btn flex-1 justify-center"

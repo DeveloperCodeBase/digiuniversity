@@ -15,6 +15,7 @@ import { toFa } from "../shared";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client.js";
 import type { Go } from "../router";
+import { Button } from "../ui";
 
 // Map API role names → local RoleProvider role IDs. The seed gives the
 // admin user the "admin" role; self-registered accounts get "student".
@@ -69,10 +70,10 @@ interface SocialBtnProps {
   label: string;
 }
 const SocialBtn = ({ icon, label }: SocialBtnProps): React.ReactElement => (
-  <button className="btn btn-outline justify-center flex-1"  style={{ padding: "12px 14px"}}>
+  <Button variant="outline" className="justify-center flex-1" style={{ padding: "12px 14px"}}>
     <span className="rounded grid"  style={{width: 18, height: 18, background: "var(--fg)", color: "var(--bg)", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700}}>{icon}</span>
     {label}
-  </button>
+  </Button>
 );
 
 // =====================================================
@@ -335,10 +336,10 @@ export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {
           مرا به خاطر بسپار · احراز دومرحله‌ای فعال
         </label>
 
-        <button type="submit" disabled={pending} className="btn btn-primary btn-lg mt-4 justify-center" >
+        <Button variant="primary" size="lg" className="mt-4 justify-center" type="submit" disabled={pending} >
           {pending ? "در حال ورود..." : "ورود به حساب"}
           {!pending && <Icon name="arrow" size={16} />}
-        </button>
+        </Button>
       </form>
 
       {/* OR divider */}
@@ -487,10 +488,10 @@ export const RegisterPage = ({ go }: AuthPageProps): React.ReactElement => {
           {" "}موافق هستم.
         </label>
 
-        <button type="submit" className="btn btn-primary btn-lg mt-3 justify-center" >
+        <Button variant="primary" size="lg" className="mt-3 justify-center" type="submit" >
           ساخت حساب و ادامه
           <Icon name="arrow" size={16} />
-        </button>
+        </Button>
       </form>
 
       <div className="mt-6 text-center"  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
@@ -565,10 +566,10 @@ export const ForgotPage = ({ go }: AuthPageProps): React.ReactElement => (
   >
     <form className="flex flex-col gap-3.5" onSubmit={(e) => { e.preventDefault(); }} >
       <AuthField label="ایمیل ثبت‌شده" placeholder="nasrin@example.com" icon="user" />
-      <button type="submit" className="btn btn-primary btn-lg mt-3.5 justify-center" >
+      <Button variant="primary" size="lg" className="mt-3.5 justify-center" type="submit" >
         ارسال لینک بازیابی
         <Icon name="send" size={16} />
-      </button>
+      </Button>
     </form>
     <div className="mt-7 p-4 rounded-xl"  style={{ background: "var(--navy-soft)", fontSize: 12, color: "var(--navy)", lineHeight: 1.6}}>
       <strong>امن:</strong> لینک‌های بازیابی فقط ۱۵ دقیقه اعتبار دارند و فقط یک بار قابل استفاده‌اند. در صورت سواستفاده، فوراً به امنیت گزارش می‌شود.
@@ -706,10 +707,10 @@ export const VerifyEmailPage = ({ go }: AuthPageProps): React.ReactElement => {
           ))}
         </div>
 
-        <button type="submit" className="btn btn-primary btn-lg justify-center"  style={{width: "100%"}}>
+        <Button variant="primary" size="lg" className="justify-center" type="submit"  style={{width: "100%"}}>
           تأیید و ادامه
           <Icon name="arrow" size={16} />
-        </button>
+        </Button>
       </form>
 
       <div className="mt-6 text-center"  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
@@ -800,10 +801,10 @@ export const TwoFactorPage = ({ go }: AuthPageProps): React.ReactElement => {
       <div className="mono mb-2.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>گام ۲ · کد ۶ رقمی نشان داده شده</div>
       <div className="flex gap-2.5 mb-7" >
         <input className="flex-1 text-center rounded-xl" placeholder="۱۲۳۴۵۶"  style={{ padding: "14px 18px", fontFamily: "var(--f-mono)", fontSize: 18, letterSpacing: "0.3em", background: "var(--surface)", border: "1px solid var(--line-2)"}} />
-        <button className="btn btn-primary btn-lg" onClick={() => go("onboarding")}>
+        <Button variant="primary" size="lg" onClick={() => go("onboarding")}>
           فعال‌سازی
           <Icon name="check" size={16} stroke={3} />
-        </button>
+        </Button>
       </div>
 
       <button className="cursor-pointer" onClick={() => go("onboarding")}  style={{background: "none", border: "none", color: "var(--fg-mute)", fontSize: 13, fontFamily: "inherit"}}>
@@ -914,10 +915,10 @@ const OnboardLevel = ({ onNext }: OnboardStepProps): React.ReactElement => {
           </button>
         ))}
       </div>
-      <button onClick={onNext} className="btn btn-primary btn-lg mt-8 justify-center"  style={{ width: "100%"}}>
+      <Button variant="primary" size="lg" className="mt-8 justify-center" onClick={onNext}  style={{ width: "100%"}}>
         ادامه
         <Icon name="arrow" size={16} />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -957,10 +958,10 @@ const OnboardInterests = ({ onNext }: OnboardStepProps): React.ReactElement => {
       </div>
       <div className="flex justify-between items-center" >
         <span style={{ fontSize: 13, color: "var(--fg-mute)" }}>{toFa(selected.length)} انتخاب شده</span>
-        <button onClick={onNext} disabled={selected.length < 3} className="btn btn-primary btn-lg" style={{ opacity: selected.length >= 3 ? 1 : 0.5 }}>
+        <Button variant="primary" size="lg" onClick={onNext} disabled={selected.length < 3} style={{ opacity: selected.length >= 3 ? 1 : 0.5 }}>
           ادامه
           <Icon name="arrow" size={16} />
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -996,10 +997,10 @@ const OnboardGoals = ({ onNext }: OnboardStepProps): React.ReactElement => {
           </button>
         ))}
       </div>
-      <button onClick={onNext} className="btn btn-primary btn-lg mt-8 justify-center"  style={{ width: "100%"}}>
+      <Button variant="primary" size="lg" className="mt-8 justify-center" onClick={onNext}  style={{ width: "100%"}}>
         ادامه
         <Icon name="arrow" size={16} />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -1023,10 +1024,10 @@ const OnboardReady = ({ onNext, role }: OnboardReadyProps): React.ReactElement =
       <h3 style={{ fontSize: 17 }}>مبانی یادگیری ماشین — CS-410</h3>
       <div className="mt-1.5"  style={{fontSize: 13, color: "var(--fg-mute)"}}>دکتر آرش عظیمی · ۱۲ هفته · با تسلط ۹۲٪ احتمال موفقیت</div>
     </div>
-    <button onClick={onNext} className="btn btn-primary btn-lg mt-8" >
+    <Button variant="primary" size="lg" className="mt-8" onClick={onNext} >
       شروع یادگیری
       <Icon name="arrow" size={16} />
-    </button>
+    </Button>
   </div>
 );
 

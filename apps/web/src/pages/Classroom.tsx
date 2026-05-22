@@ -350,18 +350,18 @@ export const ClassroomPage = ({ go }) => {
             </div>
 
             <div className="tool-group">
-              <button className="btn btn-outline btn-sm" onClick={() => { setAsideOpen(true); setTab("tutor"); }}>
+              <Button variant="outline" size="sm" onClick={() => { setAsideOpen(true); setTab("tutor"); }}>
                 <Icon name="sparkle" size={14} />
                 دستیار AI
-              </button>
-              <button className="btn btn-outline btn-sm" onClick={() => setShowBreakout(true)}>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowBreakout(true)}>
                 <Icon name="users" size={14} />
                 Breakout
-              </button>
-              <button className="btn btn-outline btn-sm" onClick={() => window.toast?.({ title: "یادداشت ذخیره شد", msg: "یادداشت جلسه در آرشیو شخصی شما اضافه شد.", kind: "success" })}>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "یادداشت ذخیره شد", msg: "یادداشت جلسه در آرشیو شخصی شما اضافه شد.", kind: "success" })}>
                 <Icon name="file" size={14} />
                 یادداشت
-              </button>
+              </Button>
             </div>
 
             <div className="tool-group">
@@ -484,11 +484,11 @@ const ClassroomLobby = ({ course, instructor, muted, setMuted, camOff, setCamOff
           </div>
 
           <div className="lobby-actions">
-            <button className="btn btn-ghost btn-lg" onClick={onBack}>انصراف</button>
-            <button className="btn btn-primary btn-lg" onClick={onJoin}>
+            <Button variant="ghost" size="lg" onClick={onBack}>انصراف</Button>
+            <Button variant="primary" size="lg" onClick={onJoin}>
               ورود به کلاس
               <Icon name="arrow" size={14} />
-            </button>
+            </Button>
           </div>
 
           <div className="lobby-tips">
@@ -577,9 +577,9 @@ const TranscriptPanel = () => {
         ))}
       </div>
       <div className="tutor-input">
-        <button className="btn btn-outline btn-sm flex-1 justify-center"  onClick={() => window.toast?.("جستجو در متن جلسه")}>
+        <Button variant="outline" size="sm" className="flex-1 justify-center" onClick={() => window.toast?.("جستجو در متن جلسه")}>
           <Icon name="search" size={12} />جستجو در متن این کلاس
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { toFa } from "../shared";
+import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard } from "../components/widgets";
 
@@ -25,10 +26,8 @@ export const AnalyticsPage = ({ go }) => {
                 <option>سال ۱۴۰۴</option>
                 <option>کل دوره</option>
               </select>
-              <button
-                className="btn btn-outline"
-                onClick={() => window.toast?.({ title: "Export آغاز شد", msg: "فایل CSV آماده‌سازی می‌شود (۲ مگابایت).", kind: "success" })}
-              ><Icon name="download" size={14} />Export CSV</button>
+              <Button variant="outline" onClick={() => window.toast?.({ title: "Export آغاز شد", msg: "فایل CSV آماده‌سازی می‌شود (۲ مگابایت).", kind: "success" })}
+              ><Icon name="download" size={14} />Export CSV</Button>
             </div>
           </div>
 

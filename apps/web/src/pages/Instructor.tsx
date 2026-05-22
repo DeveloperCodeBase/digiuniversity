@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { toFa } from "../shared";
+import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 
 export const InstructorPage = ({ go }) => {
@@ -17,10 +18,10 @@ export const InstructorPage = ({ go }) => {
               <h1 className="mt-2.5" >دکتر عظیمی، کلاسِ ساعت ۱۴ نیاز به بازبینی دارد</h1>
               <p className="muted">۳ هشدار آموزشی · ۸ پاسخ AI در انتظار تأیید · ۲ تمرین برای تصحیح نهایی.</p>
             </div>
-            <button className="btn btn-primary" onClick={() => go("classroom")}>
+            <Button variant="primary" onClick={() => go("classroom")}>
               ورود به کنسول کلاس
               <Icon name="arrow" size={14} />
-            </button>
+            </Button>
           </div>
 
           {/* Class health */}
@@ -61,14 +62,10 @@ export const InstructorPage = ({ go }) => {
                         <span className="pill pill-cyan" style={{ fontSize: 10 }}>پذیرفته شد</span>
                       ) : (
                         <>
-                          <button
-                            className="btn btn-outline btn-sm"
-                            onClick={() => window.toast?.({ title: "پیشنهاد پذیرفته شد", msg: "این پیشنهاد در نقشه‌ی درس اعمال شد.", kind: "success" })}
-                          >پذیرش</button>
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() => window.toast?.("به فهرست بعداً منتقل شد")}
-                          >بعداً</button>
+                          <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "پیشنهاد پذیرفته شد", msg: "این پیشنهاد در نقشه‌ی درس اعمال شد.", kind: "success" })}
+                          >پذیرش</Button>
+                          <Button variant="ghost" size="sm" onClick={() => window.toast?.("به فهرست بعداً منتقل شد")}
+                          >بعداً</Button>
                         </>
                       )}
                     </div>
@@ -105,17 +102,13 @@ export const InstructorPage = ({ go }) => {
                       ریسک {r.risk === "high" ? "بالا" : r.risk === "med" ? "متوسط" : "کم"}
                     </span>
                     <div className="flex gap-1.5" >
-                      <button
-                        className="btn btn-ghost btn-sm icon-btn"
-                        onClick={() => window.toast?.({ title: r.title, msg: `${r.kind} · ایجنت: ${r.agent}` })}
+                      <Button variant="ghost" size="sm" className="icon-btn" onClick={() => window.toast?.({ title: r.title, msg: `${r.kind} · ایجنت: ${r.agent}` })}
                         aria-label={"پیش‌نمایش " + r.title}
                         title="پیش‌نمایش"
-                      ><Icon name="eye" size={13} /></button>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => window.toast?.({ title: "تأیید شد", msg: r.title + " منتشر شد.", kind: "success" })}
+                      ><Icon name="eye" size={13} /></Button>
+                      <Button variant="outline" size="sm" onClick={() => window.toast?.({ title: "تأیید شد", msg: r.title + " منتشر شد.", kind: "success" })}
                         aria-label={"تأیید " + r.title}
-                      >تأیید</button>
+                      >تأیید</Button>
                     </div>
                   </div>
                 ))}
@@ -148,13 +141,11 @@ export const InstructorPage = ({ go }) => {
                     </div>
                   </div>
                 ))}
-                <button
-                  className="btn btn-outline justify-center"
-                   style={{width: "100%"}}
+                <Button variant="outline" className="justify-center" style={{width: "100%"}}
                   onClick={() => { go("messages"); window.toast?.({ title: "آماده‌ی ارسال", msg: "۳ دانشجو در گفتگوی گروهی اضافه شدند." }); }}
                 >
                   ارسال پیام شخصی به همه
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -170,17 +161,15 @@ export const InstructorPage = ({ go }) => {
                   AI Course Planner ساختار اولیه، اهداف یادگیری و نقشه‌ی مفهومی را پیشنهاد می‌دهد. شما تأیید، اصلاح یا رد می‌کنید. خروجی، یک Course Blueprint استاندارد است.
                 </p>
                 <div className="flex gap-3 mt-7" >
-                  <button className="btn btn-primary" onClick={() => go("authoring")}>
+                  <Button variant="primary" onClick={() => go("authoring")}>
                     <Icon name="plus" size={14} />
                     شروع درس جدید
-                  </button>
-                  <button
-                    className="btn btn-outline"
-                    onClick={() => window.toast?.({ title: "قالب‌های آماده", msg: "۸ قالب درسی در دسترس است." })}
+                  </Button>
+                  <Button variant="outline" onClick={() => window.toast?.({ title: "قالب‌های آماده", msg: "۸ قالب درسی در دسترس است." })}
                   >
                     <Icon name="file" size={14} />
                     قالب‌ها
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div className="card-flat p-5" >

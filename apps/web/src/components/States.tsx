@@ -7,6 +7,7 @@
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
+import { Button } from "../ui";
 
 export const EmptyState = ({
   title = "هنوز چیزی اینجا نیست",
@@ -24,10 +25,10 @@ export const EmptyState = ({
     <h3 className="empty-state-title">{title}</h3>
     {body && <p className="empty-state-body">{body}</p>}
     {cta && onCta && (
-      <button type="button" className="btn btn-primary btn-sm" onClick={onCta}>
+      <Button variant="primary" size="sm" type="button" onClick={onCta}>
         {ctaIcon && <Icon name={ctaIcon} size={14} />}
         {cta}
-      </button>
+      </Button>
     )}
   </div>
 );
@@ -79,10 +80,10 @@ export const ErrorState = ({
     <h3 className="error-state-title">{title}</h3>
     <p className="error-state-body">{message}</p>
     {onRetry && (
-      <button type="button" className="btn btn-outline btn-sm" onClick={onRetry}>
+      <Button variant="outline" size="sm" type="button" onClick={onRetry}>
         <Icon name="bolt" size={14} />
         {retryLabel}
-      </button>
+      </Button>
     )}
   </div>
 );

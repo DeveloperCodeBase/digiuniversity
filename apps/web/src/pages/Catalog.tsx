@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthContext";
 import { catalogApi, enrollmentsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
+import { Button } from "../ui";
 
 const LEVEL_LABEL = {
   beginner: "مقدماتی",
@@ -38,10 +39,10 @@ const SignInPrompt = ({ go }) => (
         از <code style={{ direction: "ltr" }}>admin@digiuniversity.ir</code> با
         رمز پیش‌فرض استفاده کنید.
       </p>
-      <button className="btn btn-primary mt-7" onClick={() => go("login")}>
+      <Button variant="primary" className="mt-7" onClick={() => go("login")}>
         ورود به حساب
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </main>
 );
@@ -251,12 +252,10 @@ const CatalogPage = ({ go }) => {
                         </span>
                       </div>
                       <div className="flex gap-2">
-                        <button
-                          className="btn btn-outline flex-1 justify-center"
-                          onClick={() => go("course-live", c.id)}
+                        <Button variant="outline" className="flex-1 justify-center" onClick={() => go("course-live", c.id)}
                         >
                           مشاهده فصل‌ها
-                        </button>
+                        </Button>
                         {enrolled ? (
                           <button
                             className="btn flex-1 justify-center"
@@ -266,13 +265,11 @@ const CatalogPage = ({ go }) => {
                             رفتن به دوره‌های من
                           </button>
                         ) : (
-                          <button
-                            className="btn btn-primary flex-1 justify-center"
-                            disabled={enrolling === c.id}
+                          <Button variant="primary" className="flex-1 justify-center" disabled={enrolling === c.id}
                             onClick={() => handleEnrol(c.id)}
                           >
                             {enrolling === c.id ? "در حال ثبت‌نام..." : "ثبت‌نام"}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </article>

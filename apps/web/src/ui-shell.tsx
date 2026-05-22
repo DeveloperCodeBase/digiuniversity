@@ -12,6 +12,10 @@
 // =====================================================
 import React from "react";
 import { Icon } from "./icons";
+// Phase-16 R5': use the typed Button primitive in the modal footer.
+// Direct import (not via `./ui` barrel) to avoid the ui→ui-shell→ui
+// circular dependency.
+import { Button } from "./ui/Button";
 
 // ---------- Theme ----------
 export type Theme = "dark" | "light";
@@ -517,8 +521,8 @@ export const UIRoot = ({ children, onNavigate }: UIRootProps): React.ReactElemen
             <h3 id="modal-title" className="modal-title">{modal.title || "تأیید عملیات"}</h3>
             {modal.body && <p className="modal-body">{modal.body}</p>}
             <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={modal.onCancel}>{modal.cancelLabel || "انصراف"}</button>
-              <button className="btn btn-primary" onClick={modal.onConfirm} autoFocus>{modal.confirmLabel || "تأیید"}</button>
+              <Button variant="ghost" onClick={modal.onCancel}>{modal.cancelLabel || "انصراف"}</Button>
+              <Button variant="primary" onClick={modal.onConfirm} autoFocus>{modal.confirmLabel || "تأیید"}</Button>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { CREDENTIALS } from "../data.js";
+import { Button } from "../ui";
 
 const CredentialVerifyForm = () => {
   const [code, setCode] = React.useState("");
@@ -39,7 +40,7 @@ const CredentialVerifyForm = () => {
           fontSize: 13,
           direction: "ltr"}}
       />
-      <button type="submit" className="btn btn-amber btn-sm" aria-label="بررسی گواهی">بررسی</button>
+      <Button variant="secondary" size="sm" type="submit" aria-label="بررسی گواهی">بررسی</Button>
     </form>
   );
 };
@@ -121,20 +122,14 @@ export const CredentialPage = ({ go }) => {
 }`}
               </pre>
               <div className="flex gap-2 mt-3.5" >
-                <button
-                  className="btn btn-outline btn-sm flex-1 justify-center"
-                  
-                  onClick={() => window.toast?.({ title: "JSON-LD آماده شد", msg: "credential.json دانلود شد.", kind: "success" })}
+                <Button variant="outline" size="sm" className="flex-1 justify-center" onClick={() => window.toast?.({ title: "JSON-LD آماده شد", msg: "credential.json دانلود شد.", kind: "success" })}
                 >
                   <Icon name="download" size={13} />JSON-LD
-                </button>
-                <button
-                  className="btn btn-outline btn-sm flex-1 justify-center"
-                  
-                  onClick={() => window.toast?.({ title: "PDF آماده شد", msg: "گواهی به‌صورت PDF دانلود شد.", kind: "success" })}
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1 justify-center" onClick={() => window.toast?.({ title: "PDF آماده شد", msg: "گواهی به‌صورت PDF دانلود شد.", kind: "success" })}
                 >
                   <Icon name="download" size={13} />PDF
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -172,16 +167,14 @@ export const CredentialPage = ({ go }) => {
               <span className="eyebrow">ALL CREDENTIALS</span>
               <h2 className="h-2 mt-3.5" >کیف اعتبارنامه</h2>
             </div>
-            <button
-              className="btn btn-outline"
-              onClick={() => {
+            <Button variant="outline" onClick={() => {
                 if (navigator.clipboard) navigator.clipboard.writeText("https://digiu.edu/u/nasrin/credentials").catch(() => {});
                 window.toast?.({ title: "لینک پروفایل کپی شد", msg: "digiu.edu/u/nasrin/credentials", kind: "success" });
               }}
             >
               <Icon name="share" size={14} />
               اشتراک پروفایل عمومی
-            </button>
+            </Button>
           </div>
           <div className="grid grid-3">
             {CREDENTIALS.map((cred, i) => {

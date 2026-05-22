@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Nav, toFa, Sparkline } from "../shared";
+import { Button } from "../ui";
 
 export const AssessmentPage = ({ go }) => {
   const [selected, setSelected] = React.useState(1);
@@ -62,18 +63,18 @@ export const AssessmentPage = ({ go }) => {
 
             {/* Nav */}
             <div className="flex justify-between mt-12" >
-              <button className="btn btn-ghost" onClick={() => setCurrent(Math.max(1, current - 1))}>
+              <Button variant="ghost" onClick={() => setCurrent(Math.max(1, current - 1))}>
                 <Icon name="arrow" size={14} style={{ transform: "rotate(180deg)" }} />
                 قبلی
-              </button>
-              <button className="btn btn-outline">
+              </Button>
+              <Button variant="outline">
                 <Icon name="hand" size={14} />
                 علامت‌گذاری برای بازبینی
-              </button>
-              <button className="btn btn-primary" onClick={() => setCurrent(Math.min(total, current + 1))}>
+              </Button>
+              <Button variant="primary" onClick={() => setCurrent(Math.min(total, current + 1))}>
                 ثبت و سوال بعدی
                 <Icon name="arrow" size={14} />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -137,9 +138,9 @@ export const AssessmentPage = ({ go }) => {
             </div>
           </div>
 
-          <button className="btn btn-outline justify-center" >
+          <Button variant="outline" className="justify-center">
             ذخیره و ادامه بعداً
-          </button>
+          </Button>
         </aside>
       </div>
     </main>

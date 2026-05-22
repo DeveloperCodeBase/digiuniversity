@@ -6,6 +6,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer } from "../shared";
 import { Toggle } from "../components/widgets";
+import { Button } from "../ui";
 
 export const SettingsPage = ({ go }) => {
   const [tab, setTab] = React.useState("profile");
@@ -76,11 +77,11 @@ const ProfileTab = () => (
       <Row label="عکس پروفایل" hint="JPG یا PNG · حداکثر ۲MB · ابعاد مربعی پیشنهاد می‌شود">
         <div className="flex items-center gap-4 flex-wrap" >
           <div className="avatar cyan" style={{ width: 76, height: 76, fontSize: 22 }}>نر</div>
-          <button className="btn btn-outline" onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}>آپلود تصویر جدید</button>
-          <button className="btn btn-ghost" onClick={async () => {
+          <Button variant="outline" onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}>آپلود تصویر جدید</Button>
+          <Button variant="ghost" onClick={async () => {
             const ok = await window.confirmAction?.({ title: "حذف عکس پروفایل", body: "آیا مطمئن هستید؟", confirmLabel: "حذف", danger: true });
             if (ok) window.toast?.({ title: "حذف شد", kind: "success" });
-          }}>حذف</button>
+          }}>حذف</Button>
         </div>
       </Row>
       <Row label="نام نمایشی" hint="در کلاس‌ها و پروفایل عمومی نشان داده می‌شود">
@@ -103,8 +104,8 @@ const ProfileTab = () => (
         </div>
       </Row>
       <div className="pt-6 flex justify-end gap-2.5" >
-        <button className="btn btn-ghost" onClick={() => window.toast?.("تغییرات نادیده گرفته شد")}>انصراف</button>
-        <button className="btn btn-primary" onClick={() => window.toast?.({ title: "ذخیره شد", msg: "تغییرات شما با موفقیت ذخیره شد.", kind: "success" })}>ذخیره تغییرات</button>
+        <Button variant="ghost" onClick={() => window.toast?.("تغییرات نادیده گرفته شد")}>انصراف</Button>
+        <Button variant="primary" onClick={() => window.toast?.({ title: "ذخیره شد", msg: "تغییرات شما با موفقیت ذخیره شد.", kind: "success" })}>ذخیره تغییرات</Button>
       </div>
     </div>
   </div>
@@ -115,7 +116,7 @@ const SecurityTab = () => (
     <SectionH eyebrow="SECURITY" title="امنیت حساب" sub="کنترل کامل بر دسترسی، احراز هویت دومرحله‌ای، و نشست‌های فعال." />
     <div className="card p-8" >
       <Row label="رمز عبور" hint="آخرین تغییر: ۲۳ روز پیش">
-        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "تغییر رمز عبور", msg: "لینک تغییر رمز به ایمیل شما ارسال شد.", kind: "info" })}>تغییر رمز عبور</button>
+        <Button variant="outline" onClick={() => window.toast?.({ title: "تغییر رمز عبور", msg: "لینک تغییر رمز به ایمیل شما ارسال شد.", kind: "info" })}>تغییر رمز عبور</Button>
       </Row>
       <Row label="احراز هویت دو مرحله‌ای" hint="با اپلیکیشن authenticator یا پیامک امن‌تر شوید">
         <div className="flex items-center gap-3" >
@@ -124,7 +125,7 @@ const SecurityTab = () => (
         </div>
       </Row>
       <Row label="کلید سخت‌افزاری (FIDO2)" hint="بالاترین سطح امنیت — کلید فیزیکی USB یا NFC">
-        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "ثبت کلید امنیتی", msg: "WebAuthn روی این مرورگر فعال نیست." , kind: "warn"})}>ثبت کلید جدید</button>
+        <Button variant="outline" onClick={() => window.toast?.({ title: "ثبت کلید امنیتی", msg: "WebAuthn روی این مرورگر فعال نیست." , kind: "warn"})}>ثبت کلید جدید</Button>
       </Row>
       <Row label="نشست‌های فعال" hint="می‌توانید هر نشست را از راه دور خارج کنید">
         <div className="flex flex-col gap-2" >
@@ -138,29 +139,25 @@ const SecurityTab = () => (
                 <div style={{ fontSize: 13, fontWeight: 500 }}>{d}</div>
                 <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>{w}</div>
               </div>
-              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <button className="btn btn-ghost btn-sm" onClick={() => window.toast?.({ title: "نشست بسته شد", kind: "success" })}>خروج</button>}
+              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <Button variant="ghost" size="sm" onClick={() => window.toast?.({ title: "نشست بسته شد", kind: "success" })}>خروج</Button>}
             </div>
           ))}
         </div>
       </Row>
       <Row label="منطقه‌ی خطر" hint="حذف یا غیرفعال‌سازی حساب">
         <div className="flex gap-2.5" >
-          <button
-            className="btn btn-outline"
-            style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+          <Button variant="outline" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
             onClick={async () => {
               const ok = await window.confirmAction?.({ title: "غیرفعال‌سازی موقت حساب", body: "حساب شما تا فعال‌سازی مجدد قابل دسترس نخواهد بود.", confirmLabel: "غیرفعال کن", danger: true });
               if (ok) window.toast?.({ title: "حساب غیرفعال شد", kind: "warn" });
             }}
-          >غیرفعال‌سازی موقت</button>
-          <button
-            className="btn btn-outline"
-            style={{ borderColor: "var(--rose)", color: "var(--rose)" }}
+          >غیرفعال‌سازی موقت</Button>
+          <Button variant="outline" style={{ borderColor: "var(--rose)", color: "var(--rose)" }}
             onClick={async () => {
               const ok = await window.confirmAction?.({ title: "حذف کامل حساب", body: "این عملیات غیرقابل بازگشت است و همه‌ی داده‌های شما حذف می‌شوند.", confirmLabel: "حذف کامل", danger: true });
               if (ok) window.toast?.({ title: "درخواست حذف ثبت شد", msg: "تا ۳۰ روز قابل لغو است.", kind: "danger" });
             }}
-          >حذف کامل حساب</button>
+          >حذف کامل حساب</Button>
         </div>
       </Row>
     </div>
@@ -305,7 +302,7 @@ const PrivacyTab = () => (
         <Toggle on={false} />
       </Row>
       <Row label="گزارش حقوق داده" hint="درخواست همه‌ی داده‌های جمع‌آوری‌شده درباره‌ی شما">
-        <button className="btn btn-outline" onClick={() => window.toast?.({ title: "درخواست ثبت شد", msg: "ظرف ۷۲ ساعت لینک دانلود به ایمیل شما ارسال می‌شود.", kind: "info" })}><Icon name="download" size={14} />درخواست export کامل (GDPR)</button>
+        <Button variant="outline" onClick={() => window.toast?.({ title: "درخواست ثبت شد", msg: "ظرف ۷۲ ساعت لینک دانلود به ایمیل شما ارسال می‌شود.", kind: "info" })}><Icon name="download" size={14} />درخواست export کامل (GDPR)</Button>
       </Row>
     </div>
   </div>
@@ -345,7 +342,7 @@ const BillingTab = () => (
           <div className="mt-1.5"  style={{fontSize: 22, fontWeight: 700}}>۱۲ میلیون تومان</div>
           <div className="mt-1"  style={{fontSize: 13, color: "var(--fg-mute)"}}>تجدید خودکار: ۱۵ شهریور ۱۴۰۵</div>
         </div>
-        <button className="btn btn-outline" onClick={() => go("pricing")}>ارتقاء پلن</button>
+        <Button variant="outline" onClick={() => go("pricing")}>ارتقاء پلن</Button>
       </div>
     </div>
 
@@ -389,17 +386,13 @@ const WalletTab = () => (
       <div className="mono" style={{ color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em" }}>BALANCE · موجودی</div>
       <div className="mt-3"  style={{fontFamily: "var(--f-mono)", fontSize: 56, fontWeight: 700, color: "var(--accent)"}}>۲,۴۵۰,۰۰۰<span className="me-2"  style={{fontSize: 20, color: "var(--fg-mute)"}}>تومان</span></div>
       <div className="flex gap-2.5 mt-6" >
-        <button
-          className="btn btn-primary"
-          onClick={() => window.toast?.({ title: "هدایت به درگاه پرداخت", msg: "در حال انتقال…", kind: "info" })}
-        ><Icon name="plus" size={14} />شارژ کیف پول</button>
-        <button
-          className="btn btn-outline"
-          onClick={async () => {
+        <Button variant="primary" onClick={() => window.toast?.({ title: "هدایت به درگاه پرداخت", msg: "در حال انتقال…", kind: "info" })}
+        ><Icon name="plus" size={14} />شارژ کیف پول</Button>
+        <Button variant="outline" onClick={async () => {
             const ok = await window.confirmAction?.({ title: "برداشت از کیف پول", body: "مبلغ به حساب بانکی متصل به حساب شما واریز می‌شود.", confirmLabel: "ادامه" });
             if (ok) window.toast?.({ title: "درخواست برداشت ثبت شد", kind: "success" });
           }}
-        ><Icon name="download" size={14} />برداشت</button>
+        ><Icon name="download" size={14} />برداشت</Button>
       </div>
     </div>
   </div>

@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
+import { Button } from "../ui";
 
 export const AdmissionsPage = ({ go }) => {
   const [step, setStep] = React.useState(2);
@@ -85,9 +86,9 @@ export const AdmissionsPage = ({ go }) => {
               <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
                 دستیار پذیرش ۲۴/۷ پاسخگوست. اگر چیزی نامشخص است، همین‌جا بپرس — اگر پاسخ قطعی نیافت، تیکت به مشاور انسانی ارسال می‌شود.
               </p>
-              <button className="btn btn-outline justify-center mt-3.5"  style={{width: "100%"}}>
+              <Button variant="outline" className="justify-center mt-3.5" style={{width: "100%"}}>
                 <Icon name="chat" size={14} />شروع گفتگو
-              </button>
+              </Button>
             </div>
 
             <div className="card p-6" >
@@ -129,10 +130,10 @@ const Step1Programs = ({ go }) => (
   <div>
     <h2 className="h-2">برنامه‌ی موردنظر را انتخاب کنید</h2>
     <p className="mt-3.5"  style={{color: "var(--fg-mute)"}}>هر برنامه شامل بسته‌ای از دروس، استادان و گواهی است.</p>
-    <button className="btn btn-primary mt-8"  onClick={() => go("programs")}>
+    <Button variant="primary" className="mt-8" onClick={() => go("programs")}>
       <Icon name="layers" size={14} />
       مشاهده برنامه‌ها
-    </button>
+    </Button>
   </div>
 );
 
@@ -162,10 +163,10 @@ const Step2Info = ({ onNext }) => (
 
     <div className="mt-10 flex justify-between items-center" >
       <span style={{ fontSize: 12, color: "var(--fg-mute)" }}>پیشرفت در این مرحله: ۸۰٪</span>
-      <button className="btn btn-primary" onClick={onNext}>
+      <Button variant="primary" onClick={onNext}>
         ادامه به ارزیابی ورودی
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </div>
 );
@@ -193,11 +194,11 @@ const Step3Assessment = ({ onNext }) => (
       </div>
     </div>
     <div className="mt-8 flex justify-between" >
-      <button className="btn btn-ghost">قبلی</button>
-      <button className="btn btn-primary" onClick={onNext}>
+      <Button variant="ghost">قبلی</Button>
+      <Button variant="primary" onClick={onNext}>
         سوال بعدی
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </div>
 );
@@ -226,18 +227,18 @@ const Step4Payment = ({ onNext }) => (
       <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>روش پرداخت</div>
       <div className="grid gap-2"  style={{ gridTemplateColumns: "repeat(4, 1fr)"}}>
         {["درگاه ملی", "زرین‌پال", "کیف‌پول", "پرداخت سازمانی"].map((m, i) => (
-          <button key={m} className="btn btn-outline justify-center"  style={{ background: i === 0 ? "var(--surface)" : "transparent", borderColor: i === 0 ? "var(--cyan)" : "var(--line-2)"}}>
+          <Button variant="outline" className="justify-center" key={m}  style={{ background: i === 0 ? "var(--surface)" : "transparent", borderColor: i === 0 ? "var(--cyan)" : "var(--line-2)"}}>
             {m}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
     <div className="mt-8 flex justify-between" >
       <span style={{ fontSize: 12, color: "var(--fg-mute)" }}>پرداخت امن · رمزنگاری end-to-end</span>
-      <button className="btn btn-primary" onClick={onNext}>
+      <Button variant="primary" onClick={onNext}>
         پرداخت و نهایی‌سازی
         <Icon name="arrow" size={14} />
-      </button>
+      </Button>
     </div>
   </div>
 );
@@ -257,13 +258,13 @@ const Step5Onboard = ({ go }) => (
       پروفایل شناختی اولیه‌ی شما ساخته شد. اولین درس شما در ۹۰ دقیقه‌ی آینده آغاز می‌شود.
     </p>
     <div className="flex gap-3 justify-center mt-8" >
-      <button className="btn btn-primary btn-lg" onClick={() => go("dashboard")}>
+      <Button variant="primary" size="lg" onClick={() => go("dashboard")}>
         ورود به میز کار من
         <Icon name="arrow" size={14} />
-      </button>
-      <button className="btn btn-outline btn-lg" onClick={() => go("course")}>
+      </Button>
+      <Button variant="outline" size="lg" onClick={() => go("course")}>
         مشاهده اولین درس
-      </button>
+      </Button>
     </div>
   </div>
 );

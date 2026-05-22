@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Sparkline, CognitiveRadar } from "../shared";
+import { Button } from "../ui";
 // Phase-14.7 R2: RoleSideNav + Footer removed — Layout (router.tsx)
 // now renders the sidebar for every workspace route. Footer is hidden
 // on workspace routes by the centralised chrome.
@@ -41,16 +42,14 @@ export const DashboardPage = ({ go }) => {
               <p className="muted">۳ کار باز · جلسه‌ی بعدی ۹۰ دقیقه دیگر · پروفایل شناختی به‌روز.</p>
             </div>
             <div className="flex gap-2.5" >
-              <button
-                className="btn btn-outline icon-btn"
-                onClick={() => go("inbox")}
+              <Button variant="outline" className="icon-btn" onClick={() => go("inbox")}
                 aria-label="صندوق اعلان‌ها"
                 title="اعلان‌ها"
-              ><Icon name="bell" size={14} /></button>
-              <button className="btn btn-primary" onClick={() => go("classroom")}>
+              ><Icon name="bell" size={14} /></Button>
+              <Button variant="primary" onClick={() => go("classroom")}>
                 ورود به کلاس بعدی
                 <Icon name="arrow" size={14} />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -132,10 +131,10 @@ export const DashboardPage = ({ go }) => {
                     </div>
                     <div>
                       {s.now ? (
-                        <button className="btn btn-primary btn-sm" onClick={() => go("classroom")}>
+                        <Button variant="primary" size="sm" onClick={() => go("classroom")}>
                           <span className="dot dot-live"></span>
                           ورود
-                        </button>
+                        </Button>
                       ) : (
                         <span className="pill">{s.in}</span>
                       )}

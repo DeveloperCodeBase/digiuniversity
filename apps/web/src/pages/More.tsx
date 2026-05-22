@@ -10,6 +10,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { toFa } from "../shared";
 import { FACULTY as FACULTY_DATA, SCHOOLS, LIBRARY_RESOURCES, WEEKLY_SCHEDULE, WEEK_DAYS } from "../data.js";
+import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx). The
 // per-page <Footer/> calls below are gone — CSS used to hide them on
 // workspace routes; now we just don't render them.
@@ -49,10 +50,8 @@ export const CalendarPage = ({ go }) => {
                   style={view === v ? { background: "var(--accent-soft)", color: "var(--accent)", borderColor: "var(--accent)" } : undefined}
                 >{l}</button>
               ))}
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => window.toast?.({ title: "فرم رویداد جدید", msg: "افزودن رویداد به‌زودی فعال می‌شود.", kind: "info" })}
-              ><Icon name="plus" size={13} />رویداد جدید</button>
+              <Button variant="primary" size="sm" onClick={() => window.toast?.({ title: "فرم رویداد جدید", msg: "افزودن رویداد به‌زودی فعال می‌شود.", kind: "info" })}
+              ><Icon name="plus" size={13} />رویداد جدید</Button>
             </div>
           </div>
 
@@ -172,10 +171,8 @@ export const LibraryPage = ({ go }) => {
                 مقالات، کتاب‌ها، نوت‌بوک‌های Jupyter، دیتاست‌ها، اسلایدها. همه با جستجوی معنایی و قابل ارجاع از داخل درس.
               </p>
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => window.toast?.({ title: "آپلود منبع", msg: "فرم آپلود به‌زودی فعال می‌شود.", kind: "info" })}
-            ><Icon name="plus" size={14} />آپلود منبع</button>
+            <Button variant="primary" onClick={() => window.toast?.({ title: "آپلود منبع", msg: "فرم آپلود به‌زودی فعال می‌شود.", kind: "info" })}
+            ><Icon name="plus" size={14} />آپلود منبع</Button>
           </div>
         </div>
       </section>
@@ -265,18 +262,14 @@ export const LibraryPage = ({ go }) => {
                     {it.tags.map((t) => <span key={t} className="pill" style={{ fontSize: 9 }}>{t}</span>)}
                   </div>
                   <div className="flex gap-1.5" >
-                    <button
-                      className="btn btn-ghost btn-sm icon-btn"
-                      onClick={() => window.toast?.({ title: "پیش‌نمایش", msg: it.title })}
+                    <Button variant="ghost" size="sm" className="icon-btn" onClick={() => window.toast?.({ title: "پیش‌نمایش", msg: it.title })}
                       aria-label={"پیش‌نمایش " + it.title}
                       title="پیش‌نمایش"
-                    ><Icon name="eye" size={13} /></button>
-                    <button
-                      className="btn btn-outline btn-sm icon-btn"
-                      onClick={() => window.toast?.({ title: "در حال دانلود", msg: it.title + " (" + it.size + ")", kind: "success" })}
+                    ><Icon name="eye" size={13} /></Button>
+                    <Button variant="outline" size="sm" className="icon-btn" onClick={() => window.toast?.({ title: "در حال دانلود", msg: it.title + " (" + it.size + ")", kind: "success" })}
                       aria-label={"دانلود " + it.title}
                       title="دانلود"
-                    ><Icon name="download" size={13} /></button>
+                    ><Icon name="download" size={13} /></Button>
                   </div>
                 </div>
               ))}
@@ -372,13 +365,11 @@ export const HelpPage = ({ go }) => (
             <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.7 }}>
               تیم پشتیبانی ۲۴/۷ آماده پاسخگویی است. زمان میانگین پاسخ: ۸ دقیقه.
             </p>
-            <button
-              className="btn btn-primary justify-center mt-3.5"
-               style={{width: "100%"}}
+            <Button variant="primary" className="justify-center mt-3.5" style={{width: "100%"}}
               onClick={() => window.toast?.({ title: "اتصال به پشتیبانی", msg: "اپراتور ظرف چند ثانیه پاسخ می‌دهد.", kind: "info" })}
             >
               <Icon name="chat" size={14} />شروع گفتگو
-            </button>
+            </Button>
           </div>
           <div className="card p-6" >
             <div className="mono mb-3.5"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.08em"}}>SYSTEM STATUS</div>
@@ -526,14 +517,10 @@ export const PricingPage = ({ go }) => {
           چنددانشکده‌ای، چندمستاجره، Single Sign-On، API اختصاصی، SLA 99.9٪، استقرار on-premise.
         </p>
         <div className="flex gap-3 justify-center mt-6" >
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => go("messages")}
-          >گفتگو با تیم فروش</button>
-          <button
-            className="btn btn-outline btn-lg"
-            onClick={() => window.toast?.({ title: "در حال دانلود", msg: "مستند معماری Enterprise در راه است.", kind: "success" })}
-          ><Icon name="download" size={14} />دانلود معماری</button>
+          <Button variant="primary" size="lg" onClick={() => go("messages")}
+          >گفتگو با تیم فروش</Button>
+          <Button variant="outline" size="lg" onClick={() => window.toast?.({ title: "در حال دانلود", msg: "مستند معماری Enterprise در راه است.", kind: "success" })}
+          ><Icon name="download" size={14} />دانلود معماری</Button>
         </div>
       </div>
     </section>

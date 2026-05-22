@@ -5,6 +5,7 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
+import { Button } from "../ui";
 
 export const CommunityPage = ({ go }) => {
   const [filter, setFilter] = React.useState("trending");
@@ -21,13 +22,11 @@ export const CommunityPage = ({ go }) => {
                 ۸۴۲ بحث فعال در ۲۳ درس. AI سوالات مشابه را خوشه‌بندی می‌کند و پاسخ‌های پراکنده را به دانش جمعی تبدیل می‌کند.
               </p>
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => window.toast?.({ title: "بحث جدید", msg: "ویرایشگر بحث آماده شد. عنوان و متن سوال را وارد کنید.", kind: "info" })}
+            <Button variant="primary" onClick={() => window.toast?.({ title: "بحث جدید", msg: "ویرایشگر بحث آماده شد. عنوان و متن سوال را وارد کنید.", kind: "info" })}
             >
               <Icon name="plus" size={14} />
               شروع بحث جدید
-            </button>
+            </Button>
           </div>
         </div>
       </section>
