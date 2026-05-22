@@ -24,28 +24,15 @@ for (const vp of viewports) {
     });
     const page = await ctx.newPage();
     await page.goto("/", { waitUntil: "networkidle" });
-    // Scroll the full page so the IntersectionObserver behind every
-    // `.reveal` element fires and the section content animates from
-    // opacity:0 → 1. Without this the fullPage screenshot captures
-    // sections in their pre-reveal state and they look empty.
-    await page.evaluate(async () => {
-      const totalHeight = document.body.scrollHeight;
-      const step = window.innerHeight / 2;
-      for (let y = 0; y <= totalHeight; y += step) {
-        window.scrollTo(0, y);
-        await new Promise((r) => setTimeout(r, 80));
-      }
-      window.scrollTo(0, 0);
-    });
-    // Force-reveal anything left behind by the observer (Playwright's
-    // fullPage capture sometimes outpaces the 700-ms reveal transition).
-    await page.evaluate(() => {
-      document
-        .querySelectorAll(".reveal, .reveal-scale, .reveal-blur")
-        .forEach((el) => el.classList.add("in"));
-    });
-    // Let the stats-band count-up + reveal animations settle visually.
-    await page.waitForTimeout(1500);
+    // Phase-16 R10 — disable the .reveal opacity-0 / transform / 700-ms
+    // transition pipeline for the duration of the screenshot. The CSS
+    // hook `[data-test-no-animation]` (see styles.css) short-circuits
+    // both `.reveal` (and friends) AND every other CSS animation, so
+    // Playwright's fullPage tile-and-stitch captures finished pixels.
+    await page.evaluate(() =>
+      document.documentElement.setAttribute("data-test-no-animation", ""),
+    );
+    await page.waitForTimeout(200);
     await page.screenshot({
       path: `${OUT}/landing-fullpage--${vp.name}.png`,
       fullPage: true,

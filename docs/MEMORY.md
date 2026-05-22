@@ -69,3 +69,24 @@ clutter and should be pruned.
   `return null`**: one-frame blank-page flash between mount and
   useEffect was visible to users. Skeleton is layout-stable so the
   swap is silent.
+
+## Lessons learned
+
+- **Gate evidence collection happens only AFTER every R for that
+  gate is confirmed done.** Phase 16 fell into this trap mid-R10:
+  evidence captured before R4 (dark mode) / R5 (ad-hoc button
+  migration) / R7 (touch-target audit) / R11 (320 overflow fix)
+  landed. Result: the evidence was incomplete and the gate review
+  had to be re-run. Going forward, an explicit "all R-N for gate X
+  done?" gate check precedes any `remote.ps1 visual -Service gate-X`
+  call.
+
+- **Reveal animations vs Playwright fullPage**: `.reveal` classes
+  default to `opacity: 0` and only animate to 1 when the
+  IntersectionObserver fires. Playwright's `fullPage: true` scrolls
+  programmatically; even with a manual scroll-warmup the 700-ms
+  transition often outpaces the per-tile capture. Cleanest fix is
+  a `data-test-no-animation` attribute on `<html>` that disables
+  `.reveal` opacity/transform/transitions for the duration of the
+  spec — see `apps/web/styles.css` and the pattern in
+  `tests/visual/r10-landing.spec.ts`.
