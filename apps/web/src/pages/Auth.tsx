@@ -39,7 +39,23 @@ interface AuthShellProps {
 
 const AuthShell = ({ children, eyebrow, title, sub, side }: AuthShellProps): React.ReactElement => (
   <main data-screen-label="Auth" style={{ minHeight: "calc(100vh - 64px)" }}>
-    <div  style={{ gridTemplateColumns: "1fr 1fr", minHeight: "calc(100vh - 64px)"}}>
+    {/* Phase-16 Gate-2 smoke fix: the inline @media rule below used
+        `.auth-grid` / `.auth-visual` class names that weren't actually
+        attached to the divs — dead CSS, the visual panel never hid on
+        mobile. That was the source of the iPhone-SE horizontal scroll
+        on /login (a 400 px absolute decoration leaked past the
+        viewport). Adding the class names + ensuring `display: grid`
+        + `overflow: hidden` so the gradient & decoration stay
+        contained. */}
+    <div
+      className="auth-grid"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        minHeight: "calc(100vh - 64px)",
+        overflow: "hidden",
+      }}
+    >
       {/* form side */}
       <div className="flex flex-col justify-center"  style={{padding: "60px 40px", maxWidth: 560, width: "100%", margin: "0 auto"}}>
         <span className="eyebrow">{eyebrow}</span>
@@ -49,9 +65,15 @@ const AuthShell = ({ children, eyebrow, title, sub, side }: AuthShellProps): Rea
       </div>
 
       {/* visual side */}
-      <div  style={{
-        background: "linear-gradient(135deg, color-mix(in oklch, var(--accent) 18%, var(--bg)), color-mix(in oklch, var(--navy) 14%, var(--bg)))",
-        borderRight: "1px solid var(--line)"}}>
+      <div
+        className="auth-visual"
+        style={{
+          background: "linear-gradient(135deg, color-mix(in oklch, var(--accent) 18%, var(--bg)), color-mix(in oklch, var(--navy) 14%, var(--bg)))",
+          borderRight: "1px solid var(--line)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
         {side}
       </div>
     </div>

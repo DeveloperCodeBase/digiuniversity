@@ -188,9 +188,13 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
         </div>
 
         <div className="nav-actions">
-          {/* Command palette trigger */}
+          {/* Command palette trigger.
+              Phase-16 Gate-2 smoke: hidden at <sm because the 5-icon
+              cluster + brand exceeds 320 px after R7' enforced 44 px
+              touch targets. Keyboard users still get it via Ctrl/Cmd+K;
+              touch users find it inside the hamburger drawer. */}
           <button
-            className="nav-icon-btn"
+            className="nav-icon-btn hide-on-xs"
             onClick={() => window.openCommandPalette?.()}
             aria-label="پالت دستورات (Cmd+K)"
             title="جستجوی سریع (Ctrl+K)"
@@ -213,8 +217,11 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
             <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
 
-          {/* Notifications */}
-          <div className="notif-wrap relative" >
+          {/* Notifications.
+              Phase-16 Gate-2 smoke: also `.hide-on-xs` for the same
+              320-px width constraint. Notifications surface inside
+              the hamburger drawer + via the bottom-nav badge. */}
+          <div className="notif-wrap relative hide-on-xs" >
             <button className="nav-icon-btn" onClick={() => setNotifsOpen(!notifsOpen)} aria-label="اعلان‌ها">
               <Icon name="bell" size={18} />
               <span className="notif-dot"></span>

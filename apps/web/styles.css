@@ -4615,6 +4615,17 @@ html { scroll-padding-top: 80px; }
 }
 
 /* ================================================================
+   Phase-16 Gate-2 smoke fix — viewport-scoped chrome hiding.
+   At <sm (480 px) the 5-icon nav-actions cluster + RTL brand
+   exceeds 320 px after R7' enforced 44 px touch targets. Hide
+   non-essential icons (search, bell) on xs/iPhone-SE; they
+   stay reachable via the hamburger drawer and Ctrl/Cmd+K.
+   ================================================================ */
+@media (max-width: 479.98px) {
+  .hide-on-xs { display: none !important; }
+}
+
+/* ================================================================
    Phase-16 R7' — WCAG 2.5.5 / 2.5.8 touch target floor.
    On phones (<md = 768 px) every interactive control must be at
    least 44×44 CSS pixels. The `.btn` primitive already meets this
