@@ -61,17 +61,20 @@ switch ($Action) {
     }
 
     "pull" {
-        Remote "git pull origin $Branch"
+        # Phase-16 hardening: the docs/ bind mount from the visual
+        # container can leave tracked PNGs locally modified. Reset
+        # docs/ before pull so we always converge on origin/main.
+        Remote "git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null; git pull origin $Branch"
     }
 
     "build" {
         git push origin $Branch
-        Remote "git pull origin $Branch && docker compose build"
+        Remote "git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null; git pull origin $Branch && docker compose build"
     }
 
     "up" {
         git push origin $Branch
-        Remote "git pull origin $Branch && docker compose up -d --build"
+        Remote "git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null; git pull origin $Branch && docker compose up -d --build"
     }
 
     "down" {
@@ -80,7 +83,7 @@ switch ($Action) {
 
     "restart" {
         git push origin $Branch
-        Remote "git pull origin $Branch && docker compose down && docker compose up -d --build"
+        Remote "git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null; git pull origin $Branch && docker compose down && docker compose up -d --build"
     }
 
     "logs" {
