@@ -105,12 +105,32 @@ const NAV_ITEMS_BY_ROLE: Record<RoleId, NavItem[]> = {
   ],
 };
 
+export type NavMode = "public" | "workspace" | "auth_flow";
+
 export interface NavProps {
   current: string;
   go: Go;
+  /**
+   * Phase-A R1.1: route-kind-aware mode set by AppShell.
+   *   public    — top-nav links + own hamburger drawer for those links
+   *               (existing behavior; default)
+   *   workspace — top-nav links hidden; the single hamburger calls
+   *               `onWorkspaceMenuClick` which AppShell wires to its
+   *               sidebar Sheet drawer
+   *   auth_flow — minimal chrome: brand + theme toggle only; no nav
+   *               links, no hamburger, no notifications/user popovers
+   */
+  mode?: NavMode;
+  /** Workspace-only: AppShell-provided callback to open the sidebar drawer. */
+  onWorkspaceMenuClick?: () => void;
 }
 
-export const Nav = ({ current, go }: NavProps): React.ReactElement => {
+export const Nav = ({
+  current,
+  go,
+  mode = "public",
+  onWorkspaceMenuClick,
+}: NavProps): React.ReactElement => {
   const { role, setRole } = useRole();
   const auth = useAuth();
   const { theme, setTheme } = useTheme();
@@ -118,6 +138,19 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
   const [notifsOpen, setNotifsOpen] = React.useState(false);
   const [userOpen, setUserOpen] = React.useState(false);
   React.useEffect(() => { setOpen(false); setNotifsOpen(false); setUserOpen(false); }, [current]);
+  const isWorkspace = mode === "workspace";
+  const isAuthFlow = mode === "auth_flow";
+
+  // Logo destination is mode + auth aware. WORKSPACE always → dashboard;
+  // PUBLIC: dashboard if logged in (back-to-workspace shortcut), else home;
+  // AUTH_FLOW: home (escape back to the marketing site).
+  const brandTarget: string = isWorkspace
+    ? "dashboard"
+    : isAuthFlow
+      ? "home"
+      : auth.isAuthenticated
+        ? "dashboard"
+        : "home";
 
   // close popovers on outside click
   React.useEffect(() => {
@@ -156,9 +189,9 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
   const items = NAV_ITEMS_BY_ROLE[role.id] || NAV_ITEMS_BY_ROLE.student;
 
   return (
-    <nav className="nav">
+    <nav className="nav" data-mode={mode}>
       <div className="nav-inner">
-        <a href="/home" onClick={(e) => { e.preventDefault(); go("home"); }} className="brand">
+        <a href={"/" + brandTarget} onClick={(e) => { e.preventDefault(); go(brandTarget); }} className="brand">
           <span className="brand-mark"></span>
           <span>
             دیجی‌یونیورسیتی
@@ -166,26 +199,30 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
           </span>
         </a>
 
-        <div className={"nav-links " + (open ? "open" : "")}>
-          {items.map((n) => (
-            <a
-              key={n.id}
-              href={"#" + n.id}
-              onClick={(e) => { e.preventDefault(); go(n.id); setOpen(false); }}
-              className={"nav-link " + (current === n.id ? "active" : "")}
-              aria-current={current === n.id ? "page" : undefined}
-            >
-              {n.label}
-              {n.live && (
-                <span
-                  className="nav-live-dot"
-                  aria-label="داده زنده"
-                  title="متصل به API"
-                />
-              )}
-            </a>
-          ))}
-        </div>
+        {/* Top-nav links: PUBLIC only. WORKSPACE relies on the sidebar
+            for in-app navigation, AUTH_FLOW shows a minimal shell. */}
+        {mode === "public" && (
+          <div className={"nav-links " + (open ? "open" : "")}>
+            {items.map((n) => (
+              <a
+                key={n.id}
+                href={"#" + n.id}
+                onClick={(e) => { e.preventDefault(); go(n.id); setOpen(false); }}
+                className={"nav-link " + (current === n.id ? "active" : "")}
+                aria-current={current === n.id ? "page" : undefined}
+              >
+                {n.label}
+                {n.live && (
+                  <span
+                    className="nav-live-dot"
+                    aria-label="داده زنده"
+                    title="متصل به API"
+                  />
+                )}
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="nav-actions">
           {/* Command palette trigger.
@@ -247,14 +284,24 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
             {userOpen && <UserDropdown go={go} role={role} setRole={setRole} auth={auth} />}
           </div>
 
-          <button
-            className="nav-toggle"
-            onClick={() => setOpen(!open)}
-            aria-label="منو"
-            aria-expanded={open ? "true" : "false"}
-          >
-            <span className="bars"></span>
-          </button>
+          {/* Hamburger button.
+              WORKSPACE: invokes AppShell.onWorkspaceMenuClick which opens
+                         the sidebar Sheet (right-anchored under RTL).
+              PUBLIC:    toggles the in-Nav nav-links drawer (legacy).
+              AUTH_FLOW: hidden — no drawer in minimal chrome. */}
+          {!isAuthFlow && (
+            <button
+              className="nav-toggle"
+              onClick={isWorkspace
+                ? () => onWorkspaceMenuClick?.()
+                : () => setOpen(!open)}
+              aria-label="منو"
+              aria-expanded={isWorkspace ? undefined : (open ? "true" : "false")}
+              aria-controls={isWorkspace ? "appshell-sidebar-drawer" : undefined}
+            >
+              <span className="bars"></span>
+            </button>
+          )}
         </div>
       </div>
     </nav>

@@ -1289,7 +1289,41 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
   gap: 32px;
   min-height: calc(100vh - 64px);
 }
-@media (max-width: 980px) { .workspace-grid { grid-template-columns: 1fr; padding: 20px; } }
+/* Phase-A R1.1: switch the grid at lg (1024px) to match tailwind's
+   token + AppShell's drawer breakpoint. Below lg, AppShell renders the
+   sidebar as a Sheet drawer instead of stacking it above the content
+   (which was the 981–1023px tablet-collapse bug). Above lg, the fixed
+   sidebar persists. */
+@media (max-width: 1023px) { .workspace-grid { grid-template-columns: 1fr; padding: 20px; } }
+/* Below lg the AppShell removes the inline RoleSideNav entirely (sidebar
+   moves into a Sheet drawer triggered by the topbar hamburger), so the
+   grid effectively becomes a single column of content. The above rule
+   handles it; this comment documents the intent. */
+
+/* Phase-A R1.1: AppShell mobile/tablet sidebar Sheet drawer. The Sheet
+   primitive supplies the chrome (overlay, focus trap, escape dismiss);
+   we only tune the inner padding so the RoleSideNav content fits the
+   drawer without double-padding. */
+.appshell-sidebar-drawer {
+  padding: 16px;
+  max-width: min(280px, 85vw);
+}
+.appshell-sidebar-drawer .side-nav {
+  /* Override the sticky positioning inside a drawer — useless in a
+     Sheet that scrolls on its own. */
+  position: static !important;
+  top: auto !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  max-height: none !important;
+}
+
+/* Phase-A R1.1: Nav mode rules. data-mode is set by Nav itself based on
+   the route kind that AppShell hands down. */
+.nav[data-mode="workspace"] .nav-links { display: none; }
+.nav[data-mode="auth_flow"] .nav-links,
+.nav[data-mode="auth_flow"] .nav-toggle { display: none; }
 .workspace-content { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
 /* Drop the inner padding so the page's own .dash doesn't double-pad
    inside .workspace-grid. */

@@ -30,19 +30,13 @@ import React from "react";
 import {
   createBrowserRouter,
   RouterProvider,
-  Outlet,
   useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
 
-import { ErrorBoundary } from "./auth/ErrorBoundary";
-import { useAuth } from "./auth/AuthContext";
-import { AuthLoadingSkeleton } from "./components/AuthLoadingSkeleton";
-import { UIRoot, BottomNav, cn } from "./ui";
-import { ScrollProgress } from "./motion";
-import { Nav, Footer } from "./shared";
-import { RoleSideNav } from "./sidenav";
+import { UIRoot } from "./ui";
+import { AppShell } from "./layouts/AppShell";
 
 import HomePage from "./pages/Home";
 import AssessmentLivePage from "./pages/AssessmentLive";
@@ -207,135 +201,25 @@ const RouteShell = ({ Component, paramKey }: RouteShellProps): React.ReactElemen
 };
 
 // =====================================================
-// Route classification
+// Route classification + Layout
 // =====================================================
 //
-// Phase-14.7: routes are partitioned into three groups so the Layout
-// can choose the right chrome (and gate authentication):
+// Phase-A R1.1: the inline Layout + route classification that lived
+// here were extracted. Layout → apps/web/src/layouts/AppShell.tsx (3-mode
+// shell with adaptive sidebar). Route classification →
+// apps/web/src/router/route-classification.ts (getRouteKind +
+// isPublicRoute / isAuthFlowRoute / isWorkspaceRoute helpers).
 //
-//   PUBLIC      — anyone can view, no sidebar, footer shows
-//                 (home, programs, about, pricing, admissions, help)
-//   AUTH_FLOW   — login/register/forgot/verify/2fa/onboarding
-//                 (anyone can view, but no sidebar + no footer —
-//                 the auth shell has its own visual)
-//   WORKSPACE   — everything else (dashboard, course, settings, ...)
-//                 requires authentication, renders RoleSideNav,
-//                 no footer (sidebar replaces footer nav for these)
-//
-// A route id is workspace by elimination: if it's NOT in PUBLIC and
-// NOT in AUTH_FLOW, it's workspace. That's the deny-by-default
-// behaviour Phase 15 RBAC will extend with CASL per-action.
-
-const PUBLIC_ROUTE_IDS: ReadonlySet<string> = new Set([
-  "",
-  "home",
-  "programs",
-  "about",
-  "pricing",
-  "admissions",
-  "help",
-  "honor-code",
-]);
-
-const AUTH_FLOW_ROUTE_IDS: ReadonlySet<string> = new Set([
-  "login",
-  "register",
-  "forgot",
-  "verify-email",
-  "2fa-setup",
-  "onboarding",
-]);
-
-const isPublicRoute = (id: string): boolean => PUBLIC_ROUTE_IDS.has(id);
-const isAuthFlowRoute = (id: string): boolean => AUTH_FLOW_ROUTE_IDS.has(id);
-const isWorkspaceRoute = (id: string): boolean =>
-  !isPublicRoute(id) && !isAuthFlowRoute(id);
-
-// =====================================================
-// Layout — chrome that wraps every route
-// =====================================================
-//
-// Pulls `current` route id + param so Nav can highlight the active
-// item and ErrorBoundary can reset on route change (key changes →
-// React unmounts + remounts the subtree, clearing any latent error
-// state from the previous page).
-//
-// Phase-14.7:
-//   - workspace routes render RoleSideNav alongside <Outlet/> in a
-//     `.workspace-grid` two-column layout. Sidebar stays present
-//     across navigations between workspace pages — no more
-//     "click sidebar item → sidebar disappears" because each page
-//     used to render its own sidebar inconsistently.
-//   - workspace routes are auth-gated: an unauthenticated user is
-//     redirected to /login. Closes the "anyone can visit /instructor
-//     without logging in" reporter F-122.
-const Layout: React.FC = () => {
-  const { id: route, param: routeParam } = useCurrentRoute();
+// We still wrap AppShell in UIRoot here so theme / toast / confirm /
+// command-palette / AI FAB context is available everywhere. UIRoot
+// previously lived inside Layout; pulling it up means AppShell's three
+// modes can compose without owning the global context, and any future
+// shell variant (e.g., a print-only shell) gets the same context for free.
+const LayoutWithChrome: React.FC = () => {
   const go = useGo();
-  const auth = useAuth();
-
-  const isWorkspace = isWorkspaceRoute(route);
-
-  // Phase-14.7 auth gate — redirect to /login when a non-authenticated
-  // visitor hits a workspace route. Effect runs after the render so a
-  // naive implementation would flash the workspace shell before the
-  // navigate() takes effect.
-  //
-  // Phase-16 Gate-1 Fix 2: when the visitor is unauthenticated on a
-  // workspace route, render <AuthLoadingSkeleton/> instead of the
-  // workspace UI. The skeleton is layout-stable so the swap to /login
-  // is silent. Same idea Home.tsx uses on the inverse path.
-  React.useEffect(() => {
-    if (isWorkspace && !auth.isAuthenticated) {
-      go("login");
-    }
-  }, [isWorkspace, auth.isAuthenticated, go]);
-
-  if (isWorkspace && !auth.isAuthenticated) {
-    return <AuthLoadingSkeleton label="در حال انتقال به ورود..." />;
-  }
-
   return (
     <UIRoot onNavigate={go}>
-      <a href="#main-content" className="skip-link">
-        پرش به محتوای اصلی
-      </a>
-      <ScrollProgress />
-      <Nav current={route} go={go} />
-      <ErrorBoundary key={route + ":" + (routeParam || "")}>
-        <main
-          id="main-content"
-          className={cn(
-            "page-shell",
-            // Phase-16 R8 — leave room for the bottom nav on mobile
-            // (h-16 + safe-area-inset). Desktop unaffected by md:pb-0.
-            "pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0",
-          )}
-          tabIndex={-1}
-        >
-          {isWorkspace ? (
-            <div className="workspace-grid">
-              <RoleSideNav active={route} go={go} />
-              <div className="workspace-content">
-                <Outlet />
-              </div>
-            </div>
-          ) : (
-            <Outlet />
-          )}
-        </main>
-        {/* Phase-14.7 R2: footer is centralised here, not per-page.
-            Public marketing pages get it; auth-flow + workspace
-            routes don't (sidebar is the workspace nav, auth shell has
-            its own visual). Pages that still import Footer themselves
-            are deprecated — to be removed file-by-file. */}
-        {isPublicRoute(route) && <Footer go={go} />}
-        {/* Phase-16 R8 — mobile bottom nav. Visible on `<md` only and
-            only when the visitor is authenticated (anonymous visitors
-            on the landing don't need a workspace nav). The component
-            hides itself on /classroom and the auth shell routes. */}
-        {auth.isAuthenticated ? <BottomNav /> : null}
-      </ErrorBoundary>
+      <AppShell />
     </UIRoot>
   );
 };
@@ -456,7 +340,7 @@ const routes = [
 
 const router = createBrowserRouter([
   {
-    element: <Layout />,
+    element: <LayoutWithChrome />,
     children: routes,
   },
 ]);
