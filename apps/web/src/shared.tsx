@@ -198,14 +198,19 @@ export const Nav = ({ current, go }: NavProps): React.ReactElement => {
             <Icon name="search" size={18} />
           </button>
 
-          {/* Theme toggle */}
+          {/* Theme toggle — Phase-16 R4': dedicated sun/moon icons.
+              Replaces the older sparkle/globe placeholder. The icon
+              shows the destination state (sun when dark, moon when
+              light) so users know what the click does. */}
           <button
-            className="nav-icon-btn"
+            className="nav-icon-btn theme-toggle"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label={theme === "dark" ? "تم روشن" : "تم تیره"}
+            aria-label={theme === "dark" ? "تغییر به تم روشن" : "تغییر به تم تیره"}
+            aria-pressed={theme === "dark"}
             title={theme === "dark" ? "روشن" : "تیره"}
+            data-testid="theme-toggle"
           >
-            <Icon name={theme === "dark" ? "sparkle" : "globe"} size={18} />
+            <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
 
           {/* Notifications */}

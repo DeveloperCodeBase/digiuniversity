@@ -131,6 +131,21 @@ const readPersistedTheme = (): Theme => {
   } catch {
     /* localStorage blocked */
   }
+  // Phase-16 R4': honour `prefers-color-scheme` on first visit. Previously
+  // the default was hard-coded "dark", which surprised users whose OS was
+  // in light mode. localStorage takes precedence if the user has explicitly
+  // toggled — only the FIRST visit falls back to the system pref.
+  try {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-color-scheme: light)").matches
+    ) {
+      return "light";
+    }
+  } catch {
+    /* matchMedia unsupported (jsdom + older browsers) */
+  }
   return "dark";
 };
 

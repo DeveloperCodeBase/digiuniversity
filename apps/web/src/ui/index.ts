@@ -65,3 +65,4 @@ export { Skeleton, type SkeletonProps } from "./Skeleton";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { ErrorState, type ErrorStateProps } from "./ErrorState";
 export { BottomNav } from "./BottomNav";
+export { ThemeToggle, type ThemeToggleProps } from "./ThemeToggle";

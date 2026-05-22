@@ -42,6 +42,8 @@ export const Icon = ({ name, size = 18, stroke = 1.7 }) => {
     eye: <svg {...P}><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>,
     send: <svg {...P}><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>,
     sparkle: <svg {...P}><path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2zM19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM5 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg>,
+    sun: <svg {...P}><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>,
+    moon: <svg {...P}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>,
     target: <svg {...P}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>,
     bolt: <svg {...P}><path d="m13 2-9 12h6l-2 8 9-12h-6z"/></svg>,
     headset: <svg {...P}><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="14" width="5" height="7" rx="1.5"/><rect x="17" y="14" width="5" height="7" rx="1.5"/></svg>,

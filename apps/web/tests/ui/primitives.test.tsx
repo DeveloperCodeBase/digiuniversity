@@ -57,6 +57,8 @@ import { Skeleton } from "../../src/ui/Skeleton";
 import { EmptyState } from "../../src/ui/EmptyState";
 import { ErrorState } from "../../src/ui/ErrorState";
 import { ToastProvider, toast } from "../../src/ui/Toast";
+import { ThemeToggle } from "../../src/ui/ThemeToggle";
+import { ThemeProvider } from "../../src/ui-shell";
 
 afterEach(() => cleanup());
 
@@ -364,5 +366,49 @@ describe("Toast", () => {
     toast.success("ذخیره شد", { description: "تغییرات اعمال گردید." });
     expect(await screen.findByText("ذخیره شد")).toBeInTheDocument();
     expect(screen.getByText("تغییرات اعمال گردید.")).toBeInTheDocument();
+  });
+});
+
+describe("ThemeToggle (Phase-16 R4')", () => {
+  // ThemeToggle relies on the ThemeProvider from ui-shell — wrap each
+  // test in a fresh provider so localStorage state from earlier tests
+  // doesn't leak across.
+  const wrap = (node: React.ReactElement) =>
+    renderRtl(<ThemeProvider>{node}</ThemeProvider>);
+
+  it("renders icon variant with role=switch + aria-checked", () => {
+    wrap(<ThemeToggle variant="icon" />);
+    const btn = screen.getByRole("switch");
+    expect(btn).toBeInTheDocument();
+    expect(btn).toHaveAttribute("aria-checked");
+  });
+
+  it("toggles aria-checked + data-theme on click", async () => {
+    wrap(<ThemeToggle variant="labeled" />);
+    const btn = screen.getByRole("switch");
+    const startTheme = document.documentElement.getAttribute("data-theme");
+    fireEvent.click(btn);
+    const afterTheme = document.documentElement.getAttribute("data-theme");
+    expect(afterTheme).not.toBe(startTheme);
+  });
+
+  it("axe passes for every variant", async () => {
+    const { container } = wrap(
+      <div style={{ display: "flex", gap: 12 }}>
+        <ThemeToggle variant="icon" />
+        <ThemeToggle variant="labeled" />
+        <ThemeToggle variant="switch" />
+      </div>,
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("calls onToggle with the destination theme", () => {
+    const onToggle = vi.fn();
+    wrap(<ThemeToggle variant="icon" onToggle={onToggle} />);
+    fireEvent.click(screen.getByRole("switch"));
+    expect(onToggle).toHaveBeenCalled();
+    const next = onToggle.mock.calls[0][0];
+    expect(["light", "dark"]).toContain(next);
   });
 });
