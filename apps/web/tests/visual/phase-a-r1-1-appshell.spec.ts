@@ -79,12 +79,17 @@ test.describe("R1.1 — Responsive sidebar/hamburger", () => {
     await expect(page.locator(".workspace-grid > .side-nav")).toHaveCount(0);
     await expect(page.locator("button.nav-toggle")).toBeVisible();
   });
-  test("WORKSPACE ≥lg: inline sidebar visible, hamburger hidden", async ({ page }) => {
+  // R1.1 originally asserted "inline sidebar visible, hamburger hidden"
+  // at lg+. R1.3 D9 changed the contract: sidebar is ALWAYS a Sheet
+  // drawer except at ≥3xl + pref="open". Hamburger is visible at every
+  // viewport in workspace mode. Updated to the D9 contract; the D9 spec
+  // file has the pinned-at-3xl exception test.
+  test("WORKSPACE ≥lg: hamburger visible (D9), no inline sidebar by default", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await login(page);
     await page.goto("/dashboard");
-    await expect(page.locator(".workspace-grid .side-nav")).toBeVisible();
-    await expect(page.locator("button.nav-toggle")).toBeHidden();
+    await expect(page.locator("button.nav-toggle").first()).toBeVisible();
+    await expect(page.locator(".workspace-grid .side-nav")).toHaveCount(0);
   });
   test("PUBLIC ≥lg: inline nav-links visible", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
