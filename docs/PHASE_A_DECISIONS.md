@@ -58,6 +58,27 @@ Source: <user instruction, plan section, runbook chapter, or "my call">
 **Why:** Honours the ≤300-line rule; preserves R1's deliverable scope; single user smoke pause after R1.2.
 **Source:** my call, per the explicit ≤300-line rule.
 
+### R1.1-D7 — Line budget is a target, not a ceiling; never split code from test
+**Context:** I initially proposed moving R1.1's test spec to R1.2 to keep R1.1 under 300 lines. The user rejected this as the Phase-16 vasle-pinneh pattern returning under a new name.
+**Rule (now Phase-A invariant):**
+  - The ≤300 line cap is a **target**, not a hard ceiling. 10–15% over (≤345 lines) is acceptable when splitting would break a coherent unit.
+  - **Never split test from code to fit the budget.** Tests and the code they verify ship in the same PR so the reviewer can read both in one pass.
+  - If a PR genuinely doesn't fit even with the 10–15% grace, the split must be **vertical** (smaller feature + its complete test) — not **horizontal** (code in one PR, test in another).
+**Why:** Tests are the contract for the code. Reviewing them separately invites the "deploy now, write tests later" rot pattern. Phase 16's lessons explicitly warned against this.
+**Application to R1.1:** ship code + test together in one PR. Expected size ~340–360 lines. The review doc will note the overage and the reason.
+**Source:** user instruction 2026-05-22 after my mistaken horizontal-split proposal.
+
+### R1-D6 — VPS docs sweep failure (deploy blocker)
+**Context:** On first attempt to deploy R1.1 via `.\scripts\remote.ps1 up`, git pull on the VPS aborted with "untracked working tree files would be overwritten" against `docs/audit-logged-in-evidence/` and `docs/gate-2-evidence/smoke/`. These dirs hold PNGs written previously by the `web-visual` Playwright docker container.
+**Diagnosis:** `remote.ps1`'s `up` action prefixes the pull with `git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null;`. The `clean -fd` silently failed (errors swallowed by `2>/dev/null`). Most likely cause: the docker container writes files with a different UID than the VPS user, so the VPS user can't `unlink()` them despite the parent dir being chmod 777. The fix in `remote.ps1` would be `sudo rm -rf` or `find ... -delete` with appropriate ownership.
+**Options considered:**
+  A. Patch `remote.ps1` cleanup prefix (add `sudo rm -rf docs/audit-logged-in-evidence/ docs/gate-2-evidence/smoke/ 2>/dev/null || true` before the git clean) — small infra fix, but touches a cross-cutting script mid-R1
+  B. Ask the user to ssh to VPS once and run a one-shot cleanup, then retry `up`
+  C. Push a commit that untracks the PNGs so pull doesn't conflict — destroys the 150 PNG dossier evidence, ruled out
+**Choice:** B for this round (unblock R1.1 deploy now). Open a follow-up "infra: harden remote.ps1 docs sweep" ticket; logged in `PHASE_A_OUT_OF_SCOPE.md`.
+**Why:** Modifying `remote.ps1` mid-R1.1 expands scope and the fix needs testing. A one-shot manual cleanup is faster and preserves R1's focus on AppShell.
+**Source:** my call, after `.\scripts\remote.ps1 up` and `.\scripts\remote.ps1 pull` both failed identically.
+
 ### R1-D5 — `.workspace-grid` breakpoint 980px → 1024px
 **Context:** Current CSS breaks the grid at 980px (sidebar stacks above content). Compass says fixed sidebar at lg+ which is 1024px in tailwind config.
 **Options considered:**
