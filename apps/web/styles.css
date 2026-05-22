@@ -445,7 +445,11 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
    animated parallax. */
 .hero-bg {
   position: absolute;
-  inset: -15% -10% -25% -10%;
+  /* Phase-16 R11 — constrain bleed to 0 on the horizontal axis under
+     `<md`. The negative-10% on each side was decorative for desktop
+     auroras (which now only render at >=lg) but it bloated the body
+     scrollWidth on phones even with overflow:clip on html. */
+  inset: -15% 0 -25% 0;
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(
@@ -1889,6 +1893,24 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
     transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
+}
+
+/* Phase-16 R10 — test mode escape hatch for fullPage screenshots.
+   Playwright's fullPage capture scrolls in tiles and the .reveal
+   IntersectionObserver fires after the per-tile shot is taken, so
+   the captured PNG shows the page mid-animation (opacity 0). Setting
+   `data-test-no-animation` on <html> from the spec before the
+   screenshot bypasses the entire reveal animation stack — no
+   timing race, no flaky pre-warm. */
+[data-test-no-animation] .reveal,
+[data-test-no-animation] .reveal-scale,
+[data-test-no-animation] .reveal-blur {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+[data-test-no-animation] * {
+  animation: none !important;
 }
 .reveal.in {
   opacity: 1;

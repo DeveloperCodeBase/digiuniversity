@@ -685,20 +685,57 @@ export const ArchStack = (): React.ReactElement => {
     { name: "Cloud-Native Platform", sub: "Kubernetes · Kafka · CDN · Observability", color: "var(--fg-dim)" },
   ];
   return (
-    <div style={{ perspective: 1400, transformStyle: "preserve-3d", padding: "20px 0" }}>
-      <div className="flex flex-col gap-4.5 items-center"  style={{transform: "rotateX(48deg) rotateZ(-28deg)",
-        transformStyle: "preserve-3d"}}>
+    <div
+      // Phase-16 R11 — the 3D rotation (rotateX(48deg) rotateZ(-28deg))
+      // projects the 320-px boxes to a visual width ~360 px, which on
+      // 320-px viewports leaked past the page-shell. Clip horizontally
+      // at the ArchStack parent so the diagram still renders inside
+      // the slot.
+      style={{
+        perspective: 1400,
+        transformStyle: "preserve-3d",
+        padding: "20px 0",
+        overflowX: "clip",
+        maxWidth: "100%",
+      }}
+    >
+      <div
+        className="flex flex-col gap-4.5 items-center"
+        style={{
+          transform: "rotateX(48deg) rotateZ(-28deg)",
+          transformStyle: "preserve-3d",
+        }}
+      >
         {layers.map((L, i) => (
-          <div className="rounded-xl relative flex flex-col justify-center" key={i}  style={{width: 320,
-            height: 70,
-            background: "linear-gradient(180deg, var(--surface-2), var(--surface))",
-            border: "1px solid var(--line-2)",
-            padding: "0 18px",
-            transform: `translateZ(${(layers.length - i) * 20}px)`,
-            boxShadow: "0 20px 40px -20px rgba(0,0,0,0.7)"}}>
-            <div className="absolute"  style={{ top: 8, left: 12, width: 5, height: 5, borderRadius: 50, background: L.color, boxShadow: `0 0 12px ${L.color}`}} />
+          <div
+            className="rounded-xl relative flex flex-col justify-center"
+            key={i}
+            style={{
+              // Cap at 320px on desktop, fluid below — the 3D tilt
+              // never visually exceeds the slot now.
+              width: "min(320px, calc(100% - 16px))",
+              height: 70,
+              background: "linear-gradient(180deg, var(--surface-2), var(--surface))",
+              border: "1px solid var(--line-2)",
+              padding: "0 18px",
+              transform: `translateZ(${(layers.length - i) * 20}px)`,
+              boxShadow: "0 20px 40px -20px rgba(0,0,0,0.7)",
+            }}
+          >
+            <div
+              className="absolute"
+              style={{
+                top: 8,
+                left: 12,
+                width: 5,
+                height: 5,
+                borderRadius: 50,
+                background: L.color,
+                boxShadow: `0 0 12px ${L.color}`,
+              }}
+            />
             <div style={{ fontSize: 14, fontWeight: 600 }}>{L.name}</div>
-            <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)"}}>{L.sub}</div>
+            <div className="mt-1" style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-mute)" }}>{L.sub}</div>
           </div>
         ))}
       </div>
