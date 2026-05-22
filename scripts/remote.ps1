@@ -898,8 +898,11 @@ cd /var/www/digiuniversity
 # container, so previous captures land PNGs directly into the VPS's
 # working tree. If those PNGs are later committed AND pushed (as
 # gate-1-evidence is), `git pull` refuses to overwrite the still-
-# present untracked files. Sweep any untracked evidence files before
-# pulling so we always converge on origin/main.
+# present untracked files (or, after the file is committed, the
+# tracked-and-locally-modified PNG blocks the merge). Reset tracked
+# changes AND sweep untracked before pulling so we always converge
+# on origin/main.
+git checkout -- docs/ 2>/dev/null || true
 git clean -fd docs/ 2>/dev/null || true
 git pull origin main
 # Host-side output dir. Container writes here via the ./docs bind mount.
