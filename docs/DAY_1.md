@@ -19,6 +19,18 @@ Working on: Phase A Foundation Repair
 - R1.1 test (commit `3942656`): `apps/web/tests/visual/phase-a-r1-1-appshell.spec.ts` (121 lines, 13 assertions across 4 groups: 3-mode topology, logo target, responsive, a11y).
 - Total R1.1 PR size: +443 / -165 added/removed (296 code + 147 test+docs). Over the 300 target — explained in R1.1-D7: code+test must ship together; cannot horizontally split per the new memory rule.
 
+## R1.1-fix (focus restore) + R1.2 — shipped
+
+- R1.1 fix commit `f2958d3`: `onCloseAutoFocus` callback on workspace Sheet + `id="appshell-sidebar-trigger"` on hamburger. Test 13 now green.
+- R1.2 memo + code + test (commits `a63fd3c`, `aab62fc`, `8171be1`, `c607cf5`): Breadcrumbs row, route-label map, 10 assertions, shared-auth-context fix to dodge the 10/min rate limit.
+- Deploy at `c607cf5`: 13/13 R1.1 + 9/10 R1.2 (1 intentional skip — no 4-deep route to exercise popover content yet).
+- Bundle growth: +1% gzipped JS (+2.51 KB), within Phase-11 5% cap.
+- `PHASE_A_R1_REVIEW.md` written.
+
+## Pause
+
+Awaiting owner ack on R1 review (60-second smoke checklist). R2 starts after green-light.
+
 ## Blockers (resolved during day)
 
 - VPS deploy blocked on `git pull` because the audit PNG dir was untracked but conflicted with origin's tracked PNGs. `remote.ps1`'s docs sweep silently failed (Playwright container UID owned the files; VPS user couldn't unlink). Logged the underlying `remote.ps1` flaw in `PHASE_A_OUT_OF_SCOPE.md` (infra PR after Gate A). User ran a permanent fix and confirmed git status clean; deploy retried successfully.
