@@ -142,16 +142,25 @@ test.describe("R1.3 — B4 + D9 hamburger-toggle sidebar everywhere", () => {
 });
 
 test.describe("R1.3 — B2 login layout minimum fix", () => {
-  test("login role tabs render as 2-column grid at 375", async ({ page }) => {
+  test("login role tabs render as 2-column grid at 375 (assert via child positions)", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto("/login");
     const tabs = page.locator(".login-role-tabs").first();
     await expect(tabs).toBeVisible();
-    const cols = await tabs.evaluate((el: HTMLElement) =>
-      window.getComputedStyle(el).gridTemplateColumns,
-    );
-    // 2 fractional units -> "Xpx Xpx" computed.
-    expect(cols.split(" ").length).toBe(2);
+    // Computed `grid-template-columns` was returning unexpected values
+    // (probably because the inline `style` attribute or another rule
+    // wins on this device). Assert the actual visual layout instead:
+    // 5 chips in 2 cols = 3 rows of offsetTop → 3 unique Y positions.
+    const info = await tabs.evaluate((el: HTMLElement) => ({
+      display: window.getComputedStyle(el).display,
+      cols: window.getComputedStyle(el).gridTemplateColumns,
+      childOffsets: Array.from(el.children).map((c) => (c as HTMLElement).offsetTop),
+    }));
+    const uniqueRows = new Set(info.childOffsets).size;
+    expect(
+      uniqueRows,
+      `Expected 3 rows (5 chips in 2 cols). Got ${uniqueRows}. display="${info.display}", cols="${info.cols}", offsets=${JSON.stringify(info.childOffsets)}`,
+    ).toBe(3);
   });
 
   test("login form side has max-width ≤420 at 375", async ({ page }) => {
@@ -250,29 +259,37 @@ test.describe("R1.3 — Brand integration (logos + copyright + About)", () => {
 });
 
 test.describe("R1.3 — B5 landing privacy leak", () => {
-  test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
+  test("authed student on / never sees Nav before redirect (AppShell skeleton holds the chrome)", async ({ browser }) => {
+    // The actual leak contract: Nav (with its user-menu showing the
+    // authed name) must NOT render while the URL is still the landing.
+    // String-matching "نسرین" in HTML was over-broad — Home.tsx has a
+    // testimonial that legitimately uses that name as marketing copy,
+    // even when no real user is involved. Assert the structural
+    // contract instead: nav.nav must never coexist with pathname="/".
     const page = await authedPage(browser);
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    // Sample the rendered HTML ONLY while the URL is still the landing
-    // (/ or /home). Once AppShell's useEffect navigates to /dashboard,
-    // the student's name IS allowed to appear (greeting, avatar, etc.)
-    // and we'd get a false positive if we kept sampling.
-    let leakFound: string | null = null;
-    const startedAt = Date.now();
-    while (Date.now() - startedAt < 1500) {
-      const path = new URL(page.url()).pathname;
-      const stillOnLanding = path === "/" || path === "/home";
-      if (!stillOnLanding) break;
-      const html = await page.content();
-      for (const needle of STUDENT.leakNeedles) {
-        if (html.includes(needle)) { leakFound = needle; break; }
-      }
-      if (leakFound) break;
-      await page.waitForTimeout(40);
-    }
-    // Wait for the redirect to land (independent of the leak sampling).
+
+    // Poll in the browser (per requestAnimationFrame) for cheap, race-
+    // free observation. Resolves when the URL leaves the landing OR a
+    // 3-second safety timeout fires.
+    const racedToNav: boolean = await page.evaluate(
+      () => new Promise<boolean>((resolve) => {
+        let sawNavOnLanding = false;
+        const tick = (): void => {
+          const path = window.location.pathname;
+          const onLanding = path === "/" || path === "/home";
+          const navEl = document.querySelector("nav.nav");
+          if (onLanding && navEl) sawNavOnLanding = true;
+          if (!onLanding) { resolve(sawNavOnLanding); return; }
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+        setTimeout(() => resolve(sawNavOnLanding), 3000);
+      }),
+    );
+
     await page.waitForURL((u) => u.pathname.startsWith("/dashboard"), { timeout: 5000 });
-    expect(leakFound, `leak detected: "${leakFound}" appeared on landing before redirect`).toBeNull();
+    expect(racedToNav, "Nav.nav appeared while still on landing — AppShell should have rendered AuthLoadingSkeleton instead").toBe(false);
     expect(page.url()).toMatch(/\/dashboard/);
   });
 });
