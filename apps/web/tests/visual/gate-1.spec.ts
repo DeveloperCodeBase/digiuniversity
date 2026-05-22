@@ -59,19 +59,20 @@ test.describe("Gate 1 — landing responsive + redirect", () => {
       // The new outcome-first headline must be visible — proves R2 shipped.
       await expect(page.locator("h1.hero-title")).toContainText("۲۴۸ برنامه");
 
-      // B-02 sanity: body must not horizontally overflow at this viewport.
-      // We log + soft-mark the failure rather than throw, so Gate 1 can
-      // ship even while the full responsive sweep (R11) is pending. The
-      // screenshot above is the visible proof of any overflow.
-      const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
-      if (scrollWidth > vp.width + 2) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[Gate-1] overflow at ${vp.width}x${vp.height}: ` +
-            `body.scrollWidth=${scrollWidth} (expected <= ${vp.width + 2}). ` +
-            "Tracked as B-02 — full responsive sweep lands in R11.",
-        );
-      }
+      // B-02 sanity: the page must NOT actually horizontally scroll.
+      // R11 (commit 25ad4b8) closed this on the live URL: the residual
+      // body.scrollWidth artefacts (marquee track, snap-scroll cards,
+      // glow blobs) are clipped by `html { overflow-x: clip }` and
+      // their parent containers' overflow:hidden. The check below
+      // measures the canSCROLL property, not the dormant scrollWidth.
+      const canScrollHoriz = await page.evaluate(() => {
+        const before = window.scrollX;
+        window.scrollTo(99999, 0);
+        const after = window.scrollX;
+        window.scrollTo(before, 0);
+        return after > 0;
+      });
+      expect(canScrollHoriz).toBe(false);
 
       await ctx.close();
     });
