@@ -58,6 +58,25 @@ Source: <user instruction, plan section, runbook chapter, or "my call">
 **Why:** Honours the ≤300-line rule; preserves R1's deliverable scope; single user smoke pause after R1.2.
 **Source:** my call, per the explicit ≤300-line rule.
 
+### R1.3-D10 — Manual smoke is authoritative; Playwright `toBeVisible` does NOT prove visual correctness
+**Context:** R1's 23 assertions all passed but the owner's manual smoke surfaced 6 bugs the spec didn't catch (sticky navbar, login layout broken, dashboard not responsive, drawer not actually opening, landing leak, classroom mobile broken). Playwright assertions like `expect(navbar).toBeVisible()` returned true even though the navbar wasn't sticky and scrolled off on mobile.
+**Rule:** Manual smoke on a real device (or DevTools mobile emulation, run twice) is the authoritative visual-fidelity check. Playwright spec is necessary but **not sufficient**. Every sub-R review must include manual smoke evidence, not just spec output.
+**Application:** Every sub-R from R1.3 onward includes a "Manual smoke required" step before claiming green. Owner re-runs the smoke after the agent reports — agent does NOT mark the sub-R done until owner ack.
+**Memory:** Saved to `feedback_manual_smoke_required.md` so future sessions inherit the rule.
+**Source:** owner instruction 2026-05-22, post-R1 smoke.
+
+### R1.3-D9 — Sidebar is hamburger-toggle on every viewport (Notion / Linear pattern)
+**Context:** R1.1 shipped a sidebar fixed at lg+ and Sheet-drawer at <lg. Owner's preferred pattern is hamburger-toggle on **every** viewport — modern UX (Notion, Linear, Gmail, GitHub), more content room for widgets, mobile/desktop consistency.
+**Rule:**
+  - Hamburger button visible on every viewport (not only <lg)
+  - Sidebar closed by default on every viewport
+  - Click hamburger → drawer slides in from right (RTL)
+  - Click any sidebar item → navigate + auto-close drawer
+  - Click hamburger again or click backdrop → close
+  - State persisted in localStorage as `digiu_sidebar_pref` per user
+  - **Exception:** at viewport ≥3xl (1536px) **and** in workspace **and** the user previously had it open → stays open (power users on large monitors)
+**Source:** owner instruction 2026-05-22.
+
 ### R1.1-D8 — `find -newer .git/HEAD` is unsafe for git-tracked dirs
 **Context:** When unblocking the VPS pull, an attempted cleanup with `find docs -name '*.png' -newer .git/HEAD -delete` matched and deleted tracked PNGs too. Recovery: `git checkout HEAD -- docs/` restored tracked files; `sudo rm` on the untracked dir finished the job.
 **Rule:** Never use `find -newer .git/HEAD` to discriminate untracked vs tracked files. The mtime-vs-HEAD-mtime comparison isn't reliable — touched files, rebased commits, and clone-fresh checkouts all break the heuristic.

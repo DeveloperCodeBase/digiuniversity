@@ -14,6 +14,12 @@ Candidate destination: <Phase B / R{n}, or a separate ticket name>
 
 ## Entries
 
+### 2026-05-22 — R1.3 — B6: Live classroom mobile rewrite (deferred to Phase D R1)
+File:        apps/web/src/pages/Classroom.tsx
+What I saw:  Manual smoke on R1 found the classroom page broken on <md viewports. The current implementation predates the LiveKit integration that Phase D ships and would need to be re-done from scratch regardless.
+Why I didn't fix it: R1.3 scope is post-smoke fixes + sidebar redesign + brand. Touching classroom now means writing throwaway code that Phase D's ground-up rewrite would discard.
+Candidate destination: Phase D R1 (LiveKit integration). The full rewrite will include mobile-first layout (bottom sheet for participants, swipe gestures, full-bleed video on <md per Master Runbook §D specs). Owner notified.
+
 ### 2026-05-22 — R1.2 — Extract a shared "auth-once" Playwright helper (post-Gate-A test infra task)
 File:        apps/web/tests/visual/_setup/ (new) or playwright.visual.config.js globalSetup
 What I saw:  Auth flow is throttled at 10/min per IP. The visual docker runs all specs from the same IP, so by the 11th login attempt in a minute the API returns 429 and `page.waitForURL` times out. R1.2's first run had 5 failures because R1.1's 13 logins consumed the bucket. Workaround inside R1.2 spec: one beforeAll login + sharedContext for all login-required tests.
