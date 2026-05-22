@@ -1,7 +1,11 @@
 # Gate 2 — Landing redesign + responsive primitives review
 
 **Status:** awaiting owner approval.
-**Deployed:** `https://digiuniversity.ir` (commit `cc64611`, deploy `.\scripts\remote.ps1 up` ran clean).
+**Deployed:** `https://digiuniversity.ir` (commit `de4027f`, deploy `.\scripts\remote.ps1 up` ran clean).
+
+**Automated smoke**: `apps/web/tests/visual/gate-2-smoke.spec.ts` — **9 / 9 pass** against the live URL. Full report at [`docs/gate-2-smoke-evidence/SMOKE_REPORT.md`](gate-2-smoke-evidence/SMOKE_REPORT.md). The two failures from the first smoke pass (iPhone-SE horizontal scroll on landing + classroom) were root-caused to (a) the nav-actions 5-icon cluster exceeding 320 px after R7' enforced 44 px touch targets and (b) the AuthShell's `.auth-grid` / `.auth-visual` media-query rules referencing classes that weren't actually attached. Both fixed in commit `27cd0f9`:
+- Hide `search` + `bell` nav icons on `<sm` (xs / iPhone SE). They remain reachable via the hamburger drawer and `Ctrl/Cmd+K`.
+- Apply the `.auth-grid` / `.auth-visual` class names to the AuthShell so the visual side panel actually hides on `<980 px` (was dead CSS; the 400 px decorative ring inside `AuthVisualLogin` was leaking past the viewport on `/login`).
 **Scope:** Phase-16 sprints R3 → R11, plus the four "missing R" backfills (R4' theme, R5' button migration, R7' touch targets, R10 reveal fix).
 
 ---
