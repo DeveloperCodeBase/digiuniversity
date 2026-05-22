@@ -204,6 +204,45 @@ test.describe("R1.3 — B3 dashboard + profile minimum responsive", () => {
   });
 });
 
+test.describe("R1.3 — Brand integration (logos + copyright + About)", () => {
+  test("PUBLIC footer carries JDO copyright text + theme-aware logo tags", async ({ page }) => {
+    await page.goto("/about");
+    // The footer's full attribution block exists.
+    const fullAttr = page.locator(".org-attribution-full").first();
+    await expect(fullAttr).toBeVisible();
+    // Persian org name is on the page (used by AboutPage + Footer).
+    await expect(page.getByText(/مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی/).first()).toBeVisible();
+    // Both theme-aware logo <img> elements ship in the DOM (light + dark).
+    await expect(page.locator('img.org-attribution-logo.is-light').first()).toBeAttached();
+    await expect(page.locator('img.org-attribution-logo.is-dark').first()).toBeAttached();
+    await expect(page.locator('img.org-attribution-logo.is-light').first()).toHaveAttribute("src", "/logos/jdo-light.png");
+    await expect(page.locator('img.org-attribution-logo.is-dark').first()).toHaveAttribute("src", "/logos/jdo-dark.png");
+  });
+
+  test("WORKSPACE shows compact attribution bar on every page", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.goto("/dashboard");
+    await expect(page.locator(".org-attribution-compact").first()).toBeVisible();
+    await expect(page.getByText(/تمامی حقوق محفوظ است/).first()).toBeVisible();
+  });
+
+  test("AUTH_FLOW shows compact attribution bar too", async ({ page }) => {
+    await page.goto("/login");
+    await expect(page.locator(".org-attribution-compact").first()).toBeVisible();
+  });
+
+  test("About page renders the JDO ownership section + polished Persian paragraph", async ({ page }) => {
+    await page.goto("/about");
+    await expect(page.locator(".about-org-section").first()).toBeVisible();
+    await expect(
+      page.getByText(/توسط .* مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی .* طراحی و توسعه یافته/).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/دیجی‌یونیورسیتی نخستین خروجی عملیاتی این مأموریت/).first(),
+    ).toBeVisible();
+  });
+});
+
 test.describe("R1.3 — B5 landing privacy leak", () => {
   test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
     const page = await authedPage(browser);

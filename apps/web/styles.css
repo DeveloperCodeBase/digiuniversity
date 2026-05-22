@@ -1368,6 +1368,91 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
   }
 }
 
+/* Phase-A R1.3 Brand — organizational attribution + theme-aware
+   logo swap. Two <img> tags ship per logo block; CSS hides the
+   inactive one based on html[data-theme]. */
+.org-attribution-logo {
+  display: block;
+  max-height: 64px;
+  width: auto;
+  /* If the file isn't on disk yet, the broken-image placeholder is
+     reserved by max-height so layout doesn't jump when assets land. */
+  min-height: 24px;
+}
+.org-attribution-logo.is-dark { display: none; }
+html[data-theme="dark"] .org-attribution-logo.is-light { display: none; }
+html[data-theme="dark"] .org-attribution-logo.is-dark { display: block; }
+
+/* Full variant — used in marketing Footer + AboutPage org section. */
+.org-attribution-full {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.org-attribution-full .org-attribution-mark {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.org-attribution-full .org-attribution-mark .org-attribution-logo {
+  max-height: 96px;
+  width: auto;
+}
+.org-attribution-full .org-attribution-text {
+  flex: 1;
+  min-width: 240px;
+}
+.org-attribution-full .org-attribution-name {
+  font-family: var(--f-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 6px;
+}
+.org-attribution-full .org-attribution-copyright {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fg-mute);
+}
+
+/* Compact variant — used by AppShell as the workspace/auth-flow
+   footnote bar. Thin, sits at the bottom of the viewport-tall
+   page-shell without dominating. */
+.org-attribution-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--fg-dim);
+  background: var(--surface);
+  flex-wrap: wrap;
+  text-align: center;
+}
+.org-attribution-compact .org-attribution-logo {
+  max-height: 22px;
+  width: auto;
+  min-height: 16px;
+}
+
+@media (max-width: 767px) {
+  .org-attribution-compact { font-size: 11px; padding: 12px 16px; gap: 8px; }
+  .org-attribution-full { gap: 16px; padding: 20px 0; }
+  .org-attribution-full .org-attribution-mark { width: 72px; height: 72px; }
+  .org-attribution-full .org-attribution-mark .org-attribution-logo { max-height: 72px; }
+}
+
+/* About page org section visual spacing. */
+.about-org-section { margin-top: 24px; margin-bottom: 32px; }
+
 /* Phase-A R1.3 B1 — scroll-aware nav depth. When AppShell's scroll
    listener sets html[data-scrolled="true"], the nav gets a small
    shadow + a slightly more opaque background so it doesn't visually

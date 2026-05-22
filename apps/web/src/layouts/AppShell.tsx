@@ -18,6 +18,7 @@ import { useGo, useCurrentRoute } from "../router";
 import { getRouteKind, type RouteKind } from "../router/route-classification";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { OrgAttribution } from "../components/OrgAttribution";
 
 type NavMode = "public" | "workspace" | "auth_flow";
 
@@ -163,6 +164,10 @@ export const AppShell: React.FC = () => {
         ) : null}
 
         {kind === "PUBLIC" && <Footer go={go} />}
+        {/* Phase-A R1.3 Brand: workspace + auth_flow get a thin attribution
+            bar (the marketing Footer above already carries the full version
+            for PUBLIC). Owner asked for org credit on every page. */}
+        {kind !== "PUBLIC" ? <OrgAttribution variant="compact" /> : null}
         {auth.isAuthenticated && isWorkspace ? <BottomNav /> : null}
       </ErrorBoundary>
     </>

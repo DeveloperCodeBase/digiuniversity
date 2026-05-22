@@ -13,6 +13,7 @@ import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard, Toggle } from "../components/widgets";
 import { EVENTS } from "../data.js";
+import { OrgAttribution } from "../components/OrgAttribution";
 
 export const AdminPage = ({ go }) => {
   return (
@@ -566,6 +567,25 @@ export const AboutPage = ({ go }) => (
         </h1>
         <p className="mt-8"  style={{fontSize: 22, lineHeight: 1.7, color: "var(--fg-mute)", fontFamily: "var(--f-display)", fontWeight: 400}}>
           ما دانشگاهی نمی‌سازیم که از ابزارهای AI استفاده می‌کند — ما دانشگاهی می‌سازیم که <strong style={{ color: "var(--fg)" }}>از ابتدا با AI به‌عنوان زیرساخت یادگیری</strong> طراحی شده. تفاوت، در همه چیز است.
+        </p>
+      </div>
+    </section>
+
+    {/* Phase-A R1.3 Brand: organizational ownership section. The
+        platform is a product of مرکز راهبری پژوهش و پیشرفت هوش مصنوعی
+        جهاد دانشگاهی; this block makes that explicit on the public
+        About page. */}
+    <section style={{ padding: "60px 0", borderBottom: "1px solid var(--line)" }}>
+      <div className="shell" style={{ maxWidth: 920 }}>
+        <span className="eyebrow">سازنده · OWNERSHIP</span>
+        <div className="about-org-section">
+          <OrgAttribution variant="full" />
+        </div>
+        <p className="mt-8"  style={{fontSize: 17, lineHeight: 1.9, color: "var(--fg-mute)"}}>
+          این پلتفرم توسط <strong style={{ color: "var(--fg)" }}>مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی</strong> طراحی و توسعه یافته است. مرکز راهبری، با اتکا به تجربه‌ی چهار دهه‌ای جهاد دانشگاهی در عرصه‌ی پژوهش و آموزش عالی کشور، مأموریت دارد بسترهای پیشرفته‌ی هوش مصنوعی، یادگیری ترکیبی و آموزش آنلاین را در نظام دانشگاهی ایران توسعه دهد و در دسترس پژوهشگران، دانشجویان و استادان قرار دهد.
+        </p>
+        <p className="mt-5"  style={{fontSize: 17, lineHeight: 1.9, color: "var(--fg-mute)"}}>
+          دیجی‌یونیورسیتی نخستین خروجی عملیاتی این مأموریت است: یک زیرساخت دانشگاه آنلاین کاملاً بومی، استاندارد-محور (LTI 1.3، xAPI، QTI، Caliper) و آماده‌ی استقرار در هر دانشگاه یا سازمان آموزشی.
         </p>
       </div>
     </section>

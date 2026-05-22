@@ -13,6 +13,7 @@ import { useRole, ROLES, type RoleId, type Role } from "./role";
 import { useAuth, type AuthContextValue } from "./auth/AuthContext";
 import { Button, useTheme } from "./ui";
 import type { Go } from "./router";
+import { OrgAttribution } from "./components/OrgAttribution";
 
 // (Window.toast / Window.confirmAction / Window.openCommandPalette
 // types live in ui.tsx — the file that actually assigns them. Both
@@ -581,8 +582,12 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </ul>
         </div>
       </div>
+      {/* Phase-A R1.3: organizational attribution. DigiUniversity is
+          the product; ownership and copyright sit with مرکز راهبری
+          پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی. */}
+      <OrgAttribution variant="full" className="footer-org-attribution" />
       <div className="footer-bot">
-        <span>© ۱۴۰۵ DigiUniversity · پلتفرم دانشگاه آنلاین هوشمند</span>
+        <span>دیجی‌یونیورسیتی · پلتفرم دانشگاه آنلاین هوشمند</span>
         <span>v1.0.0 · build 2026.05 · region: TEH-01</span>
       </div>
     </div>
