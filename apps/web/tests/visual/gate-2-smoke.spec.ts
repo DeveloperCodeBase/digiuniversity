@@ -30,7 +30,9 @@ import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
 
-const OUT = "/screenshots/gate-2-evidence/smoke";
+// Phase-16 Gate-2: docs/gate-2-smoke-evidence is bind-mounted to
+// /screenshots inside the web-visual container — write directly there.
+const OUT = "/screenshots";
 
 interface SmokeFinding {
   item: string;
