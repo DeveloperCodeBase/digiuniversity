@@ -97,8 +97,10 @@ test.describe("R1.3 — B4 + D9 hamburger-toggle sidebar everywhere", () => {
   test("D9: localStorage `digiu_sidebar_pref` toggles on hamburger click", async ({ browser }) => {
     const page = await authedPage(browser);
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.evaluate(() => localStorage.removeItem("digiu_sidebar_pref"));
+    // Navigate first — localStorage access on about:blank throws
+    // SecurityError. Once on the SPA's origin, localStorage works.
     await page.goto("/dashboard");
+    await page.evaluate(() => localStorage.removeItem("digiu_sidebar_pref"));
     await page.locator("button.nav-toggle").first().click();
     await expect.poll(async () =>
       page.evaluate(() => localStorage.getItem("digiu_sidebar_pref")),
@@ -234,9 +236,13 @@ test.describe("R1.3 — Brand integration (logos + copyright + About)", () => {
   test("About page renders the JDO ownership section + polished Persian paragraph", async ({ page }) => {
     await page.goto("/about");
     await expect(page.locator(".about-org-section").first()).toBeVisible();
-    await expect(
-      page.getByText(/توسط .* مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی .* طراحی و توسعه یافته/).first(),
-    ).toBeVisible();
+    // getByText matches against an element's accessible text. The
+    // paragraph wraps the org name in a <strong>, so the surrounding
+    // paragraph's text *as a whole* is the concatenation. Match on
+    // the unique phrase fragments instead of a single long regex
+    // that has to span the <strong> boundary.
+    await expect(page.getByText(/این پلتفرم توسط/).first()).toBeVisible();
+    await expect(page.getByText(/طراحی و توسعه یافته است/).first()).toBeVisible();
     await expect(
       page.getByText(/دیجی‌یونیورسیتی نخستین خروجی عملیاتی این مأموریت/).first(),
     ).toBeVisible();
@@ -246,26 +252,25 @@ test.describe("R1.3 — Brand integration (logos + copyright + About)", () => {
 test.describe("R1.3 — B5 landing privacy leak", () => {
   test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
     const page = await authedPage(browser);
-    // Sample the page content several times in the redirect window;
-    // if the student's name appears in ANY sample, that's the leak we
-    // claim is fixed. The needles list covers first name, last name,
-    // and the demo email.
-    let leakFound: string | null = null;
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    for (let i = 0; i < 8; i++) {
+    // Sample the rendered HTML ONLY while the URL is still the landing
+    // (/ or /home). Once AppShell's useEffect navigates to /dashboard,
+    // the student's name IS allowed to appear (greeting, avatar, etc.)
+    // and we'd get a false positive if we kept sampling.
+    let leakFound: string | null = null;
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < 1500) {
+      const path = new URL(page.url()).pathname;
+      const stillOnLanding = path === "/" || path === "/home";
+      if (!stillOnLanding) break;
       const html = await page.content();
       for (const needle of STUDENT.leakNeedles) {
-        if (html.includes(needle)) {
-          leakFound = needle;
-          break;
-        }
+        if (html.includes(needle)) { leakFound = needle; break; }
       }
       if (leakFound) break;
-      // The redirect should land within a few hundred ms; sample
-      // every 75ms × 8 = 600ms total to cover the gap.
-      await page.waitForTimeout(75);
+      await page.waitForTimeout(40);
     }
-    // After the redirect lands, URL must be /dashboard (no /home).
+    // Wait for the redirect to land (independent of the leak sampling).
     await page.waitForURL((u) => u.pathname.startsWith("/dashboard"), { timeout: 5000 });
     expect(leakFound, `leak detected: "${leakFound}" appeared on landing before redirect`).toBeNull();
     expect(page.url()).toMatch(/\/dashboard/);
