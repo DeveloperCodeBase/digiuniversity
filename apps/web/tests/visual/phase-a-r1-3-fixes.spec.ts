@@ -139,6 +139,38 @@ test.describe("R1.3 — B4 + D9 hamburger-toggle sidebar everywhere", () => {
   });
 });
 
+test.describe("R1.3 — B2 login layout minimum fix", () => {
+  test("login role tabs render as 2-column grid at 375", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/login");
+    const tabs = page.locator(".login-role-tabs").first();
+    await expect(tabs).toBeVisible();
+    const cols = await tabs.evaluate((el: HTMLElement) =>
+      window.getComputedStyle(el).gridTemplateColumns,
+    );
+    // 2 fractional units -> "Xpx Xpx" computed.
+    expect(cols.split(" ").length).toBe(2);
+  });
+
+  test("login form side has max-width ≤420 at 375", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/login");
+    const formSide = page.locator(".auth-grid > div").first();
+    const maxWidth = await formSide.evaluate((el: HTMLElement) =>
+      window.getComputedStyle(el).maxWidth,
+    );
+    expect(maxWidth).toBe("420px");
+  });
+
+  test("login at 375 has no horizontal overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/login");
+    await page.waitForTimeout(300);
+    const scrollX = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(scrollX).toBeLessThanOrEqual(2);
+  });
+});
+
 test.describe("R1.3 — B3 dashboard + profile minimum responsive", () => {
   test("dashboard at 375 has no horizontal overflow", async ({ browser }) => {
     const page = await authedPage(browser);

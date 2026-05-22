@@ -4500,11 +4500,32 @@ main[data-screen-label*="کلاس زنده"] + * .ai-fab {
 }
 
 /* Login role tabs: 5-tab strip (دانشجو · استاد · مدیر · والد · سازمان)
-   crams into <50px per cell at 320px. Wrap to 2 rows below 480px. */
-@media (max-width: 480px) {
+   crams into <50px per cell at 320px. Phase-A R1.3 B2: wrap to 2 cols
+   at <md (was 3-cols at <480). User spec said "2-column grid not
+   vertical list" — 5 tabs in 2 cols = 3 rows of 2+2+1, which reads
+   cleanly. Final polish (cleaner role-chip design) lands in R5. */
+@media (max-width: 767px) {
   .login-role-tabs {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 6px !important;
+  }
+}
+
+/* Phase-A R1.3 B2 — login form side at <lg: tighter horizontal padding
+   + max-width 420 (mobile) → 480 (tablet) per user spec. AuthShell's
+   inline maxWidth: 560 is the lg+ value; this override narrows on
+   small screens so the form doesn't feel airy and the input fields
+   don't stretch unreadable. */
+@media (max-width: 767px) {
+  .auth-grid > div:first-child {
+    padding: 32px 20px !important;
+    max-width: 420px !important;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .auth-grid > div:first-child {
+    padding: 40px 32px !important;
+    max-width: 480px !important;
   }
 }
 
