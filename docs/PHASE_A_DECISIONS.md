@@ -58,6 +58,13 @@ Source: <user instruction, plan section, runbook chapter, or "my call">
 **Why:** Honours the ≤300-line rule; preserves R1's deliverable scope; single user smoke pause after R1.2.
 **Source:** my call, per the explicit ≤300-line rule.
 
+### R1.1-D8 — `find -newer .git/HEAD` is unsafe for git-tracked dirs
+**Context:** When unblocking the VPS pull, an attempted cleanup with `find docs -name '*.png' -newer .git/HEAD -delete` matched and deleted tracked PNGs too. Recovery: `git checkout HEAD -- docs/` restored tracked files; `sudo rm` on the untracked dir finished the job.
+**Rule:** Never use `find -newer .git/HEAD` to discriminate untracked vs tracked files. The mtime-vs-HEAD-mtime comparison isn't reliable — touched files, rebased commits, and clone-fresh checkouts all break the heuristic.
+**Correct primitive:** `git clean -fdx <dir>` (git-aware: removes untracked + ignored, leaves tracked alone). If write permissions block clean, escalate to `sudo git -c safe.directory=$PWD clean -fdx <dir>` rather than improvising with `find`.
+**Application:** `remote.ps1`'s `up` / `pull` / `restart` actions currently use `git checkout -- docs/ 2>/dev/null; git clean -fd docs/ 2>/dev/null` which silently swallows the permission failure. Replace with `sudo git clean -fdx docs/ 2>/dev/null || true` (or chmod files post-Playwright-write so the VPS user can unlink). Logged as post-Gate-A infra task.
+**Source:** user instruction + recovery sequence 2026-05-22.
+
 ### R1.1-D7 — Line budget is a target, not a ceiling; never split code from test
 **Context:** I initially proposed moving R1.1's test spec to R1.2 to keep R1.1 under 300 lines. The user rejected this as the Phase-16 vasle-pinneh pattern returning under a new name.
 **Rule (now Phase-A invariant):**
