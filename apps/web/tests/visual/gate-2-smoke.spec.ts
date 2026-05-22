@@ -70,11 +70,28 @@ for (const vp of landingViewports) {
       document.documentElement.setAttribute("data-test-no-animation", ""),
     );
     await page.waitForTimeout(200);
-    // No horizontal overflow on <body>.
-    const overflow = await page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-    }));
+    // No horizontal overflow on <body>. If something IS overflowing,
+    // walk the DOM and pin the offender so the smoke report names it.
+    const overflow = await page.evaluate(() => {
+      const sw = document.documentElement.scrollWidth;
+      const cw = document.documentElement.clientWidth;
+      if (sw <= cw + 1) return { scrollWidth: sw, clientWidth: cw, offenders: [] as string[] };
+      const offenders: string[] = [];
+      document.querySelectorAll("*").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.right > cw + 1 || r.left < -1) {
+          const tag = el.tagName.toLowerCase();
+          const id = el.id ? `#${el.id}` : "";
+          const cls =
+            el.className && typeof el.className === "string"
+              ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".")
+              : "";
+          const dim = `(L${r.left.toFixed(0)} R${r.right.toFixed(0)} W${r.width.toFixed(0)})`;
+          offenders.push(`${tag}${id}${cls}${dim}`);
+        }
+      });
+      return { scrollWidth: sw, clientWidth: cw, offenders: offenders.slice(0, 8) };
+    });
     const cleanOverflow = overflow.scrollWidth <= overflow.clientWidth + 1; // 1px tolerance for sub-pixel rounding
     // Hero outcome-first headline is present.
     const headlineOk = await page
@@ -97,9 +114,14 @@ for (const vp of landingViewports) {
       item: "1. Landing logged-out",
       viewport: `${vp.width}x${vp.height}`,
       status: cleanOverflow && headlineOk ? "pass" : "fail",
-      detail: `overflow:${overflow.scrollWidth}/${overflow.clientWidth} headline:${headlineOk ? "OK" : "MISSING"} aurora:${auroraOpts.exists ? auroraOpts.display : "absent"}`,
+      detail: `overflow:${overflow.scrollWidth}/${overflow.clientWidth}${overflow.offenders.length ? ` offenders:[${overflow.offenders.join(" | ")}]` : ""} headline:${headlineOk ? "OK" : "MISSING"} aurora:${auroraOpts.exists ? auroraOpts.display : "absent"}`,
     });
-    expect(cleanOverflow).toBe(true);
+    if (!cleanOverflow) {
+      // Console-log so the playwright output surface the offenders.
+      // eslint-disable-next-line no-console
+      console.log(`OFFENDERS at ${vp.width}: ${JSON.stringify(overflow.offenders)}`);
+    }
+    expect(cleanOverflow, JSON.stringify(overflow)).toBe(true);
     expect(headlineOk).toBe(true);
     await ctx.close();
   });
@@ -203,10 +225,28 @@ for (const vp of classroomViewports) {
       document.documentElement.setAttribute("data-test-no-animation", ""),
     );
     await page.waitForTimeout(200);
-    const overflow = await page.evaluate(() => ({
-      sw: document.documentElement.scrollWidth,
-      cw: document.documentElement.clientWidth,
-    }));
+    const overflow = await page.evaluate(() => {
+      const sw = document.documentElement.scrollWidth;
+      const cw = document.documentElement.clientWidth;
+      const offenders: string[] = [];
+      if (sw > cw + 1) {
+        document.querySelectorAll("*").forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.right > cw + 1 || r.left < -1) {
+            const tag = el.tagName.toLowerCase();
+            const id = el.id ? `#${el.id}` : "";
+            const cls =
+              el.className && typeof el.className === "string"
+                ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".")
+                : "";
+            offenders.push(
+              `${tag}${id}${cls}(L${r.left.toFixed(0)} R${r.right.toFixed(0)})`,
+            );
+          }
+        });
+      }
+      return { sw, cw, offenders: offenders.slice(0, 8) };
+    });
     const clean = overflow.sw <= overflow.cw + 1;
     await page.screenshot({
       path: `${OUT}/item-4-classroom-${vp.name}.png`,
@@ -216,9 +256,13 @@ for (const vp of classroomViewports) {
       item: "4. Classroom mobile/tablet",
       viewport: `${vp.width}x${vp.height}`,
       status: clean ? "pass" : "fail",
-      detail: `overflow:${overflow.sw}/${overflow.cw}`,
+      detail: `overflow:${overflow.sw}/${overflow.cw}${overflow.offenders.length ? ` offenders:[${overflow.offenders.join(" | ")}]` : ""}`,
     });
-    expect(clean).toBe(true);
+    if (!clean) {
+      // eslint-disable-next-line no-console
+      console.log(`CLASSROOM OFFENDERS at ${vp.width}: ${JSON.stringify(overflow.offenders)}`);
+    }
+    expect(clean, JSON.stringify(overflow)).toBe(true);
     await ctx.close();
   });
 }
