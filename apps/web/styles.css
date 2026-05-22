@@ -4615,6 +4615,36 @@ html { scroll-padding-top: 80px; }
 }
 
 /* ================================================================
+   Phase-16 R7' — WCAG 2.5.5 / 2.5.8 touch target floor.
+   On phones (<md = 768 px) every interactive control must be at
+   least 44×44 CSS pixels. The `.btn` primitive already meets this
+   via the legacy padding scale, but ad-hoc `<button>` / `<a
+   role="button">` / native checkbox/radio inputs can fall under.
+   Pure CSS guard — no JS, no a11y trade-off.
+
+   Exemption (`[data-touch-exempt]`): used for chips inside dense
+   nav bars where the parent <a> is the real touch surface and the
+   chip is a decorative child. Apply sparingly.
+   ================================================================ */
+@media (max-width: 767.98px) {
+  button,
+  a[role="button"],
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  [data-touch-exempt] {
+    min-height: 0;
+    min-width: 0;
+  }
+}
+
+/* ================================================================
    Phase-16 R9 — Landing §2 Trust strip + §3 Stats band.
    Both render after the hero, before the rest of the page. Tokens
    only — no hardcoded colours. The band uses count-up animation
