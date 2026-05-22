@@ -267,16 +267,31 @@ export const Nav = ({
             {notifsOpen && <NotificationsDropdown go={go} />}
           </div>
 
-          {/* User menu */}
+          {/* User menu.
+              Phase-A R1.4 B5 — avatar fallback. Before this commit the
+              avatar div unconditionally rendered `role.avatar` (e.g.
+              "نر" for the student role), which leaked the mock
+              identity to anonymous visitors on every PUBLIC + AUTH_FLOW
+              route. Phase-14.8 already fixed the user-name fallback;
+              we apply the same discipline to the avatar:
+                - authed user: derive initials from fullName, else email[0]
+                - anonymous: render a generic user-icon, no role colour. */}
           <div className="user-wrap relative" >
             <button className="user-btn" onClick={() => setUserOpen(!userOpen)}>
-              <div className={"avatar " + role.color} style={{ width: 32, height: 32, fontSize: 11 }}>{role.avatar}</div>
+              <div
+                className={"avatar " + (auth.user ? role.color : "")}
+                style={{ width: 32, height: 32, fontSize: 11 }}
+                data-anon={auth.user ? undefined : "true"}
+              >
+                {auth.user ? (
+                  auth.user.fullName?.split(" ").filter(Boolean).map((p) => p[0]).slice(0, 2).join("")
+                    || auth.user.email?.[0]?.toUpperCase()
+                    || <Icon name="user" size={14} />
+                ) : (
+                  <Icon name="user" size={14} />
+                )}
+              </div>
               <span className="user-name">{
-                // Phase-14.8: NEVER fall back to mock role.name. If the
-                // user isn't authenticated (or has a stale session
-                // without name/email), show the role label instead of
-                // a fake identity. The mock "رضوی" used to show here
-                // for unauthenticated visitors which was misleading.
                 (auth.user?.fullName?.split(" ")[0])
                   || auth.user?.email?.split("@")[0]
                   || role.label
@@ -404,7 +419,21 @@ const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.Rea
   <div className="dropdown" style={{ width: 300 }}>
     <div className="p-4.5"  style={{ borderBottom: "1px solid var(--line)"}}>
       <div className="flex items-center gap-3" >
-        <div className={"avatar " + role.color} style={{ width: 44, height: 44 }}>{role.avatar}</div>
+        {/* Phase-A R1.4 B5 — same fix as the trigger above: never leak
+            `role.avatar` mock initials to anonymous visitors. */}
+        <div
+          className={"avatar " + (isAuthed ? role.color : "")}
+          style={{ width: 44, height: 44 }}
+          data-anon={isAuthed ? undefined : "true"}
+        >
+          {isAuthed ? (
+            auth.user?.fullName?.split(" ").filter(Boolean).map((p) => p[0]).slice(0, 2).join("")
+              || auth.user?.email?.[0]?.toUpperCase()
+              || <Icon name="user" size={18} />
+          ) : (
+            <Icon name="user" size={18} />
+          )}
+        </div>
         <div className="flex-1"  style={{ minWidth: 0}}>
           <div style={{ fontSize: 14, fontWeight: 600 }}>{displayName}</div>
           <div className="mt-0.5"  style={{fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"}}>{identifier}</div>
