@@ -33,18 +33,33 @@ export const AppShell: React.FC = () => {
   // 1024px = tailwind `lg`. Below lg: sidebar is a Sheet drawer.
   const isLg = useMediaQuery("(min-width: 1024px)");
 
+  // R1.3 B5 — privacy: an authenticated visitor hitting the landing
+  // (/ or /home) must NOT see any chrome rendered with their identity
+  // (e.g., the Nav user-menu showing their name) before the redirect
+  // takes effect. Gate the entire shell behind a skeleton until the
+  // navigate() lands. Home.tsx keeps its own useEffect as defence in
+  // depth but AppShell's gate is the primary mechanism now.
+  const isLandingRoute = route === "" || route === "home";
+  const redirectAuthedFromLanding = isLandingRoute && auth.isAuthenticated;
+
   // Sidebar Sheet — workspace + <lg only. AppShell owns the open state;
   // Nav calls onWorkspaceMenuClick to open. Closed on every navigation.
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   React.useEffect(() => { setSidebarOpen(false); }, [route, routeParam]);
 
-  // Auth gate — preserves the previous Layout's behaviour exactly.
+  // Auth gate (workspace + not authed → /login) + landing redirect
+  // (landing + authed → /dashboard). Both run via the same effect to
+  // keep the holding-skeleton render logic centralised.
   React.useEffect(() => {
     if (isWorkspace && !auth.isAuthenticated) go("login");
-  }, [isWorkspace, auth.isAuthenticated, go]);
+    else if (redirectAuthedFromLanding) go("dashboard");
+  }, [isWorkspace, auth.isAuthenticated, redirectAuthedFromLanding, go]);
 
   if (isWorkspace && !auth.isAuthenticated) {
     return <AuthLoadingSkeleton label="در حال انتقال به ورود..." />;
+  }
+  if (redirectAuthedFromLanding) {
+    return <AuthLoadingSkeleton label="در حال انتقال به داشبورد..." />;
   }
 
   const navMode = navModeFor(kind);
