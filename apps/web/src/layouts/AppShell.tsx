@@ -17,6 +17,7 @@ import { RoleSideNav } from "../sidenav";
 import { useGo, useCurrentRoute } from "../router";
 import { getRouteKind, type RouteKind } from "../router/route-classification";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { Breadcrumbs } from "./Breadcrumbs";
 
 type NavMode = "public" | "workspace" | "auth_flow";
 
@@ -71,7 +72,9 @@ export const AppShell: React.FC = () => {
           tabIndex={-1}
           data-route-kind={kind}
         >
-          {/* R1.2 will inject <Breadcrumbs /> here for workspace routes. */}
+          {/* Breadcrumb row — workspace routes only. PUBLIC + AUTH_FLOW
+              don't need a trail (the topbar's brand handles return-to-home). */}
+          {isWorkspace ? <Breadcrumbs /> : null}
           {isWorkspace ? (
             <div className="workspace-grid">
               {isLg ? <RoleSideNav active={route} go={go} /> : null}
@@ -82,10 +85,21 @@ export const AppShell: React.FC = () => {
           )}
         </main>
 
-        {/* Sidebar drawer at <lg. side="start" → right edge under RTL. */}
+        {/* Sidebar drawer at <lg. side="start" → right edge under RTL.
+            onCloseAutoFocus: Radix's default focus restore relies on tracking
+            the trigger element, but our trigger lives in Nav (not a Radix
+            DialogTrigger), so we restore focus manually via DOM lookup. */}
         {isWorkspace && !isLg ? (
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="start" className="appshell-sidebar-drawer" aria-label="منوی workspace">
+            <SheetContent
+              side="start"
+              className="appshell-sidebar-drawer"
+              aria-label="منوی workspace"
+              onCloseAutoFocus={(e) => {
+                e.preventDefault();
+                document.getElementById("appshell-sidebar-trigger")?.focus();
+              }}
+            >
               <RoleSideNav active={route} go={go} />
             </SheetContent>
           </Sheet>

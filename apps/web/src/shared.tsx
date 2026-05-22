@@ -291,6 +291,7 @@ export const Nav = ({
               AUTH_FLOW: hidden — no drawer in minimal chrome. */}
           {!isAuthFlow && (
             <button
+              id={isWorkspace ? "appshell-sidebar-trigger" : undefined}
               className="nav-toggle"
               onClick={isWorkspace
                 ? () => onWorkspaceMenuClick?.()
