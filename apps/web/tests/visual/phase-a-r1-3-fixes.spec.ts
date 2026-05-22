@@ -139,6 +139,39 @@ test.describe("R1.3 — B4 + D9 hamburger-toggle sidebar everywhere", () => {
   });
 });
 
+test.describe("R1.3 — B3 dashboard + profile minimum responsive", () => {
+  test("dashboard at 375 has no horizontal overflow", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 375, height: 720 });
+    await page.goto("/dashboard");
+    await page.waitForTimeout(400);
+    // No horizontal scrollbar should appear at the body level —
+    // workspace-content has overflow-x: hidden + max-width: 100%.
+    const scrollX = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(scrollX).toBeLessThanOrEqual(2); // 2px slop for rounding
+  });
+
+  test("dashboard stat-row collapses to single column at 375", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 375, height: 720 });
+    await page.goto("/dashboard");
+    const cols = await page.locator(".stat-row").first().evaluate(
+      (el: HTMLElement) => window.getComputedStyle(el).gridTemplateColumns,
+    );
+    // "1fr" or one space-separated value; not 4 fractions.
+    expect(cols.split(" ").length).toBe(1);
+  });
+
+  test("profile page at 375 has no horizontal overflow + stacks the 1fr-320px grid", async ({ browser }) => {
+    const page = await authedPage(browser);
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/profile");
+    await page.waitForTimeout(400);
+    const scrollX = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(scrollX).toBeLessThanOrEqual(2);
+  });
+});
+
 test.describe("R1.3 — B5 landing privacy leak", () => {
   test("authed student visiting / redirects to /dashboard without name leak", async ({ browser }) => {
     const page = await authedPage(browser);

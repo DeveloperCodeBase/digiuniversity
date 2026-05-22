@@ -1334,6 +1334,40 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
    workspace mode at all sizes. Auth-flow keeps it hidden. */
 .nav[data-mode="workspace"] .nav-toggle { display: flex !important; }
 
+/* Phase-A R1.3 B3 — minimum responsive defences for Dashboard +
+   Profile. Existing inline `style={{ gridTemplateColumns: ... }}`
+   on these pages can't respond to media queries, so we add wrapper
+   defences + targeted attribute-selector overrides. Polish per-page
+   responsive design is R3's job; here we only prevent overflow and
+   force vertical stacking on small screens. */
+.workspace-content {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+@media (max-width: 767px) {
+  /* Stat row: 4 cols → 1 col on <md (existing rules step it to 2 at
+     720; we go to 1 below md). */
+  .stat-row { grid-template-columns: 1fr !important; }
+  /* Profile stats strip: inline `repeat(5, 1fr)` becomes 2-col. */
+  main[data-screen-label*="پروفایل"] .card[style*="repeat(5"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  /* Profile main + sidebar: inline `1fr 320px` becomes single column. */
+  main[data-screen-label*="پروفایل"] .grid[style*="1fr 320px"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Dashboard cog-grid: already 1-col at 980, re-affirm + reset
+     inline `placeItems: center` from breaking the cog-radar viewBox. */
+  main[data-screen-label*="میز کار"] .cog-grid { grid-template-columns: 1fr !important; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Profile stats strip: 5 → 3 columns at tablet width. */
+  main[data-screen-label*="پروفایل"] .card[style*="repeat(5"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
 /* Phase-A R1.3 B1 — scroll-aware nav depth. When AppShell's scroll
    listener sets html[data-scrolled="true"], the nav gets a small
    shadow + a slightly more opaque background so it doesn't visually
