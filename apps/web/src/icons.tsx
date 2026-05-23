@@ -86,6 +86,27 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7 }) => 
     refresh: <svg {...P}><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 4v4h-4M21 12a9 9 0 0 1-15 6.7L3 16M3 20v-4h4"/></svg>,
     upload: <svg {...P}><path d="M12 20V8M6 12l6-6 6 6M4 4h16"/></svg>,
     link: <svg {...P}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>,
+
+    /* Phase-A R6 — Classroom redesign icons */
+    "chev-left": <svg {...P}><path d="m14 6-6 6 6 6"/></svg>,
+    "chev-right": <svg {...P}><path d="m10 6 6 6-6 6"/></svg>,
+    chevronLeft: <svg {...P}><path d="m14 6-6 6 6 6"/></svg>,
+    chevronRight: <svg {...P}><path d="m10 6 6 6-6 6"/></svg>,
+    sparkles: <svg {...P}><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>,
+    sparkleSm: <svg {...P}><path d="M12 4v16M4 12h16"/><path d="M7 7l10 10M17 7 7 17" opacity=".5"/></svg>,
+    screen: <svg {...P}><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+    text: <svg {...P}><path d="M5 6h14M5 12h14M5 18h9"/></svg>,
+    question: <svg {...P}><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg>,
+    bot: <svg {...P}><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 13h.01M15 13h.01M9 17h6M12 4v4M9 4h6"/></svg>,
+    note: <svg {...P}><path d="M5 4h10l4 4v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M14 4v5h5"/><path d="M8 13h7M8 17h5"/></svg>,
+    breakout: <svg {...P}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+    phoneOff: <svg {...P}><path d="M21 15.5c-3-3-7-4-10-4s-7 1-10 4l2 2 3-2v-2c1.5-.5 3-1 5-1s3.5.5 5 1v2l3 2z"/><path d="m3 3 18 18"/></svg>,
+    thumbsUp: <svg {...P}><path d="M7 11v9H3v-9zM7 11l5-8a2 2 0 0 1 2 2v4h5a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 2H7"/></svg>,
+    bookmark: <svg {...P}><path d="M6 4h12v17l-6-4-6 4z"/></svg>,
+    copy: <svg {...P}><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>,
+    pin: <svg {...P}><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v3H7v-3l3-3z"/></svg>,
+    lightbulb: <svg {...P}><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg>,
+    close: <svg {...P}><path d="M6 6l12 12M6 18 18 6"/></svg>,
   };
   return map[name] || null;
 };

@@ -8,6 +8,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "../styles.css";
+// Phase-A R6: classroom redesign CSS, scoped under .r6-classroom-shell so
+// it never bleeds into other pages.
+import "../styles-r6-classroom.css";
 
 // Apply persisted theme before first paint to avoid flash.
 const savedTheme = ((): string => {

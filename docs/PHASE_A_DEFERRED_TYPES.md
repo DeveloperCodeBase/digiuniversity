@@ -1,21 +1,14 @@
 # Phase A — `@ts-nocheck` files deferred
 
-> R2 retired 43 of 45 active `@ts-nocheck` files. Two remain, both with explicit prior-art justification and a follow-up plan. Hard cap is ≤5; we're well under.
+> R2 retired 43 of 45 active `@ts-nocheck` files. **R6 brought Classroom.tsx down to typed**, leaving only Home.tsx. Hard cap is ≤5; we're at 1.
 
-## Deferred files (2 of 5 cap)
+## Deferred files (1 of 5 cap)
 
-### 1. `apps/web/src/pages/Classroom.tsx` (644 lines)
+### ~~1. `apps/web/src/pages/Classroom.tsx`~~ — retired in R6
 
-**Why deferred:** the live-classroom page is the most overlay-dense surface in the SPA — Radix-backed Dialog (poll), Sheet (breakout), reactions float, host controls, attendance pane, AI tutor inline panel. Per the explicit Phase 16.5 ruling baked into the file header ("Phase-16 R6 leaves @ts-nocheck in place per the Phase 16.5 ruling… the poll + breakout overlays were swapped to Radix-backed Dialog / Sheet in this commit; the rest of the file remains untyped"), R2 honours that decision and does not break the deferral.
+The 644-line monolith was replaced in Phase A R6 (Classroom redesign from owner template). The new shell lives under `apps/web/src/pages/classroom/` (ClassroomShell, Stage, AIPanel, CourseHeader, classroom-atoms) and is fully typed. The old path (`apps/web/src/pages/Classroom.tsx`) now re-exports the new shell so `router.tsx`'s import keeps working. No `@ts-nocheck` anywhere in the classroom tree.
 
-**What blocks immediate typing:**
-- Five distinct sub-views (lobby / live / breakout / ended / replay) sharing a single component tree.
-- Many `useState` slots whose runtime shape isn't documented anywhere (chat messages, reactions, poll responses, breakout rooms, AI tutor prompts).
-- Heavy interplay with the `claude-in-chrome` / WebRTC mock state — current types in `apps/web/src/api/endpoints.js` for `classSessionsApi` are loose.
-
-**Follow-up plan:** Phase D (Live Classes — LiveKit ground-up rewrite). When the live-classroom infrastructure becomes real (LiveKit + Egress + faster-whisper per the compass roadmap), the entire Classroom.tsx is rewritten against the Phase D contracts, with full types from the start. No incremental typing of the current mock-heavy file makes sense — the rewrite is cheaper.
-
-### 2. `apps/web/src/pages/Home.tsx` (908 lines)
+### 1. `apps/web/src/pages/Home.tsx` (908 lines)
 
 **Why deferred:** the home/landing page is 908 lines of inline JSX marketing layout. Per the explicit Phase 16 R2 ruling baked into the file header ("Phase-16 R2 deliberately leaves @ts-nocheck in place: the file is 530+ lines of inline JSX and the type sweep is scheduled for R16 (cleanup) after the new sections + primitives land. R2 only adds the auth-aware redirect + outcome-first headline."), R2 honours that decision.
 
