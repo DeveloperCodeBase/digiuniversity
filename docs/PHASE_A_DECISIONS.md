@@ -184,6 +184,51 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Effect:** Phase-A D12 assertion roster is locked at 68/68 with owner ack on R5 (positive feedback) + R6.6. Remaining D13 acks: R1.1+R1.2+R1.3+R1.4, R2, R3, R4, R6, R6.5 (7 sub-Rs pending owner manual smoke).
 **Source:** owner message 2026-05-23 ("R6.6 manual smoke pass شد (4/4 checkpoint pass)…").
 
+### R7.6-D19 — R7.6 D13 ack confirmed, token contrast darken passes
+**Context:** R7.6 darkened `--fg-mute` (5.39:1 → 6.96:1) and `--fg-dim` (2.64:1 → 3.97:1) per owner-prescribed values. 49/49 D12 regression green; axe-scan showed the scoped target (fg-mute + fg-dim text on white) cleared 100%. Owner ran D13 manual smoke on real device.
+**Result:** **PASS.** Owner verified text legibility on real mobile + incognito + hard reload. The avatar-placeholder issue raised in the same review pass is **separate** (logged as OWNER-FINDING-1; scaffolding from the original SPA mock content, slated for Phase B Profile-model sub-R) and does not block R7.6.
+**Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
+**Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
+
+### R7.7a-D20 — Path 1 approved: replace accent-as-text with `--fg`
+**Context:** R7.6 cleared `--fg-mute`/`--fg-dim` violations but exposed 31 routes where `--accent` (#2f5fd3 family) is rendered as TEXT against white/bg-soft at ~4.17:1 — just below WCAG SC 1.4.3 AA-normal. Two paths were on the table in the R7.6 review:
+  - **Path 1**: replace accent-as-text with `--fg` (navy ink). Reserves `--accent` for borders/fills/icons/focus rings only.
+  - **Path 2**: globally darken `--accent` itself (e.g., to #2647a8) so accent-as-text passes contrast.
+
+**Choice: Path 1.**
+
+**Owner rationale:**
+  - **D11/D14 protection.** R6.5 (D14) explicitly approved `--accent: #2f5fd3` as the brand-blue palette value. Path 2 would silently darken the brand color — that's a D11/D14 violation in spirit (palette change without an explicit owner re-decision).
+  - **UX correctness independent of WCAG.** Accent-as-text is an anti-pattern regardless of contrast. Brand colors are best reserved for "interactive" tones (borders, fills, icons, focus rings) — body text should be the ink token. Demoting accent away from text duty makes the design more legible AND more semantically consistent.
+  - **Surgical scope.** Path 1 only touches the CSS classes that currently use `--accent` as a `color:` value. Path 2 is a global token edit with broad visual impact on every accent-tinted UI element.
+
+**Application (R7.7a):** find every `color: var(--accent)` / `color: var(--accent-2)` / `color: var(--cyan)` rule in components + global styles. Replace with `var(--fg)` unless the visual intent is non-text (e.g., the rule is decorative tinting on an icon or a divider that happens to be set via `color`). The 31 affected routes will all clear `color-contrast` once the underlying classes are repointed.
+
+**R7.7 sweep updates (also approved):**
+  - **R7.7b** (gold-as-text, 13 routes) — replace gold-as-text with `--fg`. Gold (`#e7c87a`) is reserved for badge backgrounds, icon fills, MockBadge pill, and celebration moments only.
+  - **R7.7c** (1 route, footer dark bg) — add `--fg-mute-on-dark` token (lighter mute, e.g. `#aab0c4` matching dark-theme `--fg-mute`). Wire the footer CSS to use it.
+  - **R7.7d** (4 routes, accent-button on-color) — per-button audit, measurement first, owner decision per case if > 2 routes still fail after R7.7a-c land (R7.7a removes some of the surface area).
+
+**Source:** owner message 2026-05-23 («R7.7a Path 1 approved» + explicit reasoning).
+
+### R8-D21 — R8 (role-aware nav sub-R) deleted from the R7 sweep; subsumed by R7.9
+**Context:** Owner-reported FINDING 2 ("all 10 roles see the same navbar/sidebar/user-menu") looked like a missing R8 sub-R. A diagnostic audit (`docs/PHASE_A_R8_ROLE_NAV_AUDIT.md`) checked the actual data in code:
+  - `NAV_ITEMS_BY_ROLE` (`apps/web/src/shared.tsx:32`) — 10 of 10 roles defined with distinct item lists (3-6 items each).
+  - `SIDEBAR_BY_ROLE` (`apps/web/src/sidenav.tsx:28`) — 10 of 10 roles defined with distinct group + item lists (7-28 entries each).
+  - Both consumers (`Nav`, `RoleSideNav`) use `useRole()` to pick the right entry.
+
+**Audit verdict:** the role-aware navigation **is fully defined in code**. The visible "same nav for everyone" symptom is the **same upstream bug** as Gate A §5 — `apiRoleToLocal` maps only 3 of 10 API roles, so the 7 non-default roles all collapse to `"student"` and both consumers read the student entries.
+
+**Decision: R8 deleted from the R7 sweep plan.** No separate sub-R for nav data is needed because the data already exists. R7.9 fixes the upstream mapper, which immediately surfaces the correct nav per role for free.
+
+**R7.9 spec extension (per D18 deepening):** R7.9's existing flow-regression spec (`gate-a-role-routing.spec.ts`) was scoped to assert URL match per role. The audit recommends extending it with a **`ROLE_DISTINCTIVE` sentinel map** — one item id per role that no other role's nav contains. The spec then asserts that sentinel is visible after login. Catches two failure modes in one pass:
+  - Routing drift (URL mismatch, the original D18 case)
+  - Nav-data drift (per-role data is silently overwritten or misordered, e.g., if a future R touches `NAV_ITEMS_BY_ROLE` and accidentally loses a role)
+
+**Implementation:** R7.9 carries the extended spec. R8 line removed from the R7 sweep plan in `docs/GATE_A_DOSSIER.md` next time that file is touched.
+
+**Source:** owner message 2026-05-23 («R8 NOT NEEDED — accept the diagnosis») + diagnostic audit `docs/PHASE_A_R8_ROLE_NAV_AUDIT.md` 2026-05-23.
+
 ### R7-D17 — R7 sweep approved as the Gate-A unblock path, critical-path-first ordering
 **Context:** Gate A measurement returned 3 of 6 criteria 🔴 FAIL:
   - §1 Lighthouse mobile — Perf 35 / 66 / 66, A11y 88 / 88 / 87 on `/`, `/login`, `/programs`

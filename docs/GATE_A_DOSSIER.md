@@ -526,35 +526,43 @@ montage docs/gate-a-evidence/role-dashboards/*.png -tile 5x2 -geometry +6+6 \
 
 ---
 
-## Roll-up — R7 fix sweep (proposed, awaiting owner approval)
+## Roll-up — R7 fix sweep (approved per D17, critical-path-first per D17 + D19 + D20 + D21)
 
-The three failing criteria cluster on **four root causes**, each isolable to one or two files. The total fix budget is ~2 weeks of sub-Rs. Nothing here is implemented — owner approves R7 explicitly before any code lands, same D11/D14 discipline as every prior pivot.
+The three failing criteria cluster on **four root causes**, each isolable to one or two files. Owner approved the sweep + ordering 2026-05-23. Decisions D17 (sweep + order), D19 (R7.6 ack), D20 (R7.7a Path 1), D21 (R8 deleted, subsumed by R7.9) refine the table below.
 
-| Sub-R | Title | Fixes which criteria? | Est. budget |
+| Sub-R | Title | Fixes which criteria? | Status |
 |---|---|---|---|
-| **R7.1** | Vite manual chunks + `React.lazy` route splitting | §1 Performance: 35/66/66 → ~70+ | 2-3 days |
-| **R7.2** | Self-host Vazirmatn + drop unused font families | §1 Performance: ~70 → ~85+ | 1 day |
-| **R7.3** | Lighthouse a11y sweep (button-name, contrast, heading-order, label-mismatch, aria-toggle) | §1 Accessibility: 88/88/87 → 95+ | 2 days |
-| **R7.4** | Authed-route Lighthouse runner (Playwright + lighthouse `{port}`) | §1 measurement methodology fix | 1 day |
-| **R7.5** | Find + fix chrome-level `aria-valid-attr-value` (53 routes) | §2 critical: 54 → ~1-2 routes | 1 day |
-| **R7.6** | Darken `--fg-mute` + `--fg-dim` theme tokens for 4.5:1 contrast | §2 color-contrast: 65 routes → 0; also helps §1 | 0.5 day |
-| **R7.7** | Long-tail a11y one-offs (10ish routes with specific violations) | §2 remaining: 0 critical + 0 serious | 1-2 days |
-| **R7.8** | Re-scan `/` and `/home` (page-disposal race fix in axe spec) | §2 truly-clean verification | 0.5 day |
-| **R7.9** | Complete `apiRoleToLocal` (3 → 10 roles) + extract to shared source | §5 routing: 3/10 reach → 10/10 reach | 0.5 day |
-| **R7.10** | Regression spec: assert each of 10 demo users lands on `homeRoute` | §5 prevent regression | 0.5 day |
-| **R7.11** | Multi-role hierarchy decision + workspace switcher pattern (if needed) | §5 follow-up, owner decision | TBD |
+| **R7.1** | Vite manual chunks + `React.lazy` route splitting | §1 Performance: 35/66/66 → ~70+ | ⏳ pending — Performance track, blocked on critical path |
+| **R7.2** | Self-host Vazirmatn + drop unused font families | §1 Performance: ~70 → ~85+ | ⏳ pending — Performance track |
+| **R7.3** | Lighthouse a11y sweep (button-name, heading-order, label-mismatch, aria-toggle) | §1 Accessibility: 88/88/87 → 95+ | ⏳ pending — partially absorbed by R7.5+R7.6+R7.7 |
+| **R7.4** | Authed-route Lighthouse runner (Playwright + lighthouse `{port}`) | §1 measurement methodology fix | ⏳ pending |
+| **R7.5** | Fix chrome-level `aria-valid-attr-value` (53 routes) | §2 critical: 54 → ~1-2 routes | 🟢 **NEXT — critical path** |
+| **R7.6** | Darken `--fg-mute` + `--fg-dim` theme tokens for 4.5:1 contrast | §2 color-contrast: scoped target 100% cleared (65→64 headline masks per-bucket success) | ✅ shipped, D13 PASS (D19) |
+| **R7.7** | Long-tail color/a11y violations — split into R7.7a-d per the R7.6 diagnostic + D20 decisions | §2 remaining serious violations | ⏳ pending — owner gate after R7.5+R7.9 ship and measurement re-runs |
+| ↳ R7.7a | Replace accent-as-text with `--fg` (Path 1 per D20); 31 routes | §2 accent-blue color-contrast | ⏳ pending |
+| ↳ R7.7b | Replace gold-as-text with `--fg`; reserve gold for badges/icons/celebration; 13 routes | §2 gold color-contrast | ⏳ pending |
+| ↳ R7.7c | Add `--fg-mute-on-dark` token + retarget footer dark-bg text; 1 route | §2 footer color-contrast | ⏳ pending |
+| ↳ R7.7d | Per-button accent-button on-color audit; measurement first; owner decision per case if >2 routes still fail after R7.7a-c | §2 button color-contrast | ⏳ owner-gated, audit-first |
+| **R7.8** | Re-scan `/` and `/home` (page-disposal race fix in axe spec) | §2 truly-clean verification | ⏳ pending — single-line fix, can ride along with R7.7 |
+| **R7.9** | Complete `apiRoleToLocal` (3 → 10 roles) + extract to shared source + ROLE_DISTINCTIVE D18 sentinel spec | §5 routing 3/10 → 10/10 reach **AND** nav-data drift detection (subsumes OWNER-FINDING-2 / D21) | 🟢 **NEXT after R7.5 — critical path; ~1 day (scope +50% for D18 sentinel)** |
+| ~~R7.10~~ | ~~Regression spec~~ | — | **Merged into R7.9** (the spec is shipped alongside the mapper fix, not a separate sub-R) |
+| **R7.11** | Multi-role hierarchy decision + workspace switcher pattern | §5 follow-up, owner decision | ⏳ owner-gated, not in critical path |
+| ~~R8~~ | ~~Role-aware nav sub-R~~ | — | **Deleted per D21** — diagnostic audit showed nav data is fully defined in code; R7.9 fixes the upstream root cause for free |
 
-**Critical path** = R7.6 (token contrast, 0.5 day) → R7.5 (chrome aria, 1 day) → R7.9 (role mapper, 0.5 day) → re-run all three measurement specs. Worst-case 4 days of focused work clears the three FAIL criteria. R7.1+R7.2 (Performance) can run in parallel with R7.6+R7.5 since they touch different files.
+**Critical path** = R7.5 (chrome aria, 1 day) → R7.9 (role mapper + D18 sentinel spec, ~1 day) → re-run §1 a11y + §2 + §5 measurements. Worst-case ~2 working days clears the most actionable parts of the FAIL surface. R7.7a-d follow once owner reviews the post-R7.5+R7.9 measurement deltas.
 
-**Sequencing constraint:** R7 cannot start until owner explicitly authorizes it per D11/D14. R7 is itself out-of-Phase-A-plan scope; the original plan ended Phase A at "Gate A passes → start Phase B". Gate A failing means Phase A extends with R7 (foundation polish) before Phase B (academic hierarchy + onboarding) can begin.
+**Performance track** (R7.1 + R7.2 + R7.3 + R7.4) is gated on owner explicit start. Per D17 sequencing, it begins **after** the critical path lands and §1 a11y / §2 / §5 are at their post-R7.5+R7.9 state.
 
-## Owner decision required
+## Owner decisions logged
 
-The dossier is now complete enough for review. Two questions for the owner:
+The dossier originally posed two questions; both are now resolved:
 
-1. **Approve R7 sweep as the Gate A unblock path?** Alternative would be to drop one or more of the six Compass criteria (not recommended — they're the foundation for Phase B+ work). Or to defer some criteria past Gate A (also risky — the bugs accumulate).
-2. **Order of R7 sub-Rs?** Critical-path-first (R7.6 → R7.5 → R7.9, ~2 days) hits the FAIL fastest. Foundation-first (R7.1 + R7.2 Performance, then a11y) is more invasive but pays bigger long-term dividends.
+1. ✅ **R7 sweep approved as the Gate A unblock path?** Yes, D17.
+2. ✅ **Order?** Critical-path-first, D17.
 
-After owner approves R7 + the order, I'll memo each sub-R and ship the standard workflow (memo → code → deploy → spec → review → D13 manual smoke). When all R7 sub-Rs land + Gate A criteria re-verify, the dossier moves from RE-REVIEW DRAFT to FINAL and Phase B can begin.
+Plus 3 follow-ons resolved 2026-05-23:
+  - ✅ **R7.6 D13 ack?** PASS, D19.
+  - ✅ **R7.7a path?** Path 1 (replace accent-as-text with `--fg`), D20.
+  - ✅ **R8 spin-up?** No — subsumed by R7.9 + D18 spec extension, D21.
 
 — Phase A author, 2026-05-23. RE-REVIEW DRAFT awaiting owner sign-off on the R7 plan.
