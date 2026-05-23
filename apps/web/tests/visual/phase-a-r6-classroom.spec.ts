@@ -105,8 +105,9 @@ test.describe("R6 — Classroom shell", () => {
     await expect(page.locator(".r6-slide-canvas")).toBeVisible();
     await expect(page.locator(".r6-slide-counter")).toBeVisible();
     await expect(page.locator(".r6-slide-rec")).toBeVisible();
-    // Slide title is the Persian topic of slide 1
-    await expect(page.getByRole("heading", { name: /گرادیان نزولی تصادفی/ })).toBeVisible();
+    // Slide title is the Persian topic of slide 1 (scoped to .r6-slide-title
+    // because the course-head h1 also contains the same string).
+    await expect(page.locator(".r6-slide-title")).toContainText("گرادیان نزولی تصادفی");
   });
 
   test("participant rail visible with host + +35 overflow", async ({ browser }) => {
@@ -126,8 +127,11 @@ test.describe("R6 — Classroom shell", () => {
     await page.goto("/classroom", { waitUntil: "domcontentloaded" });
     const controls = page.locator(".r6-controls");
     await expect(controls).toBeVisible();
-    // Leave button
-    await expect(page.getByRole("button", { name: /خروج از کلاس/ })).toBeVisible();
+    // Leave button — visible label is the short "خروج"; the longer
+    // "خروج از کلاس" is only in the title attribute (which doesn't
+    // contribute to the computed accessible name when text is present).
+    await expect(page.locator(".r6-ctl-btn.is-danger")).toBeVisible();
+    await expect(page.locator(".r6-ctl-btn.is-danger")).toContainText("خروج");
   });
 
   test("MockBadge appears in the course-head crumb (Phase-A stub policy)", async ({ browser }) => {
