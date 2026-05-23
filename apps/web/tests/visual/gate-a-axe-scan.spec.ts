@@ -157,6 +157,15 @@ interface ScanResult {
   page_title?: string;
   /** True if the route returned a 404-shell or auth-redirect. */
   redirect_or_404?: boolean;
+  /** Up to 3 sample failing nodes per critical+serious rule. Lets the
+      dossier identify what's actually failing (which selector, what
+      colors) without re-running the scan. */
+  violation_samples?: Array<{
+    rule: string;
+    impact: string;
+    target: string;
+    failureSummary?: string;
+  }>;
 }
 
 const ALL_RESULTS: ScanResult[] = [];
@@ -189,15 +198,28 @@ async function scanOne(page: Page, spec: RouteSpec): Promise<ScanResult> {
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]);
     const r = await axe.analyze();
     const bySeverity: Record<string, string[]> = { critical: [], serious: [], moderate: [], minor: [] };
+    const samples: ScanResult["violation_samples"] = [];
     for (const v of r.violations) {
       const sev = v.impact || "minor";
       if (sev in bySeverity) bySeverity[sev].push(v.id);
+      // Capture one sample per critical/serious rule per route so the
+      // dossier can identify the exact selector + failure summary.
+      if ((sev === "critical" || sev === "serious") && v.nodes.length > 0) {
+        const n = v.nodes[0];
+        samples!.push({
+          rule: v.id,
+          impact: sev,
+          target: Array.isArray(n.target) ? n.target.join(" ") : String(n.target),
+          failureSummary: n.failureSummary?.slice(0, 240),
+        });
+      }
     }
     result.critical_count = bySeverity.critical.length;
     result.serious_count = bySeverity.serious.length;
     result.moderate_count = bySeverity.moderate.length;
     result.minor_count = bySeverity.minor.length;
     result.top_rules = [...new Set([...bySeverity.critical, ...bySeverity.serious])].slice(0, 5);
+    result.violation_samples = samples;
   } catch (err) {
     result.top_rules = [`scan-error:${err instanceof Error ? err.message.slice(0, 60) : "unknown"}`];
   }
