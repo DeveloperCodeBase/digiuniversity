@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.9 — typed.
 // =====================================================
 // More productivity pages: Notifications, Messages, Bookmarks,
 // Achievements, Submission, Profile/Portfolio
@@ -19,8 +19,11 @@ import {
   BADGES as BADGES_DATA,
   CURRENT_USER,
 } from "../data.js";
+import type { Go } from "../router";
 
-export const NotificationsPage = ({ go }) => {
+interface ProductivityPageProps { go: Go }
+
+export const NotificationsPage: React.FC<ProductivityPageProps> = ({ go }) => {
   const [filter, setFilter] = React.useState("all");
   return (
     <main data-screen-label="30 اعلان‌ها">
@@ -115,7 +118,7 @@ const NOTIFS = NOTIFICATIONS.map((n) => {
 // =====================================================
 // Messages / Inbox
 // =====================================================
-export const MessagesPage = ({ go }) => {
+export const MessagesPage: React.FC<ProductivityPageProps> = ({ go }) => {
   const [active, setActive] = React.useState(0);
   const [view, setView] = React.useState("list"); // mobile-only: "list" | "chat"
   const [draft, setDraft] = React.useState("");
@@ -269,7 +272,7 @@ const CONVERSATIONS = CONVERSATIONS_DATA.map((c) => ({
 // =====================================================
 // Bookmarks / Saved
 // =====================================================
-export const BookmarksPage = ({ go }) => {
+export const BookmarksPage: React.FC<ProductivityPageProps> = ({ go }) => {
   const [activeCat, setActiveCat] = React.useState("all");
   return (
   <main data-screen-label="32 ذخیره‌ها">
@@ -369,7 +372,7 @@ const SAVED_ITEMS = LIBRARY_RESOURCES.slice(0, 6).map((r, i) => {
 // =====================================================
 // Achievements / Badges
 // =====================================================
-export const AchievementsPage = ({ go }) => (
+export const AchievementsPage: React.FC<ProductivityPageProps> = ({ go }) => (
   <main data-screen-label="33 دستاوردها">
     <section className="shell" style={{ padding: "60px 40px" }}>
       <div className="mb-8" >
@@ -430,7 +433,7 @@ const BADGES = BADGES_DATA;
 // =====================================================
 // Assignment Submission
 // =====================================================
-export const SubmissionPage = ({ go }) => {
+export const SubmissionPage: React.FC<ProductivityPageProps> = ({ go }) => {
   const [tab, setTab] = React.useState("upload");
   return (
     <main data-screen-label="34 تحویل تمرین">
@@ -643,7 +646,7 @@ export const SubmissionPage = ({ go }) => {
 // =====================================================
 // Profile / Portfolio (public-facing)
 // =====================================================
-export const ProfilePage = ({ go }) => (
+export const ProfilePage: React.FC<ProductivityPageProps> = ({ go }) => (
   <main data-screen-label="35 پروفایل">
     {/* Cover */}
     <div className="relative overflow-hidden"  style={{height: 200, background: "linear-gradient(135deg, oklch(0.3 0.12 255), oklch(0.5 0.16 255))"}}>

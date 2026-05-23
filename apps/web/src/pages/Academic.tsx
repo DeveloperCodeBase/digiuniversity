@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.9 — typed.
 // =====================================================
 // Real-university workflows: Transcript, Degree Audit,
 // Registration, Career Services, Financial Aid, Wellness,
@@ -21,8 +21,11 @@ import {
   findFaculty,
   CURRENT_USER,
 } from "../data.js";
+import type { Go } from "../router";
 
-export const TranscriptPage = ({ go }) => (
+interface AcademicPageProps { go: Go }
+
+export const TranscriptPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="36 کارنامه">
     <section className="shell" style={{ padding: "60px 40px" }}>
       <div className="flex justify-between items-end gap-4 flex-wrap mb-8" >
@@ -119,7 +122,7 @@ const TRANSCRIPT_SEMESTERS = TRANSCRIPT.map((sem) => ({
 // =====================================================
 // Degree Audit / Progress
 // =====================================================
-export const DegreeAuditPage = ({ go }) => (
+export const DegreeAuditPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="37 مسیر مدرک">
     <section className="shell" style={{ padding: "60px 40px" }}>
       <div className="mb-8" >
@@ -233,7 +236,7 @@ const RegistrationFilterPills = () => {
   );
 };
 
-export const RegistrationPage = ({ go }) => {
+export const RegistrationPage: React.FC<AcademicPageProps> = ({ go }) => {
   const [cart, setCart] = React.useState(() => {
     try { return JSON.parse(localStorage.getItem("digiu_cart") || "[\"CS-580\"]"); } catch { return ["CS-580"]; }
   });
@@ -353,7 +356,7 @@ export const RegistrationPage = ({ go }) => {
 // =====================================================
 // Career Services / Jobs Board
 // =====================================================
-export const CareerPage = ({ go }) => (
+export const CareerPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="39 خدمات شغلی">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
@@ -451,7 +454,7 @@ export const CareerPage = ({ go }) => (
 // =====================================================
 // Financial Aid / Scholarships
 // =====================================================
-export const FinancialAidPage = ({ go }) => (
+export const FinancialAidPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="40 کمک هزینه">
     <section className="shell" style={{ padding: "60px 40px" }}>
       <div className="mb-8" >
@@ -516,7 +519,7 @@ export const FinancialAidPage = ({ go }) => (
 // =====================================================
 // Wellness / Counseling
 // =====================================================
-export const WellnessPage = ({ go }) => (
+export const WellnessPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="41 سلامت">
     <section className="shell" style={{ padding: "60px 40px" }}>
       <div className="mb-8" >
@@ -594,7 +597,7 @@ export const WellnessPage = ({ go }) => (
 // =====================================================
 // Alumni Network
 // =====================================================
-export const AlumniPage = ({ go }) => (
+export const AlumniPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="42 شبکه فارغ‌التحصیلان">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
@@ -657,7 +660,7 @@ export const AlumniPage = ({ go }) => (
 // =====================================================
 // Hackathons & Competitions
 // =====================================================
-export const HackathonsPage = ({ go }) => (
+export const HackathonsPage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="43 رقابت‌ها">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
@@ -731,7 +734,7 @@ export const HackathonsPage = ({ go }) => (
 // =====================================================
 // Honor Code / Academic Integrity
 // =====================================================
-export const HonorCodePage = ({ go }) => (
+export const HonorCodePage: React.FC<AcademicPageProps> = ({ go }) => (
   <main data-screen-label="44 منشور علمی">
     <section className="shell" style={{ padding: "60px 40px", maxWidth: 960 }}>
       <div className="mb-10" >
