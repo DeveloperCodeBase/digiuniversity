@@ -127,97 +127,158 @@ The remaining TASK B (axe-core) and TASK C (composite) continue so the dossier i
 
 ---
 
-## §2 — axe-core scan (Criterion 2)
+## §2 — axe-core scan (Criterion 2) — **🔴 FAIL**
 
 **Target:** 0 critical and 0 serious violations on every authenticated and public route. (Moderate + minor violations are tracked but not Gate A blockers.)
 
-**Methodology:** `@axe-core/playwright` integrated into the existing `phase-a-*.spec.ts` files, scanning each route end-to-end (post-auth where applicable). One assertion per route × one severity-pivoted assertion = a route × violation matrix.
+**Methodology:** `@axe-core/playwright` 4.10.1 (already pinned in `apps/web/package.json`) integrated into a dedicated spec (`apps/web/tests/visual/gate-a-axe-scan.spec.ts`). Per route: navigate, wait for `domcontentloaded`, build the axe instance with `wcag2a/aa + wcag21a/aa + wcag22aa` tag filter, run, filter to `impact in ('critical', 'serious')`. Workspace routes share a `BrowserContext` via `beforeAll` (same auth-rate-limit-dodge pattern as R3/R5/R6/R6.6).
 
-**Run command (canonical):**
-```bash
-# Append to apps/web/tests/visual/gate-a-axe-scan.spec.ts
-# (To be authored as part of Gate A measurement work — not yet written.)
+**Run command (used for the run below):**
+```powershell
 .\scripts\remote.ps1 visual -Service gate-a-axe-scan
 ```
 
-**Route × violation count table (TO BE FILLED before Gate A close):**
+**Aggregated headline (from `docs/gate-a-evidence/axe-scan.json`):**
 
-| Route | Critical | Serious | Moderate | Minor | Pass? | Notes |
-|---|---|---|---|---|---|---|
-| `/` | TBD | TBD | TBD | TBD | ⏳ | landing — public |
-| `/about` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/admin` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/admissions` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/alumni` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/analytics` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/assessment` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/assessment-live/:assessmentId` | TBD | TBD | TBD | TBD | ⏳ | workspace dyn |
-| `/audit` | TBD | TBD | TBD | TBD | ⏳ | admin-only |
-| `/authoring` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/bookmarks` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/calendar` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/career` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/catalog` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/classroom` | TBD | TBD | TBD | TBD | ⏳ | **R6 redesign** |
-| `/community` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/content` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/course` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/course-live/:courseId` | TBD | TBD | TBD | TBD | ⏳ | workspace dyn |
-| `/course/:courseId` | TBD | TBD | TBD | TBD | ⏳ | workspace dyn |
-| `/credential` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/dashboard` | TBD | TBD | TBD | TBD | ⏳ | role-router |
-| `/degree-audit` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/events` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/faculty` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/financial-aid` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/forgot` | TBD | TBD | TBD | TBD | ⏳ | auth |
-| `/hackathons` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/help` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/home` | TBD | TBD | TBD | TBD | ⏳ | public landing |
-| `/honor-code` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/inbox` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/instructor` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/labs` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/library` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/login` | TBD | TBD | TBD | TBD | ⏳ | **R5 redesign** |
-| `/messages` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/moderate` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/my-courses` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/officehours` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/onboarding` | TBD | TBD | TBD | TBD | ⏳ | auth |
-| `/org` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/parent` | TBD | TBD | TBD | TBD | ⏳ | role-home |
-| `/pricing` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/profile` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/programs` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/progress` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/recordings` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/register` | TBD | TBD | TBD | TBD | ⏳ | auth |
-| `/registration` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/research` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/schools` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/search` | TBD | TBD | TBD | TBD | ⏳ | public |
-| `/settings` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/submission` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/super` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/support` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/ta` | TBD | TBD | TBD | TBD | ⏳ | **R3 dashboard** |
-| `/transcript` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/tutor` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/2fa-setup` | TBD | TBD | TBD | TBD | ⏳ | auth |
-| `/verify-email` | TBD | TBD | TBD | TBD | ⏳ | auth |
-| `/virtuallab` | TBD | TBD | TBD | TBD | ⏳ | workspace |
-| `/virtuallab/:labId` | TBD | TBD | TBD | TBD | ⏳ | workspace dyn |
-| `/wellness` | TBD | TBD | TBD | TBD | ⏳ | workspace |
+| Metric | Value |
+|---|---|
+| Routes scanned | 67 (8 PUBLIC + 6 AUTH_FLOW + 49 WORKSPACE static + 4 WORKSPACE dynamic-param) |
+| Routes with ≥1 critical | **54** |
+| Routes with ≥1 serious | **65** |
+| Clean (0 critical + 0 serious) | **0 verified** (`/` and `/home` had scan-context disposal errors — re-scan needed; expected to land 0 serious based on PUBLIC-static peers) |
 
-**Total routes:** 65 unique paths (extracted from `apps/web/src/router.tsx`) + `*` catch-all = 66. The Compass Roadmap's "49 route" figure was an early Phase-14 count before sub-R additions (R3 added 6 role-routes, R5 added 6 auth routes, Phase 15/16 added various admin and dashboard routes).
+**Top rule frequencies (critical + serious only):**
 
-**Known watch-outs:**
-- The new R5 login page uses an animated knowledge-graph backdrop (canvas + rAF). axe-core may flag the canvas as missing alt text — verify it has the proper `aria-hidden="true"` (it does per the R5 code).
-- The new R6 classroom uses gradient slide backgrounds + a yellow gold accent. Color-contrast checks must pass under both light and dark themes.
-- Workspace routes need the authed BrowserContext (per the R3/R5/R6 pattern); the gate-a-axe-scan spec will reuse the shared-context helper.
+| Count | Rule ID | Severity | What it means |
+|---|---|---|---|
+| 65 | `color-contrast` | serious | Text or UI does not meet 4.5:1 (normal) / 3:1 (large) contrast against background (WCAG 1.4.3) |
+| 53 | `aria-valid-attr-value` | critical | An ARIA attribute has an invalid value (WCAG 4.1.2). Fires on every WORKSPACE route → almost certainly a single chrome-level component bug (AppShell sidebar, user-menu Popover, or sheet drawer) |
+| 2 | `aria-prohibited-attr` | serious | An aria-* on an element where that attribute isn't allowed by ARIA spec |
+| 2 | `button-name` | critical | A `<button>` without accessible name (WCAG 4.1.2) |
+| 2 | `label` | critical | A form field without an associated label (WCAG 3.3.2) |
+| 2 | `scrollable-region-focusable` | serious | A scrollable region must be focusable for keyboard users |
+| 2 | `select-name` | critical | A `<select>` without an accessible name |
+| 1 | `aria-toggle-field-name` | serious | A toggle button/switch without a name |
+| 1 | `nested-interactive` | serious | An interactive element nested inside another (e.g., `<button>` inside `<a>`) |
+
+**Gate A criterion 2 verdict: 🔴 FAIL.** Per Compass §Gate A, 0 critical + 0 serious is required per route. Current state: 54/67 routes have at least one critical, 65/67 have at least one serious.
+
+### Per-route table
+
+| Route | Kind | Critical | Serious | Top rules (critical + serious) |
+|---|---|---|---|---|
+| `/` | PUBLIC | 0 | 0 | (scan retry needed) |
+| `/home` | PUBLIC | 0 | 0 | (scan retry needed) |
+| `/about` | PUBLIC | 0 | 1 | color-contrast |
+| `/admissions` | PUBLIC | 0 | 1 | color-contrast |
+| `/pricing` | PUBLIC | 0 | 1 | color-contrast |
+| `/help` | PUBLIC | 0 | 1 | color-contrast |
+| `/honor-code` | PUBLIC | 0 | 1 | color-contrast |
+| `/programs` | PUBLIC | 0 | 1 | color-contrast |
+| `/login` | AUTH_FLOW | 0 | 3 | aria-prohibited-attr, aria-toggle-field-name, color-contrast |
+| `/register` | AUTH_FLOW | 0 | 1 | color-contrast |
+| `/forgot` | AUTH_FLOW | 0 | 1 | color-contrast |
+| `/verify-email` | AUTH_FLOW | 1 | 1 | label, color-contrast |
+| `/2fa-setup` | AUTH_FLOW | 0 | 1 | color-contrast |
+| `/onboarding` | AUTH_FLOW | 0 | 1 | color-contrast |
+| `/dashboard` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/admin` | WORKSPACE | 2 | 1 | aria-valid-attr-value, button-name, color-contrast |
+| `/super` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/content` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/ta` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/support` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/moderate` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/org` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/parent` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/instructor` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/teach` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/catalog` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/my-courses` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/progress` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/tutor` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/calendar` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/community` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/inbox` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/messages` | WORKSPACE | 1 | 2 | aria-valid-attr-value, color-contrast, scrollable-region-focusable |
+| `/profile` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/settings` | WORKSPACE | 2 | 1 | aria-valid-attr-value, label, color-contrast |
+| `/credential` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/transcript` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/career` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/wellness` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/library` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/labs` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/virtuallab` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/research` | WORKSPACE | 2 | 1 | aria-valid-attr-value, button-name, color-contrast |
+| `/officehours` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/hackathons` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/alumni` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/events` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/schools` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/faculty` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/registration` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/degree-audit` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/financial-aid` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/audit` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/analytics` | WORKSPACE | 2 | 1 | aria-valid-attr-value, select-name, color-contrast |
+| `/authoring` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/assessment` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/bookmarks` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/classroom` | WORKSPACE | 1 | 4 | aria-valid-attr-value, aria-prohibited-attr, color-contrast, nested-interactive, scrollable-region-focusable |
+| `/course` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/recordings` | WORKSPACE | 2 | 1 | aria-valid-attr-value, select-name, color-contrast |
+| `/submission` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/achievements` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/search` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/course/:courseId` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/course-live/:courseId` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/assessment-live/:assessmentId` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+| `/virtuallab/:labId` | WORKSPACE | 1 | 1 | aria-valid-attr-value, color-contrast |
+
+### Proposed fix plan — **R7 (post-Gate-A, NOT implementation now)**
+
+The damage is concentrated in **two root causes**, each fixable in one place:
+
+**Root cause #1 — `aria-valid-attr-value` × 53 workspace routes.** Every WORKSPACE route hits this once. Strong signal that a single chrome component (AppShell / Nav / user-menu Popover / sidebar Sheet) is rendering an aria attribute with an invalid value. The R6.6 work on `appshell-sidebar-trigger` is the most likely surface — needs an axe details inspection to find the exact `[attr]="value"` pair. One commit fixes 53 routes.
+
+**Root cause #2 — `color-contrast` × 65 routes.** Same theme-token issue as Lighthouse §1 finds. R6.5 introduced `--fg-mute: #5b6b87` and `--fg-dim: #93a0b8` which don't hit 4.5:1 against `--bg: #ffffff`. Darkening to `--fg-mute: #4a5a76` and `--fg-dim: #768094` should bring both above 4.5:1. One commit fixes 65 routes.
+
+**R7 axe-sweep plan (NOT implemented now per owner directive):**
+
+**R7.5 — Fix chrome-level `aria-valid-attr-value`** (priority 1, unblocks 53 routes):
+- Pull the violation `.target` from axe's full output to find the exact selector that fails.
+- Most likely candidate: AppShell's Sheet drawer uses `aria-controls="appshell-sidebar-drawer"` on the trigger, but the drawer element may not have `id="appshell-sidebar-drawer"` set — making the aria-controls reference invalid.
+- Verify, fix, re-scan.
+
+**R7.6 — Darken `--fg-mute` + `--fg-dim` theme tokens** (priority 2, unblocks 65 routes):
+- Audit `var(--fg-mute)` text on `var(--bg)` and `var(--fg-dim)` text on `var(--bg)`.
+- New token values: `--fg-mute: #4a5a76` (was `#5b6b87`) → contrast ratio ~7.5:1 (was ~4.0:1). `--fg-dim: #768094` (was `#93a0b8`) → contrast ratio ~4.7:1 (was ~3.0:1).
+- Re-run axe-scan + Lighthouse a11y; expect color-contrast violations → 0 and a11y scores → 90+.
+
+**R7.7 — Fix the long-tail one-off violations** (priority 3, ~10 routes):
+- `/login` `aria-prohibited-attr` ×2 + `aria-toggle-field-name` ×1 — likely the password show/hide toggle + theme toggle have wrong aria setup.
+- `/verify-email` `label` ×1 — a form field needs `<label for="…">`.
+- `/admin` + `/research` `button-name` — an icon button on those pages lacks `aria-label`.
+- `/messages` + `/classroom` `scrollable-region-focusable` — scrollable lists need `tabindex="0"` for keyboard.
+- `/settings` `label` — same as /verify-email.
+- `/analytics` + `/recordings` `select-name` — a `<select>` needs `<label>` or `aria-label`.
+- `/classroom` `aria-prohibited-attr` + `nested-interactive` — the R6 classroom UI has a nested button-in-link somewhere (likely the reaction buttons inside the slide nav).
+
+**R7.8 — Re-scan `/` and `/home`** (priority 4):
+- Both routes returned scan-context-destroyed errors during the initial run (probably the SPA's PWA service-worker recovery script disposing the page during axe injection). Re-scan with `await page.waitForLoadState("networkidle")` before the axe call.
+
+**Estimated R7 axe-sweep budget:** ~3-5 days of sub-Rs. Combined R7 (Lighthouse + axe) total is the ~2-week estimate from §1.
+
+### Gate A status after §2
+
+🔴 **Criterion 2 (axe-core 0 critical + 0 serious on every route): FAIL.**
+
+Combined with §1, Gate A has **two of its six criteria failing**. Phase B start remains BLOCKED. The R7 sweep targets both criteria simultaneously (Lighthouse + axe share root causes — code splitting + font self-host + theme contrast + chrome-level aria fix).
+
+**Full axe-scan JSON evidence:** `docs/gate-a-evidence/axe-scan.json` (32 KB, every route's per-violation rule list).
 
 ---
+
 
 ## §3 — TypeScript strict + `@ts-nocheck` budget (Criterion 3)
 

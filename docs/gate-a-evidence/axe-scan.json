@@ -1,0 +1,1012 @@
+{
+  "scanned_at": "2026-05-23T11:38:48.592Z",
+  "total_routes": 67,
+  "routes_with_critical": 54,
+  "routes_with_serious": 65,
+  "routes_clean": 2,
+  "routes_redirected": 0,
+  "results": [
+    {
+      "path": "/",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:31.083Z",
+      "url": "/",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/home",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:32.261Z",
+      "url": "/home",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "scan-error:page.evaluate: Execution context was destroyed, most likely "
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/about",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:32.984Z",
+      "url": "/about",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/admissions",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:34.333Z",
+      "url": "/admissions",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/pricing",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:35.633Z",
+      "url": "/pricing",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/help",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:36.905Z",
+      "url": "/help",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/honor-code",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:38.182Z",
+      "url": "/honor-code",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/programs",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-23T11:37:39.444Z",
+      "url": "/programs",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/login",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:40.852Z",
+      "url": "/login",
+      "critical_count": 0,
+      "serious_count": 3,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-prohibited-attr",
+        "aria-toggle-field-name",
+        "color-contrast"
+      ]
+    },
+    {
+      "path": "/register",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:42.111Z",
+      "url": "/register",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/forgot",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:43.304Z",
+      "url": "/forgot",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/verify-email",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:44.424Z",
+      "url": "/verify-email",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "label",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/2fa-setup",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:45.513Z",
+      "url": "/2fa-setup",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/onboarding",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-23T11:37:46.638Z",
+      "url": "/onboarding",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/dashboard",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:50.323Z",
+      "url": "/dashboard",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/admin",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:51.510Z",
+      "url": "/admin",
+      "critical_count": 2,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "button-name",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/super",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:52.709Z",
+      "url": "/super",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/content",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:53.667Z",
+      "url": "/content",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/ta",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:54.646Z",
+      "url": "/ta",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/support",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:55.623Z",
+      "url": "/support",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/moderate",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:56.562Z",
+      "url": "/moderate",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/org",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:57.525Z",
+      "url": "/org",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/parent",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:58.468Z",
+      "url": "/parent",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/instructor",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:37:59.470Z",
+      "url": "/instructor",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/teach",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:00.641Z",
+      "url": "/teach",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/catalog",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:01.766Z",
+      "url": "/catalog",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/my-courses",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:02.756Z",
+      "url": "/my-courses",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/progress",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:03.696Z",
+      "url": "/progress",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/tutor",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:04.666Z",
+      "url": "/tutor",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/calendar",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:05.651Z",
+      "url": "/calendar",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/community",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:06.863Z",
+      "url": "/community",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/inbox",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:08.087Z",
+      "url": "/inbox",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/messages",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:09.170Z",
+      "url": "/messages",
+      "critical_count": 1,
+      "serious_count": 2,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast",
+        "scrollable-region-focusable"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/profile",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:10.258Z",
+      "url": "/profile",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/settings",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:11.356Z",
+      "url": "/settings",
+      "critical_count": 2,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "label",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/credential",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:12.342Z",
+      "url": "/credential",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/transcript",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:13.463Z",
+      "url": "/transcript",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/career",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:14.658Z",
+      "url": "/career",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/wellness",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:15.841Z",
+      "url": "/wellness",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/library",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:16.849Z",
+      "url": "/library",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/labs",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:18.190Z",
+      "url": "/labs",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/virtuallab",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:19.363Z",
+      "url": "/virtuallab",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/research",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:20.440Z",
+      "url": "/research",
+      "critical_count": 2,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "button-name",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/officehours",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:21.521Z",
+      "url": "/officehours",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/hackathons",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:22.631Z",
+      "url": "/hackathons",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/alumni",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:23.702Z",
+      "url": "/alumni",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/events",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:24.807Z",
+      "url": "/events",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/schools",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:25.998Z",
+      "url": "/schools",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/faculty",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:27.437Z",
+      "url": "/faculty",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/registration",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:28.662Z",
+      "url": "/registration",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/degree-audit",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:29.763Z",
+      "url": "/degree-audit",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/financial-aid",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:30.839Z",
+      "url": "/financial-aid",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/audit",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:31.880Z",
+      "url": "/audit",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/analytics",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:32.813Z",
+      "url": "/analytics",
+      "critical_count": 2,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "select-name",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/authoring",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:34.075Z",
+      "url": "/authoring",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/assessment",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:35.182Z",
+      "url": "/assessment",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/bookmarks",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:36.250Z",
+      "url": "/bookmarks",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/classroom",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:37.321Z",
+      "url": "/classroom",
+      "critical_count": 1,
+      "serious_count": 4,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "aria-prohibited-attr",
+        "color-contrast",
+        "nested-interactive",
+        "scrollable-region-focusable"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/course",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:38.534Z",
+      "url": "/course",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/recordings",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:39.703Z",
+      "url": "/recordings",
+      "critical_count": 2,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "select-name",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/submission",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:40.871Z",
+      "url": "/submission",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/achievements",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:41.954Z",
+      "url": "/achievements",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/search",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:42.988Z",
+      "url": "/search",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/course/:courseId",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:44.197Z",
+      "url": "/course/c-cs410",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/course-live/:courseId",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:45.388Z",
+      "url": "/course-live/c-cs410",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/assessment-live/:assessmentId",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:46.329Z",
+      "url": "/assessment-live/a-1",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/virtuallab/:labId",
+      "kind": "WORKSPACE",
+      "scanned_at": "2026-05-23T11:38:47.268Z",
+      "url": "/virtuallab/lab-1",
+      "critical_count": 1,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "aria-valid-attr-value",
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    }
+  ]
+}
