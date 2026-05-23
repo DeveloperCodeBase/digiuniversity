@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.3 — typed.
 // =====================================================
 // Programs / Catalog page
 // =====================================================
@@ -7,11 +7,14 @@ import { Icon } from "../icons";
 import { Stagger } from "../motion";
 import { Footer, toFa } from "../shared";
 import { PROGRAMS, findSchool } from "../data.js";
+import type { Go } from "../router";
 
-const LEVEL_LABEL = { MS: "ارشد", PHD: "دکتری", BS: "کارشناسی", MD: "M.D", CERT: "حرفه‌ای", AS: "کاردانی" };
+const LEVEL_LABEL: Record<string, string> = { MS: "ارشد", PHD: "دکتری", BS: "کارشناسی", MD: "M.D", CERT: "حرفه‌ای", AS: "کاردانی" };
 
-export const ProgramsPage = ({ go }) => {
-  const [activeLevel, setActiveLevel] = React.useState("ALL");
+interface ProgramsPageProps { go: Go }
+
+export const ProgramsPage: React.FC<ProgramsPageProps> = ({ go }) => {
+  const [activeLevel, setActiveLevel] = React.useState<string>("ALL");
   const levels = ["ALL", "MS", "PHD", "BS", "CERT"];
   const filtered = activeLevel === "ALL" ? PROGRAMS : PROGRAMS.filter((p) => p.level === activeLevel);
   const programs = filtered.map((p, i) => {

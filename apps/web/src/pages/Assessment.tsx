@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.3 — typed.
 // =====================================================
 // Adaptive Assessment / Exam interface
 // =====================================================
@@ -6,10 +6,13 @@ import React from "react";
 import { Icon } from "../icons";
 import { Nav, toFa, Sparkline } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const AssessmentPage = ({ go }) => {
-  const [selected, setSelected] = React.useState(1);
-  const [current, setCurrent] = React.useState(4);
+interface AssessmentPageProps { go: Go }
+
+export const AssessmentPage: React.FC<AssessmentPageProps> = ({ go }) => {
+  const [selected, setSelected] = React.useState<number>(1);
+  const [current, setCurrent] = React.useState<number>(4);
   const total = 12;
 
   const steps = Array.from({ length: total }, (_, i) =>

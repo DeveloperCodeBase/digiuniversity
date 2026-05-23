@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.3 — typed.
 // =====================================================
 // Search — Semantic search across courses, video, docs
 // =====================================================
@@ -6,10 +6,13 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const SearchPage = ({ go }) => {
-  const [query, setQuery] = React.useState("گرادیان نزولی با مومنتوم");
-  const [mode, setMode] = React.useState("hybrid");
+interface SearchPageProps { go: Go }
+
+export const SearchPage: React.FC<SearchPageProps> = ({ go }) => {
+  const [query, setQuery] = React.useState<string>("گرادیان نزولی با مومنتوم");
+  const [mode, setMode] = React.useState<string>("hybrid");
 
   return (
     <main data-screen-label="09 جستجو">

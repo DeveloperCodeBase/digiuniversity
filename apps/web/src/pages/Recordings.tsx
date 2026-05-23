@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.3 — typed.
 // =====================================================
 // Recordings library — post-class artifact bundle
 // =====================================================
@@ -7,8 +7,11 @@ import { Icon } from "../icons";
 import { Footer } from "../shared";
 import { RECORDINGS as RECORDINGS_DATA, findCourse, findFaculty } from "../data.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const RecordingsPage = ({ go }) => {
+interface RecordingsPageProps { go: Go }
+
+export const RecordingsPage: React.FC<RecordingsPageProps> = ({ go }) => {
   return (
     <main data-screen-label="14 آرشیو کلاس‌ها">
       <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
@@ -145,9 +148,9 @@ export const RecordingsPage = ({ go }) => {
 // Sort pills — Phase-12 R2: were dead `<span class="pill">` elements
 // with no onClick. Now they keep client-side sort state and surface
 // the choice via aria-pressed.
-const SORT_OPTIONS = ["جدیدترین", "محبوب", "کوتاه‌ترین", "بلندترین"];
-const RecordingsSortPills = () => {
-  const [active, setActive] = React.useState(SORT_OPTIONS[0]);
+const SORT_OPTIONS: readonly string[] = ["جدیدترین", "محبوب", "کوتاه‌ترین", "بلندترین"];
+const RecordingsSortPills: React.FC = () => {
+  const [active, setActive] = React.useState<string>(SORT_OPTIONS[0]);
   return (
     <div className="flex gap-1.5 flex-wrap" role="group" aria-label="مرتب‌سازی">
       {SORT_OPTIONS.map((s) => (
