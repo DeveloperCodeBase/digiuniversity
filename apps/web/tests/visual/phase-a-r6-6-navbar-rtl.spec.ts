@@ -172,11 +172,20 @@ test.describe("R6.6 — Workspace navbar (logged in): hamburger right, user-menu
         userBox!.x + userBox!.width <= hBox!.x + 1;
       expect(noHUserOverlap, "workspace navbar: hamburger and user-menu must not overlap").toBe(true);
 
-      // Hamburger opens the drawer (a11y wiring sanity)
+      // Hamburger toggles the sidebar (a11y wiring sanity).
+      // At <1536px the AppShell renders a Sheet drawer. At ≥1536px
+      // it pins the sidebar inline beside content (data-sidebar-pinned).
+      // Either form is acceptable — both prove the click was wired.
       await hamburger.click();
-      await expect(page.locator(".appshell-sidebar-drawer")).toBeVisible();
-      // Close via Escape so subsequent tests don't inherit an open drawer
-      await page.keyboard.press("Escape");
+      if (v.w >= 1536) {
+        await expect(page.locator(".workspace-grid[data-sidebar-pinned='true']")).toBeVisible();
+        // Click again to un-pin so the next test starts clean
+        await hamburger.click();
+      } else {
+        await expect(page.locator(".appshell-sidebar-drawer")).toBeVisible();
+        // Close via Escape so subsequent tests don't inherit an open drawer
+        await page.keyboard.press("Escape");
+      }
 
       await shotIfBaseline(page, `workspace-${v.name}`);
     });
