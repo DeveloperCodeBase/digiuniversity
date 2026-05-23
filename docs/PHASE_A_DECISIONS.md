@@ -147,3 +147,37 @@ No "76% ready, move on". No "automated passed, ship it". Manual is non-negotiabl
 **Choice:** A.
 **Why:** Tailwind `lg` token = 1024px. Consistency. Drawer takes over at the same breakpoint that everywhere else uses.
 **Source:** my call, derived from tailwind.config.js + AppShell drawer logic.
+
+### R6+R6.5-D14 — Owner-approved mid-Phase-A pivot (Classroom redesign + theme + brand logo)
+**Context:** Between R5 (login) and the planned R6 (audit lint backfill / Gate-A start), the owner explicitly requested three pieces of scope that were NOT in the original Compass Roadmap or the Phase-A plan locked in `~/.claude/plans/c-users-98912-downloads-compass-artifac-partitioned-eclipse.md`:
+  - **R6 Classroom redesign** — apply the owner-uploaded template at `docs/my-upload/classroom/` to the کلاس زنده + AI page, port to typed React inside AppShell, retire the Classroom `@ts-nocheck`.
+  - **R6.5 Global theme switch** — replace the off-white-paper + oxford-blue light theme with the white + navy + brand-blue + gold palette from the R6 template; default theme `dark` → `light`.
+  - **JDO logo + brand attribution** — wire the owner-supplied `darklogo.png` / `lightlogo.png` JDO marks into the footer + co-brand strip across PUBLIC + WORKSPACE + AUTH_FLOW (R1.3 Brand and CoBrandFooter inside R5).
+
+**The question this entry settles:** are these D11 violations? (D11 = "no addition outside the locked plan without explicit owner message".)
+
+**Answer:** **No.** All three pivots arrived as explicit, in-band user messages in the chat transcript:
+  - R6: «use this style and design for کلاس زنده + AI page exactly like this and make it responsive for all pages...i put template in root of project: C:\digiuniversity\docs\my-upload\classroom»
+  - R6.5: «continue as plan make theme color white and blue navy»
+  - JDO logo: «darklogo.png و lightlogo.png در C:\digiuniversity\ هستن» + the earlier R5 template upload that included `assets/jahad-dark.png` + `assets/jahad-light.png`.
+
+Each message is an explicit owner authorization to deviate from the locked plan. The pivots were ratified on-the-fly, executed under the same Phase-A workflow (memo→code→deploy→spec→review→D13 manual smoke), and recorded as sub-Rs (R6, R6.5; R1.3 Brand was the original logo work). **No D11 violation.**
+
+**D11 reaffirmed for future features.** Every future addition — whether mid-Phase-A or in Phase B+ — needs the same explicit owner-message authorization. The pattern is:
+  - Owner writes a clear instruction in the chat.
+  - I memo the addition before code (per the established workflow).
+  - I cite the message that authorized it in the memo.
+  - The PR review doc references this decision (so future agents see the trail).
+
+**What this entry is NOT:** a blanket pre-approval for me to widen scope on perceived owner intent. Implicit, ambiguous, or interpreted messages don't qualify. The owner must say the words.
+
+**Source:** owner messages on 2026-05-23 (R6 Classroom redesign request, R6.5 theme color, JDO logo) and 2026-05-22 (R5 template + jahad logo files).
+
+### R6.6-D15 — Logical CSS properties are the canonical RTL fix
+**Context:** R6.6 fixed a user-reported navbar RTL bug. Two CSS choices for pushing `.nav-actions` to the end edge:
+  - A. `margin-left: auto` (physical) — works only in LTR; in RTL the "left" side is the END so this would push the wrong way.
+  - B. `margin-inline-start: auto` (logical) — under RTL "inline-start" is the right edge; absorbing the start-side margin pushes the box toward the end (left). One rule, both directions correct.
+**Choice:** B.
+**Why:** Single source of truth for both LTR (Phase-F en-US locale, if ever) and RTL (current). No `[dir="rtl"]` override needed. Aligns with the existing `inset-inline-start` / `inset-inline-end` patterns already used in AppShell's Sheet drawer (R1.1) and the R6 classroom CSS.
+**Application:** R6.6 used `margin-inline-start: auto` on `.nav-actions`. Future RTL fixes that involve directional margins, padding, or absolute positioning must use logical-property equivalents (`margin-inline-*`, `padding-inline-*`, `inset-inline-*`, `border-inline-*`, `start-*` / `end-*` Tailwind utilities) — never `margin-left/right`, `padding-left/right`, `left/right`, etc.
+**Source:** owner-prescribed debug-step list 2026-05-23 («ml-* و mr-* استفاده شده یا ms-* و me-*؟»).
