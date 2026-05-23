@@ -1,7 +1,16 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Hero-stat tile used in marketing surfaces.
 import React from "react";
 
-export const Stat = ({ v, unit, l }) => (
+export interface StatProps {
+  /** The headline number / phrase. */
+  v: React.ReactNode;
+  /** Optional small unit suffix rendered inline. */
+  unit?: React.ReactNode;
+  /** Caption underneath. */
+  l: React.ReactNode;
+}
+
+export const Stat: React.FC<StatProps> = ({ v, unit, l }) => (
   <div className="hero-stat">
     <div className="v">{v}{unit && <span className="unit">{unit}</span>}</div>
     <div className="l">{l}</div>

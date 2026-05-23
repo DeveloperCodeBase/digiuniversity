@@ -1,7 +1,9 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed.
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { StatCard } from "./StatCard";
 
-export default {
+const meta: Meta<typeof StatCard> = {
   title: "Widgets/StatCard",
   component: StatCard,
   tags: ["autodocs"],
@@ -14,8 +16,11 @@ export default {
     ),
   ],
 };
+export default meta;
 
-export const Default = {
+type Story = StoryObj<typeof StatCard>;
+
+export const Default: Story = {
   args: {
     l: "میانگین تسلط",
     v: "۷۸",
@@ -26,7 +31,7 @@ export const Default = {
   },
 };
 
-export const Down = {
+export const Down: Story = {
   args: {
     l: "ریسک افت",
     v: "کم",
@@ -37,7 +42,7 @@ export const Down = {
   },
 };
 
-export const WithUnit = {
+export const WithUnit: Story = {
   args: {
     l: "ساعت مطالعه",
     v: "۲۴",
@@ -48,10 +53,10 @@ export const WithUnit = {
   },
 };
 
-export const NoSparkline = {
+export const NoSparkline: Story = {
   args: {
     l: "وضعیت",
     v: "ممتاز",
-    trend: null,
+    trend: undefined,
   },
 };

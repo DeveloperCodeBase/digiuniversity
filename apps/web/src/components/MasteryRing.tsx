@@ -1,10 +1,22 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Circular mastery percentage indicator.
 import React from "react";
 
-const toFa = (n) => String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+const toFa = (n: number | string): string =>
+  String(n).replace(/[0-9]/g, (d) => FA_DIGITS[Number(d)]);
 
-export const MasteryRing = ({ percent, label = "تسلط فعلی", sub }) => {
-  const r = 36, c = 2 * Math.PI * r;
+export interface MasteryRingProps {
+  /** 0–100. */
+  percent: number;
+  /** Primary label beside the ring. */
+  label?: React.ReactNode;
+  /** Optional smaller secondary line. */
+  sub?: React.ReactNode;
+}
+
+export const MasteryRing: React.FC<MasteryRingProps> = ({ percent, label = "تسلط فعلی", sub }) => {
+  const r = 36;
+  const c = 2 * Math.PI * r;
   const off = c - (percent / 100) * c;
   return (
     <div className="flex items-center gap-4">

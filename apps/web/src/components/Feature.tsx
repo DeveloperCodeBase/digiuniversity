@@ -1,8 +1,15 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Single "feature" cell with leading icon + title + description.
 import React from "react";
 import { Icon } from "../icons";
 
-export const Feature = ({ title, desc, icon }) => (
+export interface FeatureProps {
+  title: React.ReactNode;
+  desc: React.ReactNode;
+  /** Icon name from the shared icon set. */
+  icon: string;
+}
+
+export const Feature: React.FC<FeatureProps> = ({ title, desc, icon }) => (
   <div>
     <div className="flex items-center gap-2 mb-2" style={{ color: "var(--cyan)" }}>
       <Icon name={icon} size={18} />

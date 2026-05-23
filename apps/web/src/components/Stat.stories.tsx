@@ -1,7 +1,9 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed.
+import React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { Stat } from "./Stat";
 
-export default {
+const meta: Meta<typeof Stat> = {
   title: "Widgets/Stat (Hero)",
   component: Stat,
   tags: ["autodocs"],
@@ -13,6 +15,9 @@ export default {
     ),
   ],
 };
+export default meta;
 
-export const Default = { args: { v: "۸", unit: " دانشکده", l: "مهندسی · پزشکی · علوم پایه · AI · مدیریت · انسانی · هنر · حقوق" } };
-export const Big = { args: { v: "۸,۴۰۰", unit: " دانشجو", l: "در ۴۲ شهر و ۲۸ کشور" } };
+type Story = StoryObj<typeof Stat>;
+
+export const Default: Story = { args: { v: "۸", unit: " دانشکده", l: "مهندسی · پزشکی · علوم پایه · AI · مدیریت · انسانی · هنر · حقوق" } };
+export const Big: Story = { args: { v: "۸,۴۰۰", unit: " دانشجو", l: "در ۴۲ شهر و ۲۸ کشور" } };

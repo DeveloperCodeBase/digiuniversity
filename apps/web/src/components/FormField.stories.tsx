@@ -1,8 +1,9 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
-import { useState } from "react";
+// Phase-A R2.1 — typed.
+import React, { useState } from "react";
+import type { Meta, StoryObj } from "@storybook/react";
 import { FormField } from "./FormField";
 
-export default {
+const meta: Meta<typeof FormField> = {
   title: "Widgets/FormField",
   component: FormField,
   tags: ["autodocs"],
@@ -14,15 +15,18 @@ export default {
     ),
   ],
 };
+export default meta;
 
-export const Default = {
+type Story = StoryObj<typeof FormField>;
+
+export const Default: Story = {
   args: {
     label: "نام کامل",
     placeholder: "نسرین رضوی",
   },
 };
 
-export const WithHint = {
+export const WithHint: Story = {
   args: {
     label: "ایمیل دانشگاهی",
     placeholder: "you@digiu.edu",
@@ -30,7 +34,7 @@ export const WithHint = {
   },
 };
 
-export const Required = {
+export const Required: Story = {
   args: {
     label: "رمز عبور",
     type: "password",
@@ -39,7 +43,7 @@ export const Required = {
   },
 };
 
-export const WithError = {
+export const WithError: Story = {
   args: {
     label: "کد دانشجویی",
     placeholder: "84-XX-XX",
@@ -48,7 +52,7 @@ export const WithError = {
   },
 };
 
-export const Monospace = {
+export const Monospace: Story = {
   args: {
     label: "شناسه گواهی",
     placeholder: "DU-2026-...",
@@ -56,9 +60,9 @@ export const Monospace = {
   },
 };
 
-export const Interactive = {
+export const Interactive: Story = {
   render: () => {
-    const [v, setV] = useState("");
+    const [v, setV] = useState<string>("");
     return <FormField label="موضوع" placeholder="چه چیزی می‌خواهید بپرسید؟" value={v} onChange={(e) => setV(e.target.value)} />;
   },
 };

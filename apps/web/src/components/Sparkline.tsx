@@ -1,12 +1,24 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Minimal SVG sparkline (line + gradient area).
 import React from "react";
 
-export const Sparkline = ({ values, color = "var(--cyan)", height = 50, width = 220 }) => {
+export interface SparklineProps {
+  values: number[];
+  color?: string;
+  height?: number;
+  width?: number;
+}
+
+export const Sparkline: React.FC<SparklineProps> = ({
+  values,
+  color = "var(--cyan)",
+  height = 50,
+  width = 220,
+}) => {
   if (!values || values.length < 2) return null;
   const max = Math.max(...values);
   const min = Math.min(...values);
   const range = max - min || 1;
-  const pts = values.map((v, i) => {
+  const pts: Array<[number, number]> = values.map((v, i): [number, number] => {
     const x = (i / (values.length - 1)) * width;
     const y = height - ((v - min) / range) * height * 0.85 - height * 0.07;
     return [x, y];

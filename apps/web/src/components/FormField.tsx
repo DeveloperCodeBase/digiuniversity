@@ -1,7 +1,33 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Label + input + optional hint/error row.
 import React from "react";
 
-export const FormField = ({ label, placeholder, mono, value, onChange, hint, type = "text", required, error }) => (
+export interface FormFieldProps {
+  label: React.ReactNode;
+  placeholder?: string;
+  /** If true, the input uses the mono font family (for IDs, codes). */
+  mono?: boolean;
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  /** Hint shown when no error is present. */
+  hint?: React.ReactNode;
+  /** Native input type (text/email/password/...). */
+  type?: React.HTMLInputTypeAttribute;
+  required?: boolean;
+  /** Error message; when set, replaces the hint and tints the border. */
+  error?: React.ReactNode;
+}
+
+export const FormField: React.FC<FormFieldProps> = ({
+  label,
+  placeholder,
+  mono,
+  value,
+  onChange,
+  hint,
+  type = "text",
+  required,
+  error,
+}) => (
   <label className="flex flex-col gap-1.5">
     <span className="font-mono uppercase text-[10px] text-fg-mute tracking-widest">
       {label}{required && <span className="text-rose me-1"> *</span>}

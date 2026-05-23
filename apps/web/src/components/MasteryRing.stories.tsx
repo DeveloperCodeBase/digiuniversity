@@ -1,14 +1,18 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed.
+import type { Meta, StoryObj } from "@storybook/react";
 import { MasteryRing } from "./MasteryRing";
 
-export default {
+const meta: Meta<typeof MasteryRing> = {
   title: "Widgets/MasteryRing",
   component: MasteryRing,
   tags: ["autodocs"],
   parameters: { layout: "centered" },
 };
+export default meta;
 
-export const Low = { args: { percent: 25, sub: "۲ از ۹ هدف" } };
-export const Mid = { args: { percent: 55, sub: "۵ از ۹ هدف" } };
-export const High = { args: { percent: 78, sub: "۷ از ۹ هدف" } };
-export const Complete = { args: { percent: 100, label: "تسلط کامل", sub: "۹ از ۹ هدف" } };
+type Story = StoryObj<typeof MasteryRing>;
+
+export const Low: Story = { args: { percent: 25, sub: "۲ از ۹ هدف" } };
+export const Mid: Story = { args: { percent: 55, sub: "۵ از ۹ هدف" } };
+export const High: Story = { args: { percent: 78, sub: "۷ از ۹ هدف" } };
+export const Complete: Story = { args: { percent: 100, label: "تسلط کامل", sub: "۹ از ۹ هدف" } };

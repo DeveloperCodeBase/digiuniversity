@@ -1,8 +1,29 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Icon-only button with aria-label and tooltip.
 import React from "react";
 import { Icon } from "../icons";
 
-export const IconButton = ({ icon, label, onClick, variant = "ghost", size = 14, className = "", ...rest }) => (
+export type IconButtonVariant = "ghost" | "outline" | "primary";
+
+export interface IconButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
+  /** Icon name from the shared icon set. */
+  icon: string;
+  /** Accessible label used as aria-label + title (tooltip). */
+  label: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  variant?: IconButtonVariant;
+  size?: number;
+  className?: string;
+}
+
+export const IconButton: React.FC<IconButtonProps> = ({
+  icon,
+  label,
+  onClick,
+  variant = "ghost",
+  size = 14,
+  className = "",
+  ...rest
+}) => (
   <button
     type="button"
     className={`btn btn-${variant} icon-btn ${className}`}

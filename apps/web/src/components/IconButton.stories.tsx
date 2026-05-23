@@ -1,13 +1,17 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed.
+import type { Meta, StoryObj } from "@storybook/react";
 import { IconButton } from "./IconButton";
 
-export default {
+const meta: Meta<typeof IconButton> = {
   title: "Widgets/IconButton",
   component: IconButton,
   tags: ["autodocs"],
   parameters: { layout: "centered" },
 };
+export default meta;
 
-export const Ghost = { args: { icon: "settings", label: "تنظیمات", variant: "ghost" } };
-export const Outline = { args: { icon: "bell", label: "اعلان‌ها", variant: "outline" } };
-export const Primary = { args: { icon: "send", label: "ارسال پیام", variant: "primary" } };
+type Story = StoryObj<typeof IconButton>;
+
+export const Ghost: Story = { args: { icon: "settings", label: "تنظیمات", variant: "ghost" } };
+export const Outline: Story = { args: { icon: "bell", label: "اعلان‌ها", variant: "outline" } };
+export const Primary: Story = { args: { icon: "send", label: "ارسال پیام", variant: "primary" } };

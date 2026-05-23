@@ -1,7 +1,12 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.1 — typed. Binary on/off pill toggle (controlled).
 import React from "react";
 
-export const Toggle = ({ on, onChange }) => (
+export interface ToggleProps {
+  on: boolean;
+  onChange?: (next: boolean) => void;
+}
+
+export const Toggle: React.FC<ToggleProps> = ({ on, onChange }) => (
   <button
     type="button"
     onClick={() => onChange?.(!on)}
