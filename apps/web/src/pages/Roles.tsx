@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.8 — typed.
 // =====================================================
 // Role-specific pages: Admin, Parent, Office Hours, Events, About
 // =====================================================
@@ -14,8 +14,11 @@ import { Button } from "../ui";
 import { StatCard, Toggle } from "../components/widgets";
 import { EVENTS } from "../data.js";
 import { OrgAttribution } from "../components/OrgAttribution";
+import type { Go } from "../router";
 
-export const AdminPage = ({ go }) => {
+interface RolesPageProps { go: Go }
+
+export const AdminPage: React.FC<RolesPageProps> = ({ go }) => {
   return (
     <main data-screen-label="21 میز مدیریت">
       <div className="dash-main">
@@ -191,7 +194,7 @@ export const AdminPage = ({ go }) => {
 // =====================================================
 // Parent / Guardian Dashboard
 // =====================================================
-export const ParentPage = ({ go }) => (
+export const ParentPage: React.FC<RolesPageProps> = ({ go }) => (
   <main data-screen-label="22 میز والد">
       <div className="dash-main">
         <div className="dash-greet">
@@ -287,7 +290,7 @@ export const ParentPage = ({ go }) => (
 // =====================================================
 // Office Hours / Booking
 // =====================================================
-export const OfficeHoursPage = ({ go }) => {
+export const OfficeHoursPage: React.FC<RolesPageProps> = ({ go }) => {
   const [selectedDay, setSelectedDay] = React.useState(2);
   const [selectedSlot, setSelectedSlot] = React.useState(null);
   const [selectedInstructor, setSelectedInstructor] = React.useState(0);
@@ -463,7 +466,7 @@ const EventFilters = () => {
   );
 };
 
-export const EventsPage = ({ go }) => (
+export const EventsPage: React.FC<RolesPageProps> = ({ go }) => (
   <main data-screen-label="24 رویدادها">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
@@ -556,7 +559,7 @@ export const EventsPage = ({ go }) => (
 // =====================================================
 // About / Mission
 // =====================================================
-export const AboutPage = ({ go }) => (
+export const AboutPage: React.FC<RolesPageProps> = ({ go }) => (
   <main data-screen-label="25 درباره">
     <section style={{ padding: "100px 0 60px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell" style={{ maxWidth: 920 }}>

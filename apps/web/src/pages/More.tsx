@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.8 — typed.
 // =====================================================
 // More pages: Calendar, Library, Help, Pricing, Faculty
 // =====================================================
@@ -11,25 +11,28 @@ import { Icon } from "../icons";
 import { toFa } from "../shared";
 import { FACULTY as FACULTY_DATA, SCHOOLS, LIBRARY_RESOURCES, WEEKLY_SCHEDULE, WEEK_DAYS } from "../data.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx). The
 // per-page <Footer/> calls below are gone — CSS used to hide them on
 // workspace routes; now we just don't render them.
 
-export const CalendarPage = ({ go }) => {
-  const [view, setView] = React.useState("week");
+interface MorePageProps { go: Go }
+
+export const CalendarPage: React.FC<MorePageProps> = ({ go }) => {
+  const [view, setView] = React.useState<string>("week");
   const days = WEEK_DAYS;
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
   // Map data.js shape (`title`) to local shape (`t`)
   const events = WEEKLY_SCHEDULE.map((e) => ({ ...e, t: e.title }));
 
-  const colorFor = (k) => ({
+  const colorFor = (k: string): string => (({
     live: "var(--accent)",
     self: "var(--navy)",
     peer: "var(--sage)",
     office: "var(--fg-mute)",
     exam: "var(--gold)",
     lab: "var(--navy-2)",
-  })[k] || "var(--fg-mute)";
+  } as Record<string, string>)[k] || "var(--fg-mute)");
 
   return (
     <main data-screen-label="16 تقویم">
@@ -136,7 +139,7 @@ export const CalendarPage = ({ go }) => {
 // =====================================================
 // Library — Resources
 // =====================================================
-export const LibraryPage = ({ go }) => {
+export const LibraryPage: React.FC<MorePageProps> = ({ go }) => {
   const [activeCat, setActiveCat] = React.useState("all");
   const [query, setQuery] = React.useState("");
   const [filters, setFilters] = React.useState({ "زبان: فارسی": true, "موضوع: ML": true });
@@ -294,7 +297,7 @@ const LIBRARY_ITEMS = LIBRARY_RESOURCES.map((r) => ({
 // =====================================================
 // Help Center / Knowledge Base
 // =====================================================
-export const HelpPage = ({ go }) => (
+export const HelpPage: React.FC<MorePageProps> = ({ go }) => (
   <main data-screen-label="18 پشتیبانی">
     <section style={{ padding: "80px 0 60px", background: "var(--surface-2)", borderBottom: "1px solid var(--line)" }}>
       <div className="shell text-center" >
@@ -400,7 +403,7 @@ export const HelpPage = ({ go }) => (
 // =====================================================
 // Pricing / Plans
 // =====================================================
-export const PricingPage = ({ go }) => {
+export const PricingPage: React.FC<MorePageProps> = ({ go }) => {
   const [billing, setBilling] = React.useState("month");
   const factor = billing === "month" ? 1 : billing === "term" ? 0.85 : 0.75;
   return (
@@ -531,7 +534,7 @@ export const PricingPage = ({ go }) => {
 // =====================================================
 // Faculty Directory
 // =====================================================
-export const FacultyPage = ({ go }) => {
+export const FacultyPage: React.FC<MorePageProps> = ({ go }) => {
   const [activeDept, setActiveDept] = React.useState("همه");
   const DEPTS = ["همه", "علوم رایانه", "ریاضی و آمار", "مدیریت", "زبان‌شناسی", "فلسفه و اخلاق", "علوم داده", "مهندسی"];
   const filtered = activeDept === "همه" ? FACULTY : FACULTY.filter((f) => f.role.includes(activeDept) || (f.tags || []).some((t) => activeDept.includes(t)));

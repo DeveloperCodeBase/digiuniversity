@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.8 — typed.
 // =====================================================
 // Schools / Faculties / Programs — full university structure
 // Virtual Lab — simulation environment
@@ -13,6 +13,10 @@ import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { SCHOOLS as SCHOOLS_DATA, PROGRAMS, LABS as LABS_DATA, DEGREE_LEVELS } from "../data.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
+
+interface UniPageProps { go: Go }
+interface VirtualLabPageProps { go: Go; labId?: string }
 
 // Compose page-shape from data: include 3 featured programs per school.
 const SCHOOLS = SCHOOLS_DATA.map((s) => ({
@@ -24,7 +28,7 @@ const SCHOOLS = SCHOOLS_DATA.map((s) => ({
   })),
 }));
 
-export const SchoolsPage = ({ go }) => {
+export const SchoolsPage: React.FC<UniPageProps> = ({ go }) => {
   return (
     <main data-screen-label="26 دانشکده‌ها">
       <section style={{ padding: "80px 0 40px", borderBottom: "1px solid var(--line)" }}>
@@ -288,7 +292,7 @@ const VIRTUAL_LABS = {
   },
 };
 
-export const VirtualLabPage = ({ go, labId }) => {
+export const VirtualLabPage: React.FC<VirtualLabPageProps> = ({ go, labId }) => {
   const id = labId && VIRTUAL_LABS[labId] ? labId : "ANAT";
   const lab = VIRTUAL_LABS[id];
   const [activeTab, setActiveTab] = React.useState(lab.tabs[0][0]);
@@ -477,7 +481,7 @@ const LabsFilterPills = () => {
   );
 };
 
-export const LabsPage = ({ go }) => (
+export const LabsPage: React.FC<UniPageProps> = ({ go }) => (
   <main data-screen-label="28 آزمایشگاه‌ها">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
@@ -542,7 +546,7 @@ const LABS = LABS_DATA.map((l) => ({
 // =====================================================
 // Research / PhD Studio
 // =====================================================
-export const ResearchPage = ({ go }) => (
+export const ResearchPage: React.FC<UniPageProps> = ({ go }) => (
   <main data-screen-label="29 پژوهش">
     <section style={{ padding: "60px 0 32px", borderBottom: "1px solid var(--line)" }}>
       <div className="shell">
