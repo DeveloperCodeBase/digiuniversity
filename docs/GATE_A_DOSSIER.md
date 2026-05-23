@@ -1,6 +1,6 @@
 # Gate A Dossier — Foundation Repair
 
-> **DRAFT** — assembled at the end of Phase A, awaiting owner manual-smoke ack across the stacked sub-Rs (R1.1, R1.4, R2, R3, R4, R5, R6, R6.5, R6.6) and the two pending measurement steps (Lighthouse + axe-core) before Gate A can be declared passed. This file aggregates the evidence trail; **it does not declare passage.** Per the Compass Roadmap §Gate A criteria block, all six criteria below must verify before Phase B starts.
+> **RE-REVIEW DRAFT** — all three measurement TASKs (A: Lighthouse, B: axe-core, C: role-dashboards composite) have now executed against real data. The dossier no longer carries TBD placeholders. **Gate A is BLOCKED on 3 of 6 criteria** (§1 Lighthouse, §2 axe-core, §5 role-dashboard routing). Each section documents real numbers + a concrete R7 fix plan; no R7 implementation has begun. Awaiting owner review before any sub-R kicks off.
 
 ---
 
@@ -526,14 +526,35 @@ montage docs/gate-a-evidence/role-dashboards/*.png -tile 5x2 -geometry +6+6 \
 
 ---
 
-## Open items before Gate A close
+## Roll-up — R7 fix sweep (proposed, awaiting owner approval)
 
-1. **Run Lighthouse** against `/`, `/login`, `/teach` × 3 runs each, capture median. Fill §1 table.
-2. **Author + run `gate-a-axe-scan.spec.ts`** with `@axe-core/playwright` against every route × authed/anonymous as appropriate. Fill §2 table.
-3. **Assemble `docs/gate-a-evidence/role-dashboards-grid.png`** via `montage` (or any tiling tool) from the 10 role-dashboard 1280×800 PNGs.
-4. **Run the 5 sub-R + R6.6 + R6.5 manual smoke scripts on a real device.** Owner walks through each `docs/PHASE_A_R{n}_REVIEW.md` §Owner manual smoke section and confirms green.
-5. **Update §1, §2, §8 in this dossier** with the actual numbers. Then move this file from DRAFT to FINAL via a `docs(gate-a): close — all 6 criteria green` commit.
+The three failing criteria cluster on **four root causes**, each isolable to one or two files. The total fix budget is ~2 weeks of sub-Rs. Nothing here is implemented — owner approves R7 explicitly before any code lands, same D11/D14 discipline as every prior pivot.
 
-After all 5 open items are checked off and the dossier is in FINAL state, Phase A is officially closed, and Phase B can begin per the locked plan.
+| Sub-R | Title | Fixes which criteria? | Est. budget |
+|---|---|---|---|
+| **R7.1** | Vite manual chunks + `React.lazy` route splitting | §1 Performance: 35/66/66 → ~70+ | 2-3 days |
+| **R7.2** | Self-host Vazirmatn + drop unused font families | §1 Performance: ~70 → ~85+ | 1 day |
+| **R7.3** | Lighthouse a11y sweep (button-name, contrast, heading-order, label-mismatch, aria-toggle) | §1 Accessibility: 88/88/87 → 95+ | 2 days |
+| **R7.4** | Authed-route Lighthouse runner (Playwright + lighthouse `{port}`) | §1 measurement methodology fix | 1 day |
+| **R7.5** | Find + fix chrome-level `aria-valid-attr-value` (53 routes) | §2 critical: 54 → ~1-2 routes | 1 day |
+| **R7.6** | Darken `--fg-mute` + `--fg-dim` theme tokens for 4.5:1 contrast | §2 color-contrast: 65 routes → 0; also helps §1 | 0.5 day |
+| **R7.7** | Long-tail a11y one-offs (10ish routes with specific violations) | §2 remaining: 0 critical + 0 serious | 1-2 days |
+| **R7.8** | Re-scan `/` and `/home` (page-disposal race fix in axe spec) | §2 truly-clean verification | 0.5 day |
+| **R7.9** | Complete `apiRoleToLocal` (3 → 10 roles) + extract to shared source | §5 routing: 3/10 reach → 10/10 reach | 0.5 day |
+| **R7.10** | Regression spec: assert each of 10 demo users lands on `homeRoute` | §5 prevent regression | 0.5 day |
+| **R7.11** | Multi-role hierarchy decision + workspace switcher pattern (if needed) | §5 follow-up, owner decision | TBD |
 
-— Phase A author, 2026-05-23. DRAFT awaiting owner review.
+**Critical path** = R7.6 (token contrast, 0.5 day) → R7.5 (chrome aria, 1 day) → R7.9 (role mapper, 0.5 day) → re-run all three measurement specs. Worst-case 4 days of focused work clears the three FAIL criteria. R7.1+R7.2 (Performance) can run in parallel with R7.6+R7.5 since they touch different files.
+
+**Sequencing constraint:** R7 cannot start until owner explicitly authorizes it per D11/D14. R7 is itself out-of-Phase-A-plan scope; the original plan ended Phase A at "Gate A passes → start Phase B". Gate A failing means Phase A extends with R7 (foundation polish) before Phase B (academic hierarchy + onboarding) can begin.
+
+## Owner decision required
+
+The dossier is now complete enough for review. Two questions for the owner:
+
+1. **Approve R7 sweep as the Gate A unblock path?** Alternative would be to drop one or more of the six Compass criteria (not recommended — they're the foundation for Phase B+ work). Or to defer some criteria past Gate A (also risky — the bugs accumulate).
+2. **Order of R7 sub-Rs?** Critical-path-first (R7.6 → R7.5 → R7.9, ~2 days) hits the FAIL fastest. Foundation-first (R7.1 + R7.2 Performance, then a11y) is more invasive but pays bigger long-term dividends.
+
+After owner approves R7 + the order, I'll memo each sub-R and ship the standard workflow (memo → code → deploy → spec → review → D13 manual smoke). When all R7 sub-Rs land + Gate A criteria re-verify, the dossier moves from RE-REVIEW DRAFT to FINAL and Phase B can begin.
+
+— Phase A author, 2026-05-23. RE-REVIEW DRAFT awaiting owner sign-off on the R7 plan.
