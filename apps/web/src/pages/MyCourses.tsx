@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.5 — typed.
 // =====================================================
 // "My courses" — live view of the current user's enrollments.
 //
@@ -15,22 +15,35 @@ import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const STATUS_LABEL = {
+type EnrollmentStatus = "active" | "completed" | "dropped" | "withdrawn";
+
+interface Enrollment {
+  id: string;
+  status: EnrollmentStatus | string;
+  courseId?: string;
+  enrolledAt?: string;
+  cohort?: { name?: string };
+  course?: { code?: string; title?: string };
+}
+
+const STATUS_LABEL: Record<string, string> = {
   active: "فعال",
   completed: "اتمام‌یافته",
   dropped: "حذف‌شده",
   withdrawn: "انصراف",
 };
 
-const STATUS_COLOR = {
+const STATUS_COLOR: Record<string, { bg: string; fg: string }> = {
   active: { bg: "color-mix(in oklch, var(--accent) 16%, var(--bg))", fg: "var(--accent)" },
   completed: { bg: "color-mix(in oklch, var(--cyan) 16%, var(--bg))", fg: "var(--cyan)" },
   dropped: { bg: "color-mix(in oklch, var(--warn) 14%, var(--bg))", fg: "var(--warn)" },
   withdrawn: { bg: "color-mix(in oklch, var(--warn) 14%, var(--bg))", fg: "var(--warn)" },
 };
 
-const SignInPrompt = ({ go }) => (
+interface SignInPromptProps { go: Go }
+const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   <main data-screen-label="دوره‌های من" className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div
       className="rounded-2xl"
@@ -53,21 +66,29 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const MyCoursesPage = ({ go }) => {
-  const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [items, setItems] = React.useState([]);
-  const [actingOn, setActingOn] = React.useState(null);
+interface MyCoursesPageProps { go: Go }
 
-  const load = React.useCallback(async () => {
+const MyCoursesPage: React.FC<MyCoursesPageProps> = ({ go }) => {
+  const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [items, setItems] = React.useState<Enrollment[]>([]);
+  const [actingOn, setActingOn] = React.useState<string | null>(null);
+
+  const load = React.useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
-      const mine = await enrollmentsApi.listMine();
+      const mine = (await enrollmentsApi.listMine()) as Enrollment[];
       setItems(mine);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.displayMessage : err.message);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof ApiError
+          ? (err as { displayMessage?: string }).displayMessage ?? "خطای ناشناخته"
+          : err instanceof Error
+            ? err.message
+            : "خطای ناشناخته";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -79,14 +100,19 @@ const MyCoursesPage = ({ go }) => {
 
   if (!isAuthenticated) return <SignInPrompt go={go} />;
 
-  const withdraw = async (id) => {
+  const withdraw = async (id: string): Promise<void> => {
     setActingOn(id);
     try {
       await enrollmentsApi.setStatus(id, "withdrawn");
       window.toast?.({ title: "انصراف ثبت شد", msg: "", kind: "info" });
       await load();
-    } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+    } catch (err: unknown) {
+      const msg =
+        err instanceof ApiError
+          ? (err as { displayMessage?: string }).displayMessage ?? "خطای ناشناخته"
+          : err instanceof Error
+            ? err.message
+            : "خطای ناشناخته";
       window.toast?.({ title: "خطا", msg, kind: "warn" });
     } finally {
       setActingOn(null);
@@ -233,7 +259,8 @@ const MyCoursesPage = ({ go }) => {
   );
 };
 
-const Stat = ({ label, value }) => (
+interface MyCoursesStatProps { label: React.ReactNode; value: React.ReactNode }
+const Stat: React.FC<MyCoursesStatProps> = ({ label, value }) => (
   <div>
     <div className="mono" style={{ fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.1em" }}>
       {label}

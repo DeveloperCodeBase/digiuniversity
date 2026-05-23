@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.5 — typed.
 // =====================================================
 // Course Authoring Studio — AI Planner + blueprint
 // =====================================================
@@ -7,9 +7,12 @@ import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { Toggle, FormField } from "../components/widgets";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const AuthoringPage = ({ go }) => {
-  const [step, setStep] = React.useState("blueprint");
+interface AuthoringPageProps { go: Go }
+
+export const AuthoringPage: React.FC<AuthoringPageProps> = ({ go }) => {
+  const [step, setStep] = React.useState<string>("blueprint");
 
   return (
     <main data-screen-label="13 استودیو">

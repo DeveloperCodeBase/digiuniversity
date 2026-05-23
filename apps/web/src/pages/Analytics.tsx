@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.5 — typed.
 // =====================================================
 // Analytics Dashboard — admin / institutional view
 // =====================================================
@@ -8,8 +8,11 @@ import { toFa } from "../shared";
 import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
 import { StatCard } from "../components/widgets";
+import type { Go } from "../router";
 
-export const AnalyticsPage = ({ go }) => {
+interface AnalyticsPageProps { go: Go }
+
+export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ go }) => {
   return (
     <main data-screen-label="12 تحلیل‌گری">
       <div className="dash-main">

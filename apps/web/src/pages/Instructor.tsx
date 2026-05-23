@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.5 — typed.
 // =====================================================
 // Instructor Console
 // =====================================================
@@ -7,8 +7,11 @@ import { Icon } from "../icons";
 import { toFa } from "../shared";
 import { Button } from "../ui";
 // Phase-14.7 R2: sidebar + footer come from Layout (router.tsx).
+import type { Go } from "../router";
 
-export const InstructorPage = ({ go }) => {
+interface InstructorPageProps { go: Go }
+
+export const InstructorPage: React.FC<InstructorPageProps> = ({ go }) => {
   return (
     <main data-screen-label="06 کنسول استاد">
       <div className="dash-main">
