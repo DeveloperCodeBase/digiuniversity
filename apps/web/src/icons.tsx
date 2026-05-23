@@ -1,12 +1,28 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.2 — typed.
 // =====================================================
 // Icons — minimal stroke icon set, no emoji
 // =====================================================
 import React from "react";
 
-export const Icon = ({ name, size = 18, stroke = 1.7 }) => {
-  const P = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round" };
-  const map = {
+export interface IconProps {
+  /** Icon name. Unknown names render `null`. */
+  name: string;
+  size?: number;
+  stroke?: number;
+}
+
+export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7 }) => {
+  const P: React.SVGProps<SVGSVGElement> = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: stroke,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
+  const map: Record<string, React.ReactElement> = {
     arrow: <svg {...P}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
     spark: <svg {...P}><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>,
     book: <svg {...P}><path d="M4 4h11a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4V4Z"/><path d="M4 16a4 4 0 0 1 4-4h11"/></svg>,

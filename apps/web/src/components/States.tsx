@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.2 — typed.
 // =====================================================
 // Shared state components — EmptyState, LoadingSkeleton, ErrorState.
 // Every async surface in the SPA should use these instead of inline
@@ -9,7 +9,20 @@ import React from "react";
 import { Icon } from "../icons";
 import { Button } from "../ui";
 
-export const EmptyState = ({
+export interface EmptyStateProps {
+  title?: React.ReactNode;
+  body?: React.ReactNode;
+  /** Icon name from the shared icon set. */
+  icon?: string;
+  /** CTA label; renders the action button only when both `cta` AND `onCta` are set. */
+  cta?: React.ReactNode;
+  /** Icon name for the CTA's leading icon. */
+  ctaIcon?: string;
+  onCta?: () => void;
+  className?: string;
+}
+
+export const EmptyState: React.FC<EmptyStateProps> = ({
   title = "هنوز چیزی اینجا نیست",
   body,
   icon = "sparkle",
@@ -33,7 +46,15 @@ export const EmptyState = ({
   </div>
 );
 
-export const LoadingSkeleton = ({ kind = "card", count = 3, className = "" }) => {
+export type LoadingSkeletonKind = "row" | "chart" | "text" | "card";
+
+export interface LoadingSkeletonProps {
+  kind?: LoadingSkeletonKind;
+  count?: number;
+  className?: string;
+}
+
+export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ kind = "card", count = 3, className = "" }) => {
   if (kind === "row") {
     return (
       <div className={"skeleton-stack " + className} aria-busy="true" aria-live="polite">
@@ -66,7 +87,15 @@ export const LoadingSkeleton = ({ kind = "card", count = 3, className = "" }) =>
   );
 };
 
-export const ErrorState = ({
+export interface ErrorStateProps {
+  title?: React.ReactNode;
+  message?: React.ReactNode;
+  onRetry?: () => void;
+  retryLabel?: React.ReactNode;
+  className?: string;
+}
+
+export const ErrorState: React.FC<ErrorStateProps> = ({
   title = "خطایی رخ داد",
   message = "نتوانستیم این بخش را بارگیری کنیم. لطفاً دوباره تلاش کنید.",
   onRetry,
@@ -88,7 +117,18 @@ export const ErrorState = ({
   </div>
 );
 
-export const PageHeader = ({
+export interface PageHeaderProps {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  /** Back-link label; renders the back row only when `back` AND `onBack` are set. */
+  back?: React.ReactNode;
+  onBack?: () => void;
+  actions?: React.ReactNode;
+  badge?: React.ReactNode;
+  className?: string;
+}
+
+export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
   back,
@@ -100,7 +140,7 @@ export const PageHeader = ({
   <header className={"page-header " + className}>
     <div className="page-header-main">
       {back && (
-        <button type="button" className="page-header-back" onClick={onBack} aria-label={back}>
+        <button type="button" className="page-header-back" onClick={onBack} aria-label={typeof back === "string" ? back : undefined}>
           <Icon name="chev-right" size={16} />
           <span>{back}</span>
         </button>
