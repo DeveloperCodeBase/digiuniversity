@@ -192,6 +192,29 @@ export const Nav = ({
   return (
     <nav className="nav" data-mode={mode}>
       <div className="nav-inner">
+        {/* Phase-A R6.6 — RTL navbar correctness:
+            WORKSPACE renders the hamburger as the FIRST child of
+            nav-inner so under RTL it sits at the START edge (right in
+            Persian), matching the standard Persian sidebar pattern
+            (menu opener on the right, logo next to it, user/theme/
+            notification chips on the left). The PUBLIC mode keeps the
+            hamburger inside `.nav-actions` at the end (left in RTL)
+            because that's the established mobile pattern there — the
+            user is opening a drawer of nav-links that fly out from the
+            same edge as the brand. AUTH_FLOW has no hamburger. */}
+        {isWorkspace ? (
+          <button
+            id="appshell-sidebar-trigger"
+            type="button"
+            className="nav-toggle nav-toggle-start"
+            onClick={() => onWorkspaceMenuClick?.()}
+            aria-label="منو"
+            aria-controls="appshell-sidebar-drawer"
+          >
+            <span className="bars"></span>
+          </button>
+        ) : null}
+
         <a href={"/" + brandTarget} onClick={(e) => { e.preventDefault(); go(brandTarget); }} className="brand">
           <span className="brand-mark"></span>
           <span>
@@ -300,21 +323,16 @@ export const Nav = ({
             {userOpen && <UserDropdown go={go} role={role} setRole={setRole} auth={auth} />}
           </div>
 
-          {/* Hamburger button.
-              WORKSPACE: invokes AppShell.onWorkspaceMenuClick which opens
-                         the sidebar Sheet (right-anchored under RTL).
-              PUBLIC:    toggles the in-Nav nav-links drawer (legacy).
-              AUTH_FLOW: hidden — no drawer in minimal chrome. */}
-          {!isAuthFlow && (
+          {/* Hamburger button — PUBLIC mode only.
+              WORKSPACE renders its own hamburger at the start of
+              nav-inner (per R6.6). AUTH_FLOW has no hamburger. */}
+          {!isAuthFlow && !isWorkspace && (
             <button
-              id={isWorkspace ? "appshell-sidebar-trigger" : undefined}
+              type="button"
               className="nav-toggle"
-              onClick={isWorkspace
-                ? () => onWorkspaceMenuClick?.()
-                : () => setOpen(!open)}
+              onClick={() => setOpen(!open)}
               aria-label="منو"
-              aria-expanded={isWorkspace ? undefined : (open ? "true" : "false")}
-              aria-controls={isWorkspace ? "appshell-sidebar-drawer" : undefined}
+              aria-expanded={open ? "true" : "false"}
             >
               <span className="bars"></span>
             </button>
