@@ -134,7 +134,15 @@ const DEMO_CREDS: Record<RoleId, { email: string; password: string }> = {
   super_admin:     { email: "superadmin@digiuniversity.ir",   password: "SuperAdminPass!1" },
 };
 
-export const LoginPage = ({ go }: AuthPageProps): React.ReactElement => {
+// Phase-A R5 — LoginPage redesigned. The legacy implementation below is
+// kept in this file for reference but is no longer the default export. The
+// new design lives in ./auth/LoginPage and is re-exported here so the
+// router import (`import { LoginPage } from "./pages/Auth"`) still resolves
+// without touching router.tsx.
+import { LoginPage as R5LoginPage } from "./auth/LoginPage";
+export const LoginPage = R5LoginPage;
+
+const LegacyLoginPage = ({ go }: AuthPageProps): React.ReactElement => {
   const { setRole } = useRole();
   const auth = useAuth();
   const [roleId, setRoleId] = React.useState<RoleId>("student");

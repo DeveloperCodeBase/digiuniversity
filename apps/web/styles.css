@@ -5777,3 +5777,120 @@ button.prog-card {
 [data-test-no-animation] .theme-toggle-switch-thumb {
   transition: none !important;
 }
+
+/* ================================================================
+   Phase-A R5 — Login redesign (split layout + knowledge-graph backdrop)
+   All vars scoped under .r5-login-shell so they don't leak into the
+   rest of the SPA. Owner template lives at docs/my-upload/login/.
+   ================================================================ */
+.r5-login-shell {
+  --r5-bg: #ffffff;
+  --r5-bg-2: #f1f5fb;
+  --r5-paper: #ffffff;
+  --r5-ink: #0b1d3a;
+  --r5-ink-2: #1c2e4a;
+  --r5-muted: #5a6a85;
+  --r5-line: rgba(11, 29, 58, 0.10);
+  --r5-line-strong: rgba(11, 29, 58, 0.22);
+  --r5-sage: #1e3a8a;
+  --r5-sage-deep: #0c2461;
+  --r5-accent-soft: #e6edf9;
+  --r5-gold: #d4a341;
+  --r5-danger: #c0392b;
+  --r5-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+html[data-theme="dark"] .r5-login-shell {
+  --r5-bg: #050b18;
+  --r5-bg-2: #0a1426;
+  --r5-paper: #0d1a30;
+  --r5-ink: #eaf1ff;
+  --r5-ink-2: #c8d3e8;
+  --r5-muted: #7588a8;
+  --r5-line: rgba(234, 241, 255, 0.10);
+  --r5-line-strong: rgba(234, 241, 255, 0.22);
+  --r5-sage: #6b95ff;
+  --r5-sage-deep: #a3bcff;
+  --r5-accent-soft: rgba(107, 149, 255, 0.12);
+  --r5-gold: #e0b755;
+}
+
+/* Theme-aware Jahad mark in the co-brand footer (light shown on light,
+   dark shown on dark — same pattern as OrgAttribution). */
+.r5-jahad-mark.is-dark { display: none; }
+html[data-theme="dark"] .r5-jahad-mark.is-light { display: none; }
+html[data-theme="dark"] .r5-jahad-mark.is-dark { display: inline-block; }
+
+/* Keyframes. Prefixed with r5- so they don't collide with existing
+   animations used elsewhere. */
+@keyframes r5-card-in {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes r5-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes r5-spin { to { transform: rotate(360deg); } }
+@keyframes r5-aurora-1 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: .9; }
+  100% { transform: translate3d(8%, 6%, 0) scale(1.15); opacity: 1; }
+}
+@keyframes r5-aurora-2 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: .8; }
+  100% { transform: translate3d(-6%, -8%, 0) scale(1.2); opacity: 1; }
+}
+
+/* === Responsive: split → strip → form-only ============================ */
+/* ≤880: collapse to single column; brand becomes a 260px-max strip on top */
+@media (max-width: 880px) {
+  .r5-login-shell { grid-template-columns: 1fr !important; }
+  .r5-login-shell .r5-brand-panel {
+    position: relative !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 260px;
+    padding: clamp(20px, 4vw, 36px) !important;
+  }
+  .r5-login-shell .r5-brand-panel h2 { font-size: clamp(26px, 4.5vw, 38px) !important; }
+  .r5-login-shell .r5-brand-panel p { display: none; }
+}
+
+/* ≤720: phone — brand panel hidden, form gets the whole screen */
+@media (max-width: 720px) {
+  .r5-login-shell .r5-brand-panel { display: none !important; }
+  .r5-login-shell .r5-form-panel { padding: 20px 18px 28px !important; }
+  .r5-login-shell .r5-form-panel header { margin-bottom: 18px !important; }
+}
+
+/* ≤420: very small phones — tighten chips */
+@media (max-width: 420px) {
+  .r5-login-shell .r5-form-panel h1 { font-size: 30px !important; }
+  .r5-login-shell .r5-role-tabs { gap: 2px !important; }
+  .r5-login-shell .r5-role-tabs button { padding: 9px 4px !important; font-size: 12px !important; }
+  .r5-login-shell .r5-role-tabs button svg { display: none; }
+}
+
+/* ≤380: stack SSO buttons full-width */
+@media (max-width: 380px) {
+  .r5-login-shell .r5-sso-row button { flex: 1 1 100% !important; }
+}
+
+/* Touch targets ≥44px on coarse pointers */
+@media (pointer: coarse) {
+  .r5-login-shell input,
+  .r5-login-shell button,
+  .r5-login-shell [role="checkbox"],
+  .r5-login-shell [role="tab"] { min-height: 44px; }
+}
+
+/* Reduced motion: kill the aurora drift + knowledge-graph rAF */
+@media (prefers-reduced-motion: reduce) {
+  .r5-login-shell *,
+  .r5-login-shell *::before,
+  .r5-login-shell *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
