@@ -67,6 +67,21 @@ async function login(page: Page, role: RoleConfig): Promise<void> {
 test.describe("@gate-a — Role-routing flow (D18 ROLE_DISTINCTIVE spec)", () => {
   test.describe.configure({ mode: "serial" });
 
+  // Throttle-bucket safety: the api throttles /v1/auth/login at 10/min
+  // per IP. With 10 demo logins back-to-back from the same docker
+  // container IP, we can hit the bucket if a previous visual run also
+  // left logins in the rolling 60s window. Small inter-test pause keeps
+  // us comfortably under the limit (10 roles × 6.5s = 65s + ~2s each
+  // for the actual test work = ~85s total spec runtime — acceptable).
+  // The first test runs immediately; subsequent ones wait.
+  let testIndex = 0;
+  test.beforeEach(async () => {
+    if (testIndex > 0) {
+      await new Promise((r) => setTimeout(r, 6500));
+    }
+    testIndex++;
+  });
+
   for (const role of ROLES) {
     test(`${role.slug} (${role.fa}) lands on ${role.expectedHomeRoute} + sidebar contains /${role.sentinel}`, async ({ browser }) => {
       // Fresh context per role — no leakage of localStorage / role
