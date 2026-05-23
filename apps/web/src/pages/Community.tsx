@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.4 — typed.
 // =====================================================
 // Community — Discussion forum + AI Q&A clustering
 // =====================================================
@@ -6,9 +6,12 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const CommunityPage = ({ go }) => {
-  const [filter, setFilter] = React.useState("trending");
+interface CommunityPageProps { go: Go }
+
+export const CommunityPage: React.FC<CommunityPageProps> = ({ go }) => {
+  const [filter, setFilter] = React.useState<string>("trending");
 
   return (
     <main data-screen-label="11 جامعه">

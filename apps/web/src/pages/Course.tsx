@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.4 — typed.
 // =====================================================
 // Course detail page — with AI tutor inline + outline
 // =====================================================
@@ -6,9 +6,16 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const CoursePage = ({ go }) => {
-  const [activeModule, setActiveModule] = React.useState(2);
+interface CoursePageProps {
+  go: Go;
+  /** Optional URL param; the router passes it for /course/:courseId. */
+  courseId?: string;
+}
+
+export const CoursePage: React.FC<CoursePageProps> = ({ go }) => {
+  const [activeModule, setActiveModule] = React.useState<number>(2);
 
   return (
     <main data-screen-label="05 درس">

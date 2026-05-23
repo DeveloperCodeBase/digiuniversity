@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.4 — typed.
 // =====================================================
 // Student Dashboard — with Cognitive Profile
 // =====================================================
@@ -12,8 +12,11 @@ import { Button } from "../ui";
 import { StatCard } from "../components/widgets";
 import { useRole } from "../role";
 import { useAuth } from "../auth/AuthContext";
+import type { Go } from "../router";
 
-export const DashboardPage = ({ go }) => {
+interface DashboardPageProps { go: Go }
+
+export const DashboardPage: React.FC<DashboardPageProps> = ({ go }) => {
   const { role } = useRole();
   const auth = useAuth();
   // Phase-14.8: greeting NEVER falls back to ROLES.student.name (which

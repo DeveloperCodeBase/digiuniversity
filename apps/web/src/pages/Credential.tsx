@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.4 — typed.
 // =====================================================
 // Credential / Certificate page
 // =====================================================
@@ -7,9 +7,10 @@ import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { CREDENTIALS } from "../data.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const CredentialVerifyForm = () => {
-  const [code, setCode] = React.useState("");
+const CredentialVerifyForm: React.FC = () => {
+  const [code, setCode] = React.useState<string>("");
   return (
     <form className="flex gap-2 mt-3.5"
       onSubmit={(e) => {
@@ -45,7 +46,9 @@ const CredentialVerifyForm = () => {
   );
 };
 
-export const CredentialPage = ({ go }) => {
+interface CredentialPageProps { go: Go }
+
+export const CredentialPage: React.FC<CredentialPageProps> = ({ go }) => {
   return (
     <main data-screen-label="08 گواهی">
       <section style={{ padding: "80px 0 40px", borderBottom: "1px solid var(--line)" }}>
