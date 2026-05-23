@@ -190,6 +190,38 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
 **Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
 
+### R7.5-D22 — R7.5 D13 ack confirmed, chrome aria fix verified
+**Context:** R7.5 swapped the workspace hamburger's `aria-controls="appshell-sidebar-drawer"` (unresolvable IDREF because Radix Sheet lazy-mounts) for the canonical disclosure-widget pattern `aria-expanded={open} + aria-haspopup="dialog"`. axe-scan delta: `aria-valid-attr-value` 53 → 0; routes with ≥1 critical 54 → 6 (the 6 residuals are pre-existing R7.7 long-tail items — button-name, label, select-name). R1.1 13/13 + R6.6 12/12 regression green. Owner ran D13 manual smoke.
+**Result:** **PASS.** Owner verified on real mobile + incognito:
+  1. ✅ 3 random workspace routes — drawer behavior preserved, no visible change for sighted users
+  2. ✅ Keyboard nav — Tab → Enter opens drawer, Esc closes + focus returns to hamburger
+**Status:** **R7.5 closed.** D13 ack confirmed. Critical violations now at 6 (all R7.7d-gated long-tail). R7.9 unblocked per D17.
+**Source:** owner message 2026-05-23 («R7.5 D13 PASS»).
+
+### R7.12-D23 — Mini-variant persistent sidebar (owner-requested scope addition)
+**Context:** During the R7.5 ack pass, the owner explicitly requested a new sub-R: replace the current hamburger-drawer sidebar with the Material Design **Mini variant drawer** pattern (https://mui.com/material-ui/react-drawer/#mini-variant-drawer) — persistent navigation that changes width between a 72px icon-only "mini" rail and an expanded standard drawer.
+**Owner specifications:**
+  - **Viewport gate:** ≥1024px (desktop + tablet). <1024px keeps the existing R6.6 Sheet drawer overlay (mobile pattern). R1.3-D9 (hamburger drawer everywhere) is **partially superseded** — superseded only on ≥1024px; <1024px stays as-is.
+  - **Default state:** collapsed (mini). User sees icon-only rail; toggles to expanded via a click on a chevron / the active item.
+  - **Per-user persistence:** localStorage key `digiu_sidebar_pref` extended from the current `"open" | "closed"` to `{ mode: "mini" | "expanded" }`. Migration: existing `"open"` → `"expanded"`, `"closed"` → `"mini"`.
+  - **Clipped by app bar:** the navbar (app bar) stays full-width. The sidebar begins **below** the navbar, not from the top of the viewport.
+  - **Same elevation as content:** no shadow on the sidebar. `z-index` matches content (not a higher-elevation overlay).
+
+**Authorization:** explicit owner-message scope addition 2026-05-23 — legitimate per D11/D14 (every scope addition needs explicit owner authorization; this satisfies that).
+
+**Position in R7 sweep:** between R7.9 and the critical-path measurement re-run. The full ordering becomes: ~~R7.6 → R7.5 →~~ R7.9 → **R7.12** → measurement re-run → owner gate for R7.7 + Performance track.
+
+**Three risks (must be in R7.12 memo, owner reviews before code starts):**
+  1. **Architecture change.** Current sidebar = Radix Sheet (lazy-mount, overlay, dismiss on outside-click). New sidebar = persistent rail (always in DOM, width animation between 72px / 280px). This is a **rewrite of `AppShell`'s sidebar mount path** + a refactor of `RoleSideNav` to render an icon-only mode + a tooltip-on-hover affordance. Not a tweak — a structural change.
+  2. **Content layout shift.** Every workspace route's content area currently runs full-width below the navbar. After R7.12, content must have `margin-inline-start: 72px` (mini) or `280px` (expanded). A per-page spacing audit is needed because some pages may have their own grid / hero / canvas elements that would clip or overlap with the new rail.
+  3. **Baseline reset.** R1.1 (13 assertions), R3 (12), R6 (12), R6.6 (12) — all tested against the current workspace chrome. R7.12 will produce a sidebar that's **always in the DOM at ≥1024px**, vs. today's drawer-on-demand. Snapshot diff > 1% is expected. R7.12 must explicitly document the before/after diff per spec in its review doc and bump baselines via `UPDATE_BASELINES=1` with reasoning.
+
+**Sequencing constraint:** R7.12 does NOT start until:
+  - R7.9 ships + D13 ack received, AND
+  - Owner explicitly approves the R7.12 memo (which surfaces the 3 risks above).
+
+**Source:** owner message 2026-05-23 («NEW SCOPE: R7.12 — Mini-variant persistent sidebar» with viewport + state + persistence + elevation specs).
+
 ### R7.7a-D20 — Path 1 approved: replace accent-as-text with `--fg`
 **Context:** R7.6 cleared `--fg-mute`/`--fg-dim` violations but exposed 31 routes where `--accent` (#2f5fd3 family) is rendered as TEXT against white/bg-soft at ~4.17:1 — just below WCAG SC 1.4.3 AA-normal. Two paths were on the table in the R7.6 review:
   - **Path 1**: replace accent-as-text with `--fg` (navy ink). Reserves `--accent` for borders/fills/icons/focus rings only.
