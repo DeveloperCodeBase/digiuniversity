@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.7 — typed.
 // =====================================================
 // Settings / Profile page
 // =====================================================
@@ -7,9 +7,12 @@ import { Icon } from "../icons";
 import { Footer } from "../shared";
 import { Toggle } from "../components/widgets";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const SettingsPage = ({ go }) => {
-  const [tab, setTab] = React.useState("profile");
+interface SettingsPageProps { go: Go }
+
+export const SettingsPage: React.FC<SettingsPageProps> = ({ go }) => {
+  const [tab, setTab] = React.useState<string>("profile");
 
   return (
     <main data-screen-label="15 تنظیمات">

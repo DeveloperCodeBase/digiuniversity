@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.7 — typed.
 // =====================================================
 // AI Tutor chat surface.
 //
@@ -17,8 +17,10 @@ import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const SignInPrompt = ({ go }) => (
+interface SignInPromptProps { go: Go }
+const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   <main className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div
       className="rounded-2xl"
@@ -41,7 +43,16 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const Message = ({ m }) => {
+interface TutorMessage {
+  id?: string;
+  role?: string;
+  content?: string;
+  citations?: Array<{ id?: string; title?: string; score?: number }>;
+  confidence?: number;
+  humanReviewRequired?: boolean;
+  aiRequestId?: string;
+}
+const Message: React.FC<{ m: TutorMessage }> = ({ m }) => {
   const isUser = m.role === "user";
   const citations = Array.isArray(m.citations) ? m.citations : [];
   return (
@@ -108,17 +119,19 @@ const Message = ({ m }) => {
   );
 };
 
-const TutorPage = ({ go }) => {
+interface TutorPageProps { go: Go }
+
+const TutorPage: React.FC<TutorPageProps> = ({ go }) => {
   const { isAuthenticated } = useAuth();
-  const [loadingSessions, setLoadingSessions] = React.useState(true);
-  const [sessions, setSessions] = React.useState([]);
-  const [activeId, setActiveId] = React.useState(null);
-  const [messages, setMessages] = React.useState([]);
-  const [loadingMessages, setLoadingMessages] = React.useState(false);
-  const [input, setInput] = React.useState("");
-  const [pending, setPending] = React.useState(false);
-  const [error, setError] = React.useState(null);
-  const scrollRef = React.useRef(null);
+  const [loadingSessions, setLoadingSessions] = React.useState<boolean>(true);
+  const [sessions, setSessions] = React.useState<any[]>([]);
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [messages, setMessages] = React.useState<TutorMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = React.useState<boolean>(false);
+  const [input, setInput] = React.useState<string>("");
+  const [pending, setPending] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const reloadSessions = React.useCallback(async () => {
     setLoadingSessions(true);

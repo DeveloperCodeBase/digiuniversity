@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.7 — typed.
 // =====================================================
 // Course detail (live) — /api/v1/courses/:id, with nested modules + lessons.
 // =====================================================
@@ -16,8 +16,10 @@ import {
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
+import type { Go } from "../router";
 
-const SignInPrompt = ({ go }) => (
+interface SignInPromptProps { go: Go }
+const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   <main data-screen-label="درس" className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div
       className="rounded-2xl"
@@ -40,18 +42,20 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const CourseLivePage = ({ go, courseId }) => {
+interface CourseLivePageProps { go: Go; courseId?: string }
+
+const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
   const { isAuthenticated, hasRole } = useAuth();
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [course, setCourse] = React.useState(null);
-  const [enrolled, setEnrolled] = React.useState(false);
-  const [enrolling, setEnrolling] = React.useState(false);
-  const [sessions, setSessions] = React.useState([]);
-  const [joiningId, setJoiningId] = React.useState(null);
-  const [analyzing, setAnalyzing] = React.useState(null);
-  const [analysisBySession, setAnalysisBySession] = React.useState({});
-  const [assessments, setAssessments] = React.useState([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [course, setCourse] = React.useState<any>(null);
+  const [enrolled, setEnrolled] = React.useState<boolean>(false);
+  const [enrolling, setEnrolling] = React.useState<boolean>(false);
+  const [sessions, setSessions] = React.useState<any[]>([]);
+  const [joiningId, setJoiningId] = React.useState<string | null>(null);
+  const [analyzing, setAnalyzing] = React.useState<string | null>(null);
+  const [analysisBySession, setAnalysisBySession] = React.useState<Record<string, unknown>>({});
+  const [assessments, setAssessments] = React.useState<any[]>([]);
 
   React.useEffect(() => {
     if (!isAuthenticated || !courseId) return;
