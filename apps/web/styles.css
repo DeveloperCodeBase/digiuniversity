@@ -303,7 +303,23 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
   box-shadow: 0 0 12px var(--cyan);
 }
 
-.nav-actions { display: flex; gap: 10px; align-items: center; }
+/* Phase-A R6.6 — RTL navbar: `.nav-actions` must sit at the end edge
+   of the flex row (left in Persian RTL) so the user menu / theme /
+   notification chips don't drift toward the center. In PUBLIC mode at
+   desktop, `.nav-links` already absorbs the middle via its `margin:
+   auto` rule below, but at <=1024px the links are taken out of flow
+   (position: fixed mobile menu) and the rule there doesn't push the
+   actions out. Same situation in WORKSPACE mode at every viewport
+   (nav-links is hidden). margin-inline-start: auto is the one rule
+   that fixes both cases without a media query — under RTL flex-row
+   the "inline-start" side is the right edge, so absorbing that side
+   pushes the box toward the end (left). */
+.nav-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-inline-start: auto;
+}
 
 /* ================================================================
    Buttons
