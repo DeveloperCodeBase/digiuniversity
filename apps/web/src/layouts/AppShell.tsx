@@ -121,6 +121,8 @@ export const AppShell: React.FC = () => {
         go={go}
         mode={navMode}
         onWorkspaceMenuClick={() => setSidebarOpenWithPersist(!sidebarOpen)}
+        // R7.5 — plumb open state for the hamburger's aria-expanded.
+        workspaceMenuOpen={sidebarOpen}
       />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
         <main
@@ -151,6 +153,7 @@ export const AppShell: React.FC = () => {
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpenWithPersist}>
             <SheetContent
               side="start"
+              id="appshell-sidebar-drawer"
               className="appshell-sidebar-drawer"
               aria-label="منوی workspace"
               onCloseAutoFocus={(e) => {

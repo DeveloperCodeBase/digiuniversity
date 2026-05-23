@@ -124,6 +124,14 @@ export interface NavProps {
   mode?: NavMode;
   /** Workspace-only: AppShell-provided callback to open the sidebar drawer. */
   onWorkspaceMenuClick?: () => void;
+  /**
+   * Workspace-only: whether the sidebar Sheet drawer is currently open.
+   * Wired to `aria-expanded` on the hamburger trigger (R7.5). Replaces
+   * the earlier `aria-controls="appshell-sidebar-drawer"` which axe-core
+   * flagged as `aria-valid-attr-value` on every workspace route (the
+   * referenced id wasn't in the DOM because Radix Sheet lazy-mounts).
+   */
+  workspaceMenuOpen?: boolean;
 }
 
 export const Nav = ({
@@ -131,6 +139,7 @@ export const Nav = ({
   go,
   mode = "public",
   onWorkspaceMenuClick,
+  workspaceMenuOpen = false,
 }: NavProps): React.ReactElement => {
   const { role, setRole } = useRole();
   const auth = useAuth();
@@ -209,7 +218,19 @@ export const Nav = ({
             className="nav-toggle nav-toggle-start"
             onClick={() => onWorkspaceMenuClick?.()}
             aria-label="منو"
-            aria-controls="appshell-sidebar-drawer"
+            // R7.5 — disclosure-widget ARIA pattern:
+            // aria-controls dropped because Radix Sheet lazy-mounts the
+            // drawer, so the IDREF can't always resolve (axe-core
+            // aria-valid-attr-value rule fired on all 53 workspace
+            // routes). aria-expanded + aria-haspopup="dialog" is the
+            // canonical pattern recommended by ARIA Authoring Practices
+            // for buttons that open a dialog/menu — and it's the pattern
+            // Radix wires automatically when you use <SheetTrigger>,
+            // which we can't here because the trigger lives in Nav
+            // (rendered by AppShell at a different tree depth than the
+            // Sheet itself).
+            aria-expanded={workspaceMenuOpen}
+            aria-haspopup="dialog"
           >
             <span className="bars"></span>
           </button>

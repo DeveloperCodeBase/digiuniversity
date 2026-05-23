@@ -99,13 +99,26 @@ test.describe("R1.1 — Responsive sidebar/hamburger", () => {
 });
 
 test.describe("R1.1 — A11y", () => {
-  test("workspace hamburger exposes aria-label + aria-controls", async ({ page }) => {
+  test("workspace hamburger exposes aria-label + disclosure-widget ARIA (aria-expanded + aria-haspopup)", async ({ page }) => {
+    // R7.5 updated the ARIA pattern: aria-controls dropped (the IDREF
+    // couldn't resolve when Radix Sheet was lazy-mounted-closed),
+    // replaced with the canonical disclosure-widget pattern of
+    // aria-expanded + aria-haspopup="dialog". Same a11y semantics,
+    // axe-clean.
     await page.setViewportSize({ width: 768, height: 1024 });
     await login(page);
     await page.goto("/dashboard");
     const btn = page.locator("button.nav-toggle").first();
     await expect(btn).toHaveAttribute("aria-label", "منو");
-    await expect(btn).toHaveAttribute("aria-controls", "appshell-sidebar-drawer");
+    await expect(btn).toHaveAttribute("aria-haspopup", "dialog");
+    // aria-expanded reflects sidebar state; starts closed.
+    await expect(btn).toHaveAttribute("aria-expanded", "false");
+    // Opening the drawer flips it to true.
+    await btn.click();
+    await expect(btn).toHaveAttribute("aria-expanded", "true");
+    // aria-controls is no longer set (R7.5 — was the source of all 53
+    // workspace-route axe critical violations).
+    await expect(btn).not.toHaveAttribute("aria-controls", /./);
   });
   test("workspace drawer: Escape closes and returns focus to hamburger", async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
