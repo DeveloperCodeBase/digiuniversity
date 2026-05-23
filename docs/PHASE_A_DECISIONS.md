@@ -173,6 +173,17 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 
 **Source:** owner messages on 2026-05-23 (R6 Classroom redesign request, R6.5 theme color, JDO logo) and 2026-05-22 (R5 template + jahad logo files).
 
+### R6.6-D16 — Owner D13 ack: R6.6 manual smoke 4/4 pass, R6.6 closed
+**Context:** R6.6 shipped the navbar RTL fix (workspace hamburger at start edge + `margin-inline-start: auto` on `.nav-actions`). Automated 12/12 + R1.1 regression 13/13. Owner ran manual smoke on real device per D13 (real Persian phone + desktop + incognito).
+**Result:** 4/4 checkpoints pass —
+  1. ✅ Public mode RTL (logo right, user-menu left, mobile hamburger at end)
+  2. ✅ Workspace mode RTL (hamburger right edge, brand follows, user-menu left edge)
+  3. ✅ Desktop chrome (no overlap, no drift; nav-actions pinned to left)
+  4. ✅ Spot-check overlap (no z-index issues; drawer slides in from right under RTL)
+**Status:** **R6.6 closed.** D13 ack confirmed.
+**Effect:** Phase-A D12 assertion roster is locked at 68/68 with owner ack on R5 (positive feedback) + R6.6. Remaining D13 acks: R1.1+R1.2+R1.3+R1.4, R2, R3, R4, R6, R6.5 (7 sub-Rs pending owner manual smoke).
+**Source:** owner message 2026-05-23 ("R6.6 manual smoke pass شد (4/4 checkpoint pass)…").
+
 ### R6.6-D15 — Logical CSS properties are the canonical RTL fix
 **Context:** R6.6 fixed a user-reported navbar RTL bug. Two CSS choices for pushing `.nav-actions` to the end edge:
   - A. `margin-left: auto` (physical) — works only in LTR; in RTL the "left" side is the END so this would push the wrong way.
