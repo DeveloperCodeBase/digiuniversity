@@ -27,10 +27,16 @@
   --line: rgba(11, 36, 71, 0.08);
   --line-2: rgba(11, 36, 71, 0.16);
 
-  /* — ink (navy 800; muted + faint scales) — */
+  /* — ink (navy 800; muted + faint scales) —
+     R7.6 darkened --fg-mute (5.39:1 → 6.96:1) and --fg-dim (2.64:1 → 3.97:1)
+     to clear WCAG 2.x SC 1.4.3 violations surfaced by axe-scan against
+     --bg: #ffffff. Contrast ratios verified by tools/r7-6-contrast-check.mjs.
+     --fg-dim at 3.97:1 satisfies SC 1.4.11 (large text + non-essential UI,
+     3:1) but not SC 1.4.3 (normal text, 4.5:1); any normal-text --fg-dim
+     usage that axe-scan still flags is queued for R7.7 long-tail. */
   --fg: #0b2447;
-  --fg-mute: #5b6b87;
-  --fg-dim: #93a0b8;
+  --fg-mute: #4a5a76;
+  --fg-dim: #768094;
 
   /* — single accent: brand blue (template's blue-500) — */
   --accent: #2f5fd3;
