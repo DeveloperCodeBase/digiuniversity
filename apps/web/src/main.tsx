@@ -13,11 +13,16 @@ import "../styles.css";
 import "../styles-r6-classroom.css";
 
 // Apply persisted theme before first paint to avoid flash.
+//
+// Phase-A R6.5: default changed from "dark" to "light" so the new
+// white + navy-blue palette is what users see on first paint. The
+// dark theme stays available — toggling via the theme menu writes
+// "dark" to localStorage and this code picks it up next load.
 const savedTheme = ((): string => {
   try {
-    return localStorage.getItem("digiu_theme") || "dark";
+    return localStorage.getItem("digiu_theme") || "light";
   } catch {
-    return "dark";
+    return "light";
   }
 })();
 document.documentElement.setAttribute("data-theme", savedTheme);

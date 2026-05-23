@@ -10,43 +10,62 @@
 
 :root,
 [data-theme="light"] {
-  /* — surfaces (warm off-white paper) — */
-  --bg: #fafaf5;
-  --bg-deep: #f0eee5;
+  /* Phase-A R6.5 — White + navy blue palette, template-aligned.
+     Surfaces are clean white with subtle blue-tinted off-white for
+     panels. Ink is navy-800 so headings + body read as a single brand
+     voice. Primary accent is the template's brand blue. The legacy
+     --navy / --amber tokens stay pointing at muted gold for back-compat
+     with the 90+ pre-existing use sites; new code uses --accent
+     (blue) or the explicit --brand-navy-* tokens below. */
+
+  /* — surfaces (white + soft blue-tinted off-white) — */
+  --bg: #ffffff;
+  --bg-deep: #f5f7fb;
   --surface: #ffffff;
-  --surface-2: #f4f3ee;
-  --surface-3: #e8e6dd;
-  --line: rgba(13, 13, 13, 0.08);
-  --line-2: rgba(13, 13, 13, 0.16);
+  --surface-2: #f5f7fb;
+  --surface-3: #eaf0f8;
+  --line: rgba(11, 36, 71, 0.08);
+  --line-2: rgba(11, 36, 71, 0.16);
 
-  /* — ink (true deep black with subtle warmth) — */
-  --fg: #0d0d0c;
-  --fg-mute: #4a4a48;
-  --fg-dim: #8a8884;
+  /* — ink (navy 800; muted + faint scales) — */
+  --fg: #0b2447;
+  --fg-mute: #5b6b87;
+  --fg-dim: #93a0b8;
 
-  /* — single accent: oxford blue (academic, restrained) — */
-  --accent: oklch(0.34 0.13 255);
-  --accent-2: oklch(0.28 0.14 256);
-  --accent-soft: oklch(0.95 0.025 255);
-  --accent-dim: oklch(0.65 0.08 255);
-  --accent-on: #fafaf5;
+  /* — single accent: brand blue (template's blue-500) — */
+  --accent: #2f5fd3;
+  --accent-2: #1e3a8a;
+  --accent-soft: #e6edfc;
+  --accent-dim: #7fa1f0;
+  --accent-on: #ffffff;
 
   /* — secondary warm: muted gold, used sparingly — */
-  --navy: oklch(0.55 0.12 75);            /* muted gold (back-compat → amber slot) */
+  /* Legacy slot. `--navy` is a misnomer kept for back-compat with
+     90+ pre-existing references; it is gold, not navy. New navy
+     uses --brand-navy-* below. */
+  --navy: oklch(0.55 0.12 75);
   --navy-2: oklch(0.5 0.13 75);
   --navy-soft: oklch(0.95 0.04 75);
+
+  /* — brand-navy tokens (new in R6.5) — explicit navy for any
+     component that wants the literal navy blue ink/border tones from
+     the template. */
+  --brand-navy-900: #061634;
+  --brand-navy-800: #0b2447;
+  --brand-navy-700: #122e5f;
+  --brand-navy-600: #19376d;
 
   /* — tertiary: deep forest (rare) — */
   --sage: oklch(0.4 0.08 155);
   --sage-soft: oklch(0.94 0.025 155);
 
-  /* — alert: muted brick — */
-  --gold: oklch(0.5 0.16 30);
-  --gold-soft: oklch(0.94 0.04 30);
+  /* — accent gold for highlights (template tone) — */
+  --gold: #e7c87a;
+  --gold-soft: rgba(231, 200, 122, 0.18);
 
   /* Back-compat aliases. `--cyan-2` and `--amber-2` were removed in
-     R3a as orphans (nothing read them); `--accent-2` / `--navy-2` are
-     used directly. */
+     R3a as orphans. `--amber` keeps mapping to `--navy` (which is
+     gold) for the 50+ pre-existing references. */
   --cyan: var(--accent);
   --cyan-dim: var(--accent-dim);
   --amber: var(--navy);
@@ -65,11 +84,11 @@
   --r-lg: 10px;
   --r-xl: 14px;
 
-  /* — shadows (gentle, paper-like) — */
-  --shadow-1: 0 1px 0 rgba(13,13,13,0.04), 0 1px 2px rgba(13,13,13,0.04);
-  --shadow-2: 0 1px 0 rgba(13,13,13,0.04), 0 16px 40px -16px rgba(13,13,13,0.12);
-  --shadow-paper: 0 1px 0 rgba(13,13,13,0.04), 0 1px 3px rgba(13,13,13,0.05), 0 18px 48px -24px rgba(13,13,13,0.14);
-  --glow-cyan: 0 4px 12px -4px oklch(0.34 0.13 255 / 0.35);
+  /* — shadows (navy-tinted for ink consistency) — */
+  --shadow-1: 0 1px 0 rgba(11, 36, 71, 0.04), 0 1px 2px rgba(11, 36, 71, 0.05);
+  --shadow-2: 0 1px 0 rgba(11, 36, 71, 0.04), 0 16px 40px -16px rgba(11, 36, 71, 0.12);
+  --shadow-paper: 0 1px 0 rgba(11, 36, 71, 0.04), 0 1px 3px rgba(11, 36, 71, 0.05), 0 18px 48px -24px rgba(11, 36, 71, 0.14);
+  --glow-cyan: 0 4px 12px -4px rgba(47, 95, 211, 0.35);
 }
 
 /* ================================================================
