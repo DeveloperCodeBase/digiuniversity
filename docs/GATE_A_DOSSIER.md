@@ -8,15 +8,17 @@
 
 | # | Criterion | Status | Evidence below |
 |---|---|---|---|
-| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | ⏳ awaiting run | §1 |
-| 2 | axe-core: 0 critical / serious on every route | ⏳ awaiting run | §2 |
+| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🔴 **FAIL** | §1 |
+| 2 | axe-core: 0 critical / serious on every route | 🔴 **FAIL** | §2 |
 | 3 | TypeScript strict, ≤ 5 `@ts-nocheck` (all in DEFERRED) | ✅ verified | §3 |
 | 4 | All Playwright baseline + D12 assertions pass | ✅ verified | §4 |
-| 5 | 10 role dashboards visually distinct | ✅ verified | §5 |
+| 5 | 10 role dashboards visually distinct (reachable by role) | 🔴 **FAIL** | §5 |
 | 6 | Audit-on-mutation lint enforced in CI | ✅ verified | §6 |
 | ➕ | Owner manual smoke ack on every sub-R (D13 formal gate) | ⏳ awaiting owner | §7 |
 
 **Gate A passes when:** all six above are ✅ AND every sub-R has owner D13 ack. Until then, **no Phase B work begins.**
+
+**Current state: Gate A is BLOCKED on 3 of 6 criteria.** The blockers cluster on shared root causes — see the R7 fix plan in §1, §2, §5 (and the rolled-up summary at the bottom of this dossier).
 
 ---
 
@@ -343,32 +345,115 @@ The Compass §Gate A bullet «126 frames pass» was an earlier estimate against 
 
 ---
 
-## §5 — 10 role dashboards visually distinct (Criterion 5)
+## §5 — 10 role dashboards visually distinct (Criterion 5) — **🔴 FAIL**
 
-**Status: ✅ verified.** Each role-home renders with a role-specific KPI strip, headline, and CTA button targeting a role-appropriate route. See `docs/PHASE_A_R3_REVIEW.md` §Master Runbook §5 coverage for the per-role matrix.
+**Target:** After login, each of the 10 demo users should land on their role-specific dashboard. The 6 NEW dashboards (Super / Content / TA / Support / Moderate / Org) shipped in R3 with role-specific KPI strips at `/super`, `/content`, `/ta`, `/support`, `/moderate`, `/org`. The 4 PRE-EXISTING role surfaces (Student / Instructor / Admin / Parent) had role-typical landings at `/progress`, `/progress`, `/progress`, `/parent`.
 
-**Side-by-side grid** (links to the per-dashboard 1280×800 baseline frames captured during R3):
+**Methodology:** `apps/web/tests/visual/gate-a-role-dashboards.spec.ts` — a Playwright spec that logs in as each of the 10 demo users (per `apps/api/src/prisma/seed.ts`), waits for the post-login redirect to settle, and screenshots the landing surface at 1024×800. Output: `docs/gate-a-evidence/role-dashboards/<slug>.png`.
 
-| Role | Route | Headline | KPI strip | Evidence frame |
+### Run results — 2026-05-23
+
+**All 10 demo users land on `/progress`** despite the 6 new role-specific routes shipping in R3.
+
+| Role | Demo email | Expected landing (from `role.tsx`) | Actual landing | File size (proxy for content distinct?) |
 |---|---|---|---|---|
-| Super Admin | `/super` | میز ابرمدیر | تنانت‌ها · کاربران فعال ۲۴h · خطاهای ۵xx · خط فعالیت AI | `docs/phase-a-r3-dashboards-evidence/super-1280.png` |
-| Content Manager | `/content` | میز مدیر محتوا | در صف بازبینی · تأییدشده هفته · بازگشتی با کامنت · زمان بازبینی متوسط | `docs/phase-a-r3-dashboards-evidence/content-1280.png` |
-| TA | `/ta` | میز دستیار آموزشی | دروس واگذار · ارسال در صف · ساعت آفیس · دانشجوی فعال | `docs/phase-a-r3-dashboards-evidence/ta-1280.png` |
-| Support | `/support` | میز پشتیبانی | تیکت باز · SLA نقض‌شده · زمان پاسخ متوسط · بازگشت در صف | `docs/phase-a-r3-dashboards-evidence/support-1280.png` |
-| Moderator | `/moderate` | میز نظارت انجمن‌ها | گزارش پرچم‌خورده · بحث‌های فعال · قانون خودکار · اقدام امروز | `docs/phase-a-r3-dashboards-evidence/moderate-1280.png` |
-| Org Manager | `/org` | میز مدیر سازمان | کاربران سازمان · سیت استفاده‌شده · کوهورت فعال · صورتحساب باز | `docs/phase-a-r3-dashboards-evidence/org-1280.png` |
-| Student | `/dashboard` | (existing student dashboard) | next class + tasks + continue learning + AI Tutor FAB | `docs/phase-a-r1-1-appshell-evidence/dashboard-1280.png` |
-| Instructor | `/instructor` | (existing instructor console) | today schedule + grading queue + course tree + live host | (no new frame — pre-R3 surface, content-complete) |
-| Admin | `/admin` | (existing admin console) | setup wizard + today KPIs + Faculty/Dept/Program shortcuts | (no new frame — pre-R3 surface, content-complete) |
-| Parent | `/parent` | (existing parent dashboard) | child cards + alerts + teacher messages + payment history | (no new frame — pre-R3 surface, content-complete) |
+| Student | `student1@digiuniversity.ir` | `/progress` | `/progress` ✅ | 334 KB |
+| Instructor | `instructor1@digiuniversity.ir` | `/progress` | `/progress` ✅ | 318 KB |
+| Admin | `admin@digiuniversity.ir` | `/progress` | `/progress` ✅ | 336 KB |
+| Parent | `parent1@digiuniversity.ir` | `/parent` | **`/progress`** 🔴 | 318 KB |
+| Org Manager | `org1@digiuniversity.ir` | `/org` | **`/progress`** 🔴 | 318 KB |
+| TA | `ta1@digiuniversity.ir` | `/ta` | **`/progress`** 🔴 | 318 KB |
+| Content Manager | `cm1@digiuniversity.ir` | `/content` | **`/progress`** 🔴 | 319 KB |
+| Support | `support1@digiuniversity.ir` | `/support` | **`/progress`** 🔴 | 318 KB |
+| Moderator | `moderator1@digiuniversity.ir` | `/moderate` | **`/progress`** 🔴 | 318 KB |
+| Super Admin | `superadmin@digiuniversity.ir` | `/super` | **`/progress`** 🔴 | 318 KB |
 
-The 6 NEW role dashboards (Super / Content / TA / Support / Moderate / Org) ship with **role-distinctive KPI cards + headline + CTA** — verified visually across the 12 R3 D12 assertions. The 4 PRE-EXISTING role surfaces (student / instructor / admin / parent) were already content-complete in pre-R3 work; the role differentiation across the **10 roles** is therefore complete.
+7 of 10 PNGs are **318 KB ± 1 KB** — visual content is essentially identical. The 6 new R3 dashboards exist at `/super`, `/content`, `/ta`, `/support`, `/moderate`, `/org` (confirmed visible at those URLs during R3 D12 assertions, see `docs/phase-a-r3-dashboards-evidence/`), but no role's post-login flow routes them there.
 
-**To assemble a single side-by-side composite image:** the dashboard evidence PNGs are already in `docs/phase-a-r3-dashboards-evidence/`. A `montage` ImageMagick command would tile them, e.g.:
-```bash
-montage docs/phase-a-r3-dashboards-evidence/*-1280.png -tile 2x5 -geometry +6+6 docs/gate-a-evidence/role-dashboards-grid.png
+**Evidence files:** `docs/gate-a-evidence/role-dashboards/{student,instructor,admin,parent,org,ta,content_manager,support,moderator,super_admin}.png`.
+
+**Gate A criterion 5 verdict: 🔴 FAIL.** The dashboards themselves ARE visually distinct when reached directly (verified by R3's 12 D12 assertions and the R3 evidence frames at `docs/phase-a-r3-dashboards-evidence/`), but the criterion requires the differentiation to be reachable by ROLE — and 7 of 10 roles never get there because the post-login redirect short-circuits to `/progress`.
+
+### Root cause
+
+`apps/web/src/pages/auth/LoginPage.tsx` line 224 (and the duplicate at `apps/web/src/pages/Auth.tsx` line 22):
+
+```ts
+const apiRoleToLocal = (roles: readonly string[] | undefined): RoleId => {
+  if (!roles || roles.length === 0) return "student";
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("instructor")) return "instructor";
+  if (roles.includes("student")) return "student";
+  return "student";   // ← every other role falls through here
+};
 ```
-(To be run when the dossier moves from DRAFT to FINAL.)
+
+Only 3 of 10 API roles are mapped (`admin`, `instructor`, `student`). The 7 others (`parent`, `org`, `ta`, `content_manager`, `support`, `moderator`, `super_admin`) all fall through to the default `return "student"` — which then sets the local role to `"student"`, whose `homeRoute = "progress"`.
+
+The bug predates R3 (Phase 15 R7 added the 6 new roles to `role.tsx` but the login mapper was never extended). R3 added the dashboards but didn't touch the redirect path. R5 (login redesign) re-implemented `apiRoleToLocal` with the same incomplete mapping.
+
+### Proposed fix plan — **R7 (post-Gate-A, NOT implementation now)**
+
+Per owner directive: document + plan, no implementation.
+
+**R7.9 — Complete the `apiRoleToLocal` map** (priority 1, unblocks 7 of 10 roles):
+
+```ts
+const apiRoleToLocal = (roles: readonly string[] | undefined): RoleId => {
+  if (!roles || roles.length === 0) return "student";
+  // Highest-privilege first so a user with both `admin` + `instructor`
+  // lands on the admin console; same for super_admin > admin.
+  if (roles.includes("super_admin")) return "super_admin";
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("content_manager")) return "content_manager";
+  if (roles.includes("moderator")) return "moderator";
+  if (roles.includes("support")) return "support";
+  if (roles.includes("instructor")) return "instructor";
+  if (roles.includes("ta")) return "ta";
+  if (roles.includes("org")) return "org";
+  if (roles.includes("parent")) return "parent";
+  if (roles.includes("student")) return "student";
+  return "student";
+};
+```
+
+Also: extract the mapper to a single file (`apps/web/src/role.ts` or similar) so `LoginPage.tsx` and `Auth.tsx` import the same source. The current duplicate-and-drift is what let this regress through R5.
+
+**R7.10 — Add a regression spec** that asserts each of the 10 demo users lands on their role's `homeRoute`. The current spec only screenshots; a follow-up assertion (`expect(page.url()).toMatch(/\/super$/)` etc.) would catch this kind of mapping drift in CI.
+
+**R7.11 — Decide on the role hierarchy** for users with multiple roles (e.g., an instructor who is also a content_manager). The R7.9 fix orders by privilege; if the owner prefers role-tabs on the user-menu (Notion-style "switch workspace"), that's a separate R7 sub-item.
+
+**Estimated R7 redirect-fix budget:** ~1 day of sub-R (mapper + regression spec + manual smoke).
+
+### Gate A status after §5
+
+🔴 **Criterion 5 (10 role dashboards visually distinct): FAIL.** The dashboards exist and are distinct *at their direct routes*, but the role-driven landing path that the criterion implies is broken for 7 of 10 roles.
+
+Combined with §1 + §2, Gate A has **three of its six criteria failing**. Phase B start remains BLOCKED.
+
+### What R3 actually verified (preserved for the record)
+
+The 6 R3 dashboards were correctly built — they exist at their routes and pass their D12 assertions when visited directly. R3's review document is still accurate as a sub-R-level summary. The Gate A finding is at the *integration* level: R3 shipped the dashboards but the login → homeRoute lookup wasn't taught to find them.
+
+| Role | Route | Headline | KPI strip | R3 evidence frame |
+|---|---|---|---|---|
+| Super Admin | `/super` | میز ابرمدیر | تنانت‌ها · کاربران فعال ۲۴h · خطاهای ۵xx · خط فعالیت AI | `docs/phase-a-r3-dashboards-evidence/` |
+| Content Manager | `/content` | میز مدیر محتوا | در صف بازبینی · تأییدشده هفته · بازگشتی با کامنت · زمان بازبینی متوسط | `docs/phase-a-r3-dashboards-evidence/` |
+| TA | `/ta` | میز دستیار آموزشی | دروس واگذار · ارسال در صف · ساعت آفیس · دانشجوی فعال | `docs/phase-a-r3-dashboards-evidence/` |
+| Support | `/support` | میز پشتیبانی | تیکت باز · SLA نقض‌شده · زمان پاسخ متوسط · بازگشت در صف | `docs/phase-a-r3-dashboards-evidence/` |
+| Moderator | `/moderate` | میز نظارت انجمن‌ها | گزارش پرچم‌خورده · بحث‌های فعال · قانون خودکار · اقدام امروز | `docs/phase-a-r3-dashboards-evidence/` |
+| Org Manager | `/org` | میز مدیر سازمان | کاربران سازمان · سیت استفاده‌شده · کوهورت فعال · صورتحساب باز | `docs/phase-a-r3-dashboards-evidence/` |
+| Student | `/dashboard` → `/progress` | (existing) | next class + tasks + continue learning + AI Tutor FAB | (pre-R3) |
+| Instructor | `/instructor` | (existing) | today schedule + grading queue + course tree + live host | (pre-R3) |
+| Admin | `/admin` | (existing) | setup wizard + today KPIs + Faculty/Dept/Program shortcuts | (pre-R3) |
+| Parent | `/parent` | (existing) | child cards + alerts + teacher messages + payment history | (pre-R3) |
+
+A `montage` composite of the (broken) post-login screenshots could be assembled via:
+```bash
+montage docs/gate-a-evidence/role-dashboards/*.png -tile 5x2 -geometry +6+6 \
+  docs/gate-a-evidence/role-dashboards-grid.png
+```
+…but the resulting grid will show 10 near-identical /progress screenshots, which IS the visual evidence of the bug. Post-R7.9 re-run will produce a meaningful 10-way grid.
 
 ---
 
