@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe","visual")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe","visual","lint")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
@@ -95,11 +95,35 @@ switch ($Action) {
     }
 
     "test" {
+        # Phase-A R4: run the local audit-on-mutation lint first so a
+        # missing @AuditAction / @AuditSkip is caught before we burn a
+        # remote build + jest run on it. The script is plain Node + the
+        # api workspace's already-installed `typescript`; no Docker.
+        Write-Host "--- audit-on-mutation lint (Phase-A R4) ---"
+        node "$PSScriptRoot/../tools/eslint-rules/audit-on-mutation.js"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "audit-on-mutation lint failed (exit=$LASTEXITCODE). Fix violations before re-running tests."
+            exit $LASTEXITCODE
+        }
         # Builds and runs the api test image against the live postgres
         # + ai-gateway services. Each spec creates its own tenant slug
         # so test data never collides with the demo seed.
         git push origin $Branch
         Remote "git pull origin $Branch && docker compose --profile test build api-test && docker compose --profile test run --rm api-test"
+    }
+
+    "lint" {
+        # Phase-A R4: standalone audit-on-mutation lint. Walks
+        # apps/api/src/**/*.controller.ts and fails if any @Post/@Put/
+        # @Patch/@Delete handler lacks @AuditAction / @AuditSkip / a
+        # this.audit.log(...) body call. Also runs the rule's own
+        # self-tests so a broken rule fails CI loudly.
+        Write-Host "--- audit-on-mutation lint ---"
+        node "$PSScriptRoot/../tools/eslint-rules/audit-on-mutation.js"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        Write-Host "--- audit-on-mutation self-tests ---"
+        node --test "$PSScriptRoot/../tools/eslint-rules/audit-on-mutation.spec.js"
+        exit $LASTEXITCODE
     }
 
     "status" {

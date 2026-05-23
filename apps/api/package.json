@@ -11,6 +11,9 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "seed": "node dist/prisma/seed.js",
+    "lint:audit": "node ../../tools/eslint-rules/audit-on-mutation.js",
+    "lint:audit:test": "node --test ../../tools/eslint-rules/audit-on-mutation.spec.js",
+    "pretest": "npm run lint:audit",
     "test": "jest --runInBand --forceExit"
   },
   "dependencies": {

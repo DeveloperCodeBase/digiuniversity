@@ -10,7 +10,7 @@ import { Public } from "./decorators/public.decorator";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
-import { AuditAction } from "../audit/audit-action.decorator";
+import { AuditAction, AuditSkip } from "../audit/audit-action.decorator";
 import { AbilityFactory } from "../authz/ability.factory";
 
 // Phase-15 R4: auth endpoints are the front door to a hash verify +
@@ -42,6 +42,12 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
+  // @AuditSkip per Phase-A R4 lint rule: this endpoint is @Public(), so the
+  // AuditInterceptor would skip it anyway (no req.user → no tenantId).
+  // AuthService.register writes its own audit row inside the service path
+  // once the tenant is resolved from the slug; doing it twice here would
+  // double-log the same event.
+  @AuditSkip()
   register(@Body() dto: RegisterDto, @Req() req: Request) {
     return this.auth.register(dto, requestMeta(req));
   }
@@ -50,6 +56,11 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @Post("login")
   @HttpCode(HttpStatus.OK)
+  // @AuditSkip per Phase-A R4 lint rule: same rationale as register —
+  // AuthService.login writes a tenant-scoped auth.login.success / .failure
+  // audit row from inside the service after credential check resolves
+  // the tenantId; the interceptor here would have nothing to log against.
+  @AuditSkip()
   login(@Body() dto: LoginDto, @Req() req: Request) {
     return this.auth.login(dto, requestMeta(req));
   }
@@ -58,6 +69,11 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
+  // @AuditSkip per Phase-A R4 lint rule: refresh swaps one JWT for
+  // another for an already-authenticated session. AuthService.refresh
+  // records the rotation via the AccessToken / RefreshToken tables
+  // (separate from AuditLog); we don't double-log here.
+  @AuditSkip()
   refresh(@Body() dto: RefreshDto, @Req() req: Request) {
     return this.auth.refresh(dto, requestMeta(req));
   }
