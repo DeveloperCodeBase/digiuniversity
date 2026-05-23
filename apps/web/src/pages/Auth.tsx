@@ -11,23 +11,18 @@
 import React from "react";
 import { Icon } from "../icons";
 import { useRole, ROLES, type RoleId, type Role } from "../role";
+import { apiRoleToLocal } from "../auth/role-map";
 import { toFa } from "../shared";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../api/client.js";
 import type { Go } from "../router";
 import { Button } from "../ui";
 
-// Map API role names → local RoleProvider role IDs. The seed gives the
-// admin user the "admin" role; self-registered accounts get "student".
-const apiRoleToLocal = (roles: readonly string[] | undefined): RoleId => {
-  if (!roles || roles.length === 0) return "student";
-  if (roles.includes("admin")) return "admin";
-  if (roles.includes("instructor")) return "instructor";
-  if (roles.includes("student")) return "student";
-  // Fall back to student if the api returns a role we don't model
-  // locally (parent/org will join when Phase 15 wires them through).
-  return "student";
-};
+// R7.9 — apiRoleToLocal moved to apps/web/src/auth/role-map.ts so
+// LoginPage and this legacy Auth.tsx share a single source of truth.
+// The previous local copy mapped only 3 of 10 API roles, silently
+// bucketing parent/org/ta/cm/support/moderator/super_admin as
+// "student". That bug caused Gate A §5 + OWNER-FINDING-2.
 
 interface AuthShellProps {
   children: React.ReactNode;

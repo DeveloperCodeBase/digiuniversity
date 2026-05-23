@@ -10,6 +10,7 @@
 // selector keeps the original 5 chips for clarity in the demo-tenant flow.
 import React from "react";
 import { useRole, ROLES, type RoleId } from "../../role";
+import { apiRoleToLocal } from "../../auth/role-map";
 import { useAuth } from "../../auth/AuthContext";
 import { ApiError } from "../../api/client.js";
 import type { Go } from "../../router";
@@ -221,13 +222,11 @@ interface LoginErrors {
   general?: string;
 }
 
-const apiRoleToLocal = (roles: readonly string[] | undefined): RoleId => {
-  if (!roles || roles.length === 0) return "student";
-  if (roles.includes("admin")) return "admin";
-  if (roles.includes("instructor")) return "instructor";
-  if (roles.includes("student")) return "student";
-  return "student";
-};
+// R7.9 — apiRoleToLocal moved to apps/web/src/auth/role-map.ts so
+// LoginPage and the legacy Auth.tsx share a single source of truth.
+// The previous local copy mapped only 3 of 10 API roles, silently
+// bucketing parent/org/ta/cm/support/moderator/super_admin as
+// "student" — that bug caused Gate A §5 + OWNER-FINDING-2.
 
 export const LoginPage: React.FC<AuthPageProps> = ({ go }) => {
   const { setRole } = useRole();
