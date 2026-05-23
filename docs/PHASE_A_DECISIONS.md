@@ -184,6 +184,60 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Effect:** Phase-A D12 assertion roster is locked at 68/68 with owner ack on R5 (positive feedback) + R6.6. Remaining D13 acks: R1.1+R1.2+R1.3+R1.4, R2, R3, R4, R6, R6.5 (7 sub-Rs pending owner manual smoke).
 **Source:** owner message 2026-05-23 ("R6.6 manual smoke pass شد (4/4 checkpoint pass)…").
 
+### R7-D17 — R7 sweep approved as the Gate-A unblock path, critical-path-first ordering
+**Context:** Gate A measurement returned 3 of 6 criteria 🔴 FAIL:
+  - §1 Lighthouse mobile — Perf 35 / 66 / 66, A11y 88 / 88 / 87 on `/`, `/login`, `/programs`
+  - §2 axe-core — 65 of 67 routes have ≥1 serious, 54 of 67 have ≥1 critical
+  - §5 Role-routing — 7 of 10 demo users land on `/progress` because `apiRoleToLocal` maps only 3 of 10 API roles
+
+The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. Owner reviewed and authorized.
+
+**Authorization:** owner message 2026-05-23 — «owner R7 sweep رو به‌عنوان unblock path approve کرد». R7 is out-of-original-Phase-A-plan scope but legitimized by explicit message per D11/D14.
+
+**Ordering (chosen by owner): critical-path-first.**
+  1. **R7.6** — Darken `--fg-mute` + `--fg-dim` theme tokens (0.5d, simplest, single CSS block)
+  2. **R7.5** — Fix chrome-level `aria-valid-attr-value` (1d, debug axe details first to find exact selector)
+  3. **R7.9** — Complete `apiRoleToLocal` (3 → 10 roles), extract to shared file, add flow regression spec (0.5d)
+  4. **Re-run** §1 (subset: a11y only), §2 (full), §5 (full) measurement specs
+  5. **Stop**, report, await owner explicit gate before starting Performance track (R7.1 + R7.2 + R7.3 + R7.7 + R7.8)
+
+**Why critical-path-first:** the 3 sub-Rs above clear most of the FAIL surface in ~2 working days. R7.1+R7.2 (Performance: Vite chunks + Vazirmatn self-host) are bigger surgery and can wait until the FAIL criteria are flipped to PASS/yellow.
+
+**R7.11** (multi-role hierarchy decision) is gated on owner — not in scope for the critical path. R7.9 review will surface it as an open question.
+
+**No R7 sub-R may start until both:**
+  - This decision is recorded (D17, this entry), AND
+  - The specific sub-R's memo is committed before its code.
+
+**Source:** owner instruction 2026-05-23 («R7 sweep رو به‌عنوان unblock path approve کرد. ترتیب: critical-path-first»).
+
+### D18 — Flow assertions required on every multi-step user journey
+**Context:** R3 shipped 10 role dashboards with 12/12 D12 assertions green. Gate A measurement caught that 7 of 10 roles never reach their dashboard because `apiRoleToLocal` was incomplete. **D12 verified the destination, not the journey.** Visiting `/super` directly worked; logging in as `superadmin@…` and being routed to `/super` did not — and D12 had no way of catching that.
+
+**Rule:** every sub-R that touches a multi-step user journey must ship **two flavors** of assertion:
+  a. **D12 5-point per landing page** (the existing rule — DOM, computed style, viewport position, no overlap, baseline). This verifies that, when reached, the landing is visually correct.
+  b. **Flow assertion(s)**: a Playwright test that starts from the journey's entry point, executes the journey (clicks, form fills, submissions), and verifies the **expected landing URL + landing element**. This catches mapper drift, redirect regressions, state-machine routing bugs, and any other "destination is fine but the path is broken" class of bug.
+
+**Multi-step journeys that fall under this rule:**
+  - Login → role-aware home redirect (R7.9 — first instance)
+  - Register → onboarding → first-page (Phase B onboarding R)
+  - Application submit → confirmation → application status (Phase B StudentApplication/InstructorApplication state machine)
+  - Quiz / assignment submit → grade → transcript update (Phase C learning loop)
+  - Enrollment → first lesson → progress recorded (Phase B + C overlap)
+  - Live class join → recorded → transcript ready (Phase D)
+  - Every XState state-machine transition that the SPA exposes to users (every state machine sub-R in Phase B + C)
+
+**What R7.9 ships as the first D18 instance:**
+  - `apps/web/tests/visual/gate-a-role-routing.spec.ts` — logs in as each of 10 demo users, asserts `expect(page.url()).toMatch(new RegExp(escapeRegex(expectedHomeRoute) + "$"))`.
+  - Runs in the existing visual docker profile via `.\scripts\remote.ps1 visual -Service gate-a-role-routing`.
+  - Tagged so the suite can be cherry-picked into CI's `pretest` hook (or any "smoke before push" step Phase B introduces).
+
+**Why "expected landing URL + landing element" not just URL:** URL alone catches the routing bug; the additional landing-element check (e.g., `expect(page.locator(".r6-classroom-shell")).toBeVisible()` for the classroom flow) catches the case where the route is correct but the page failed to mount (auth race, missing data, hydration error).
+
+**Application:** D18 takes effect immediately. R7.9 is the first sub-R that must satisfy it. Phase B onboarding work and every Phase C state-machine sub-R inherit the rule. Phase A's already-shipped sub-Rs (R1.x, R2, R3, R4, R5, R6, R6.5, R6.6) won't be retro-fitted — they predate D18 and any flow gaps from them are addressable through R7.x sub-Rs as discovered.
+
+**Source:** owner instruction 2026-05-23 («D18 از این به بعد روی هر sub-R که چند گام دارد aplly می‌شه»).
+
 ### R6.6-D15 — Logical CSS properties are the canonical RTL fix
 **Context:** R6.6 fixed a user-reported navbar RTL bug. Two CSS choices for pushing `.nav-actions` to the end edge:
   - A. `margin-left: auto` (physical) — works only in LTR; in RTL the "left" side is the END so this would push the wrong way.
