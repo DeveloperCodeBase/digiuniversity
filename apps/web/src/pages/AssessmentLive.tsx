@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.6 — typed.
 // =====================================================
 // Live assessment runner.
 //
@@ -17,14 +17,16 @@ import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const STATUS_LABEL = {
+const STATUS_LABEL: Record<string, string> = {
   draft: "پیش‌نویس",
   submitted: "ارسال‌شده",
   graded: "نمره‌گذاری‌شده",
 };
 
-const SignInPrompt = ({ go }) => (
+interface SignInPromptProps { go: Go }
+const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   <main className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div
       className="rounded-2xl"
@@ -47,17 +49,25 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const AssessmentLivePage = ({ go, assessmentId }) => {
+interface AssessmentLivePageProps {
+  go: Go;
+  assessmentId?: string;
+}
+
+// API responses flow as `any` from the untyped .js api client. Phase-A
+// R2 deliberately defers data-contract typing to a follow-up — the goal
+// here is removing the file-wide @ts-nocheck without changing behaviour.
+const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentId }) => {
   const { isAuthenticated, hasRole } = useAuth();
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [assessment, setAssessment] = React.useState(null);
-  const [submission, setSubmission] = React.useState(null);
-  const [answers, setAnswers] = React.useState({});
-  const [pending, setPending] = React.useState(false);
-  const [savingDraft, setSavingDraft] = React.useState(false);
-  const [aiDraft, setAiDraft] = React.useState(null);
-  const [aiPending, setAiPending] = React.useState(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [assessment, setAssessment] = React.useState<any>(null);
+  const [submission, setSubmission] = React.useState<any>(null);
+  const [answers, setAnswers] = React.useState<Record<string, unknown>>({});
+  const [pending, setPending] = React.useState<boolean>(false);
+  const [savingDraft, setSavingDraft] = React.useState<boolean>(false);
+  const [aiDraft, setAiDraft] = React.useState<any>(null);
+  const [aiPending, setAiPending] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (!isAuthenticated || !assessmentId) return;

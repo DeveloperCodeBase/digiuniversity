@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.6 — typed.
 // =====================================================
 // Live catalog page — talks to /api/v1/faculties + /programs + /courses.
 //
@@ -14,14 +14,15 @@ import { catalogApi, enrollmentsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const LEVEL_LABEL = {
+const LEVEL_LABEL: Record<string, string> = {
   beginner: "مقدماتی",
   intermediate: "متوسط",
   advanced: "پیشرفته",
 };
 
-const DEGREE_LABEL = {
+const DEGREE_LABEL: Record<string, string> = {
   bachelor: "کارشناسی",
   master: "ارشد",
   phd: "دکتری",
@@ -47,11 +48,13 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const CatalogPage = ({ go }) => {
+interface CatalogPageProps { go: Go }
+
+const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
   const { isAuthenticated, user } = useAuth();
 
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [faculties, setFaculties] = React.useState([]);
   const [programs, setPrograms] = React.useState([]);
   const [courses, setCourses] = React.useState([]);

@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.6 — typed.
 // =====================================================
 // Live progress dashboard.
 //
@@ -14,15 +14,17 @@ import { analyticsApi } from "../api/endpoints.js";
 import { ApiError } from "../api/client.js";
 import { toFa } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-const BAND_COLOR = {
+const BAND_COLOR: Record<string, { bg: string; fg: string }> = {
   low: { bg: "color-mix(in oklch, var(--accent) 14%, var(--bg))", fg: "var(--accent)" },
   medium: { bg: "color-mix(in oklch, var(--amber) 16%, var(--bg))", fg: "var(--amber)" },
   high: { bg: "color-mix(in oklch, var(--warn) 18%, var(--bg))", fg: "var(--warn)" },
 };
-const BAND_LABEL = { low: "کم", medium: "متوسط", high: "بالا" };
+const BAND_LABEL: Record<string, string> = { low: "کم", medium: "متوسط", high: "بالا" };
 
-const Stat = ({ label, value, hint }) => (
+interface StatPropsLocal { label: React.ReactNode; value: React.ReactNode; hint?: React.ReactNode }
+const Stat: React.FC<StatPropsLocal> = ({ label, value, hint }) => (
   <div
     className="rounded-2xl"
     style={{ padding: 20, background: "var(--surface)", border: "1px solid var(--line)", flex: "1 1 200px", minWidth: 180 }}
@@ -37,7 +39,7 @@ const Stat = ({ label, value, hint }) => (
   </div>
 );
 
-const EVENT_LABEL = {
+const EVENT_LABEL: Record<string, string> = {
   course_opened: "ورود به درس",
   lesson_opened: "بازکردن جلسه",
   lesson_completed: "تکمیل جلسه",
@@ -54,7 +56,8 @@ const EVENT_LABEL = {
   confusion_reported: "گزارش ابهام",
 };
 
-const SignInPrompt = ({ go }) => (
+interface SignInPromptProps { go: Go }
+const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   <main className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div
       className="rounded-2xl"
@@ -77,13 +80,15 @@ const SignInPrompt = ({ go }) => (
   </main>
 );
 
-const ProgressPage = ({ go }) => {
+interface ProgressPageProps { go: Go }
+
+const ProgressPage: React.FC<ProgressPageProps> = ({ go }) => {
   const { isAuthenticated, user, hasRole } = useAuth();
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [summary, setSummary] = React.useState(null);
-  const [risk, setRisk] = React.useState(null);
-  const [tenantSummary, setTenantSummary] = React.useState(null);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [summary, setSummary] = React.useState<any>(null);
+  const [risk, setRisk] = React.useState<any>(null);
+  const [tenantSummary, setTenantSummary] = React.useState<any>(null);
 
   React.useEffect(() => {
     if (!isAuthenticated) return;

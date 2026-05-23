@@ -1,4 +1,4 @@
-// @ts-nocheck — Phase-14 R2 bulk JSX→TSX rename. Remove when this file's props/state are typed.
+// Phase-A R2.6 — typed.
 // =====================================================
 // Admissions / Onboarding flow
 // =====================================================
@@ -6,9 +6,12 @@ import React from "react";
 import { Icon } from "../icons";
 import { Footer, toFa } from "../shared";
 import { Button } from "../ui";
+import type { Go } from "../router";
 
-export const AdmissionsPage = ({ go }) => {
-  const [step, setStep] = React.useState(2);
+interface AdmissionsPageProps { go: Go }
+
+export const AdmissionsPage: React.FC<AdmissionsPageProps> = ({ go }) => {
+  const [step, setStep] = React.useState<number>(2);
   const steps = [
     { n: 1, t: "انتخاب برنامه", done: true },
     { n: 2, t: "مشخصات و مدارک", done: false, current: true },
