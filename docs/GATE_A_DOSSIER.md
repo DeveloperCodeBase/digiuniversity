@@ -20,40 +20,110 @@
 
 ---
 
-## §1 — Lighthouse mobile scores (Criterion 1)
+## §1 — Lighthouse mobile scores (Criterion 1) — **🔴 FAIL**
 
-**Target:** ≥ 90 on each of `/`, `/login`, and a role-typical dashboard (proposed: `/teach` for instructor view, since it stresses both a list + grading queue + tutor FAB, more demanding than the kpi-grid-only `/super` or `/content`).
+**Target:** ≥ 90 on each of `/`, `/login`, and a role-typical dashboard.
 
-**Methodology:** Lighthouse 11+ CLI, mobile emulation preset (Moto G4 / Slow 4G), `--throttling-method=simulate`, run 3 times per page, report the median.
+**Methodology:** Lighthouse 12 CLI, headless Chrome via `chrome-launcher`, mobile emulation preset (Moto G4 / Slow 4G + 4× CPU), `--throttling-method=simulate`. Run from Windows host against the live production URL `https://digiuniversity.ir` so Caddy + nginx + SPA are all in the loop.
 
-**Run command (canonical):**
+**Run command (canonical, used for the runs below):**
 ```bash
-# From the VPS, against the live container so Caddy + nginx + SPA are all in the loop
-docker run --rm --network digiuniversity_web \
-  -v "$PWD/docs/gate-a-evidence/lighthouse:/lh" \
-  patrickhulce/lhci-client \
-  lhci collect \
-  --url=https://digiuniversity-app/ \
-  --url=https://digiuniversity-app/login \
-  --url=https://digiuniversity-app/teach \
-  --settings.preset=mobile \
-  --settings.throttlingMethod=simulate \
-  --numberOfRuns=3
+CHROME_PATH="/c/Program Files/Google/Chrome/Application/chrome.exe" \
+  npx -y lighthouse@12 https://digiuniversity.ir/ \
+  --output=json --output=html \
+  --output-path=docs/gate-a-evidence/lh-landing-mobile \
+  --form-factor=mobile --throttling-method=simulate --quiet \
+  --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage"
+# Repeat for /login and /programs.
 ```
 
-**Page-by-page results (TO BE FILLED before Gate A close):**
+**Page substitution from the original target list:** the Compass §Gate A bullet calls for an "instructor dashboard role-typical" third page (the owner suggested `/teach`). Two reasons for the substitution:
+1. **`/teach` does not exist** in the current route table (`apps/web/src/router.tsx` has `/instructor` for the instructor console; `instructor.homeRoute = "progress"` for the live data dashboard). The Compass label was a forward-looking name.
+2. **`/instructor` is workspace-only** (auth-gated) and Lighthouse 12 CLI doesn't carry a logged-in session through `--extra-headers` because the SPA reads JWT from `localStorage`, not headers. Auditing authed routes requires a custom puppeteer-orchestrated runner (R7 candidate).
+
+**Substituted third page:** `/programs` — a public, content-rich route with cards + faculty filters, representative of typical SPA workload. This means the §1 numbers measure the **anonymous / first-paint** profile. The authenticated profile is a follow-up.
+
+### Run results — 2026-05-23
 
 | Page | Performance | Accessibility | Best Practices | SEO | PWA | All ≥90? |
 |---|---|---|---|---|---|---|
-| `/` (landing) | TBD | TBD | TBD | TBD | TBD | ⏳ |
-| `/login` | TBD | TBD | TBD | TBD | TBD | ⏳ |
-| `/teach` (instructor) | TBD | TBD | TBD | TBD | TBD | ⏳ |
+| `/` (landing) | **35** | **88** | 100 | 92 | n/a* | 🔴 NO |
+| `/login` (R5) | **66** | **88** | 100 | 92 | n/a* | 🔴 NO |
+| `/programs` (public) | **66** | **87** | 100 | 92 | n/a* | 🔴 NO |
 
-**Why specific numbers, not just ≥90?** Per owner directive (2026-05-23): «عدد دقیق per page، نه فقط "≥90"». A 91 vs 99 difference is the gap between "we cleared the bar" and "we have headroom for Phase B feature load to land without regression". The full breakdown lets us identify which category was the weakest and which sub-R can target it.
+\* PWA: Lighthouse 12 removed the PWA category from the default desktop/mobile audit. PWA conformance is now spread across individual audits (`installable-manifest`, `service-worker`, `offline-start-url`, etc.) and is no longer a category score. The Compass §Gate A "PWA ≥ 90" line is not measurable in current Lighthouse; treat it as satisfied if the underlying audits pass. Evidence files: `docs/gate-a-evidence/lh-{landing,login,programs}-mobile.report.{json,html}`.
 
-**Known watch-outs:**
-- Performance is likely the lowest score because the JS bundle is 873 KB (gzipped 258 KB) — the threshold for a 90 on mobile is around 2.5s Time-to-Interactive on Slow 4G. Code-splitting (R7 candidate) would help. For Gate A: confirm ≥ 90; document the headroom.
-- PWA score depends on `sw.js` registration + manifest content. The Phase-15 R5 PWA recovery bootstrap should keep this satisfied; verify in the run.
+**Gate A criterion 1 verdict: 🔴 FAIL.** Three of three sampled pages are below the 90 Performance bar; three of three are below the 90 Accessibility bar.
+
+### Where the score went — Performance
+
+Detailed Web Vital metrics per page:
+
+| Page | FCP | LCP | TBT | CLS | Speed Index |
+|---|---|---|---|---|---|
+| `/` | 5.4 s | 7.0 s | **2,090 ms** | 0.011 | 5.4 s |
+| `/login` | 4.9 s | 6.1 s | 0 ms | 0.031 | 4.9 s |
+| `/programs` | 4.8 s | 6.1 s | 0 ms | 0.005 | 4.8 s |
+
+**Targets (Good in Lighthouse's banding):** FCP ≤ 1.8s, LCP ≤ 2.5s, TBT ≤ 200ms, CLS ≤ 0.1, SI ≤ 3.4s. Every page misses FCP, LCP, and Speed Index by 2-3×.
+
+**Root cause analysis:**
+- **JS bundle weight.** `dist/assets/index-*.js` is 873 KB raw / 258 KB gzipped. Parse + execute on a Moto G4 (CPU class ~2 GHz) costs ~1.5-2 s before React even mounts. That's the bulk of the TBT on `/` (`/` runs the full marketing landing animation rAF + the AppShell hydration in one go).
+- **Render-blocking resources.** Vazirmatn + JetBrains Mono + Bricolage Grotesque load from `fonts.googleapis.com` (3 separate font families, ~250 KB of woff2). Google Fonts CDN is reachable from outside Iran but slow from inside (the audit ran on a non-Iranian Lighthouse host but uses Slow 4G throttle, which simulates the latency). Each font family blocks first paint until it falls back via `font-display: swap`.
+- **No SSR / SSG.** The SPA renders client-side; the empty HTML shell is 1.8 KB but the SPA needs 873 KB of JS before any content paints. First Contentful Paint is dominated by the JS download + parse window.
+- **No code splitting.** The build is one big bundle. Marketing pages (`/`, `/about`, `/pricing`) inherit the entire workspace bundle (sidenav, RBAC, audit, AI tutor, etc.) even though they don't use any of it.
+
+### Where the score went — Accessibility
+
+| Page | Failing audits |
+|---|---|
+| `/` | `button-name` ×1, `color-contrast` ×4, `heading-order` ×2 |
+| `/login` | `aria-toggle-field-name` ×2, `button-name` ×1, `color-contrast` ×1, `label-content-name-mismatch` ×1 |
+| `/programs` | `button-name` ×1, `color-contrast` ×7, `heading-order` ×2, `label-content-name-mismatch` ×2 |
+
+**Root cause analysis:**
+- **`button-name` on every page.** Same component, same root cause: at least one button on every page lacks an accessible name (no text content, no `aria-label`, no `aria-labelledby`). Almost certainly an icon-only button somewhere in the chrome (likely the search icon button in the topbar, which uses `aria-label="پالت دستورات (Cmd+K)"` — but Lighthouse may be flagging a different one).
+- **`color-contrast` worst on /programs (7 items).** R6.5 switched the theme to white + navy, and the muted secondary tokens (`--fg-mute: #5b6b87`, `--fg-dim: #93a0b8`) may not hit 4.5:1 contrast against `--bg: #ffffff` for body text. Per WCAG 2.2 SC 1.4.3 the threshold is 4.5:1 for normal text and 3:1 for large text.
+- **`heading-order` on / and /programs.** An h3 without an h2 (or an h2 without an h1) somewhere on the page. Phase 14.7's chrome migration may have left orphan h-levels behind.
+- **`aria-toggle-field-name` on /login.** The password show/hide toggle button and the theme toggle button likely have icon-only content with the wrong aria attribute set.
+- **`label-content-name-mismatch` on /login + /programs.** A button's visible text doesn't match its accessible name (e.g., visible "خروج" but `aria-label="خروج از کلاس"` — Lighthouse expects the visible text to be a substring of the aria-label).
+
+### Proposed fix plan — **R7 (post-Gate-A, NOT implementation now)**
+
+Per owner directive (2026-05-23): «اگه page زیر 90 شد، علت رو زیر جدول لیست کن + plan fix (نه implement)».
+
+R7 sweeps in this order, each sub-bullet a separate sub-R:
+
+**R7.1 — Code split + lazy load (Performance)**
+- Add Vite manual chunks: `vendor-react`, `vendor-ui`, `auth`, `workspace`, `marketing`. Goal: marketing pages load only `vendor-react + vendor-ui + marketing` (~200 KB raw).
+- Convert `apps/web/src/pages/*.tsx` imports in `router.tsx` to `React.lazy(() => import(...))` with `<Suspense fallback={<AuthLoadingSkeleton />}>`.
+- Expected gain: FCP 5.4 s → ~2.5 s, LCP 7.0 s → ~3.5 s, Performance score ~35 → ~70.
+
+**R7.2 — Self-host Vazirmatn + remove unused font families (Performance)**
+- This is candidate A4 in `ARCHITECTURE_V2_NOTES.md` — promote to R7.2.
+- Self-host Vazirmatn 400/500/700 (drop 300/600/800/900 — the design uses only 3 weights). Same for JetBrains Mono (400/600 only). Drop Bricolage Grotesque unless evidence shows it's used; otherwise replace with Vazirmatn's bold weight.
+- Expected gain: FCP shaves 1.5-2 s on Slow 4G. Performance score ~70 → ~85.
+
+**R7.3 — Accessibility sweep (Accessibility)**
+- Find the missing `aria-label` button via Lighthouse's audit JSON (`audits['button-name'].details.items[*].node.selector`). Add the missing labels.
+- Audit color tokens: any `var(--fg-mute)` text on `var(--bg)` is checked against 4.5:1; tokens that fail get darkened (proposal: `--fg-mute: #4a5a76` instead of `#5b6b87`, increases contrast ratio).
+- Fix heading-order: walk every page's hN ladder. Make h2 the next-step after h1, never skip.
+- Fix `aria-toggle-field-name` and `label-content-name-mismatch` per the Lighthouse audit items.
+- Expected gain: A11y score 88 → 95+.
+
+**R7.4 — Authed-route Lighthouse runner (methodology)**
+- Author `tools/lighthouse/lighthouse-authed.mjs` (a small Node script that uses Playwright to log in, save storage state, then drives `lighthouse({ port })` against `/instructor` / `/dashboard` / `/classroom` etc.).
+- Run R7.4's measurements as the final pre-Gate-A step. Authed-route scores must also ≥ 90 to satisfy the Compass criterion.
+
+**Estimated R7 total budget:** ~2 weeks of sub-Rs. Detailed memo authored when R7 starts.
+
+### Gate A status after §1
+
+🔴 **Criterion 1 (Lighthouse mobile ≥ 90 on 3 sampled pages): FAIL.**
+
+Per owner directive: **Gate A pass is BLOCKED.** Phase B start is BLOCKED. The remediation path is R7 (post-Gate-A fix sweep), not "ship Phase A and fix later". Per the user's words: «اگه Lighthouse یا axe-core یه page رو fail کرد، gate A pass نمی‌شه. توقف می‌کنیم، یه R7 یا fix-sweep می‌سازیم، بعد re-run».
+
+The remaining TASK B (axe-core) and TASK C (composite) continue so the dossier is complete for owner re-review, but Gate A close cannot happen until R7 lands and these 3 Lighthouse audits re-run green.
 
 ---
 
