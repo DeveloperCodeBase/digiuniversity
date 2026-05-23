@@ -1,15 +1,15 @@
 {
-  "scanned_at": "2026-05-23T11:38:48.592Z",
+  "scanned_at": "2026-05-23T12:22:47.579Z",
   "total_routes": 67,
   "routes_with_critical": 54,
-  "routes_with_serious": 65,
+  "routes_with_serious": 64,
   "routes_clean": 2,
   "routes_redirected": 0,
   "results": [
     {
       "path": "/",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:31.083Z",
+      "scanned_at": "2026-05-23T12:21:26.569Z",
       "url": "/",
       "critical_count": 0,
       "serious_count": 0,
@@ -23,21 +23,21 @@
     {
       "path": "/home",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:32.261Z",
+      "scanned_at": "2026-05-23T12:21:30.832Z",
       "url": "/home",
       "critical_count": 0,
       "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "scan-error:page.evaluate: Execution context was destroyed, most likely "
+        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
     },
     {
       "path": "/about",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:32.984Z",
+      "scanned_at": "2026-05-23T12:21:31.862Z",
       "url": "/about",
       "critical_count": 0,
       "serious_count": 1,
@@ -46,12 +46,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".footer-grid > div:nth-child(1) > p",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/admissions",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:34.333Z",
+      "scanned_at": "2026-05-23T12:21:33.071Z",
       "url": "/admissions",
       "critical_count": 0,
       "serious_count": 1,
@@ -60,12 +68,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-4\\.5.gap-3\\.5.rounded-xl:nth-child(1) > .flex-1 > .mt-1.mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.22 (foreground color: #4772d8, background color: #f6f8fb, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/pricing",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:35.633Z",
+      "scanned_at": "2026-05-23T12:21:34.448Z",
       "url": "/pricing",
       "critical_count": 0,
       "serious_count": 1,
@@ -74,12 +90,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".absolute",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/help",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:36.905Z",
+      "scanned_at": "2026-05-23T12:21:35.802Z",
       "url": "/help",
       "critical_count": 0,
       "serious_count": 1,
@@ -88,12 +112,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-7.gap-3\\.5.card:nth-child(1) > .mt-1",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #4f78da, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/honor-code",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:38.182Z",
+      "scanned_at": "2026-05-23T12:21:37.027Z",
       "url": "/honor-code",
       "critical_count": 0,
       "serious_count": 1,
@@ -102,12 +134,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-7.card:nth-child(2) > h3",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.55 (foreground color: #e9cd87, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/programs",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-23T11:37:39.444Z",
+      "scanned_at": "2026-05-23T12:21:38.369Z",
       "url": "/programs",
       "critical_count": 0,
       "serious_count": 1,
@@ -116,12 +156,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".eyebrow.justify-center",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.33 (foreground color: #dcdfe4, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/login",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:40.852Z",
+      "scanned_at": "2026-05-23T12:21:39.781Z",
       "url": "/login",
       "critical_count": 0,
       "serious_count": 3,
@@ -131,12 +179,33 @@
         "aria-prohibited-attr",
         "aria-toggle-field-name",
         "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-prohibited-attr",
+          "impact": "serious",
+          "target": "div[aria-label=\"پنج ستاره\"]",
+          "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a div with no valid role attribute."
+        },
+        {
+          "rule": "aria-toggle-field-name",
+          "impact": "serious",
+          "target": "label:nth-child(1) > span[role=\"checkbox\"]",
+          "failureSummary": "Fix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references eleme"
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
       ]
     },
     {
       "path": "/register",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:42.111Z",
+      "scanned_at": "2026-05-23T12:21:40.993Z",
       "url": "/register",
       "critical_count": 0,
       "serious_count": 1,
@@ -145,12 +214,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".btn",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.13 (foreground color: #edf1fb, background color: #436fd7, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/forgot",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:43.304Z",
+      "scanned_at": "2026-05-23T12:21:42.193Z",
       "url": "/forgot",
       "critical_count": 0,
       "serious_count": 1,
@@ -159,27 +236,42 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-4",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #a47209, background color: #ffedd6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/verify-email",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:44.424Z",
+      "scanned_at": "2026-05-23T12:21:43.288Z",
       "url": "/verify-email",
       "critical_count": 1,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "label",
-        "color-contrast"
+        "label"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "label",
+          "impact": "critical",
+          "target": "input:nth-child(1)",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
+        }
+      ]
     },
     {
       "path": "/2fa-setup",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:45.513Z",
+      "scanned_at": "2026-05-23T12:21:44.407Z",
       "url": "/2fa-setup",
       "critical_count": 0,
       "serious_count": 1,
@@ -188,12 +280,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".btn",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.13 (foreground color: #edf1fb, background color: #436fd7, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/onboarding",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-23T11:37:46.638Z",
+      "scanned_at": "2026-05-23T12:21:45.547Z",
       "url": "/onboarding",
       "critical_count": 0,
       "serious_count": 1,
@@ -202,12 +302,20 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-4\\.5.rounded-xl.text-right:nth-child(2) > .rounded-lg.grid",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/dashboard",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:50.323Z",
+      "scanned_at": "2026-05-23T12:21:49.245Z",
       "url": "/dashboard",
       "critical_count": 1,
       "serious_count": 1,
@@ -217,12 +325,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".sched-item:nth-child(1) > .sched-time > .day",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/admin",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:51.510Z",
+      "scanned_at": "2026-05-23T12:21:50.423Z",
       "url": "/admin",
       "critical_count": 2,
       "serious_count": 1,
@@ -233,12 +355,32 @@
         "button-name",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "button-name",
+          "impact": "critical",
+          "target": ".card-flat.p-4:nth-child(1) > .mb-2.justify-between.flex > .border-none.p-0.cursor-pointer",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references"
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".mb-4\\.5 > div > .eyebrow",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/super",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:52.709Z",
+      "scanned_at": "2026-05-23T12:21:51.679Z",
       "url": "/super",
       "critical_count": 1,
       "serious_count": 1,
@@ -248,12 +390,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".stat:nth-child(3) > .mt-1.gap-2.items-center > .pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.51 (foreground color: #e7c87a, background color: #fcf7ec, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/content",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:53.667Z",
+      "scanned_at": "2026-05-23T12:21:52.657Z",
       "url": "/content",
       "critical_count": 1,
       "serious_count": 1,
@@ -263,12 +419,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/ta",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:54.646Z",
+      "scanned_at": "2026-05-23T12:21:53.636Z",
       "url": "/ta",
       "critical_count": 1,
       "serious_count": 1,
@@ -278,12 +448,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/support",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:55.623Z",
+      "scanned_at": "2026-05-23T12:21:54.589Z",
       "url": "/support",
       "critical_count": 1,
       "serious_count": 1,
@@ -293,12 +477,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".stat:nth-child(2) > .mt-1.gap-2.items-center > .pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.51 (foreground color: #e7c87a, background color: #fcf7ec, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/moderate",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:56.562Z",
+      "scanned_at": "2026-05-23T12:21:55.582Z",
       "url": "/moderate",
       "critical_count": 1,
       "serious_count": 1,
@@ -308,12 +506,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/org",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:57.525Z",
+      "scanned_at": "2026-05-23T12:21:56.539Z",
       "url": "/org",
       "critical_count": 1,
       "serious_count": 1,
@@ -323,12 +535,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/parent",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:58.468Z",
+      "scanned_at": "2026-05-23T12:21:57.477Z",
       "url": "/parent",
       "critical_count": 1,
       "serious_count": 1,
@@ -338,12 +564,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/instructor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:37:59.470Z",
+      "scanned_at": "2026-05-23T12:21:58.474Z",
       "url": "/instructor",
       "critical_count": 1,
       "serious_count": 1,
@@ -353,12 +593,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".mb-5 > .pill-amber.pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/teach",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:00.641Z",
+      "scanned_at": "2026-05-23T12:21:59.582Z",
       "url": "/teach",
       "critical_count": 1,
       "serious_count": 1,
@@ -368,12 +622,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".sched-item:nth-child(1) > .sched-time > .day",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/catalog",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:01.766Z",
+      "scanned_at": "2026-05-23T12:22:00.697Z",
       "url": "/catalog",
       "critical_count": 1,
       "serious_count": 1,
@@ -383,12 +651,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/my-courses",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:02.756Z",
+      "scanned_at": "2026-05-23T12:22:01.674Z",
       "url": "/my-courses",
       "critical_count": 1,
       "serious_count": 1,
@@ -398,12 +680,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #2f5fd3, background color: #f8dee3, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/progress",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:03.696Z",
+      "scanned_at": "2026-05-23T12:22:02.598Z",
       "url": "/progress",
       "critical_count": 1,
       "serious_count": 1,
@@ -413,12 +709,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/tutor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:04.666Z",
+      "scanned_at": "2026-05-23T12:22:03.546Z",
       "url": "/tutor",
       "critical_count": 1,
       "serious_count": 1,
@@ -428,12 +738,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/calendar",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:05.651Z",
+      "scanned_at": "2026-05-23T12:22:04.514Z",
       "url": "/calendar",
       "critical_count": 1,
       "serious_count": 1,
@@ -443,12 +767,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".text-center:nth-child(4) > .uppercase",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/community",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:06.863Z",
+      "scanned_at": "2026-05-23T12:22:05.750Z",
       "url": "/community",
       "critical_count": 1,
       "serious_count": 1,
@@ -458,12 +796,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".thread:nth-child(2) > div:nth-child(2) > .mb-2\\.5.gap-2\\.5.items-center > .pill-amber.pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/inbox",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:08.087Z",
+      "scanned_at": "2026-05-23T12:22:06.991Z",
       "url": "/inbox",
       "critical_count": 1,
       "serious_count": 1,
@@ -473,12 +825,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-4\\.5.gap-4.cursor-pointer:nth-child(1) > .gap-1\\.5.items-end.flex-col > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #768094, background color: #f9fafe, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/messages",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:09.170Z",
+      "scanned_at": "2026-05-23T12:22:08.105Z",
       "url": "/messages",
       "critical_count": 1,
       "serious_count": 2,
@@ -489,12 +855,32 @@
         "color-contrast",
         "scrollable-region-focusable"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".gap-3.p-3\\.5.text-right:nth-child(2) > .flex-1 > .items-baseline.justify-between.flex > span:nth-child(2)",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.38 (foreground color: #768094, background color: #e6edfc, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "rule": "scrollable-region-focusable",
+          "impact": "serious",
+          "target": ".p-6",
+          "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+        }
+      ]
     },
     {
       "path": "/profile",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:10.258Z",
+      "scanned_at": "2026-05-23T12:22:09.209Z",
       "url": "/profile",
       "critical_count": 1,
       "serious_count": 1,
@@ -504,12 +890,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-5\\.5.card:nth-child(1) > .mb-2.justify-between.flex > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/settings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:11.356Z",
+      "scanned_at": "2026-05-23T12:22:10.302Z",
       "url": "/settings",
       "critical_count": 2,
       "serious_count": 1,
@@ -520,12 +920,32 @@
         "label",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "rule": "label",
+          "impact": "critical",
+          "target": "input[value=\"نسرین رضوی\"]",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
+        }
+      ]
     },
     {
       "path": "/credential",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:12.342Z",
+      "scanned_at": "2026-05-23T12:22:11.342Z",
       "url": "/credential",
       "critical_count": 1,
       "serious_count": 1,
@@ -535,12 +955,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".cursor-pointer.card[role=\"button\"]:nth-child(2) > .mb-4\\.5.justify-between.items-center > .pill-amber.pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/transcript",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:13.463Z",
+      "scanned_at": "2026-05-23T12:22:12.473Z",
       "url": "/transcript",
       "critical_count": 1,
       "serious_count": 1,
@@ -550,12 +984,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-0.overflow-hidden.card:nth-child(3) > .gap-3.flex-wrap.justify-between > .gap-6.flex > div:nth-child(1) > .mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/career",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:14.658Z",
+      "scanned_at": "2026-05-23T12:22:13.670Z",
       "url": "/career",
       "critical_count": 1,
       "serious_count": 1,
@@ -565,12 +1013,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".rose",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #ffffff, background color: #e7c87a, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/wellness",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:15.841Z",
+      "scanned_at": "2026-05-23T12:22:14.860Z",
       "url": "/wellness",
       "critical_count": 1,
       "serious_count": 1,
@@ -580,12 +1042,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/library",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:16.849Z",
+      "scanned_at": "2026-05-23T12:22:15.879Z",
       "url": "/library",
       "critical_count": 1,
       "serious_count": 1,
@@ -595,12 +1071,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".card-flat.gap-4\\.5.p-4\\.5:nth-child(1) > .rounded.grid",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #e7c87a, background color: #fbf5e7, font size: 7.5pt (10px), font weight: bold). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/labs",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:18.190Z",
+      "scanned_at": "2026-05-23T12:22:17.245Z",
       "url": "/labs",
       "critical_count": 1,
       "serious_count": 1,
@@ -610,12 +1100,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/virtuallab",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:19.363Z",
+      "scanned_at": "2026-05-23T12:22:18.423Z",
       "url": "/virtuallab",
       "critical_count": 1,
       "serious_count": 1,
@@ -625,12 +1129,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/research",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:20.440Z",
+      "scanned_at": "2026-05-23T12:22:19.500Z",
       "url": "/research",
       "critical_count": 2,
       "serious_count": 1,
@@ -641,12 +1159,32 @@
         "button-name",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "button-name",
+          "impact": "critical",
+          "target": ".p-4\\.5.gap-4.items-center:nth-child(1) > .btn-ghost.btn-sm.btn",
+          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references"
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": "div:nth-child(2) > .mt-1.justify-between.flex > span:nth-child(2)",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/officehours",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:21.521Z",
+      "scanned_at": "2026-05-23T12:22:20.605Z",
       "url": "/officehours",
       "critical_count": 1,
       "serious_count": 1,
@@ -656,12 +1194,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".rose",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #ffffff, background color: #e7c87a, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/hackathons",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:22.631Z",
+      "scanned_at": "2026-05-23T12:22:21.681Z",
       "url": "/hackathons",
       "critical_count": 1,
       "serious_count": 1,
@@ -671,12 +1223,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": "div:nth-child(3) > .mt-1",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/alumni",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:23.702Z",
+      "scanned_at": "2026-05-23T12:22:22.730Z",
       "url": "/alumni",
       "critical_count": 1,
       "serious_count": 1,
@@ -686,12 +1252,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".card.p-6:nth-child(4) > .mt-2\\.5",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 24.0pt (32px), font weight: bold). Expected contrast ratio of 3:1"
+        }
+      ]
     },
     {
       "path": "/events",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:24.807Z",
+      "scanned_at": "2026-05-23T12:22:23.800Z",
       "url": "/events",
       "critical_count": 1,
       "serious_count": 1,
@@ -701,12 +1281,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".card.p-6.gap-3:nth-child(2) > .items-start.justify-between.flex > .pill-amber.pill",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/schools",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:25.998Z",
+      "scanned_at": "2026-05-23T12:22:24.973Z",
       "url": "/schools",
       "critical_count": 1,
       "serious_count": 1,
@@ -716,12 +1310,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-8.cursor-pointer[role=\"link\"]:nth-child(1) > .gap-2\\.5.flex-col.flex > .uppercase.mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/faculty",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:27.437Z",
+      "scanned_at": "2026-05-23T12:22:26.389Z",
       "url": "/faculty",
       "critical_count": 1,
       "serious_count": 1,
@@ -731,12 +1339,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".card.p-7.flex-col:nth-child(4) > .items-center.gap-3\\.5.flex > .rose.avatar",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #ffffff, background color: #e7c87a, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/registration",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:28.662Z",
+      "scanned_at": "2026-05-23T12:22:27.578Z",
       "url": "/registration",
       "critical_count": 1,
       "serious_count": 1,
@@ -746,12 +1368,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".pill-rose",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #e7c87a, background color: #fbf5e7, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/degree-audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:29.763Z",
+      "scanned_at": "2026-05-23T12:22:28.716Z",
       "url": "/degree-audit",
       "critical_count": 1,
       "serious_count": 1,
@@ -761,12 +1397,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-6.card:nth-child(4) > .mb-3\\.5.justify-between.flex > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/financial-aid",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:30.839Z",
+      "scanned_at": "2026-05-23T12:22:29.801Z",
       "url": "/financial-aid",
       "critical_count": 1,
       "serious_count": 1,
@@ -776,12 +1426,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:31.880Z",
+      "scanned_at": "2026-05-23T12:22:30.859Z",
       "url": "/audit",
       "critical_count": 1,
       "serious_count": 1,
@@ -791,12 +1455,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/analytics",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:32.813Z",
+      "scanned_at": "2026-05-23T12:22:31.795Z",
       "url": "/analytics",
       "critical_count": 2,
       "serious_count": 1,
@@ -807,12 +1485,32 @@
         "select-name",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".justify-between.mb-5.flex > div > .eyebrow",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "rule": "select-name",
+          "impact": "critical",
+          "target": "select",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
+        }
+      ]
     },
     {
       "path": "/authoring",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:34.075Z",
+      "scanned_at": "2026-05-23T12:22:33.122Z",
       "url": "/authoring",
       "critical_count": 1,
       "serious_count": 1,
@@ -822,12 +1520,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/assessment",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:35.182Z",
+      "scanned_at": "2026-05-23T12:22:34.250Z",
       "url": "/assessment",
       "critical_count": 1,
       "serious_count": 1,
@@ -837,12 +1549,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".exam-header > div:nth-child(1) > .mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.42 (foreground color: #2f5fd3, background color: #0d0d0c, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/bookmarks",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:36.250Z",
+      "scanned_at": "2026-05-23T12:22:35.345Z",
       "url": "/bookmarks",
       "critical_count": 1,
       "serious_count": 1,
@@ -852,12 +1578,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".card-flat.gap-4.p-4\\.5:nth-child(1) > .rounded.grid",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.49 (foreground color: #e7c87a, background color: #fbf5e7, font size: 6.8pt (9px), font weight: bold). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/classroom",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:37.321Z",
+      "scanned_at": "2026-05-23T12:22:36.502Z",
       "url": "/classroom",
       "critical_count": 1,
       "serious_count": 4,
@@ -870,12 +1610,44 @@
         "nested-interactive",
         "scrollable-region-focusable"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-prohibited-attr",
+          "impact": "serious",
+          "target": "div[title=\"علی ر.\"] > .r6-rail-mic-off[aria-label=\"میکروفون خاموش\"]",
+          "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
+        },
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "rule": "nested-interactive",
+          "impact": "serious",
+          "target": ".r6-slide",
+          "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+        },
+        {
+          "rule": "scrollable-region-focusable",
+          "impact": "serious",
+          "target": ".r6-rail",
+          "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+        }
+      ]
     },
     {
       "path": "/course",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:38.534Z",
+      "scanned_at": "2026-05-23T12:22:37.697Z",
       "url": "/course",
       "critical_count": 1,
       "serious_count": 1,
@@ -885,12 +1657,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".pill-amber",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/recordings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:39.703Z",
+      "scanned_at": "2026-05-23T12:22:38.811Z",
       "url": "/recordings",
       "critical_count": 2,
       "serious_count": 1,
@@ -901,12 +1687,32 @@
         "select-name",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": "div[aria-label=\"پخش گرادیان نزولی با مومنتوم\"] > .p-4\\.5 > .mb-2.gap-2.items-center > .mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        },
+        {
+          "rule": "select-name",
+          "impact": "critical",
+          "target": "select",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
+        }
+      ]
     },
     {
       "path": "/submission",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:40.871Z",
+      "scanned_at": "2026-05-23T12:22:40.032Z",
       "url": "/submission",
       "critical_count": 1,
       "serious_count": 1,
@@ -916,12 +1722,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".pill-amber",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/achievements",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:41.954Z",
+      "scanned_at": "2026-05-23T12:22:41.123Z",
       "url": "/achievements",
       "critical_count": 1,
       "serious_count": 1,
@@ -931,12 +1751,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-6.card.text-center:nth-child(5) > .mt-1\\.5",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.25 (foreground color: #a5adbb, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/search",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:42.988Z",
+      "scanned_at": "2026-05-23T12:22:42.139Z",
       "url": "/search",
       "critical_count": 1,
       "serious_count": 1,
@@ -946,12 +1780,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".search-result[role=\"link\"]:nth-child(1) > div:nth-child(2) > .mb-2.gap-2\\.5.items-center > .mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/course/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:44.197Z",
+      "scanned_at": "2026-05-23T12:22:43.305Z",
       "url": "/course/c-cs410",
       "critical_count": 1,
       "serious_count": 1,
@@ -961,12 +1809,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".pill-amber",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.27 (foreground color: #9a6500, background color: #ffebd2, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/course-live/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:45.388Z",
+      "scanned_at": "2026-05-23T12:22:44.411Z",
       "url": "/course-live/c-cs410",
       "critical_count": 1,
       "serious_count": 1,
@@ -976,12 +1838,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/assessment-live/:assessmentId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:46.329Z",
+      "scanned_at": "2026-05-23T12:22:45.335Z",
       "url": "/assessment-live/a-1",
       "critical_count": 1,
       "serious_count": 1,
@@ -991,12 +1867,26 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/virtuallab/:labId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-23T11:38:47.268Z",
+      "scanned_at": "2026-05-23T12:22:46.265Z",
       "url": "/virtuallab/lab-1",
       "critical_count": 1,
       "serious_count": 1,
@@ -1006,7 +1896,21 @@
         "aria-valid-attr-value",
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "aria-valid-attr-value",
+          "impact": "critical",
+          "target": "#appshell-sidebar-trigger",
+          "failureSummary": "Fix all of the following:\n  Invalid ARIA attribute value: aria-controls=\"appshell-sidebar-drawer\""
+        },
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     }
   ]
 }
