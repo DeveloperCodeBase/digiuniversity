@@ -154,7 +154,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "Enterprise · ۱۴۰ کاربر",
     code: "ORG-2026-DF",
     nav: ["home", "admin", "analytics", "events", "pricing", "help"],
-    homeRoute: "admin",
+    // Phase-A R3: dedicated Org Manager dashboard at /org.
+    homeRoute: "org",
     permissions: ["manage-team", "view-progress", "billing"],
   },
   ta: {
@@ -166,7 +167,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "دستیار · علوم داده",
     code: "TA-2026-07",
     nav: ["home", "catalog", "my-courses", "classroom", "progress", "tutor"],
-    homeRoute: "classroom",
+    // Phase-A R3: dedicated TA dashboard at /ta replaces the old classroom landing.
+    homeRoute: "ta",
     permissions: ["teach", "grade", "tutor-students"],
   },
   content_manager: {
@@ -178,7 +180,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "تیم تولید محتوا",
     code: "CM-2026-03",
     nav: ["home", "catalog", "authoring", "analytics", "help"],
-    homeRoute: "authoring",
+    // Phase-A R3: dedicated Content Manager dashboard at /content.
+    homeRoute: "content",
     permissions: ["create-content", "publish-content"],
   },
   support: {
@@ -190,7 +193,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "پشتیبانی فنی",
     code: "SUP-2026-12",
     nav: ["home", "admin", "audit", "messages", "help"],
-    homeRoute: "messages",
+    // Phase-A R3: dedicated Support desk at /support.
+    homeRoute: "support",
     permissions: ["audit-read", "reset-passwords"],
   },
   moderator: {
@@ -202,7 +206,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "ناظر انجمن‌ها",
     code: "MOD-2026-05",
     nav: ["home", "community", "messages", "help"],
-    homeRoute: "community",
+    // Phase-A R3: dedicated Moderator queue at /moderate.
+    homeRoute: "moderate",
     permissions: ["moderate-discussions", "moderate"],
   },
   super_admin: {
@@ -214,7 +219,8 @@ export const ROLES: Record<RoleId, Role> = {
     subtitle: "ابرمدیر · بین‌تنانتی",
     code: "SA-001",
     nav: ["home", "admin", "analytics", "audit", "tutor", "events"],
-    homeRoute: "admin",
+    // Phase-A R3: dedicated Super Admin overview at /super.
+    homeRoute: "super",
     permissions: [
       "manage-users",
       "moderate",

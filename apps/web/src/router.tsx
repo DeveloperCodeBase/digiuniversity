@@ -59,6 +59,12 @@ import AnalyticsPage from "./pages/Analytics";
 import AuthoringPage from "./pages/Authoring";
 import RecordingsPage from "./pages/Recordings";
 import AuditPage from "./pages/Audit";
+import SuperAdminDashboard from "./pages/dashboards/SuperAdminDashboard";
+import ContentManagerDashboard from "./pages/dashboards/ContentManagerDashboard";
+import TADashboard from "./pages/dashboards/TADashboard";
+import SupportDashboard from "./pages/dashboards/SupportDashboard";
+import ModeratorDashboard from "./pages/dashboards/ModeratorDashboard";
+import OrgDashboard from "./pages/dashboards/OrgDashboard";
 import {
   LoginPage,
   RegisterPage,
@@ -255,6 +261,16 @@ const routes = [
   { path: "/tutor", element: <RouteShell Component={TutorPage} /> },
   { path: "/classroom", element: <RouteShell Component={ClassroomPage} /> },
   { path: "/dashboard", element: <RouteShell Component={DashboardPage} /> },
+  // Phase-A R3: dedicated role-home dashboards. role.tsx's homeRoute fields
+  // point here so the post-login redirect lands on the correct surface
+  // per role. The legacy /dashboard, /instructor, /admin, /parent routes
+  // remain for student/instructor/admin/parent respectively.
+  { path: "/super", element: <RouteShell Component={SuperAdminDashboard} /> },
+  { path: "/content", element: <RouteShell Component={ContentManagerDashboard} /> },
+  { path: "/ta", element: <RouteShell Component={TADashboard} /> },
+  { path: "/support", element: <RouteShell Component={SupportDashboard} /> },
+  { path: "/moderate", element: <RouteShell Component={ModeratorDashboard} /> },
+  { path: "/org", element: <RouteShell Component={OrgDashboard} /> },
   {
     path: "/course/:courseId",
     element: <RouteShell Component={CoursePage} paramKey="courseId" />,
