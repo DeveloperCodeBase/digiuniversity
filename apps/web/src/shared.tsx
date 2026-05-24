@@ -321,7 +321,18 @@ export const Nav = ({
                 - authed user: derive initials from fullName, else email[0]
                 - anonymous: render a generic user-icon, no role colour. */}
           <div className="user-wrap relative" >
-            <button className="user-btn" onClick={() => setUserOpen(!userOpen)}>
+            {/* R7.3 A.1 — aria-label is context-aware (Q1 Option A): for
+                anonymous the button routes to the login flow, for authed
+                it opens the user menu. The visible `.user-name` span is
+                display:none under 720px (mobile Lighthouse emulation),
+                so without aria-label the accessible name is just the
+                avatar initials (or nothing for anonymous), which axe
+                + Lighthouse flag as button-name failure. */}
+            <button
+              className="user-btn"
+              onClick={() => setUserOpen(!userOpen)}
+              aria-label={auth.user ? "منوی کاربر" : "ورود به حساب"}
+            >
               <div
                 className={"avatar " + (auth.user ? role.color : "")}
                 style={{ width: 32, height: 32, fontSize: 11 }}
@@ -581,7 +592,11 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
               <div className="brand-sub">AI · NATIVE · LEARNING</div>
             </span>
           </div>
-          <p style={{ color: "var(--fg-mute)", fontSize: 14, lineHeight: 1.7, maxWidth: 360 }}>
+          {/* R7.3 A.2.i — drop the inline `color: var(--fg-mute)`.
+              The footer-on-dark rule `.footer p { color: rgba(255,255,255,0.7) }`
+              gives ~9.66:1 against the navy footer bg (AAA). The
+              inline `--fg-mute` (#4a5a76) was 2.77:1 — Lighthouse fail. */}
+          <p style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 360 }}>
             یک زیرساخت آموزشی کاملاً دیجیتال که در آن هوش مصنوعی نه یک افزونه، بلکه شالوده‌ی یادگیری، طراحی برنامه و سنجش است.
           </p>
           <div className="standards mt-5" >
@@ -593,7 +608,11 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </div>
         </div>
         <div>
-          <h5>محصول</h5>
+          {/* R7.3 A.3.ii — footer column headers were `<h5>` directly
+              after the page's last `<h2>` (heading-order skip). Renamed
+              to `<h3>`; CSS rule `.footer h5` was renamed to `.footer h3`
+              in styles.css to preserve the visual treatment. */}
+          <h3>محصول</h3>
           <ul>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("classroom")}}>کلاس آنلاین</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("labs")}}>آزمایشگاه‌های مجازی</a></li>
@@ -603,7 +622,7 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </ul>
         </div>
         <div>
-          <h5>دانشگاه</h5>
+          <h3>دانشگاه</h3>
           <ul>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("schools")}}>دانشکده‌ها</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("faculty")}}>هیات علمی</a></li>
@@ -614,7 +633,7 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </ul>
         </div>
         <div>
-          <h5>برای کاربران</h5>
+          <h3>برای کاربران</h3>
           <ul>
             {isAuthed ? (
               <>
@@ -639,7 +658,7 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </ul>
         </div>
         <div>
-          <h5>منابع</h5>
+          <h3>منابع</h3>
           <ul>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("pricing")}}>پلن‌ها و قیمت</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("help")}}>مرکز پشتیبانی</a></li>

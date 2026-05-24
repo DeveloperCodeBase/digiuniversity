@@ -347,7 +347,12 @@ export const LoginPage: React.FC<AuthPageProps> = ({ go }) => {
                 <Icon d="M21 12.8A9 9 0 0 1 11.2 3a7.5 7.5 0 1 0 9.8 9.8Z" size={16} />
               )}
             </PillButton>
-            <PillButton onClick={() => showToast("زبان نمایش: فارسی")} ariaLabel="تغییر زبان">
+            {/* R7.3 B.4 — was `ariaLabel="تغییر زبان"` with visible
+                text "FA". Lighthouse's label-content-name-mismatch rule
+                requires the visible text to be part of the accessible
+                name. Including "FA" in the aria-label resolves it while
+                preserving the Persian context. */}
+            <PillButton onClick={() => showToast("زبان نمایش: فارسی")} ariaLabel="تغییر زبان (FA)">
               <span style={{ fontSize: 12, fontWeight: 600 }}>FA</span>
             </PillButton>
           </div>

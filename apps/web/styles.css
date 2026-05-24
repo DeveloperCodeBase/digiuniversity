@@ -963,7 +963,9 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
 .course-cover .pill { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.45); color: white; border-color: rgba(255,255,255,0.2); }
 
 .course-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-.course-body h4 { font-size: 17px; margin-bottom: 6px; }
+/* R7.3 A.3.i — was `.course-body h4` (Home.tsx course-card body).
+   Renamed to `<h3>` to fix heading-order skip; selector follows. */
+.course-body h3 { font-size: 17px; margin-bottom: 6px; font-weight: 600; }
 .course-body .by { font-size: 13px; color: var(--fg-mute); margin-bottom: 14px; }
 .course-meta {
   display: flex; gap: 14px; padding-top: 14px;
@@ -1043,7 +1045,11 @@ h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; letter-spacing
   margin-bottom: 48px;
 }
 @media (max-width: 980px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-.footer h5 { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-mute); margin-bottom: 16px; }
+/* R7.3 A.3.ii — footer column headers renamed `<h5>` → `<h3>`
+   in shared.tsx (heading-order: previously skipped from page's last
+   `<h2>` to `<h5>`). Selector follows the rename; visual treatment
+   identical to the previous `.footer h5` rule. */
+.footer h3 { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-mute); margin-bottom: 16px; font-weight: 600; }
 .footer ul { list-style: none; padding: 0; margin: 0; }
 .footer ul li { margin-bottom: 10px; font-size: 14px; color: var(--fg-mute); }
 .footer ul li a:hover { color: var(--fg); }
@@ -1482,7 +1488,11 @@ html[data-theme="dark"] .org-attribution-logo.is-dark { display: block; }
   padding: 14px 20px;
   border-top: 1px solid var(--line);
   font-size: 12px;
-  color: var(--fg-dim);
+  /* R7.3 B.3 — was `var(--fg-dim)` (#768094) which gives only 3.97:1
+     on white (Lighthouse fail for 11px non-large text, threshold 4.5:1).
+     Swapped to `var(--fg-mute)` (#4a5a76, post-R7.6 darkened) which
+     gives 6.86:1. Same darkening trick R7.6 used. */
+  color: var(--fg-mute);
   background: var(--surface);
   flex-wrap: wrap;
   text-align: center;
@@ -2572,7 +2582,9 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent) !importa
    for ≥8:1 on every text rule. The 0.7+ rules (ul li, p, ul li a, std)
    already pass at ~8:1 and stay as semi-transparent whites for the
    visual fade-into-bg effect. */
-.footer h5 { color: var(--fg-mute-on-dark); }
+/* R7.3 A.3.ii — selector renamed `.footer h5` → `.footer h3` to track
+   the heading-order rename in shared.tsx. */
+.footer h3 { color: var(--fg-mute-on-dark); }
 .footer ul li, .footer ul li a { color: rgba(255,255,255,0.7); }
 .footer ul li a:hover { color: white; }
 .footer-bot { border-top-color: rgba(255,255,255,0.1); color: var(--fg-mute-on-dark); }
@@ -2581,6 +2593,14 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent) !importa
 .footer .brand { color: white; }
 .footer .brand-sub { color: var(--fg-mute-on-dark); }
 .footer p { color: rgba(255,255,255,0.7); }
+/* R7.3 A.2.ii — OrgAttribution's copyright text is rendered inside
+   `.footer` (dark navy) on PUBLIC routes via shared.tsx, but the
+   component's own `.org-attribution-copyright` rule (lines ~1468+)
+   uses `var(--fg-mute)` (#4a5a76) which is correct for the About
+   page's light-bg use but fails contrast (2.77:1) on the navy footer.
+   This override scopes the dark-bg colour to the in-footer usage only. */
+.footer .org-attribution-copyright { color: var(--fg-mute-on-dark); }
+.footer .org-attribution-name { color: white; }
 .footer .brand-mark { background: white; }
 .footer .brand-mark::after { background: var(--accent); }
 .footer .brand-mark::before { background: radial-gradient(circle, var(--fg) 1.2px, transparent 1.5px); }

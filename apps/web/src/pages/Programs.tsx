@@ -58,16 +58,33 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ go }) => {
       </section>
 
       <section className="shell pb-20" >
+        {/* R7.3 C.3.i — page's hero is `<h1>` and the prog-cards each
+            carry `<h3>` for the program title. Without an intermediate
+            `<h2>` the heading order skipped (h1 → h3). The screen-reader-
+            only `<h2>` fills the ladder without changing the visual
+            design. */}
+        <h2 className="sr-only">برنامه‌های ارائه‌شده</h2>
         <Stagger className="programs-grid">
           {programs.map((p) => (
+            /* R7.3 C.4 — was `aria-label="برنامه ${p.title} · ${p.level} · مشاهده دروس"`
+                which Lighthouse flagged as label-content-name-mismatch:
+                the visible card text (h3 + pill + tags + meta) didn't
+                appear inside the aria-label as a contiguous substring.
+                Dropping the aria-label lets the screen reader read the
+                visible content directly — accessible name comes from
+                the descendant text. */
             <button
               key={p.num}
               type="button"
               className="prog-card reveal"
               onClick={() => go("course")}
-              aria-label={`برنامه ${p.title} · ${p.level} · مشاهده دروس`}
             >
-              <span className="num">{p.num}</span>
+              {/* R7.3 C.2.i — `.prog-card .num` is the decorative
+                  sequence numeral (#d8dce2 on white, 1.37:1). Marking
+                  it aria-hidden removes it from the a11y tree so the
+                  contrast rule no longer applies; visual ornament
+                  is preserved. */}
+              <span className="num" aria-hidden="true">{p.num}</span>
               <span className="pill mt-3"  style={{alignSelf: "flex-start"}}>{p.level}</span>
               <h3>{p.title}</h3>
               <p>{p.desc}</p>
@@ -102,9 +119,20 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ go }) => {
               { t: "Project · mastery", d: "بدون امتحان نهایی. پروژه پایان و rubric شفاف", c: "var(--rose)", lat: "outcome-driven" },
             ].map((m) => (
               <div key={m.t} className="card-flat relative pt-6" >
+                {/* R7.3 C.2.ii — the per-card colored top-border carries
+                    the visual cue. The eyebrow `<div>` inside was set to
+                    `color: m.c` which for `var(--rose)` (= --gold #e7c87a
+                    in light theme) gives 1.62:1 on white — Lighthouse
+                    fail. Demoted uniformly to `var(--fg)` (navy); top-
+                    border keeps the per-card accent. Same pattern R7.7b
+                    used for gold-as-text on workspace pages. */}
                 <span className="absolute"  style={{ top: 0, right: 0, width: 36, height: 3, background: m.c, borderRadius: "0 0 0 4px"}} />
-                <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: m.c, letterSpacing: "0.06em" }}>{m.lat}</div>
-                <h4 className="mt-2"  style={{ fontSize: 16}}>{m.t}</h4>
+                <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg)", letterSpacing: "0.06em" }}>{m.lat}</div>
+                {/* R7.3 C.3.ii — was `<h4>` directly under the section's
+                    `<h2>` ("چهار حالت یادگیری در یک پلتفرم") which skips
+                    h3. Renamed to `<h3>`. Inline font-size is preserved
+                    so the visual is unchanged. */}
+                <h3 className="mt-2"  style={{ fontSize: 16, fontWeight: 600 }}>{m.t}</h3>
                 <p className="mt-2"  style={{color: "var(--fg-mute)", fontSize: 13, lineHeight: 1.6}}>{m.d}</p>
               </div>
             ))}

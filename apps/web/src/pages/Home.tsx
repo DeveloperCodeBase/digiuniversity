@@ -311,7 +311,12 @@ export const HomePage = ({ go }: HomePageProps) => {
                   <span className="pill mono">{c.code}</span>
                 </div>
                 <div className="course-body">
-                  <h4>{c.title}</h4>
+                  {/* R7.3 A.3.i — was `<h4>` directly under section's
+                      `<h2>` ("دروسی که با تو رشد می‌کنند") which skips
+                      h3 (heading-order fail). Renamed to `<h3>`;
+                      `.course-body h4` rule in styles.css updated to
+                      `.course-body h3` to keep the visual treatment. */}
+                  <h3>{c.title}</h3>
                   <div className="by">با {c.by}</div>
                   <p style={{ fontSize: 13, color: "var(--fg-mute)", lineHeight: 1.6 }}>{c.desc}</p>
                   <div className="course-meta">

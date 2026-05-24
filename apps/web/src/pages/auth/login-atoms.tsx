@@ -119,9 +119,18 @@ export interface CheckboxProps {
 
 export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, hint }) => (
   <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer" }}>
+    {/* R7.3 B.1 — was a `<span role="checkbox" tabindex="0">` with no
+        accessible name (Lighthouse + axe both flag `aria-toggle-field-name`).
+        Although the `<label>` wraps the span, screen readers reading the
+        span as a focusable checkbox don't follow the label-text association
+        reliably. Adding aria-label tied to the prop's `label` string makes
+        the accessible name explicit. Native `<input type="checkbox">` would
+        be cleaner but requires re-wiring the custom visual — deferred to
+        Phase B form-primitives sub-R. */}
     <span
       role="checkbox"
       aria-checked={checked}
+      aria-label={label}
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === " " || e.key === "Enter") {
