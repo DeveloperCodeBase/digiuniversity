@@ -96,7 +96,9 @@ const ProfileTab = () => (
         <input className="rounded-xl" defaultValue="نسرین رضوی" aria-label="نام نمایشی"  style={{width: "100%", maxWidth: 400, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
       </Row>
       <Row label="بیوگرافی کوتاه" hint="حداکثر ۲۸۰ کاراکتر">
-        <textarea className="rounded-xl resize-y" defaultValue="دانشجوی ارشد علوم داده، علاقمند به مدل‌های زبانی فارسی و آموزش." rows={3}  style={{width: "100%", maxWidth: 600, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
+        {/* R7.7d (follow-on) — Row's <div> label is decorative; aria-label
+            gives axe + SR users the proper association. */}
+        <textarea className="rounded-xl resize-y" defaultValue="دانشجوی ارشد علوم داده، علاقمند به مدل‌های زبانی فارسی و آموزش." rows={3} aria-label="بیوگرافی کوتاه"  style={{width: "100%", maxWidth: 600, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
       </Row>
       <Row label="علایق پژوهشی" hint="با تب جدا کنید">
         <div className="flex flex-wrap gap-1.5" >
