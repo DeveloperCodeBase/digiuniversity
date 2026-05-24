@@ -71,13 +71,19 @@ test.describe("@gate-a — Role-routing flow (D18 ROLE_DISTINCTIVE spec)", () =>
   // per IP. With 10 demo logins back-to-back from the same docker
   // container IP, we can hit the bucket if a previous visual run also
   // left logins in the rolling 60s window. Small inter-test pause keeps
-  // us comfortably under the limit (10 roles × 6.5s = 65s + ~2s each
-  // for the actual test work = ~85s total spec runtime — acceptable).
+  // us comfortably under the limit (10 roles × 7s = 70s + ~2s each
+  // for the actual test work = ~92s total spec runtime — acceptable).
   // The first test runs immediately; subsequent ones wait.
+  //
+  // R7.3 (post-flake-#2): bumped from 6.5s → 7s. The 6.5s edge was
+  // landing the 7th login right at the 60s rolling-window boundary;
+  // when a prior visual run in the same minute consumed some bucket
+  // capacity, the 7th login hit the rate-limit. 7s puts the 7th login
+  // safely outside the window.
   let testIndex = 0;
   test.beforeEach(async () => {
     if (testIndex > 0) {
-      await new Promise((r) => setTimeout(r, 6500));
+      await new Promise((r) => setTimeout(r, 7000));
     }
     testIndex++;
   });
