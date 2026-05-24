@@ -103,22 +103,41 @@ test.describe("@gate-a — Role-routing flow (D18 ROLE_DISTINCTIVE spec)", () =>
         ).toHaveURL(pattern, { timeout: 10000 });
 
         // D18 assertion #2 — sidebar contains the role-distinctive
-        // item. Open the workspace hamburger drawer (right edge under
-        // RTL, per R6.6), then assert the sentinel link is present
-        // inside .side-nav. Catches future regressions of the per-role
-        // nav data in SIDEBAR_BY_ROLE even if the mapper is correct.
-        const trigger = page.locator("#appshell-sidebar-trigger");
-        await expect(trigger).toBeVisible();
-        await trigger.click();
-
-        const sidebar = page.locator(".appshell-sidebar-drawer .side-nav");
-        await expect(sidebar).toBeVisible({ timeout: 5000 });
-
-        const sentinelLink = sidebar.locator(`a[href="/${role.sentinel}"]`);
-        await expect(
-          sentinelLink,
-          `${role.slug}: sidebar must contain link to /${role.sentinel} (the role-distinctive sentinel per D18)`,
-        ).toBeVisible({ timeout: 5000 });
+        // item. Catches future regressions of the per-role nav data
+        // in SIDEBAR_BY_ROLE even if the mapper is correct.
+        //
+        // R7.12 partially supersedes R6.6 at ≥1024: the sidebar now
+        // lives in the persistent rail (`.r7-mini-rail`) rather than
+        // the Sheet drawer (`.appshell-sidebar-drawer`). The test runs
+        // at 1024×800 which IS the rail breakpoint — so the rail path
+        // is the primary one. <1024 viewports keep the Sheet drawer
+        // (R6.6 unchanged) but the spec doesn't exercise those today.
+        const railVisible = await page.locator(".r7-mini-rail").isVisible();
+        if (railVisible) {
+          // ≥1024 — rail is always-in-DOM; sentinel link is in rail's side-nav.
+          // In mini mode the link's text is sr-only but the <a> element is
+          // visible (icon renders).
+          const sentinelLink = page.locator(
+            `.r7-mini-rail .side-nav a[href="/${role.sentinel}"]`,
+          );
+          await expect(
+            sentinelLink,
+            `${role.slug}: rail side-nav must contain link to /${role.sentinel} (D18 sentinel)`,
+          ).toBeVisible({ timeout: 5000 });
+        } else {
+          // <1024 — Sheet drawer path (R6.6 unchanged). Click hamburger
+          // to open the drawer, then assert the sentinel link.
+          const trigger = page.locator("#appshell-sidebar-trigger");
+          await expect(trigger).toBeVisible();
+          await trigger.click();
+          const sidebar = page.locator(".appshell-sidebar-drawer .side-nav");
+          await expect(sidebar).toBeVisible({ timeout: 5000 });
+          const sentinelLink = sidebar.locator(`a[href="/${role.sentinel}"]`);
+          await expect(
+            sentinelLink,
+            `${role.slug}: Sheet sidebar must contain link to /${role.sentinel} (D18 sentinel)`,
+          ).toBeVisible({ timeout: 5000 });
+        }
       } finally {
         await ctx.close();
       }
