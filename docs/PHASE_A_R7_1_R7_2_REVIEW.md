@@ -126,7 +126,8 @@ These are R7.x.1 fine-tune candidates per owner's standing instruction: «اگه
 | R7.7 a11y-sweep | ✅ PASS (26s) |
 | R7.12 mini-rail | ✅ PASS (48s) |
 | **R1.1 appshell** | 🟡 **12/13** — skip-link Tab focus assertion timing-flaky after silent-fix 3/3 |
-| gate-a-role-routing | 🟡 rate-limit infra flake (D32-documented, not R7.1+R7.2 regression) |
+| gate-a-role-routing (1st run, during sweep) | 🟡 1/10 (rate-limit infra flake) |
+| **gate-a-role-routing (clean re-run, post-cooldown)** | ✅ **10/10 PASS** — confirms the spec is correct + R7.1+R7.2 didn't break the role-routing flow |
 
 **R1.1 skip-link failure** is environmental, not a real regression:
 - Skip-link IS in DOM (curl confirms 1 rendered after React hydration; 0 in static HTML — client-only).
