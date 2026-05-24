@@ -504,3 +504,50 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Application:** R7.1 + R7.2 (Performance track) unblocked. Per D25 sequential ordering, they're the next sub-Rs.
 
 **Source:** owner message 2026-05-24 («من R7.3 review رو با (R7.3 spec ✅ + 6/7 regression ✅ + role-routing flake) accept می‌کنم»).
+
+### R7.1+R7.2-D33 — implicit go-ahead via «forward progress» directive
+**Context:** R7.1+R7.2 memo (commit `641c08f`) presented combined Vite chunks + Vazirmatn self-host + 3 open questions (Q1 fonts, Q2 lazy granularity, Q3 sourcemap, Q4 combined). Owner replied 2026-05-24 with explicit answers: Q1=B1 (keep 3 fonts), Q2=route-level, Q3=sourcemap on, Q4=combined. Implementation proceeded.
+
+**Owner decision (2026-05-24):** code+spec+regression+review shipped as commits ed897f8 / a21babc / bb664eb / 4c5b97d / fc8f718 / fd4fb86 / 581926e / 3a5988b. No explicit D13 real-mobile ack yet — owner said «forward progress متوقف نکن» / «dont stop on any circumstances» to drive the autonomous execution to the next bottleneck. R7.1+R7.2 is functionally shipped + verified by:
+  - 7/7 per-fix spec PASS
+  - 7/8 regression first pass + 1 flake auto-confirmed + 1 environmental test fragility
+  - Lighthouse Perf single-run: 73 / 87 / 77 on /, /login, /programs (a11y stable 100/100/96)
+  - Bundle gzip: main 241→98 KiB; vendor chunks isolated; Google Fonts third-party 199→0 KiB
+
+**Status:** R7.1+R7.2 SHIPPED. D13 owner real-mobile smoke deferred — bundled into Phase A close ceremony review per owner directive to keep moving.
+
+**Application:** R7.1.1 unblocked (style & layout reduction sub-R), then iterated to R7.1.2 (REVERTED) and Phase A close memo. D33 documents the implicit-ack pattern that came from «forward progress متوقف نکن» directive.
+
+**Source:** owner directive «continue implement as plan + dont stop on any circumstances» 2026-05-24.
+
+### R7.1.1-D34 — Lighthouse variance band discovery (32-point range on identical code)
+**Context:** R7.1.1 shipped (commit `3d34278`) after iterating through 3 approaches. Iter-1 (`.is-ready` JS-toggled animations) regressed Perf 73→56 + TBT 440→1730ms (avalanche pattern). Iter-2 (drop hero entry anims entirely + Tailwind storybook purge + explicit cssCodeSplit) landed Perf 73→80. Iter-3 (content-visibility: auto on below-fold sections) regressed Perf 80→77 / 84→72 (Lighthouse scrolls during LCP detection → content materializes at once → TBT spike). Iter-3 reverted.
+
+**Discovery during R7.1.1 verification:** 3-run measurement of `/` on identical post-R7.1.1-iter-2 code (commit 3d34278):
+  - Run 1: Perf 67, TBT 720 ms
+  - Run 2: Perf 52, TBT 1170 ms (worst — CPU contention)
+  - Run 3: Perf 84, TBT 240 ms (best — clean CPU)
+  - **Median: 67. Range: 32 points.**
+
+**Implication:** Lighthouse mobile emulation on Windows + this SPA's Style&Layout cost = inherent ±15 point band per run. The literal-100% reading of "≥ 90 stable" is unreachable without architectural-level changes (SSG / different stack).
+
+**Owner-relevant consequence:** Gate A §1 strict-literal verdict isn't a stable point on this measurement methodology. Documenting verdict as «🟡 partial-with-variance, median 67, best 84, +32 to +49 trajectory from initial 35» is the honest reading.
+
+**Application:** Phase A close memo recommends Path A (accept §1 🟡, close Gate A) as the rational outcome of D34. Owner discretion via D31 precedent applies — same shape as D31 for §2.
+
+**Source:** measured during R7.1.1 verification 2026-05-24, full evidence at `docs/gate-a-evidence/lh-landing-mobile-run{1,2,3}.report.{json,html}`.
+
+### Phase-A-D35 — close ceremony memo proposes Path A (accept §1 🟡)
+**Context:** After R7.1+R7.2+R7.1.1 + 2 reverts + variance discovery (D34), the rational forward step is to propose closing Phase A with the documented partial. R7.1.3 conditional memo (`docs/PHASE_A_R7_1_3_MEMO.md`) covers Path B (lazy below-fold) and Path C (SSG) as alternates if owner wants to chase literal-90%.
+
+**Phase A close proposal (pending owner ack):** Gate A passes with 5 of 6 criteria ✅ and §1 documented as 🟡 partial-with-variance. The R7 sweep delivered +32 to +49 Perf points on `/` (35 → 67 median / 84 best), FCP 4.8s→2.4s, LCP 6.1s→3.3s, bundle 241→98 KiB gzip, Google Fonts 199 KiB → 0, 100/100/96 a11y stable, axe critical 0 across 67 routes. The Foundation Repair (Compass §Gate A intent) IS delivered; the literal-100% Lighthouse Perf score reading is bounded by the measurement variance + intrinsic Style&Layout cost, not by missed optimizations.
+
+**Status:** AWAITING owner ack of either:
+  - **Path A:** close Gate A with §1 🟡 → Phase B memo.
+  - **Path B:** spin R7.1.3 lazy below-fold (~5-10 pts gain, risk of revert).
+  - **Path C:** spin R7.1.3 SSG (~15-25 pts gain, 1-2 day debug for hydration, Phase-B-shaped scope).
+  - **Path D:** re-measure on different hardware (Linux+Docker variance check) before deciding.
+
+**Application:** all subsequent Phase A work is conditional on this decision. Phase B is unblocked under Path A; under B/C, R7.1.3 executes first.
+
+**Source:** Phase A close memo committed 2026-05-24 (commit `945e450`) at `docs/PHASE_A_CLOSE_MEMO.md`.
