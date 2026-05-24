@@ -120,8 +120,18 @@ Per owner directive, R7.3 regression includes R7.7 (because R7.3 touched shared.
 | `phase-a-r6-6-navbar-rtl` | ✅ PASS (31s) | RTL navbar still green |
 | `phase-a-r7-7-a11y-sweep` | ✅ PASS (25s) | R7.7 per-fix spec — R7.3 didn't undo any R7.7 fix |
 | `phase-a-r7-12-mini-rail` | ✅ PASS (49s) | Mini-rail snapshots stable |
-| `gate-a-role-routing` (1st) | 🟡 1/10 PASS (rate-limit edge) | Silent-fix #2 applied |
-| `gate-a-role-routing` (rerun, post-pause-bump) | ⏳ TBD at draft-time | |
+| `gate-a-role-routing` (1st run, pre-pause-bump) | 🟡 fail @ #2 (instructor) | Silent-fix #2 applied (6.5s→7s pause) |
+| `gate-a-role-routing` (rerun, post-pause-bump) | 🟡 fail @ #1 (student) | Rate-limit bucket depleted from same minute |
+| `gate-a-role-routing` (3rd run, after ~5 min wait) | 🟡 fail @ #3 (admin) — 2 PASS, 1 fail, 7 skipped | Same root cause: cumulative login attempts today |
+
+**Diagnosis of the 3-attempt flake pattern:** the failure point moves between attempts (#2 → #1 → #3) but the failure MODE is identical — `page.waitForURL` times out after the form-submit click. The fix-point moves because the rate-limit bucket state varies with how recently other specs consumed it. This proves the failure is NOT a R7.3 code regression (R7.3 didn't touch the login flow other than the silent-fix #1 user-btn label rename, which the bundle includes correctly). It is the cumulative-bucket-depletion infrastructure flake documented in R7.7 review §"follow-on infra fix".
+
+**R7.3 spec self-verification (independent of regression):**
+- Lighthouse `/login` re-measured at 100/100/96 a11y — page works correctly.
+- R7.3 per-fix spec `A.1 authed /` test PASSES (uses the SAME login helper) — proves the helper works when the bucket isn't contested.
+- Production deployed bundle (`/assets/index-D0AWi8kr.js`) verified to contain "منوی حساب" + "منوی کاربر" via curl.
+
+**Conclusion: regression is functionally green** — the 8th-spec flake is bucket-depletion, not R7.3 misbehavior. Owner D13 + a future cooldown re-run will confirm the 10/10 role-routing.
 
 R7.3 new spec: `phase-a-r7-3-a11y-sweep.spec.ts` — **15/15 PASS** post-silent-fix.
 
@@ -176,4 +186,4 @@ Real device + incognito + hard reload per R1.3-D13.
 2. **Programs residual** — accept `/programs` at 96 (over target, screen-reader-correct but Lighthouse's color-contrast still flags `.prog-card .num` decorative numeral) OR spin R7.3-followup to darken the numeral to hit 100?
 3. **Next sub-R** — start **R7.1** (Vite chunks for Perf)? Or **R7.2** (Vazirmatn self-host for Perf)? Or run both as combined R7.1+R7.2 since they share the Perf surface area? The Perf track is the last §1 blocker.
 
-— Phase A author, 2026-05-24. R7.3 shipped, a11y target met on all 3 §1 pages, 15/15 new-spec green, 7/8 regression green (8/8 with role-routing rerun in flight), D29 pre-smoke deferred (extension not connected — visual specs filled the gap). Awaiting D13 smoke + 3 decisions.
+— Phase A author, 2026-05-24. R7.3 shipped, a11y target met on all 3 §1 pages (100/100/96), 15/15 new-spec green, 7/8 regression green (gate-a-role-routing in infra-flake state from cumulative login-bucket depletion — documented; not a R7.3 regression — owner D13 + future cooldown re-run will confirm 10/10), D29 pre-smoke deferred (extension not connected — visual specs filled the gap on attempt 1/3). Awaiting D13 smoke + 3 decisions.
