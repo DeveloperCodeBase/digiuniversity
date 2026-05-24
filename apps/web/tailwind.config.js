@@ -5,7 +5,13 @@ export default {
     // Phase-14 R2: scan .ts/.tsx alongside .js/.jsx so the renamed
     // components keep getting Tailwind utility class detection.
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./.storybook/**/*.{js,jsx,ts,tsx}",
+    // Phase-A R7.1.1.b: storybook content scan removed from the prod
+    // Tailwind content list. Stories don't ship to production; their
+    // utility references were inflating the prod CSS bundle. Storybook
+    // still works in dev (`npm run storybook` runs its own JIT pass).
+    // If a future story uses a utility the app doesn't, either add it
+    // to the app code or to a Tailwind safelist; we won't pay the
+    // prod CSS cost for a dev-only artifact.
   ],
   darkMode: ["selector", "[data-theme='dark']"],
   theme: {

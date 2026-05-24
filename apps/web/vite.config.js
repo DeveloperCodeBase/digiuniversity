@@ -86,6 +86,11 @@ export default defineConfig({
     // integration is worth keeping. No secrets ship in the client
     // bundle, so the production surface risk is effectively zero.
     sourcemap: true,
+    // Phase-A R7.1.1.b — explicit cssCodeSplit. This IS the Vite
+    // default but pinning here protects against a future config tweak
+    // accidentally disabling it. Each route's CSS lives with its lazy
+    // chunk; lazy-route CSS is fetched only on first nav, not on /.
+    cssCodeSplit: true,
     // Phase-A R7.1.a — manual chunks. Splits long-cached vendor code
     // out of the per-deploy main bundle. With React.lazy applied to
     // workspace routes (R7.1.b), the main chunk drops from ~241 KiB

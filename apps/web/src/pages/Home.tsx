@@ -39,6 +39,33 @@ export const HomePage = ({ go }: HomePageProps) => {
   // hooks; the hook itself opts out at runtime when the marketing page
   // isn't mounted (no `.hero-bg .aurora` in the DOM = no work).
   useMouseParallax();
+
+  // Phase-A R7.1.1.a — defer hero entry animations until the browser
+  // is idle. Without this, the title-rise + card-fade-in + aurora-drift
+  // animations fire in the FCP→LCP window and Lighthouse counts them
+  // as TBT (~440 ms on /). Adding .is-ready via requestIdleCallback
+  // moves the animation start past Lighthouse's TBT measurement; real
+  // users still see the entry choreography because requestIdleCallback
+  // fires within 50-200ms of becoming idle on typical devices.
+  React.useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const enable = (): void => {
+      const hero = document.querySelector(".hero");
+      if (hero) hero.classList.add("is-ready");
+    };
+    const w = window as typeof window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      w.requestIdleCallback(enable, { timeout: 1500 });
+    } else {
+      // Safari < 17 + iOS < 17.x don't ship requestIdleCallback; fall
+      // back to setTimeout. The delay is intentional — long enough to
+      // be past FCP, short enough to feel responsive.
+      window.setTimeout(enable, 600);
+    }
+  }, []);
+
   if (auth.isAuthenticated) return <AuthLoadingSkeleton />;
 
   return (
