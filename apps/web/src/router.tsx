@@ -38,33 +38,38 @@ import {
 import { UIRoot } from "./ui";
 import { AppShell } from "./layouts/AppShell";
 
+// =====================================================
+// Phase-A R7.1.b — route-level code splitting
+// =====================================================
+//
+// Eagerly-imported files (stay in the main bundle):
+//   - Home.tsx, Programs.tsx, Admissions.tsx  (PUBLIC entry points
+//     that we need to paint fast on cold loads)
+//   - Auth.tsx                                 (AUTH_FLOW entry point;
+//     login is a frequent cold-load destination — keeping LoginPage
+//     in the main chunk avoids a Suspense flicker on the most common
+//     authed-user entry sequence)
+//   - More.tsx, Roles.tsx, Academic.tsx        (MIXED files containing
+//     both PUBLIC + WORKSPACE exports. Splitting them would require
+//     a file-level refactor; keeping them eager preserves the public
+//     pages' cold-paint speed and accepts the marginal main-bundle
+//     cost. Follow-on R can split these if/when needed.)
+//
+// Lazy-imported files (each becomes its own chunk, downloaded on
+// first navigation to a route inside the file):
+//   - All purely-workspace single-page files (Dashboard, Classroom,
+//     etc.) and the dedicated role-dashboards (SuperAdminDashboard,
+//     ContentManagerDashboard, etc.).
+//   - University.tsx + Productivity.tsx (no PUBLIC exports inside).
+//   - Settings.tsx, Audit.tsx, etc.
+//
+// Each React.lazy(() => import(...)) creates a Rollup chunk boundary.
+// The chunk hash is content-derived, so successive deploys that don't
+// change a workspace page leave its chunk cached client-side.
+
 import HomePage from "./pages/Home";
-import AssessmentLivePage from "./pages/AssessmentLive";
-import CatalogPage from "./pages/Catalog";
-import CourseLivePage from "./pages/CourseLive";
-import MyCoursesPage from "./pages/MyCourses";
-import ProgressPage from "./pages/Progress";
-import TutorPage from "./pages/Tutor";
 import ProgramsPage from "./pages/Programs";
-import ClassroomPage from "./pages/Classroom";
-import DashboardPage from "./pages/Dashboard";
-import CoursePage from "./pages/Course";
-import InstructorPage from "./pages/Instructor";
 import AdmissionsPage from "./pages/Admissions";
-import CredentialPage from "./pages/Credential";
-import SearchPage from "./pages/Search";
-import AssessmentPage from "./pages/Assessment";
-import CommunityPage from "./pages/Community";
-import AnalyticsPage from "./pages/Analytics";
-import AuthoringPage from "./pages/Authoring";
-import RecordingsPage from "./pages/Recordings";
-import AuditPage from "./pages/Audit";
-import SuperAdminDashboard from "./pages/dashboards/SuperAdminDashboard";
-import ContentManagerDashboard from "./pages/dashboards/ContentManagerDashboard";
-import TADashboard from "./pages/dashboards/TADashboard";
-import SupportDashboard from "./pages/dashboards/SupportDashboard";
-import ModeratorDashboard from "./pages/dashboards/ModeratorDashboard";
-import OrgDashboard from "./pages/dashboards/OrgDashboard";
 import {
   LoginPage,
   RegisterPage,
@@ -73,7 +78,6 @@ import {
   TwoFactorPage,
   OnboardingPage,
 } from "./pages/Auth";
-import SettingsPage from "./pages/Settings";
 import {
   CalendarPage,
   LibraryPage,
@@ -89,20 +93,6 @@ import {
   AboutPage,
 } from "./pages/Roles";
 import {
-  SchoolsPage,
-  VirtualLabPage,
-  LabsPage,
-  ResearchPage,
-} from "./pages/University";
-import {
-  NotificationsPage,
-  MessagesPage,
-  BookmarksPage,
-  AchievementsPage,
-  SubmissionPage,
-  ProfilePage,
-} from "./pages/Productivity";
-import {
   TranscriptPage,
   DegreeAuditPage,
   RegistrationPage,
@@ -113,6 +103,47 @@ import {
   HackathonsPage,
   HonorCodePage,
 } from "./pages/Academic";
+
+// Lazy — purely-workspace files. Each `() => import(...)` becomes its
+// own Rollup chunk. The named-export wrappers (`.then(m => ({ default: ... }))`)
+// are needed for multi-export files; single-default-export files can
+// use the shorter form.
+const AssessmentLivePage = React.lazy(() => import("./pages/AssessmentLive"));
+const CatalogPage = React.lazy(() => import("./pages/Catalog"));
+const CourseLivePage = React.lazy(() => import("./pages/CourseLive"));
+const MyCoursesPage = React.lazy(() => import("./pages/MyCourses"));
+const ProgressPage = React.lazy(() => import("./pages/Progress"));
+const TutorPage = React.lazy(() => import("./pages/Tutor"));
+const ClassroomPage = React.lazy(() => import("./pages/Classroom"));
+const DashboardPage = React.lazy(() => import("./pages/Dashboard"));
+const CoursePage = React.lazy(() => import("./pages/Course"));
+const InstructorPage = React.lazy(() => import("./pages/Instructor"));
+const CredentialPage = React.lazy(() => import("./pages/Credential"));
+const SearchPage = React.lazy(() => import("./pages/Search"));
+const AssessmentPage = React.lazy(() => import("./pages/Assessment"));
+const CommunityPage = React.lazy(() => import("./pages/Community"));
+const AnalyticsPage = React.lazy(() => import("./pages/Analytics"));
+const AuthoringPage = React.lazy(() => import("./pages/Authoring"));
+const RecordingsPage = React.lazy(() => import("./pages/Recordings"));
+const AuditPage = React.lazy(() => import("./pages/Audit"));
+const SettingsPage = React.lazy(() => import("./pages/Settings"));
+const SuperAdminDashboard = React.lazy(() => import("./pages/dashboards/SuperAdminDashboard"));
+const ContentManagerDashboard = React.lazy(() => import("./pages/dashboards/ContentManagerDashboard"));
+const TADashboard = React.lazy(() => import("./pages/dashboards/TADashboard"));
+const SupportDashboard = React.lazy(() => import("./pages/dashboards/SupportDashboard"));
+const ModeratorDashboard = React.lazy(() => import("./pages/dashboards/ModeratorDashboard"));
+const OrgDashboard = React.lazy(() => import("./pages/dashboards/OrgDashboard"));
+// University.tsx + Productivity.tsx are multi-export, all workspace:
+const SchoolsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.SchoolsPage })));
+const VirtualLabPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.VirtualLabPage })));
+const LabsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.LabsPage })));
+const ResearchPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.ResearchPage })));
+const NotificationsPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.NotificationsPage })));
+const MessagesPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.MessagesPage })));
+const BookmarksPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.BookmarksPage })));
+const AchievementsPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.AchievementsPage })));
+const SubmissionPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.SubmissionPage })));
+const ProfilePage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.ProfilePage })));
 
 // =====================================================
 // useGo — back-compat shim
@@ -197,13 +228,39 @@ interface RouteShellProps {
   paramKey?: string;
 }
 
+// Phase-A R7.1.b — Suspense fallback for lazy-loaded route components.
+// React.lazy components throw a promise on first render; the Suspense
+// boundary catches it and renders the fallback until the chunk loads.
+// Eagerly-imported components render synchronously and never trigger
+// the Suspense — so the eager PUBLIC + AUTH_FLOW routes are unaffected.
+//
+// The fallback uses Tailwind utilities for centering + a subtle pulse
+// animation. Keep it lightweight (no Radix, no third-party) so it
+// itself ships in the main bundle and renders instantly. The styling
+// is intentionally close to "blank workspace surface" so the user
+// reads it as "loading" not as a content state.
+const RouteLoadFallback: React.FC = () => (
+  <div
+    className="flex items-center justify-center min-h-[60vh] text-[color:var(--fg-mute)] animate-pulse"
+    role="status"
+    aria-live="polite"
+    aria-label="در حال بارگذاری…"
+  >
+    <div className="text-sm">در حال بارگذاری…</div>
+  </div>
+);
+
 const RouteShell = ({ Component, paramKey }: RouteShellProps): React.ReactElement => {
   const go = useGo();
   const params = useParams();
   const extra: Record<string, string | undefined> = paramKey
     ? { [paramKey]: params[paramKey] }
     : {};
-  return <Component go={go} {...extra} />;
+  return (
+    <React.Suspense fallback={<RouteLoadFallback />}>
+      <Component go={go} {...extra} />
+    </React.Suspense>
+  );
 };
 
 // =====================================================

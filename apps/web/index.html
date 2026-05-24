@@ -7,10 +7,15 @@
   <meta name="description" content="دانشگاه آنلاین هوشمند مبتنی بر هوش مصنوعی — ۸ دانشکده، ۲۴۸ برنامه، گواهی قابل اثبات." />
   <title>دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!--
+    Phase-A R7.2.c — Google Fonts <link> removed. Self-hosted via
+    @fontsource/* imports in src/main.tsx (Q1 Option B1 per owner ack
+    2026-05-24). This eliminates a ~199 KiB third-party transfer
+    (Vazirmatn ×7 + Bricolage variable + JetBrains ×4) on every cold
+    load — fonts now ship as same-origin woff2 with trimmed weights,
+    counted in the Vite build's chunk graph (no extra TLS round-trip
+    to fonts.gstatic.com).
+  -->
 
   <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg" />
   <link rel="apple-touch-icon" href="/icons/icon-192.svg" />

@@ -49,14 +49,12 @@ export default defineConfig({
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com",
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts",
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            },
-          },
+          // Phase-A R7.2.d — google-fonts runtimeCaching rule removed.
+          // Fonts are self-hosted via @fontsource/* (see main.tsx) so
+          // they're now same-origin woff2 emitted by Vite and picked
+          // up by the workbox precache via `globPatterns: ["**/*.woff2"]`.
+          // No third-party origin to intercept anymore.
+          //
           // Never cache /api or /ai — those are dynamic and would
           // serve stale auth state from the SW cache. Phase-14.6
           // hardening; previously the SW's network-first default
@@ -82,7 +80,48 @@ export default defineConfig({
   },
   build: {
     target: "es2020",
+    // Phase-A R7.1+R7.2 memo Q3 (owner choice): sourcemap stays ON.
+    // Lighthouse impact is zero (sourcemaps are lazy-loaded by devtools
+    // only, Best Practices audit weight=0). Debug ability for Phase B
+    // integration is worth keeping. No secrets ship in the client
+    // bundle, so the production surface risk is effectively zero.
     sourcemap: true,
+    // Phase-A R7.1.a — manual chunks. Splits long-cached vendor code
+    // out of the per-deploy main bundle. With React.lazy applied to
+    // workspace routes (R7.1.b), the main chunk drops from ~241 KiB
+    // (was 69.8% unused on /) to ~80-100 KiB, and the vendor chunks
+    // stay in browser cache across deploys (content hash is stable
+    // until a vendor upgrade).
+    //
+    // Chunks deliberately kept to 2 buckets (react + radix), not per-
+    // package, to avoid HTTP/2 round-trip overhead from many tiny
+    // requests. ui-shared bucket dropped (framer-motion isn't a dep
+    // in this repo — confirmed via package.json audit).
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "radix-vendor": [
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-radio-group",
+            "@radix-ui/react-scroll-area",
+            "@radix-ui/react-select",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-slider",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip",
+          ],
+        },
+      },
+    },
   },
   test: {
     environment: "jsdom",
