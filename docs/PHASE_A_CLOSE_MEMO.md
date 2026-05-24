@@ -10,11 +10,11 @@ This memo is the proposal. Owner ack of this proposal closes Phase A and unblock
 
 ### What Phase A delivered (the trajectory)
 
-| Phase-A metric | Initial (Compass start) | Final (post-R7 sweep) | Δ |
+| Phase-A metric | Initial (Compass start) | Final (post-R7 sweep, 5-run median) | Δ |
 |---|---|---|---|
-| Lighthouse Perf `/` mobile | 35 | **67 median / 84 best** | +32 median, +49 best |
-| Lighthouse Perf `/login` mobile | n/a (didn't exist as auth flow) | 77 median / 81 best | (new) |
-| Lighthouse Perf `/programs` mobile | 66 | 78 median / 84 best | +12 median, +18 best |
+| Lighthouse Perf `/` mobile | 35 | **57 median / 68 best** | +22 median, +33 best |
+| Lighthouse Perf `/login` mobile | n/a (didn't exist as auth flow) | 68 median / 86 best | (new) |
+| Lighthouse Perf `/programs` mobile | 66 | 70 median / 82 best | +4 median, +16 best |
 | Lighthouse A11y `/` `/login` `/programs` | 88 / 88 / 87 | **100 / 100 / 96** stable | +12 / +12 / +9 |
 | axe critical violations | 54 routes flagged | **0 across 67 routes** ✅ | -54 |
 | axe serious violations | 65 routes | 47 routes (documented KEEPs per D31) | -18 |
@@ -33,15 +33,19 @@ This memo is the proposal. Owner ack of this proposal closes Phase A and unblock
 
 ### Why the literal-100% reading is a moving target
 
-3-run variance measurement on `/` post-R7.1.1 (identical code):
-- Run 1: 67
-- Run 2: 52 (CPU-contention floor)
-- Run 3: 84 (clean CPU ceiling)
-- **Range: 32 points**
+**Final 5-run variance measurement on identical post-R7.1.1 code (commit 3d34278):**
 
-A score with 32-point variance can't reliably be driven to "stable ≥ 90". The variance band is INTRINSIC to Lighthouse mobile emulation on Windows + this codebase's Style&Layout cost. Pursuing literal 90+ would require:
-- **Path C: SSG (Static Site Generation)** — pre-render `/` HTML at build time. First paint doesn't wait for JS. Predicted +15-20 points → median ~85-90 (best 99+). Architectural change to Vite config + build pipeline.
-- **Or: serve a different stack for `/`** — e.g., a static landing page outside the SPA. Decoupling, larger surgery.
+| Page | Median | Best | Worst | Range | Per-run scores |
+|---|---|---|---|---|---|
+| `/` | **57** | 68 | 41 | 27 pts | 54 / 65 / 41 / 57 / 68 |
+| `/login` | **68** | 86 | 62 | 24 pts | 65 / 68 / 62 / 84 / 86 |
+| `/programs` | **70** | 82 | 58 | 24 pts | 82 / 58 / 65 / 70 / 71 |
+
+**Key finding:** earlier single-run measurements (`/` 73, `/login` 87, `/programs` 84) were **outliers from the upper tail**. The true median is much lower. The 24-27 point range on each page confirms Lighthouse mobile emulation on Windows + this codebase's Style&Layout cost = inherent noise that can't be defeated by code changes.
+
+A score with 25-32 point variance CANNOT reliably be driven to "stable ≥ 90". The variance band is INTRINSIC to Lighthouse mobile emulation on Windows + this codebase's Style&Layout cost. Pursuing literal 90+ would require:
+- **Path C: SSG (Static Site Generation)** — pre-render `/` HTML at build time. First paint doesn't wait for JS. Predicted +15-25 points → median ~75-85 (best 90+). The variance might also COLLAPSE because HTML-first paint is deterministic, not JS-dependent. Architectural change to Vite config + build pipeline.
+- **Path D: Re-measure on Linux+Docker host** — Windows headless Chrome has 2-3× more noise than Docker-hosted Chrome on Linux. The "true" Lighthouse number might be 75-80 stable on a quieter host. If owner can spin up a Docker measurement environment, that alone might collapse the band and change the verdict.
 
 These are Phase B+ territory. Gate A says "Lighthouse mobile ≥ 90 on 3 sampled pages" — strict reading isn't met. **Owner discretion** (precedent: D31 §2 verdict) can accept the trajectory + variance reality.
 

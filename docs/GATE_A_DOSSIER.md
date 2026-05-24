@@ -8,7 +8,7 @@
 
 | # | Criterion | Status | Evidence below |
 |---|---|---|---|
-| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🟡 **partial-with-variance** (A11y ✅ 100/100/96 stable; Perf median 67/77/78, best 84/81/84, target 90 — see §1 + R7.1.1 review) | §1 |
+| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🟡 **partial-with-variance** (A11y ✅ 100/100/96 stable; Perf 5-run median 57/68/70, range ~25 points per page — see §1 + R7.1.1 review + Phase A close memo) | §1 |
 | 2 | axe-core: 0 critical / serious on every route | ✅ **PASS** (critical 0 across 67; 60 documented serious KEEPs — see D31) | §2 |
 | 3 | TypeScript strict, ≤ 5 `@ts-nocheck` (all in DEFERRED) | ✅ verified | §3 |
 | 4 | All Playwright baseline + D12 assertions pass | ✅ verified | §4 |
@@ -39,16 +39,18 @@
 
 ## §1 — Lighthouse mobile scores (Criterion 1) — **🟡 partial-with-variance** (post-R7.1+R7.2+R7.1.1)
 
-**Final post-R7 state (per R7.1.1 review 3-run variance band):**
+**Final post-R7 state (5-run variance band on identical commit 3d34278):**
 
-| Page | Median | Best | Worst | Range | Target |
-|---|---|---|---|---|---|
-| `/` Perf | 67 | 84 | 52 | 32 pts | ≥ 90 |
-| `/login` Perf | 77 | 81 | 73 | 8 pts | ≥ 90 |
-| `/programs` Perf | 78 | 84 | 72 | 12 pts | ≥ 90 |
-| `/` `/login` `/programs` A11y | 100 / 100 / 96 | (stable) | — | — | ≥ 95 ✅ |
+| Page | Median | Best | Worst | Range | Per-run | Target |
+|---|---|---|---|---|---|---|
+| `/` Perf | **57** | 68 | 41 | 27 pts | 54/65/41/57/68 | ≥ 90 |
+| `/login` Perf | **68** | 86 | 62 | 24 pts | 65/68/62/84/86 | ≥ 90 |
+| `/programs` Perf | **70** | 82 | 58 | 24 pts | 82/58/65/70/71 | ≥ 90 |
+| `/` `/login` `/programs` A11y | 100 / 100 / 96 | (stable across all runs) | — | — | — | ≥ 95 ✅ |
 
-**Δ from initial (35) to post-R7.1.1 median on `/`: +32 points.** Best-case: +49 points. This is a Phase-A-defining improvement; the issue is the literal-100% Lighthouse score is bounded by Style&Layout cost intrinsic to the SPA's design.
+**Δ from initial (35) to post-R7.1.1 5-run median on `/`: +22 points.** Best-of-5 case: +33 points. This is a Phase-A-defining improvement; the issue is the literal-100% Lighthouse score is bounded by:
+(a) ~25-point variance band intrinsic to Windows-headless-Chrome mobile emulation, and
+(b) ~2.3s of Style&Layout cost intrinsic to the SPA's design.
 
 **Verdict:** 🟡 partial-with-variance. Two paths from here:
   - **Accept** the documented improvement + variance + close Gate A with §1 as 🟡.
