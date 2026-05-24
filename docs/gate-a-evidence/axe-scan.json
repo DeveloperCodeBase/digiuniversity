@@ -1,15 +1,15 @@
 {
-  "scanned_at": "2026-05-24T04:17:00.984Z",
+  "scanned_at": "2026-05-24T04:50:23.061Z",
   "total_routes": 67,
   "routes_with_critical": 6,
-  "routes_with_serious": 64,
-  "routes_clean": 2,
+  "routes_with_serious": 63,
+  "routes_clean": 3,
   "routes_redirected": 0,
   "results": [
     {
       "path": "/",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:39.319Z",
+      "scanned_at": "2026-05-24T04:48:57.276Z",
       "url": "/",
       "critical_count": 0,
       "serious_count": 0,
@@ -23,21 +23,21 @@
     {
       "path": "/home",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:40.344Z",
+      "scanned_at": "2026-05-24T04:48:58.598Z",
       "url": "/home",
       "critical_count": 0,
       "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "scan-error:page.evaluate: Execution context was destroyed, most likely "
+        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
     },
     {
       "path": "/about",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:41.044Z",
+      "scanned_at": "2026-05-24T04:48:59.689Z",
       "url": "/about",
       "critical_count": 0,
       "serious_count": 1,
@@ -46,20 +46,19 @@
       "top_rules": [
         "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".gap-4\\.5.pb-6.grid:nth-child(1) > div:nth-child(1)",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #4f78da, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".footer-grid > div:nth-child(1) > p",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/admissions",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:42.322Z",
+      "scanned_at": "2026-05-24T04:49:00.935Z",
       "url": "/admissions",
       "critical_count": 0,
       "serious_count": 1,
@@ -73,15 +72,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".eyebrow",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.33 (foreground color: #6d7a91, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".p-4\\.5.gap-3\\.5.rounded-xl:nth-child(1) > .flex-1 > .mt-1.mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #4e77d9, background color: #f7f8fc, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/pricing",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:43.582Z",
+      "scanned_at": "2026-05-24T04:49:02.246Z",
       "url": "/pricing",
       "critical_count": 0,
       "serious_count": 1,
@@ -95,15 +94,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".footer-grid > div:nth-child(1) > p",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".absolute",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/help",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:44.821Z",
+      "scanned_at": "2026-05-24T04:49:03.583Z",
       "url": "/help",
       "critical_count": 0,
       "serious_count": 1,
@@ -125,7 +124,7 @@
     {
       "path": "/honor-code",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:46.082Z",
+      "scanned_at": "2026-05-24T04:49:04.897Z",
       "url": "/honor-code",
       "critical_count": 0,
       "serious_count": 1,
@@ -139,15 +138,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".grid.gap-4:nth-child(1) > .mono",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #4973d8, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+          "target": "#root > footer > .shell > .footer-grid > div:nth-child(1) > p",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/programs",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:15:47.341Z",
+      "scanned_at": "2026-05-24T04:49:06.200Z",
       "url": "/programs",
       "critical_count": 0,
       "serious_count": 1,
@@ -161,51 +160,29 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".pill-cyan",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.94 (foreground color: #4671d8, background color: #e9effc, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".footer-grid > div:nth-child(1) > p",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/login",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:48.707Z",
+      "scanned_at": "2026-05-24T04:49:07.649Z",
       "url": "/login",
       "critical_count": 0,
-      "serious_count": 3,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "aria-prohibited-attr",
-        "aria-toggle-field-name",
-        "color-contrast"
+        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "aria-prohibited-attr",
-          "impact": "serious",
-          "target": "div[aria-label=\"پنج ستاره\"]",
-          "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a div with no valid role attribute."
-        },
-        {
-          "rule": "aria-toggle-field-name",
-          "impact": "serious",
-          "target": "label:nth-child(1) > span[role=\"checkbox\"]",
-          "failureSummary": "Fix any of the following:\n  Element does not have text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references eleme"
-        },
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
     },
     {
       "path": "/register",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:49.920Z",
+      "scanned_at": "2026-05-24T04:49:08.409Z",
       "url": "/register",
       "critical_count": 0,
       "serious_count": 1,
@@ -219,15 +196,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": "a[href$=\"help\"]",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #4973d8, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/forgot",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:51.041Z",
+      "scanned_at": "2026-05-24T04:49:09.612Z",
       "url": "/forgot",
       "critical_count": 0,
       "serious_count": 1,
@@ -241,15 +218,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".p-4",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.67 (foreground color: #a47209, background color: #ffedd6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/verify-email",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:52.112Z",
+      "scanned_at": "2026-05-24T04:49:10.664Z",
       "url": "/verify-email",
       "critical_count": 1,
       "serious_count": 0,
@@ -271,7 +248,7 @@
     {
       "path": "/2fa-setup",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:53.164Z",
+      "scanned_at": "2026-05-24T04:49:11.960Z",
       "url": "/2fa-setup",
       "critical_count": 0,
       "serious_count": 1,
@@ -285,15 +262,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".p-4\\.5.gap-3\\.5.text-right:nth-child(1) > .flex-1 > .mt-1",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.3 (foreground color: #63718b, background color: #eaf0fc, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".btn",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/onboarding",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:15:54.235Z",
+      "scanned_at": "2026-05-24T04:49:13.319Z",
       "url": "/onboarding",
       "critical_count": 0,
       "serious_count": 1,
@@ -308,14 +285,14 @@
           "rule": "color-contrast",
           "impact": "serious",
           "target": ".p-4\\.5.rounded-xl.text-right:nth-child(2) > .rounded-lg.grid",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.13 (foreground color: #edf1fb, background color: #436fd7, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.46 (foreground color: #e4eaf9, background color: #4f78da, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/dashboard",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:15:57.910Z",
+      "scanned_at": "2026-05-24T04:49:17.177Z",
       "url": "/dashboard",
       "critical_count": 0,
       "serious_count": 1,
@@ -337,7 +314,7 @@
     {
       "path": "/admin",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:15:59.120Z",
+      "scanned_at": "2026-05-24T04:49:18.515Z",
       "url": "/admin",
       "critical_count": 1,
       "serious_count": 1,
@@ -366,7 +343,7 @@
     {
       "path": "/super",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:00.393Z",
+      "scanned_at": "2026-05-24T04:49:19.909Z",
       "url": "/super",
       "critical_count": 0,
       "serious_count": 1,
@@ -388,7 +365,7 @@
     {
       "path": "/content",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:01.397Z",
+      "scanned_at": "2026-05-24T04:49:21.032Z",
       "url": "/content",
       "critical_count": 0,
       "serious_count": 1,
@@ -410,7 +387,7 @@
     {
       "path": "/ta",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:02.409Z",
+      "scanned_at": "2026-05-24T04:49:22.170Z",
       "url": "/ta",
       "critical_count": 0,
       "serious_count": 1,
@@ -432,7 +409,7 @@
     {
       "path": "/support",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:03.413Z",
+      "scanned_at": "2026-05-24T04:49:23.252Z",
       "url": "/support",
       "critical_count": 0,
       "serious_count": 1,
@@ -454,7 +431,7 @@
     {
       "path": "/moderate",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:04.411Z",
+      "scanned_at": "2026-05-24T04:49:24.355Z",
       "url": "/moderate",
       "critical_count": 0,
       "serious_count": 1,
@@ -476,7 +453,7 @@
     {
       "path": "/org",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:05.437Z",
+      "scanned_at": "2026-05-24T04:49:25.452Z",
       "url": "/org",
       "critical_count": 0,
       "serious_count": 1,
@@ -498,7 +475,7 @@
     {
       "path": "/parent",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:06.462Z",
+      "scanned_at": "2026-05-24T04:49:26.543Z",
       "url": "/parent",
       "critical_count": 0,
       "serious_count": 1,
@@ -520,7 +497,7 @@
     {
       "path": "/instructor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:07.519Z",
+      "scanned_at": "2026-05-24T04:49:27.683Z",
       "url": "/instructor",
       "critical_count": 0,
       "serious_count": 1,
@@ -542,7 +519,7 @@
     {
       "path": "/teach",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:08.712Z",
+      "scanned_at": "2026-05-24T04:49:28.957Z",
       "url": "/teach",
       "critical_count": 0,
       "serious_count": 1,
@@ -564,7 +541,7 @@
     {
       "path": "/catalog",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:09.941Z",
+      "scanned_at": "2026-05-24T04:49:30.184Z",
       "url": "/catalog",
       "critical_count": 0,
       "serious_count": 1,
@@ -586,7 +563,7 @@
     {
       "path": "/my-courses",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:11.034Z",
+      "scanned_at": "2026-05-24T04:49:31.273Z",
       "url": "/my-courses",
       "critical_count": 0,
       "serious_count": 1,
@@ -608,7 +585,7 @@
     {
       "path": "/progress",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:12.086Z",
+      "scanned_at": "2026-05-24T04:49:32.303Z",
       "url": "/progress",
       "critical_count": 0,
       "serious_count": 1,
@@ -630,7 +607,7 @@
     {
       "path": "/tutor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:13.150Z",
+      "scanned_at": "2026-05-24T04:49:33.381Z",
       "url": "/tutor",
       "critical_count": 0,
       "serious_count": 1,
@@ -652,7 +629,7 @@
     {
       "path": "/calendar",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:14.223Z",
+      "scanned_at": "2026-05-24T04:49:34.489Z",
       "url": "/calendar",
       "critical_count": 0,
       "serious_count": 1,
@@ -674,7 +651,7 @@
     {
       "path": "/community",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:15.580Z",
+      "scanned_at": "2026-05-24T04:49:35.796Z",
       "url": "/community",
       "critical_count": 0,
       "serious_count": 1,
@@ -696,7 +673,7 @@
     {
       "path": "/inbox",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:16.940Z",
+      "scanned_at": "2026-05-24T04:49:37.202Z",
       "url": "/inbox",
       "critical_count": 0,
       "serious_count": 1,
@@ -718,7 +695,7 @@
     {
       "path": "/messages",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:18.147Z",
+      "scanned_at": "2026-05-24T04:49:38.410Z",
       "url": "/messages",
       "critical_count": 0,
       "serious_count": 2,
@@ -747,7 +724,7 @@
     {
       "path": "/profile",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:19.396Z",
+      "scanned_at": "2026-05-24T04:49:39.627Z",
       "url": "/profile",
       "critical_count": 0,
       "serious_count": 1,
@@ -769,7 +746,7 @@
     {
       "path": "/settings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:20.638Z",
+      "scanned_at": "2026-05-24T04:49:40.855Z",
       "url": "/settings",
       "critical_count": 1,
       "serious_count": 1,
@@ -798,7 +775,7 @@
     {
       "path": "/credential",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:21.727Z",
+      "scanned_at": "2026-05-24T04:49:42.017Z",
       "url": "/credential",
       "critical_count": 0,
       "serious_count": 1,
@@ -820,7 +797,7 @@
     {
       "path": "/transcript",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:22.918Z",
+      "scanned_at": "2026-05-24T04:49:43.194Z",
       "url": "/transcript",
       "critical_count": 0,
       "serious_count": 1,
@@ -842,7 +819,7 @@
     {
       "path": "/career",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:24.226Z",
+      "scanned_at": "2026-05-24T04:49:44.562Z",
       "url": "/career",
       "critical_count": 0,
       "serious_count": 1,
@@ -864,7 +841,7 @@
     {
       "path": "/wellness",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:25.485Z",
+      "scanned_at": "2026-05-24T04:49:45.930Z",
       "url": "/wellness",
       "critical_count": 0,
       "serious_count": 1,
@@ -886,7 +863,7 @@
     {
       "path": "/library",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:26.645Z",
+      "scanned_at": "2026-05-24T04:49:47.095Z",
       "url": "/library",
       "critical_count": 0,
       "serious_count": 1,
@@ -908,7 +885,7 @@
     {
       "path": "/labs",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:28.111Z",
+      "scanned_at": "2026-05-24T04:49:48.663Z",
       "url": "/labs",
       "critical_count": 0,
       "serious_count": 1,
@@ -930,7 +907,7 @@
     {
       "path": "/virtuallab",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:29.411Z",
+      "scanned_at": "2026-05-24T04:49:49.973Z",
       "url": "/virtuallab",
       "critical_count": 0,
       "serious_count": 1,
@@ -952,7 +929,7 @@
     {
       "path": "/research",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:30.568Z",
+      "scanned_at": "2026-05-24T04:49:51.160Z",
       "url": "/research",
       "critical_count": 1,
       "serious_count": 1,
@@ -981,7 +958,7 @@
     {
       "path": "/officehours",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:31.725Z",
+      "scanned_at": "2026-05-24T04:49:52.367Z",
       "url": "/officehours",
       "critical_count": 0,
       "serious_count": 1,
@@ -1003,7 +980,7 @@
     {
       "path": "/hackathons",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:32.925Z",
+      "scanned_at": "2026-05-24T04:49:53.702Z",
       "url": "/hackathons",
       "critical_count": 0,
       "serious_count": 1,
@@ -1025,7 +1002,7 @@
     {
       "path": "/alumni",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:34.149Z",
+      "scanned_at": "2026-05-24T04:49:54.984Z",
       "url": "/alumni",
       "critical_count": 0,
       "serious_count": 1,
@@ -1047,7 +1024,7 @@
     {
       "path": "/events",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:35.254Z",
+      "scanned_at": "2026-05-24T04:49:56.257Z",
       "url": "/events",
       "critical_count": 0,
       "serious_count": 1,
@@ -1069,7 +1046,7 @@
     {
       "path": "/schools",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:36.489Z",
+      "scanned_at": "2026-05-24T04:49:57.567Z",
       "url": "/schools",
       "critical_count": 0,
       "serious_count": 1,
@@ -1091,7 +1068,7 @@
     {
       "path": "/faculty",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:37.920Z",
+      "scanned_at": "2026-05-24T04:49:59.164Z",
       "url": "/faculty",
       "critical_count": 0,
       "serious_count": 1,
@@ -1113,7 +1090,7 @@
     {
       "path": "/registration",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:39.201Z",
+      "scanned_at": "2026-05-24T04:50:00.527Z",
       "url": "/registration",
       "critical_count": 0,
       "serious_count": 1,
@@ -1135,7 +1112,7 @@
     {
       "path": "/degree-audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:40.418Z",
+      "scanned_at": "2026-05-24T04:50:01.790Z",
       "url": "/degree-audit",
       "critical_count": 0,
       "serious_count": 1,
@@ -1157,7 +1134,7 @@
     {
       "path": "/financial-aid",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:41.628Z",
+      "scanned_at": "2026-05-24T04:50:03.051Z",
       "url": "/financial-aid",
       "critical_count": 0,
       "serious_count": 1,
@@ -1179,7 +1156,7 @@
     {
       "path": "/audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:42.838Z",
+      "scanned_at": "2026-05-24T04:50:04.296Z",
       "url": "/audit",
       "critical_count": 0,
       "serious_count": 1,
@@ -1201,7 +1178,7 @@
     {
       "path": "/analytics",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:43.852Z",
+      "scanned_at": "2026-05-24T04:50:05.315Z",
       "url": "/analytics",
       "critical_count": 1,
       "serious_count": 1,
@@ -1230,7 +1207,7 @@
     {
       "path": "/authoring",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:45.283Z",
+      "scanned_at": "2026-05-24T04:50:06.740Z",
       "url": "/authoring",
       "critical_count": 0,
       "serious_count": 1,
@@ -1252,7 +1229,7 @@
     {
       "path": "/assessment",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:46.527Z",
+      "scanned_at": "2026-05-24T04:50:07.926Z",
       "url": "/assessment",
       "critical_count": 0,
       "serious_count": 1,
@@ -1274,7 +1251,7 @@
     {
       "path": "/bookmarks",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:47.704Z",
+      "scanned_at": "2026-05-24T04:50:09.119Z",
       "url": "/bookmarks",
       "critical_count": 0,
       "serious_count": 1,
@@ -1296,7 +1273,7 @@
     {
       "path": "/classroom",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:48.918Z",
+      "scanned_at": "2026-05-24T04:50:10.304Z",
       "url": "/classroom",
       "critical_count": 0,
       "serious_count": 4,
@@ -1339,7 +1316,7 @@
     {
       "path": "/course",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:50.194Z",
+      "scanned_at": "2026-05-24T04:50:11.733Z",
       "url": "/course",
       "critical_count": 0,
       "serious_count": 1,
@@ -1361,7 +1338,7 @@
     {
       "path": "/recordings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:51.448Z",
+      "scanned_at": "2026-05-24T04:50:12.960Z",
       "url": "/recordings",
       "critical_count": 1,
       "serious_count": 1,
@@ -1390,7 +1367,7 @@
     {
       "path": "/submission",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:52.744Z",
+      "scanned_at": "2026-05-24T04:50:14.372Z",
       "url": "/submission",
       "critical_count": 0,
       "serious_count": 1,
@@ -1412,7 +1389,7 @@
     {
       "path": "/achievements",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:53.961Z",
+      "scanned_at": "2026-05-24T04:50:15.614Z",
       "url": "/achievements",
       "critical_count": 0,
       "serious_count": 1,
@@ -1434,7 +1411,7 @@
     {
       "path": "/search",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:55.068Z",
+      "scanned_at": "2026-05-24T04:50:16.785Z",
       "url": "/search",
       "critical_count": 0,
       "serious_count": 1,
@@ -1456,7 +1433,7 @@
     {
       "path": "/course/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:56.376Z",
+      "scanned_at": "2026-05-24T04:50:18.107Z",
       "url": "/course/c-cs410",
       "critical_count": 0,
       "serious_count": 1,
@@ -1478,7 +1455,7 @@
     {
       "path": "/course-live/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:57.620Z",
+      "scanned_at": "2026-05-24T04:50:19.411Z",
       "url": "/course-live/c-cs410",
       "critical_count": 0,
       "serious_count": 1,
@@ -1500,7 +1477,7 @@
     {
       "path": "/assessment-live/:assessmentId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:58.619Z",
+      "scanned_at": "2026-05-24T04:50:20.474Z",
       "url": "/assessment-live/a-1",
       "critical_count": 0,
       "serious_count": 1,
@@ -1522,7 +1499,7 @@
     {
       "path": "/virtuallab/:labId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:16:59.661Z",
+      "scanned_at": "2026-05-24T04:50:21.553Z",
       "url": "/virtuallab/lab-1",
       "critical_count": 0,
       "serious_count": 1,
