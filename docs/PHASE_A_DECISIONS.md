@@ -190,6 +190,32 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
 **Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
 
+### R7.12-D26 — R7.12 feature-branch convention (first Phase-A exception)
+**Context:** R7.12 (~1230 line scope) is the largest sub-R since R6 (Classroom redesign, ~2,300 lines) AND the first sub-R with a heavy baseline-reset surface (~36 D12 snapshots across R1.1, R3, R6, R6.6 specs). Phase A convention to date has been "code on main, deploy from main, owner D13 smoke on prod" — small sub-Rs, no baseline resets, low blast radius.
+
+**Owner decision (2026-05-23):** R7.12 lands on a feature branch, not main. Phase A's first exception to the main-direct convention.
+
+**Owner rationale:**
+  - Risk profile differs from prior sub-Rs (1230 lines + 36 baselines vs. typical 300 lines + 0 baselines).
+  - If a baseline gets accepted in error, reverting from a feature branch is cleaner than reverting from main's commit history.
+  - Main's history stays unaffected during the R7.12 iteration cycle.
+
+**Branch name:** `phase-a/r7-12-mini-rail`.
+
+**Workflow:**
+  1. Branch created from main.
+  2. All R7.12 work (code + spec + baseline update) commits to the branch.
+  3. Deploy from the branch — preview environment if available (e.g., `digiuniversity.ir/preview` or a subdomain). If no preview infra exists, deploy to prod from the branch is acceptable (Phase A convention) so long as the commit history stays on the branch for review.
+  4. Owner D13 smoke on the branch deploy.
+  5. After ack: merge to main. Strategy (rebase vs merge commit) is the agent's choice.
+  6. After merge: tag or PHASE_A_DECISIONS.md note (the next-available decision ID).
+
+**Scope of exception:** R7.12 only. R7.13+ revert to main-direct convention **unless** they have a similar scope profile (>1000 lines OR >20 baseline updates). The convention can broaden in Phase B+ if owner sees value.
+
+**No infrastructure changes** to remote.ps1 or scripts/ for R7.12 — branch is handled via plain `git` workflow on the agent's side; deploy still uses `remote.ps1 up` which pulls whatever's pushed to the configured remote+branch (main today; can be parameterised in a future infra R if needed).
+
+**Source:** owner message 2026-05-23 («Q3: Branch vs main = feature branch (اولین استثنا در Phase A)»).
+
 ### R7.9-D24 — R7.9 D13 ack confirmed, apiRoleToLocal complete fix verified
 **Context:** R7.9 completed the role mapper (3 → 10 API roles), extracted to a shared module (`apps/web/src/auth/role-map.ts`), and shipped the first D18 flow regression spec (`gate-a-role-routing.spec.ts`). 10/10 demo users now route correctly; R1.1 13/13 + R6.6 12/12 regression green. Owner ran D13 manual smoke on real device.
 **Result:** **PASS.** Owner verified on real mobile + incognito + hard reload:
