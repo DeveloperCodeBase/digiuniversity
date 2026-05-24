@@ -190,6 +190,51 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
 **Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
 
+### R7.9-D24 — R7.9 D13 ack confirmed, apiRoleToLocal complete fix verified
+**Context:** R7.9 completed the role mapper (3 → 10 API roles), extracted to a shared module (`apps/web/src/auth/role-map.ts`), and shipped the first D18 flow regression spec (`gate-a-role-routing.spec.ts`). 10/10 demo users now route correctly; R1.1 13/13 + R6.6 12/12 regression green. Owner ran D13 manual smoke on real device.
+**Result:** **PASS.** Owner verified on real mobile + incognito + hard reload:
+  1. ✅ student → `/progress` + student sidebar (baseline; no change from before)
+  2. ✅ parent → **`/parent` + parent sidebar (NEW — was `/progress`)** — visibly distinct from student
+  3. ✅ super_admin → **`/super` + super-admin sidebar (NEW — was `/progress`)** — visibly distinct from both student AND parent
+**Status:**
+  - **R7.9 closed.** D13 ack confirmed.
+  - **Gate A §5 unblocked.** Routing is now 10/10. Pending measurement re-run after R7.12 to formalize PASS in the dossier.
+  - **OWNER-FINDING-2 resolved.** No separate R8 sub-R needed (per D21 — diagnosed as upstream-only bug).
+  - **D18 first instance in suite.** `gate-a-role-routing.spec.ts` is the template for future state-machine + multi-step-journey specs in Phase B+ (per D18's scope rule).
+**Source:** owner message 2026-05-23 («R7.9 D13 PASS»).
+
+### R7.12-D25 — R7.12 plan acked; Performance track runs sequentially AFTER R7.12 + R7.7
+**Context:** R7.12 (mini-variant persistent sidebar per D23) was scope-approved but not yet plan-approved. Performance track (R7.1 Vite manual chunks + R7.2 Vazirmatn self-host + R7.3 a11y sweep + R7.4 authed-route Lighthouse runner) was on hold for ordering decision: parallel with R7.12 vs sequential after.
+**Owner decision: SEQUENTIAL.**
+
+**Owner rationale (verbatim from message 2026-05-23):**
+  - R7.12 and R7.1+R7.2 both touch AppShell + router — parallel work would create merge-conflict potential.
+  - Parallel = both tracks need D13 manual smoke simultaneously = overhead.
+  - Regression debugging is cleaner when single chrome-or-perf cause is in play («chrome شکست یا code split؟»).
+  - Time cost: R7.12 ~3-4 days + Performance track ~1 week. Sequential = ~3 weeks; Parallel = ~2 weeks. Owner judges the 1-week premium worth it for clean execution.
+
+**R7.12 plan ack — three risks acknowledged by owner:**
+  1. ✅ **Architecture rewrite** (Sheet drawer → persistent rail). AppShell + RoleSideNav are restructured, not tweaked. Expected.
+  2. ✅ **Content margin audit per workspace route.** Every workspace route's content area inherits `margin-inline-start: 72px` (mini) or `280px` (expanded). Per-page spacing check required.
+  3. ✅ **Baseline reset** for R1.1 / R3 / R6 / R6.6 specs. `UPDATE_BASELINES=1` expected. Snapshot diff > 1% is normal for a chrome architecture change. R7.12 review doc must explicitly document `before/after baseline diff per spec, reason: chrome architecture change`.
+
+**Approved ordering (linear, no parallelism):**
+
+  1. **R7.12** — Mini-variant persistent sidebar (~3-4 days)
+  2. **Measurement re-run** — §1 a11y + §2 + §5 to confirm R7.12 doesn't regress and that the post-R7.5+R7.9 deltas hold
+  3. **R7.7a + R7.7b + R7.7c + R7.7d** — long-tail a11y (color-contrast cleanup, per D20), only if measurement still shows serious violations
+  4. **R7.1** — Vite manual chunks + `React.lazy` route splitting (Performance: 35/66/66 → ~70+)
+  5. **R7.2** — Self-host Vazirmatn + drop unused font families (Performance: ~70 → ~85+)
+  6. **R7.3** — Lighthouse a11y sweep (any residual button-name / heading-order / label-mismatch / aria-toggle gaps)
+  7. **R7.4** — Authed-route Lighthouse runner (Playwright + `lighthouse({port})`)
+  8. **Final measurement** — §1 (now including authed routes) + §2 + §5 all GREEN
+  9. **Gate A close** — dossier flips RE-REVIEW DRAFT → FINAL
+  10. **Phase B start** — Academic Hierarchy + Onboarding per the Compass Roadmap §B locked plan
+
+**No step starts without explicit owner ack of the previous step's D13 smoke.** D11/D14/D17 discipline applies through the whole tail.
+
+**Source:** owner message 2026-05-23 («Performance track timing: SEQUENTIAL» with full rationale + ordering).
+
 ### R7.5-D22 — R7.5 D13 ack confirmed, chrome aria fix verified
 **Context:** R7.5 swapped the workspace hamburger's `aria-controls="appshell-sidebar-drawer"` (unresolvable IDREF because Radix Sheet lazy-mounts) for the canonical disclosure-widget pattern `aria-expanded={open} + aria-haspopup="dialog"`. axe-scan delta: `aria-valid-attr-value` 53 → 0; routes with ≥1 critical 54 → 6 (the 6 residuals are pre-existing R7.7 long-tail items — button-name, label, select-name). R1.1 13/13 + R6.6 12/12 regression green. Owner ran D13 manual smoke.
 **Result:** **PASS.** Owner verified on real mobile + incognito:
