@@ -190,6 +190,25 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
 **Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
 
+### R7.12-D27 — R7.12 D13 ack confirmed, mini-variant sidebar shipped + verified
+**Context:** R7.12 shipped on `phase-a/r7-12-mini-rail` per D26. Branch deploy was live for owner D13 smoke. 72/72 specs green across all affected suites (R7.12 new 13/13, R1.1 13/13, R3 12/12, R6 12/12, R6.6 12/12 with workspace split, gate-a-role-routing 10/10). axe-scan delta: 0 a11y regressions (6 critical / 64 serious — identical to post-R7.5 baseline).
+**Result:** **PASS.** Owner verified on real device:
+  - ✅ Desktop ≥1024px: rail visible right edge, ~72px mini default, no shadow, clipped under navbar, no hamburger in topbar
+  - ✅ Hover tooltip working (native `title` attribute per Q2)
+  - ✅ Toggle chevron: smooth animation, groups + labels appear in expanded mode
+  - ✅ Persistence: reload preserves mode
+  - ✅ Mobile <1024px: unchanged from R6.6 (hamburger + Sheet drawer)
+  - ✅ Spot check role differences (student vs parent vs super_admin) — R7.9 + R7.12 integrated correctly
+**Notable side note:** D25 Risk 3 was **better than memo predicted**. Memo expected ~36 `UPDATE_BASELINES=1` resets; actual was 0. Semantic-assertion discipline from R1.1 → R5 → R6 → R6.6 paid off — the affected specs already encoded "what the user sees" rather than "exactly these pixels", so the chrome architecture change flowed through without touching baselines. Two specs needed assertion adaptation (R1.1 test #9 + R6.6 workspace split), zero needed baseline reset.
+**Status:** **R7.12 closed.** D13 ack confirmed.
+**Next per D25 sequencing:**
+  1. Merge `phase-a/r7-12-mini-rail` → `main` (merge commit per D26 — preserve branch history)
+  2. Deploy from main
+  3. Critical-path measurement re-run (§1 Lighthouse a11y subset + §2 axe-scan + §5 role routing)
+  4. Update `GATE_A_DOSSIER.md` (§1, §2, §5, §0 status table)
+  5. Report to owner → next decision: start R7.7 long-tail or wait
+**Source:** owner message 2026-05-23 («R7.12 D13 PASS» + 6 explicit smoke checkpoints).
+
 ### R7.12-D26 — R7.12 feature-branch convention (first Phase-A exception)
 **Context:** R7.12 (~1230 line scope) is the largest sub-R since R6 (Classroom redesign, ~2,300 lines) AND the first sub-R with a heavy baseline-reset surface (~36 D12 snapshots across R1.1, R3, R6, R6.6 specs). Phase A convention to date has been "code on main, deploy from main, owner D13 smoke on prod" — small sub-Rs, no baseline resets, low blast radius.
 
