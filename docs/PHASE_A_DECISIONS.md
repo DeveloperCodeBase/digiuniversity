@@ -190,6 +190,21 @@ Each message is an explicit owner authorization to deviate from the locked plan.
 **Status:** **R7.6 closed.** D13 ack confirmed. R7.5 unblocked per D17 ordering.
 **Source:** owner message 2026-05-23 («R7.6 D13 PASS»).
 
+### R7.7-D28 — Branch convention restored to main-direct from R7.7 onwards
+**Context:** D26 introduced a feature-branch convention for R7.12 specifically because of its scope profile (~1230 lines + ~36 baseline reset predicted). Phase A's standing convention before D26 was "all sub-R code on main, deploy from main, owner D13 smoke on prod."
+
+**Owner decision (2026-05-23):** the feature-branch convention was a **temporary exception for R7.12 only**. Starting with R7.7 (and continuing to all subsequent sub-Rs), code lands on main again.
+
+**Owner rationale (verbatim):** «R7.7 scope ـش text/CSS cleanup ـه، نه architectural rewrite، نه baseline reset سنگین. main convention پیش‌فرض Phase A برمی‌گرده.»
+
+**Scope-shape threshold:** future sub-Rs use the main-direct convention by default. The feature-branch convention is appropriate when **both** conditions hold:
+  - Scope >~800 lines AND
+  - Baseline reset of >20 D12 snapshots is expected
+
+If in doubt about which convention applies, the agent **must query the owner** before starting code (a memo-time decision, not a mid-stream switch).
+
+**Source:** owner message 2026-05-23 («Branch convention restored: همه‌ی push روی main از این به بعد. D26 یه استثنای موقت بود فقط برای R7.12»).
+
 ### R7.12-D27 — R7.12 D13 ack confirmed, mini-variant sidebar shipped + verified
 **Context:** R7.12 shipped on `phase-a/r7-12-mini-rail` per D26. Branch deploy was live for owner D13 smoke. 72/72 specs green across all affected suites (R7.12 new 13/13, R1.1 13/13, R3 12/12, R6 12/12, R6.6 12/12 with workspace split, gate-a-role-routing 10/10). axe-scan delta: 0 a11y regressions (6 critical / 64 serious — identical to post-R7.5 baseline).
 **Result:** **PASS.** Owner verified on real device:
