@@ -140,7 +140,22 @@ test.describe("R1.1 — A11y", () => {
     await expect(btn).toBeFocused();
   });
   test("skip-link receives focus on first Tab", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // R7.1+R7.2 timing fix: wait for the page to fully hydrate before
+    // pressing Tab. The skip-link is rendered client-side (AppShell);
+    // before React commits, pressing Tab focuses the browser chrome
+    // (URL bar, etc) which Playwright reports as "no element focused".
+    // Pre-R7.1 the slower font load forced an implicit wait that this
+    // test relied on; post-R7.1+R7.2 the page paints faster and the
+    // race becomes visible. Wait for the skip-link element to exist
+    // AND wait for networkidle to ensure full hydration. Then click
+    // the body once to ensure the document has focus (some browsers
+    // require an interaction before keyboard.press registers).
+    await page.locator("a.skip-link").waitFor({ state: "attached", timeout: 5000 });
+    await page.waitForLoadState("networkidle");
+    await page.locator("body").click();
+    // Clicking body focuses the body element; pressing Tab from there
+    // moves to the first focusable element, which is the skip-link.
     await page.keyboard.press("Tab");
     await expect(page.locator("a.skip-link")).toBeFocused();
   });
