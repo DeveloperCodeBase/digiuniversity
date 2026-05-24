@@ -1,15 +1,15 @@
 {
-  "scanned_at": "2026-05-24T04:50:23.061Z",
+  "scanned_at": "2026-05-24T06:04:30.882Z",
   "total_routes": 67,
-  "routes_with_critical": 6,
-  "routes_with_serious": 63,
-  "routes_clean": 3,
+  "routes_with_critical": 0,
+  "routes_with_serious": 60,
+  "routes_clean": 7,
   "routes_redirected": 0,
   "results": [
     {
       "path": "/",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:48:57.276Z",
+      "scanned_at": "2026-05-24T06:03:04.387Z",
       "url": "/",
       "critical_count": 0,
       "serious_count": 0,
@@ -23,7 +23,7 @@
     {
       "path": "/home",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:48:58.598Z",
+      "scanned_at": "2026-05-24T06:03:05.511Z",
       "url": "/home",
       "critical_count": 0,
       "serious_count": 0,
@@ -37,7 +37,7 @@
     {
       "path": "/about",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:48:59.689Z",
+      "scanned_at": "2026-05-24T06:03:06.645Z",
       "url": "/about",
       "critical_count": 0,
       "serious_count": 1,
@@ -46,6 +46,7 @@
       "top_rules": [
         "color-contrast"
       ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
         {
           "rule": "color-contrast",
@@ -58,7 +59,7 @@
     {
       "path": "/admissions",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:49:00.935Z",
+      "scanned_at": "2026-05-24T06:03:07.984Z",
       "url": "/admissions",
       "critical_count": 0,
       "serious_count": 1,
@@ -72,82 +73,16 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".p-4\\.5.gap-3\\.5.rounded-xl:nth-child(1) > .flex-1 > .mt-1.mono",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.98 (foreground color: #4e77d9, background color: #f7f8fc, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".footer-grid > div:nth-child(1) > p",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/pricing",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:49:02.246Z",
+      "scanned_at": "2026-05-24T06:03:09.332Z",
       "url": "/pricing",
-      "critical_count": 0,
-      "serious_count": 1,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".absolute",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
-    },
-    {
-      "path": "/help",
-      "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:49:03.583Z",
-      "url": "/help",
-      "critical_count": 0,
-      "serious_count": 1,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".p-7.gap-3\\.5.card:nth-child(1) > .mt-1",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #4973d8, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
-    },
-    {
-      "path": "/honor-code",
-      "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:49:04.897Z",
-      "url": "/honor-code",
-      "critical_count": 0,
-      "serious_count": 1,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": "#root > footer > .shell > .footer-grid > div:nth-child(1) > p",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
-    },
-    {
-      "path": "/programs",
-      "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T04:49:06.200Z",
-      "url": "/programs",
       "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
@@ -166,9 +101,50 @@
       ]
     },
     {
+      "path": "/help",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-24T06:03:10.850Z",
+      "url": "/help",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "scan-error:page.evaluate: Execution context was destroyed, most likely "
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
+      "path": "/honor-code",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-24T06:03:11.663Z",
+      "url": "/honor-code",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": []
+    },
+    {
+      "path": "/programs",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-24T06:03:12.779Z",
+      "url": "/programs",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+    },
+    {
       "path": "/login",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:07.649Z",
+      "scanned_at": "2026-05-24T06:03:13.582Z",
       "url": "/login",
       "critical_count": 0,
       "serious_count": 0,
@@ -182,29 +158,20 @@
     {
       "path": "/register",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:08.409Z",
+      "scanned_at": "2026-05-24T06:03:14.375Z",
       "url": "/register",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": "a[href$=\"help\"]",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #4973d8, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/forgot",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:09.612Z",
+      "scanned_at": "2026-05-24T06:03:15.490Z",
       "url": "/forgot",
       "critical_count": 0,
       "serious_count": 1,
@@ -226,30 +193,8 @@
     {
       "path": "/verify-email",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:10.664Z",
+      "scanned_at": "2026-05-24T06:03:16.753Z",
       "url": "/verify-email",
-      "critical_count": 1,
-      "serious_count": 0,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "label"
-      ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "label",
-          "impact": "critical",
-          "target": "input:nth-child(1)",
-          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
-        }
-      ]
-    },
-    {
-      "path": "/2fa-setup",
-      "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:11.960Z",
-      "url": "/2fa-setup",
       "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
@@ -262,15 +207,36 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".btn",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".eyebrow",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.75 (foreground color: #bec4ce, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "path": "/2fa-setup",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-24T06:03:18.067Z",
+      "url": "/2fa-setup",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/onboarding",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T04:49:13.319Z",
+      "scanned_at": "2026-05-24T06:03:19.301Z",
       "url": "/onboarding",
       "critical_count": 0,
       "serious_count": 1,
@@ -284,15 +250,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".p-4\\.5.rounded-xl.text-right:nth-child(2) > .rounded-lg.grid",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.46 (foreground color: #e4eaf9, background color: #4f78da, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
+          "target": ".org-attribution-compact > span",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/dashboard",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:17.177Z",
+      "scanned_at": "2026-05-24T06:03:23.323Z",
       "url": "/dashboard",
       "critical_count": 0,
       "serious_count": 1,
@@ -314,24 +280,17 @@
     {
       "path": "/admin",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:18.515Z",
+      "scanned_at": "2026-05-24T06:03:24.684Z",
       "url": "/admin",
-      "critical_count": 1,
+      "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "button-name",
         "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
-        {
-          "rule": "button-name",
-          "impact": "critical",
-          "target": ".card-flat.p-4:nth-child(1) > .mb-2.justify-between.flex > .border-none.p-0.cursor-pointer",
-          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references"
-        },
         {
           "rule": "color-contrast",
           "impact": "serious",
@@ -343,7 +302,7 @@
     {
       "path": "/super",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:19.909Z",
+      "scanned_at": "2026-05-24T06:03:26.018Z",
       "url": "/super",
       "critical_count": 0,
       "serious_count": 1,
@@ -365,7 +324,7 @@
     {
       "path": "/content",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:21.032Z",
+      "scanned_at": "2026-05-24T06:03:27.117Z",
       "url": "/content",
       "critical_count": 0,
       "serious_count": 1,
@@ -387,7 +346,7 @@
     {
       "path": "/ta",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:22.170Z",
+      "scanned_at": "2026-05-24T06:03:28.252Z",
       "url": "/ta",
       "critical_count": 0,
       "serious_count": 1,
@@ -409,7 +368,7 @@
     {
       "path": "/support",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:23.252Z",
+      "scanned_at": "2026-05-24T06:03:29.406Z",
       "url": "/support",
       "critical_count": 0,
       "serious_count": 1,
@@ -431,7 +390,7 @@
     {
       "path": "/moderate",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:24.355Z",
+      "scanned_at": "2026-05-24T06:03:30.531Z",
       "url": "/moderate",
       "critical_count": 0,
       "serious_count": 1,
@@ -453,7 +412,7 @@
     {
       "path": "/org",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:25.452Z",
+      "scanned_at": "2026-05-24T06:03:31.605Z",
       "url": "/org",
       "critical_count": 0,
       "serious_count": 1,
@@ -475,7 +434,7 @@
     {
       "path": "/parent",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:26.543Z",
+      "scanned_at": "2026-05-24T06:03:32.671Z",
       "url": "/parent",
       "critical_count": 0,
       "serious_count": 1,
@@ -497,7 +456,7 @@
     {
       "path": "/instructor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:27.683Z",
+      "scanned_at": "2026-05-24T06:03:33.823Z",
       "url": "/instructor",
       "critical_count": 0,
       "serious_count": 1,
@@ -519,7 +478,7 @@
     {
       "path": "/teach",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:28.957Z",
+      "scanned_at": "2026-05-24T06:03:35.066Z",
       "url": "/teach",
       "critical_count": 0,
       "serious_count": 1,
@@ -541,7 +500,7 @@
     {
       "path": "/catalog",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:30.184Z",
+      "scanned_at": "2026-05-24T06:03:36.299Z",
       "url": "/catalog",
       "critical_count": 0,
       "serious_count": 1,
@@ -563,7 +522,7 @@
     {
       "path": "/my-courses",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:31.273Z",
+      "scanned_at": "2026-05-24T06:03:37.360Z",
       "url": "/my-courses",
       "critical_count": 0,
       "serious_count": 1,
@@ -585,7 +544,7 @@
     {
       "path": "/progress",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:32.303Z",
+      "scanned_at": "2026-05-24T06:03:38.462Z",
       "url": "/progress",
       "critical_count": 0,
       "serious_count": 1,
@@ -607,7 +566,7 @@
     {
       "path": "/tutor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:33.381Z",
+      "scanned_at": "2026-05-24T06:03:39.605Z",
       "url": "/tutor",
       "critical_count": 0,
       "serious_count": 1,
@@ -629,7 +588,7 @@
     {
       "path": "/calendar",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:34.489Z",
+      "scanned_at": "2026-05-24T06:03:40.679Z",
       "url": "/calendar",
       "critical_count": 0,
       "serious_count": 1,
@@ -651,7 +610,7 @@
     {
       "path": "/community",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:35.796Z",
+      "scanned_at": "2026-05-24T06:03:41.953Z",
       "url": "/community",
       "critical_count": 0,
       "serious_count": 1,
@@ -673,7 +632,7 @@
     {
       "path": "/inbox",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:37.202Z",
+      "scanned_at": "2026-05-24T06:03:43.308Z",
       "url": "/inbox",
       "critical_count": 0,
       "serious_count": 1,
@@ -695,15 +654,14 @@
     {
       "path": "/messages",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:38.410Z",
+      "scanned_at": "2026-05-24T06:03:44.491Z",
       "url": "/messages",
       "critical_count": 0,
-      "serious_count": 2,
+      "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "color-contrast",
-        "scrollable-region-focusable"
+        "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
@@ -712,19 +670,13 @@
           "impact": "serious",
           "target": ".gap-3.p-3\\.5.text-right:nth-child(2) > .flex-1 > .items-baseline.justify-between.flex > span:nth-child(2)",
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.38 (foreground color: #768094, background color: #e6edfc, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
-        },
-        {
-          "rule": "scrollable-region-focusable",
-          "impact": "serious",
-          "target": ".p-6",
-          "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
         }
       ]
     },
     {
       "path": "/profile",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:39.627Z",
+      "scanned_at": "2026-05-24T06:03:45.742Z",
       "url": "/profile",
       "critical_count": 0,
       "serious_count": 1,
@@ -746,14 +698,13 @@
     {
       "path": "/settings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:40.855Z",
+      "scanned_at": "2026-05-24T06:03:46.944Z",
       "url": "/settings",
-      "critical_count": 1,
+      "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "label",
         "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
@@ -763,19 +714,13 @@
           "impact": "serious",
           "target": ".org-attribution-compact > span",
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        },
-        {
-          "rule": "label",
-          "impact": "critical",
-          "target": "input[value=\"نسرین رضوی\"]",
-          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
         }
       ]
     },
     {
       "path": "/credential",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:42.017Z",
+      "scanned_at": "2026-05-24T06:03:48.103Z",
       "url": "/credential",
       "critical_count": 0,
       "serious_count": 1,
@@ -797,7 +742,7 @@
     {
       "path": "/transcript",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:43.194Z",
+      "scanned_at": "2026-05-24T06:03:49.389Z",
       "url": "/transcript",
       "critical_count": 0,
       "serious_count": 1,
@@ -819,7 +764,7 @@
     {
       "path": "/career",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:44.562Z",
+      "scanned_at": "2026-05-24T06:03:50.755Z",
       "url": "/career",
       "critical_count": 0,
       "serious_count": 1,
@@ -841,7 +786,7 @@
     {
       "path": "/wellness",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:45.930Z",
+      "scanned_at": "2026-05-24T06:03:52.228Z",
       "url": "/wellness",
       "critical_count": 0,
       "serious_count": 1,
@@ -863,7 +808,7 @@
     {
       "path": "/library",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:47.095Z",
+      "scanned_at": "2026-05-24T06:03:53.411Z",
       "url": "/library",
       "critical_count": 0,
       "serious_count": 1,
@@ -885,7 +830,7 @@
     {
       "path": "/labs",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:48.663Z",
+      "scanned_at": "2026-05-24T06:03:55.237Z",
       "url": "/labs",
       "critical_count": 0,
       "serious_count": 1,
@@ -907,7 +852,7 @@
     {
       "path": "/virtuallab",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:49.973Z",
+      "scanned_at": "2026-05-24T06:03:56.578Z",
       "url": "/virtuallab",
       "critical_count": 0,
       "serious_count": 1,
@@ -929,24 +874,17 @@
     {
       "path": "/research",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:51.160Z",
+      "scanned_at": "2026-05-24T06:03:57.914Z",
       "url": "/research",
-      "critical_count": 1,
+      "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "button-name",
         "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
-        {
-          "rule": "button-name",
-          "impact": "critical",
-          "target": ".p-4\\.5.gap-4.items-center:nth-child(1) > .btn-ghost.btn-sm.btn",
-          "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references"
-        },
         {
           "rule": "color-contrast",
           "impact": "serious",
@@ -958,7 +896,7 @@
     {
       "path": "/officehours",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:52.367Z",
+      "scanned_at": "2026-05-24T06:03:59.429Z",
       "url": "/officehours",
       "critical_count": 0,
       "serious_count": 1,
@@ -980,7 +918,7 @@
     {
       "path": "/hackathons",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:53.702Z",
+      "scanned_at": "2026-05-24T06:04:00.815Z",
       "url": "/hackathons",
       "critical_count": 0,
       "serious_count": 1,
@@ -1002,7 +940,7 @@
     {
       "path": "/alumni",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:54.984Z",
+      "scanned_at": "2026-05-24T06:04:02.233Z",
       "url": "/alumni",
       "critical_count": 0,
       "serious_count": 1,
@@ -1024,7 +962,7 @@
     {
       "path": "/events",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:56.257Z",
+      "scanned_at": "2026-05-24T06:04:03.415Z",
       "url": "/events",
       "critical_count": 0,
       "serious_count": 1,
@@ -1046,7 +984,7 @@
     {
       "path": "/schools",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:57.567Z",
+      "scanned_at": "2026-05-24T06:04:04.727Z",
       "url": "/schools",
       "critical_count": 0,
       "serious_count": 1,
@@ -1068,7 +1006,7 @@
     {
       "path": "/faculty",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:49:59.164Z",
+      "scanned_at": "2026-05-24T06:04:06.317Z",
       "url": "/faculty",
       "critical_count": 0,
       "serious_count": 1,
@@ -1090,7 +1028,7 @@
     {
       "path": "/registration",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:00.527Z",
+      "scanned_at": "2026-05-24T06:04:07.679Z",
       "url": "/registration",
       "critical_count": 0,
       "serious_count": 1,
@@ -1112,7 +1050,7 @@
     {
       "path": "/degree-audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:01.790Z",
+      "scanned_at": "2026-05-24T06:04:08.908Z",
       "url": "/degree-audit",
       "critical_count": 0,
       "serious_count": 1,
@@ -1134,7 +1072,7 @@
     {
       "path": "/financial-aid",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:03.051Z",
+      "scanned_at": "2026-05-24T06:04:10.138Z",
       "url": "/financial-aid",
       "critical_count": 0,
       "serious_count": 1,
@@ -1156,7 +1094,7 @@
     {
       "path": "/audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:04.296Z",
+      "scanned_at": "2026-05-24T06:04:11.358Z",
       "url": "/audit",
       "critical_count": 0,
       "serious_count": 1,
@@ -1178,14 +1116,13 @@
     {
       "path": "/analytics",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:05.315Z",
+      "scanned_at": "2026-05-24T06:04:12.437Z",
       "url": "/analytics",
-      "critical_count": 1,
+      "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "select-name",
         "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
@@ -1195,19 +1132,13 @@
           "impact": "serious",
           "target": ".justify-between.mb-5.flex > div > .eyebrow",
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.62 (foreground color: #e7c87a, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
-        },
-        {
-          "rule": "select-name",
-          "impact": "critical",
-          "target": "select",
-          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
         }
       ]
     },
     {
       "path": "/authoring",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:06.740Z",
+      "scanned_at": "2026-05-24T06:04:13.957Z",
       "url": "/authoring",
       "critical_count": 0,
       "serious_count": 1,
@@ -1229,7 +1160,7 @@
     {
       "path": "/assessment",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:07.926Z",
+      "scanned_at": "2026-05-24T06:04:15.214Z",
       "url": "/assessment",
       "critical_count": 0,
       "serious_count": 1,
@@ -1251,7 +1182,7 @@
     {
       "path": "/bookmarks",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:09.119Z",
+      "scanned_at": "2026-05-24T06:04:16.438Z",
       "url": "/bookmarks",
       "critical_count": 0,
       "serious_count": 1,
@@ -1273,50 +1204,29 @@
     {
       "path": "/classroom",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:10.304Z",
+      "scanned_at": "2026-05-24T06:04:17.659Z",
       "url": "/classroom",
       "critical_count": 0,
-      "serious_count": 4,
+      "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "aria-prohibited-attr",
-        "color-contrast",
-        "nested-interactive",
-        "scrollable-region-focusable"
+        "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
       "violation_samples": [
-        {
-          "rule": "aria-prohibited-attr",
-          "impact": "serious",
-          "target": "div[title=\"علی ر.\"] > .r6-rail-mic-off[aria-label=\"میکروفون خاموش\"]",
-          "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a span with no valid role attribute."
-        },
         {
           "rule": "color-contrast",
           "impact": "serious",
           "target": ".org-attribution-compact > span",
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        },
-        {
-          "rule": "nested-interactive",
-          "impact": "serious",
-          "target": ".r6-slide",
-          "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
-        },
-        {
-          "rule": "scrollable-region-focusable",
-          "impact": "serious",
-          "target": ".r6-rail",
-          "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
         }
       ]
     },
     {
       "path": "/course",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:11.733Z",
+      "scanned_at": "2026-05-24T06:04:19.085Z",
       "url": "/course",
       "critical_count": 0,
       "serious_count": 1,
@@ -1338,14 +1248,13 @@
     {
       "path": "/recordings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:12.960Z",
+      "scanned_at": "2026-05-24T06:04:20.400Z",
       "url": "/recordings",
-      "critical_count": 1,
+      "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "select-name",
         "color-contrast"
       ],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
@@ -1355,19 +1264,13 @@
           "impact": "serious",
           "target": "div[aria-label=\"پخش گرادیان نزولی با مومنتوم\"] > .p-4\\.5 > .mb-2.gap-2.items-center > .mono",
           "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
-        },
-        {
-          "rule": "select-name",
-          "impact": "critical",
-          "target": "select",
-          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements th"
         }
       ]
     },
     {
       "path": "/submission",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:14.372Z",
+      "scanned_at": "2026-05-24T06:04:21.740Z",
       "url": "/submission",
       "critical_count": 0,
       "serious_count": 1,
@@ -1389,7 +1292,7 @@
     {
       "path": "/achievements",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:15.614Z",
+      "scanned_at": "2026-05-24T06:04:22.948Z",
       "url": "/achievements",
       "critical_count": 0,
       "serious_count": 1,
@@ -1411,7 +1314,7 @@
     {
       "path": "/search",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:16.785Z",
+      "scanned_at": "2026-05-24T06:04:24.150Z",
       "url": "/search",
       "critical_count": 0,
       "serious_count": 1,
@@ -1433,7 +1336,7 @@
     {
       "path": "/course/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:18.107Z",
+      "scanned_at": "2026-05-24T06:04:25.472Z",
       "url": "/course/c-cs410",
       "critical_count": 0,
       "serious_count": 1,
@@ -1455,7 +1358,7 @@
     {
       "path": "/course-live/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:19.411Z",
+      "scanned_at": "2026-05-24T06:04:26.886Z",
       "url": "/course-live/c-cs410",
       "critical_count": 0,
       "serious_count": 1,
@@ -1477,7 +1380,7 @@
     {
       "path": "/assessment-live/:assessmentId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:20.474Z",
+      "scanned_at": "2026-05-24T06:04:28.199Z",
       "url": "/assessment-live/a-1",
       "critical_count": 0,
       "serious_count": 1,
@@ -1499,7 +1402,7 @@
     {
       "path": "/virtuallab/:labId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T04:50:21.553Z",
+      "scanned_at": "2026-05-24T06:04:29.317Z",
       "url": "/virtuallab/lab-1",
       "critical_count": 0,
       "serious_count": 1,
