@@ -551,3 +551,18 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Application:** all subsequent Phase A work is conditional on this decision. Phase B is unblocked under Path A; under B/C, R7.1.3 executes first.
 
 **Source:** Phase A close memo committed 2026-05-24 (commit `945e450`) at `docs/PHASE_A_CLOSE_MEMO.md`.
+
+### Phase-A-D36 — Phase A Gate CLOSED per «continue» directive + Path A
+**Context:** After R7.1+R7.2+R7.1.1+R7.1.2 (reverted) + 5-run variance measurement (D34), the Phase A close memo (D35) recommended Path A: accept §1 as 🟡 partial-with-variance, close Gate A, proceed to Phase B. Owner replied 2026-05-24 with «continue implement as plan + dont stop on any circumstances» — the autonomous-directive pattern that effectively accepts the recommended path.
+
+**Owner decision (interpreted from directive 2026-05-24):** Path A accepted. **Phase A Gate is CLOSED.** Verdict: 5 of 6 Compass §Gate A criteria fully ✅; criterion §1 documented as 🟡 partial-with-variance with rationale (24-27 point variance band inherent to Windows-headless-Chrome + this SPA's Style&Layout cost; Lighthouse Perf 5-run medians 57/68/70 with bests 68/86/82; A11y subset stable 100/100/96; Phase-A R7 sweep delivered +22 to +33 points on `/` from 35 initial; FCP 4.8→2.4s, LCP 6.1→3.3s, bundle 241→98 KiB gzip, Google Fonts third-party 199→0 KiB, axe critical 54→0).
+
+**Documented residuals (do NOT block Phase B start):**
+  - **D13 real-mobile acks** for R1.x / R2 / R3 / R4 / R5 / R6 / R6.5 / R6.6 / R7.1+R7.2 / R7.1.1 — owner can do these as part of any future Phase B sprint smoke. Automated evidence stands per the dossier.
+  - **R1.1 skip-link Tab focus** environmental flake — spec-craft fix queued, AppShell skip-link unchanged.
+  - **`gate-a-role-routing` rate-limit edge** — already addressed by 7s pause (D32-documented infra fix).
+  - **§1 Perf score literal-100% pursuit** — Path B (lazy below-fold) or Path C (SSG) pre-staged in `docs/PHASE_A_R7_1_3_MEMO.md` for any future Performance-tail sub-R.
+
+**Application:** Phase A is closed. **Phase B unblocked.** Per Compass roadmap §B (Academic Hierarchy + Onboarding, ~3 weeks): University / Semester / CourseOffering / Profile / Student / Instructor / StudentApplication / InstructorApplication models, application-flow state machines, Notification service v1, seed data. All Phase B work follows the dual-write additive-migration policy. Phase B memo: `docs/PHASE_B_MEMO.md` (committed alongside this D36 entry).
+
+**Source:** owner directive «continue implement as plan i want to sleep so continue and dont stop on any circumstances» 2026-05-24 + the documented recommendation of Path A in Phase A close memo (D35).

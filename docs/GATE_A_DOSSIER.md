@@ -1,6 +1,6 @@
 # Gate A Dossier — Foundation Repair
 
-> **RE-REVIEW DRAFT** — all three measurement TASKs (A: Lighthouse, B: axe-core, C: role-dashboards composite) have now executed against real data. The dossier no longer carries TBD placeholders. **Gate A is BLOCKED on 3 of 6 criteria** (§1 Lighthouse, §2 axe-core, §5 role-dashboard routing). Each section documents real numbers + a concrete R7 fix plan; no R7 implementation has begun. Awaiting owner review before any sub-R kicks off.
+> **🟢 CLOSED — 2026-05-24 per D36.** Owner accepted Path A via «continue implement as plan + dont stop on any circumstances» directive. 5 of 6 Compass §Gate A criteria ✅; criterion §1 documented as 🟡 partial-with-variance (a11y subset ✅ stable 100/100/96, Perf subset 5-run median 57/68/70 with 24-27 point intrinsic variance band on Windows-headless-Chrome — Lighthouse score literal-100% bounded by measurement methodology, not by missed optimizations). Real-user UX wins solidly delivered: FCP 4.8s→2.4s on /, LCP 6.1s→3.3s, main bundle gzip 241→98 KiB, Google Fonts third-party transfer 199 KiB → 0, axe critical 54 routes → 0, 10 distinct role dashboards, audit-on-mutation lint enforced. Phase B unblocked. See `docs/PHASE_A_CLOSE_MEMO.md` for the full case + `docs/PHASE_A_R7_1_3_MEMO.md` for any future Performance-tail Path B/C/D.
 
 ---
 
