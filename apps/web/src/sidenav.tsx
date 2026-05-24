@@ -206,6 +206,16 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
 export interface RoleSideNavProps {
   active: string;
   go: Go;
+  /**
+   * R7.12 — dual-mode rendering for the Mini-variant Drawer.
+   * - "expanded" (default, backward-compatible): icon + label, group
+   *   headers visible. Used by the <1024px Sheet drawer and (when
+   *   wrapped by MiniRail) the ≥1024px expanded rail.
+   * - "mini": icon-only, group headers hidden. Label travels via the
+   *   anchor's `title=` (native tooltip) AND a sr-only span (screen
+   *   readers still get the label). Used by the ≥1024px mini rail.
+   */
+  mode?: "mini" | "expanded";
 }
 
 interface SidebarGroup {
@@ -213,9 +223,10 @@ interface SidebarGroup {
   items: SidebarLink[];
 }
 
-export const RoleSideNav = ({ active, go }: RoleSideNavProps): React.ReactElement => {
+export const RoleSideNav = ({ active, go, mode = "expanded" }: RoleSideNavProps): React.ReactElement => {
   const { role } = useRole();
   const items: SidebarEntry[] = SIDEBAR_BY_ROLE[role.id] || SIDEBAR_BY_ROLE.student;
+  const isMini = mode === "mini";
   // Group items: each `{ h: ... }` starts a new group
   const groups: SidebarGroup[] = [];
   let current: SidebarGroup | null = null;
@@ -231,10 +242,18 @@ export const RoleSideNav = ({ active, go }: RoleSideNavProps): React.ReactElemen
     }
   });
   return (
-    <aside className="side-nav" aria-label={`ناوبری نقش ${role.label}`}>
+    <aside
+      className={"side-nav" + (isMini ? " side-nav-mini" : "")}
+      aria-label={`ناوبری نقش ${role.label}`}
+      data-mode={mode}
+    >
       {groups.map((g, gi) => (
         <React.Fragment key={gi}>
-          {g.h && <h6>{g.h}</h6>}
+          {/* Group headers hidden in mini mode (no room for text in a
+              72px column). The sr-only sibling below keeps the
+              semantic grouping accessible to screen readers. */}
+          {g.h && !isMini ? <h6>{g.h}</h6> : null}
+          {g.h && isMini ? <h6 className="sr-only">{g.h}</h6> : null}
           <ul>
             {g.items.map((it) => (
               <li key={it.id}>
@@ -242,13 +261,14 @@ export const RoleSideNav = ({ active, go }: RoleSideNavProps): React.ReactElemen
                   href={"/" + it.id}
                   className={active === it.id ? "active" : ""}
                   aria-current={active === it.id ? "page" : undefined}
+                  title={isMini ? it.t : undefined}
                   onClick={(e) => {
                     e.preventDefault();
                     go(it.id);
                   }}
                 >
                   <Icon name={it.ic} size={14} />
-                  {it.t}
+                  {isMini ? <span className="sr-only">{it.t}</span> : it.t}
                 </a>
               </li>
             ))}

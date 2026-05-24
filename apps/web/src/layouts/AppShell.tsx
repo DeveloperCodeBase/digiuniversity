@@ -14,6 +14,7 @@ import { BottomNav, cn, Sheet, SheetContent } from "../ui";
 import { ScrollProgress } from "../motion";
 import { Nav, Footer } from "../shared";
 import { RoleSideNav } from "../sidenav";
+import { MiniRail } from "./MiniRail";
 import { useGo, useCurrentRoute } from "../router";
 import { getRouteKind, type RouteKind } from "../router/route-classification";
 import { useMediaQuery } from "../hooks/useMediaQuery";
@@ -25,17 +26,33 @@ type NavMode = "public" | "workspace" | "auth_flow";
 const navModeFor = (kind: RouteKind): NavMode =>
   kind === "WORKSPACE" ? "workspace" : kind === "AUTH_FLOW" ? "auth_flow" : "public";
 
-type SidebarPref = "open" | "closed";
+// R7.12 — replaces the binary "open"|"closed" with a width-mode discriminator.
+// The migration shim in readSidebarPref maps legacy values:
+//   "open"   → { mode: "expanded" }
+//   "closed" → { mode: "mini" }
+// so users with a previous preference keep something close to their
+// expectation. Default for new visitors: mini.
+type SidebarMode = "mini" | "expanded";
+interface SidebarPref {
+  mode: SidebarMode;
+}
 
 const readSidebarPref = (): SidebarPref => {
-  if (typeof window === "undefined") return "closed";
+  if (typeof window === "undefined") return { mode: "mini" };
   try {
-    return localStorage.getItem("digiu_sidebar_pref") === "open" ? "open" : "closed";
-  } catch { return "closed"; }
+    const raw = localStorage.getItem("digiu_sidebar_pref");
+    if (!raw) return { mode: "mini" };
+    if (raw === "open") return { mode: "expanded" };       // legacy → expanded
+    if (raw === "closed") return { mode: "mini" };         // legacy → mini
+    const parsed = JSON.parse(raw);
+    return parsed?.mode === "expanded" ? { mode: "expanded" } : { mode: "mini" };
+  } catch {
+    return { mode: "mini" };
+  }
 };
 
 const writeSidebarPref = (pref: SidebarPref): void => {
-  try { localStorage.setItem("digiu_sidebar_pref", pref); } catch {}
+  try { localStorage.setItem("digiu_sidebar_pref", JSON.stringify(pref)); } catch {}
 };
 
 export const AppShell: React.FC = () => {
@@ -51,33 +68,45 @@ export const AppShell: React.FC = () => {
   const isLandingRoute = route === "" || route === "home";
   const redirectAuthedFromLanding = isLandingRoute && auth.isAuthenticated;
 
-  // R1.3 D9 — sidebar is hamburger-toggle on every viewport. Sheet
-  // drawer at <3xl (slides from start edge = right under RTL). At
-  // ≥3xl + workspace + user pref="open", the sidebar pins inline
-  // beside content — the only "stays-open" case, for power users on
-  // big monitors. State is persisted as `digiu_sidebar_pref` in
-  // localStorage and survives across reloads.
-  const is3xl = useMediaQuery("(min-width: 1536px)");
+  // R7.12 — sidebar is now viewport-conditional:
+  //   ≥1024px (workspace): persistent rail inline in the workspace
+  //     grid. Width animates between 72px (mini) and 280px (expanded).
+  //     The rail is ALWAYS in the DOM at this breakpoint; the mode
+  //     persists across reloads via localStorage `digiu_sidebar_pref`.
+  //   <1024px (workspace): R6.6 Sheet drawer unchanged — overlay,
+  //     lazy-mounted, hamburger-toggled. R1.3-D9 still applies here.
+  //
+  // Pre-R7.12: pinned inline only at ≥1536px (3xl) and only when user
+  // had opted-in. Sheet drawer at all other sizes. R7.12 lowers that
+  // breakpoint to 1024px and makes pinning the default.
+  const isWide = useMediaQuery("(min-width: 1024px)");
   const [sidebarPref, setSidebarPrefState] = React.useState<SidebarPref>(readSidebarPref);
   const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false);
-  const pinned = is3xl && isWorkspace && sidebarPref === "open";
+  // The rail renders at ≥1024px in workspace mode. <1024px keeps the
+  // Sheet drawer for the R6.6 mobile pattern.
+  const railVisible = isWide && isWorkspace;
 
-  // Mount + pref/viewport change: if pinned, render the sidebar open.
+  // Close the (mobile) Sheet on every navigation. No equivalent for
+  // the rail because it's persistent — its open/closed state is
+  // expressed as mini vs expanded, not visibility.
   React.useEffect(() => {
-    if (pinned) setSidebarOpen(true);
-  }, [pinned]);
+    setSidebarOpen(false);
+  }, [route, routeParam]);
 
-  // Close transient drawer on every navigation — except when pinned
-  // (the 3xl exception keeps the sidebar visible across navigation).
-  React.useEffect(() => {
-    if (!pinned) setSidebarOpen(false);
-  }, [route, routeParam, pinned]);
+  /** Toggle between mini and expanded — used by the rail's chevron. */
+  const toggleRailMode = (): void => {
+    const next: SidebarPref = {
+      mode: sidebarPref.mode === "mini" ? "expanded" : "mini",
+    };
+    setSidebarPrefState(next);
+    writeSidebarPref(next);
+  };
 
+  /** Open/close the <1024px Sheet drawer. The mobile path doesn't
+   *  persist; users expect mobile drawers to default-close on every
+   *  page entry. */
   const setSidebarOpenWithPersist = (next: boolean): void => {
     setSidebarOpen(next);
-    const nextPref: SidebarPref = next ? "open" : "closed";
-    setSidebarPrefState(nextPref);
-    writeSidebarPref(nextPref);
   };
 
   // R1.3 B1 — sticky-navbar scroll-aware shadow. Toggle data-scrolled
@@ -122,6 +151,8 @@ export const AppShell: React.FC = () => {
         mode={navMode}
         onWorkspaceMenuClick={() => setSidebarOpenWithPersist(!sidebarOpen)}
         // R7.5 — plumb open state for the hamburger's aria-expanded.
+        // At ≥1024px workspace, the hamburger is hidden via CSS
+        // (R7.12), so this value only matters at <1024px.
         workspaceMenuOpen={sidebarOpen}
       />
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
@@ -137,8 +168,26 @@ export const AppShell: React.FC = () => {
           {/* Breadcrumb row — workspace routes only. */}
           {isWorkspace ? <Breadcrumbs /> : null}
           {isWorkspace ? (
-            <div className="workspace-grid" data-sidebar-pinned={pinned ? "true" : "false"}>
-              {pinned ? <RoleSideNav active={route} go={go} /> : null}
+            <div
+              className={cn("workspace-grid", railVisible && "has-rail")}
+              data-rail-mode={railVisible ? sidebarPref.mode : undefined}
+              // R7.12 — Sidebar pinning indicator preserved for any
+              // page-level CSS that still keys off it (5 legacy pages
+              // per the workspace-grid comment); semantic for the new
+              // pattern is data-rail-mode above.
+              data-sidebar-pinned={railVisible ? "true" : "false"}
+            >
+              {/* R7.12 — Persistent rail at ≥1024px. Always in DOM
+                  (not lazy-mounted), width animated via CSS variable
+                  set on the grid wrapper above. */}
+              {railVisible ? (
+                <MiniRail
+                  mode={sidebarPref.mode}
+                  onToggle={toggleRailMode}
+                  go={go}
+                  active={route}
+                />
+              ) : null}
               <div className="workspace-content"><Outlet /></div>
             </div>
           ) : (
@@ -146,10 +195,11 @@ export const AppShell: React.FC = () => {
           )}
         </main>
 
-        {/* Sidebar Sheet drawer — workspace mode, ANY viewport unless
-            pinned inline at ≥3xl. side="start" → right edge under RTL.
-            onCloseAutoFocus restores keyboard focus to the hamburger. */}
-        {isWorkspace && !pinned ? (
+        {/* R7.12 — Sidebar Sheet drawer at <1024px workspace mode ONLY.
+            At ≥1024px the persistent rail above replaces it. Pre-R7.12
+            the Sheet rendered at <1536px; R7.12 lowers the cutover to
+            1024px so all desktop/tablet sizes get the inline rail. */}
+        {isWorkspace && !railVisible ? (
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpenWithPersist}>
             <SheetContent
               side="start"
