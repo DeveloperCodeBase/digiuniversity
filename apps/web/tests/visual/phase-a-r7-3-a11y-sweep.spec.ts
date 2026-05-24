@@ -52,11 +52,15 @@ test.afterAll(async () => { await authedContext?.close(); authedContext = null; 
 test.describe("@gate-a R7.3 — Per-fix Lighthouse a11y assertions", () => {
   // ----- Page / (landing) -----
 
-  test("A.1 anonymous /: .user-btn has aria-label='ورود به حساب'", async ({ page }) => {
+  test("A.1 anonymous /: .user-btn has aria-label='منوی حساب'", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const btn = page.locator("button.user-btn").first();
     await expect(btn).toBeVisible();
-    await expect(btn).toHaveAttribute("aria-label", "ورود به حساب");
+    // "منوی حساب" not "ورود به حساب" — the latter is the form's submit
+    // button text. Picking a distinct string avoids breaking the shared
+    // Playwright login helper that uses
+    // getByRole("button", { name: /ورود به حساب/ }).first().
+    await expect(btn).toHaveAttribute("aria-label", "منوی حساب");
   });
 
   test("A.1 authed /: .user-btn has aria-label='منوی کاربر'", async ({ browser }) => {
@@ -204,7 +208,7 @@ test.describe("@gate-a R7.3 — Per-fix Lighthouse a11y assertions", () => {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       const btn = page.locator("button.user-btn").first();
       const label = await btn.getAttribute("aria-label");
-      expect(label, `${route}: .user-btn must have aria-label (anonymous = ورود به حساب)`).toBe("ورود به حساب");
+      expect(label, `${route}: .user-btn must have aria-label (anonymous = منوی حساب)`).toBe("منوی حساب");
     }
   });
 });

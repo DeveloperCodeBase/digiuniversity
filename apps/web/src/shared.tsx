@@ -322,16 +322,22 @@ export const Nav = ({
                 - anonymous: render a generic user-icon, no role colour. */}
           <div className="user-wrap relative" >
             {/* R7.3 A.1 — aria-label is context-aware (Q1 Option A): for
-                anonymous the button routes to the login flow, for authed
-                it opens the user menu. The visible `.user-name` span is
-                display:none under 720px (mobile Lighthouse emulation),
-                so without aria-label the accessible name is just the
-                avatar initials (or nothing for anonymous), which axe
-                + Lighthouse flag as button-name failure. */}
+                anonymous it opens a dropdown that contains login/register
+                links; for authed it opens the user menu. The visible
+                `.user-name` span is display:none under 720px (mobile
+                Lighthouse emulation), so without aria-label the accessible
+                name is just the avatar initials (or nothing for anonymous),
+                which axe + Lighthouse flag as button-name failure.
+
+                NOTE: the anonymous label is intentionally NOT "ورود به حساب"
+                (the form-submit string) — that collision broke the shared
+                Playwright login helper which uses
+                getByRole("button", { name: /ورود به حساب/ }).first().
+                "منوی حساب" preserves the semantic without colliding. */}
             <button
               className="user-btn"
               onClick={() => setUserOpen(!userOpen)}
-              aria-label={auth.user ? "منوی کاربر" : "ورود به حساب"}
+              aria-label={auth.user ? "منوی کاربر" : "منوی حساب"}
             >
               <div
                 className={"avatar " + (auth.user ? role.color : "")}
