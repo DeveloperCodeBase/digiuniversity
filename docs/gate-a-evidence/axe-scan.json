@@ -1,15 +1,15 @@
 {
-  "scanned_at": "2026-05-24T06:04:30.882Z",
+  "scanned_at": "2026-05-24T07:27:28.696Z",
   "total_routes": 67,
   "routes_with_critical": 0,
-  "routes_with_serious": 60,
-  "routes_clean": 7,
+  "routes_with_serious": 41,
+  "routes_clean": 26,
   "routes_redirected": 0,
   "results": [
     {
       "path": "/",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:04.387Z",
+      "scanned_at": "2026-05-24T07:26:07.389Z",
       "url": "/",
       "critical_count": 0,
       "serious_count": 0,
@@ -23,7 +23,7 @@
     {
       "path": "/home",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:05.511Z",
+      "scanned_at": "2026-05-24T07:26:08.405Z",
       "url": "/home",
       "critical_count": 0,
       "serious_count": 0,
@@ -37,51 +37,33 @@
     {
       "path": "/about",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:06.645Z",
+      "scanned_at": "2026-05-24T07:26:09.132Z",
       "url": "/about",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".footer-grid > div:nth-child(1) > p",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/admissions",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:07.984Z",
+      "scanned_at": "2026-05-24T07:26:10.400Z",
       "url": "/admissions",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".footer-grid > div:nth-child(1) > p",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/pricing",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:09.332Z",
+      "scanned_at": "2026-05-24T07:26:11.664Z",
       "url": "/pricing",
       "critical_count": 0,
       "serious_count": 1,
@@ -95,30 +77,60 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".footer-grid > div:nth-child(1) > p",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.77 (foreground color: #4a5a76, background color: #0a0d1a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".absolute",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.82 (foreground color: #e9eefa, background color: #4973d8, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/help",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:10.850Z",
+      "scanned_at": "2026-05-24T07:26:12.957Z",
       "url": "/help",
       "critical_count": 0,
-      "serious_count": 0,
+      "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "scan-error:page.evaluate: Execution context was destroyed, most likely "
+        "color-contrast"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".p-7.gap-3\\.5.card:nth-child(1) > .mt-1",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #4973d8, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
     },
     {
       "path": "/honor-code",
       "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:11.663Z",
+      "scanned_at": "2026-05-24T07:26:14.216Z",
       "url": "/honor-code",
+      "critical_count": 0,
+      "serious_count": 1,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [
+        "color-contrast"
+      ],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": [
+        {
+          "rule": "color-contrast",
+          "impact": "serious",
+          "target": ".grid.gap-4:nth-child(1) > .mono",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #4f78da, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    },
+    {
+      "path": "/programs",
+      "kind": "PUBLIC",
+      "scanned_at": "2026-05-24T07:26:15.551Z",
+      "url": "/programs",
       "critical_count": 0,
       "serious_count": 0,
       "moderate_count": 0,
@@ -128,37 +140,30 @@
       "violation_samples": []
     },
     {
-      "path": "/programs",
-      "kind": "PUBLIC",
-      "scanned_at": "2026-05-24T06:03:12.779Z",
-      "url": "/programs",
-      "critical_count": 0,
-      "serious_count": 0,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
-      ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
-    },
-    {
       "path": "/login",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:13.582Z",
+      "scanned_at": "2026-05-24T07:26:16.878Z",
       "url": "/login",
       "critical_count": 0,
-      "serious_count": 0,
+      "serious_count": 1,
       "moderate_count": 0,
       "minor_count": 0,
       "top_rules": [
-        "scan-error:frame.evaluate: Execution context was destroyed, most likely"
+        "aria-prohibited-attr"
       ],
-      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند"
+      "violation_samples": [
+        {
+          "rule": "aria-prohibited-attr",
+          "impact": "serious",
+          "target": "div[aria-label=\"پنج ستاره\"]",
+          "failureSummary": "Fix all of the following:\n  aria-label attribute cannot be used on a div with no valid role attribute."
+        }
+      ]
     },
     {
       "path": "/register",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:14.375Z",
+      "scanned_at": "2026-05-24T07:26:18.154Z",
       "url": "/register",
       "critical_count": 0,
       "serious_count": 0,
@@ -171,7 +176,7 @@
     {
       "path": "/forgot",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:15.490Z",
+      "scanned_at": "2026-05-24T07:26:19.274Z",
       "url": "/forgot",
       "critical_count": 0,
       "serious_count": 1,
@@ -185,16 +190,29 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".p-4",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.51 (foreground color: #a6760f, background color: #ffedd8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/verify-email",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:16.753Z",
+      "scanned_at": "2026-05-24T07:26:20.354Z",
       "url": "/verify-email",
+      "critical_count": 0,
+      "serious_count": 0,
+      "moderate_count": 0,
+      "minor_count": 0,
+      "top_rules": [],
+      "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
+      "violation_samples": []
+    },
+    {
+      "path": "/2fa-setup",
+      "kind": "AUTH_FLOW",
+      "scanned_at": "2026-05-24T07:26:21.481Z",
+      "url": "/2fa-setup",
       "critical_count": 0,
       "serious_count": 1,
       "moderate_count": 0,
@@ -207,36 +225,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".eyebrow",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.75 (foreground color: #bec4ce, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
-    },
-    {
-      "path": "/2fa-setup",
-      "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:18.067Z",
-      "url": "/2fa-setup",
-      "critical_count": 0,
-      "serious_count": 1,
-      "moderate_count": 0,
-      "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".btn",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.13 (foreground color: #edf1fb, background color: #436fd7, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/onboarding",
       "kind": "AUTH_FLOW",
-      "scanned_at": "2026-05-24T06:03:19.301Z",
+      "scanned_at": "2026-05-24T07:26:22.616Z",
       "url": "/onboarding",
       "critical_count": 0,
       "serious_count": 1,
@@ -250,15 +247,15 @@
         {
           "rule": "color-contrast",
           "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          "target": ".p-4\\.5.rounded-xl.text-right:nth-child(2) > .rounded-lg.grid",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #f0f4fc, background color: #3f6bd6, font size: 12.0pt (16px), font weight: bold). Expected contrast ratio of 4.5:1"
         }
       ]
     },
     {
       "path": "/dashboard",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:23.323Z",
+      "scanned_at": "2026-05-24T07:26:26.081Z",
       "url": "/dashboard",
       "critical_count": 0,
       "serious_count": 1,
@@ -280,7 +277,7 @@
     {
       "path": "/admin",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:24.684Z",
+      "scanned_at": "2026-05-24T07:26:27.295Z",
       "url": "/admin",
       "critical_count": 0,
       "serious_count": 1,
@@ -302,7 +299,7 @@
     {
       "path": "/super",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:26.018Z",
+      "scanned_at": "2026-05-24T07:26:28.605Z",
       "url": "/super",
       "critical_count": 0,
       "serious_count": 1,
@@ -324,51 +321,33 @@
     {
       "path": "/content",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:27.117Z",
+      "scanned_at": "2026-05-24T07:26:29.652Z",
       "url": "/content",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/ta",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:28.252Z",
+      "scanned_at": "2026-05-24T07:26:30.706Z",
       "url": "/ta",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/support",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:29.406Z",
+      "scanned_at": "2026-05-24T07:26:31.809Z",
       "url": "/support",
       "critical_count": 0,
       "serious_count": 1,
@@ -390,73 +369,46 @@
     {
       "path": "/moderate",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:30.531Z",
+      "scanned_at": "2026-05-24T07:26:32.846Z",
       "url": "/moderate",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/org",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:31.605Z",
+      "scanned_at": "2026-05-24T07:26:33.896Z",
       "url": "/org",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/parent",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:32.671Z",
+      "scanned_at": "2026-05-24T07:26:34.940Z",
       "url": "/parent",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/instructor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:33.823Z",
+      "scanned_at": "2026-05-24T07:26:35.993Z",
       "url": "/instructor",
       "critical_count": 0,
       "serious_count": 1,
@@ -478,7 +430,7 @@
     {
       "path": "/teach",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:35.066Z",
+      "scanned_at": "2026-05-24T07:26:37.210Z",
       "url": "/teach",
       "critical_count": 0,
       "serious_count": 1,
@@ -500,29 +452,20 @@
     {
       "path": "/catalog",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:36.299Z",
+      "scanned_at": "2026-05-24T07:26:38.442Z",
       "url": "/catalog",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/my-courses",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:37.360Z",
+      "scanned_at": "2026-05-24T07:26:39.510Z",
       "url": "/my-courses",
       "critical_count": 0,
       "serious_count": 1,
@@ -544,51 +487,33 @@
     {
       "path": "/progress",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:38.462Z",
+      "scanned_at": "2026-05-24T07:26:40.542Z",
       "url": "/progress",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/tutor",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:39.605Z",
+      "scanned_at": "2026-05-24T07:26:41.638Z",
       "url": "/tutor",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/calendar",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:40.679Z",
+      "scanned_at": "2026-05-24T07:26:42.717Z",
       "url": "/calendar",
       "critical_count": 0,
       "serious_count": 1,
@@ -610,7 +535,7 @@
     {
       "path": "/community",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:41.953Z",
+      "scanned_at": "2026-05-24T07:26:44.037Z",
       "url": "/community",
       "critical_count": 0,
       "serious_count": 1,
@@ -632,7 +557,7 @@
     {
       "path": "/inbox",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:43.308Z",
+      "scanned_at": "2026-05-24T07:26:45.385Z",
       "url": "/inbox",
       "critical_count": 0,
       "serious_count": 1,
@@ -654,7 +579,7 @@
     {
       "path": "/messages",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:44.491Z",
+      "scanned_at": "2026-05-24T07:26:46.609Z",
       "url": "/messages",
       "critical_count": 0,
       "serious_count": 1,
@@ -676,7 +601,7 @@
     {
       "path": "/profile",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:45.742Z",
+      "scanned_at": "2026-05-24T07:26:47.806Z",
       "url": "/profile",
       "critical_count": 0,
       "serious_count": 1,
@@ -698,29 +623,20 @@
     {
       "path": "/settings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:46.944Z",
+      "scanned_at": "2026-05-24T07:26:49.078Z",
       "url": "/settings",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/credential",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:48.103Z",
+      "scanned_at": "2026-05-24T07:26:50.202Z",
       "url": "/credential",
       "critical_count": 0,
       "serious_count": 1,
@@ -742,7 +658,7 @@
     {
       "path": "/transcript",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:49.389Z",
+      "scanned_at": "2026-05-24T07:26:51.406Z",
       "url": "/transcript",
       "critical_count": 0,
       "serious_count": 1,
@@ -764,7 +680,7 @@
     {
       "path": "/career",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:50.755Z",
+      "scanned_at": "2026-05-24T07:26:52.716Z",
       "url": "/career",
       "critical_count": 0,
       "serious_count": 1,
@@ -786,29 +702,20 @@
     {
       "path": "/wellness",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:52.228Z",
+      "scanned_at": "2026-05-24T07:26:54.010Z",
       "url": "/wellness",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/library",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:53.411Z",
+      "scanned_at": "2026-05-24T07:26:55.107Z",
       "url": "/library",
       "critical_count": 0,
       "serious_count": 1,
@@ -830,51 +737,33 @@
     {
       "path": "/labs",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:55.237Z",
+      "scanned_at": "2026-05-24T07:26:56.525Z",
       "url": "/labs",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/virtuallab",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:56.578Z",
+      "scanned_at": "2026-05-24T07:26:57.769Z",
       "url": "/virtuallab",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/research",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:57.914Z",
+      "scanned_at": "2026-05-24T07:26:58.936Z",
       "url": "/research",
       "critical_count": 0,
       "serious_count": 1,
@@ -896,7 +785,7 @@
     {
       "path": "/officehours",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:03:59.429Z",
+      "scanned_at": "2026-05-24T07:27:00.141Z",
       "url": "/officehours",
       "critical_count": 0,
       "serious_count": 1,
@@ -918,7 +807,7 @@
     {
       "path": "/hackathons",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:00.815Z",
+      "scanned_at": "2026-05-24T07:27:01.297Z",
       "url": "/hackathons",
       "critical_count": 0,
       "serious_count": 1,
@@ -940,7 +829,7 @@
     {
       "path": "/alumni",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:02.233Z",
+      "scanned_at": "2026-05-24T07:27:02.451Z",
       "url": "/alumni",
       "critical_count": 0,
       "serious_count": 1,
@@ -962,7 +851,7 @@
     {
       "path": "/events",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:03.415Z",
+      "scanned_at": "2026-05-24T07:27:03.549Z",
       "url": "/events",
       "critical_count": 0,
       "serious_count": 1,
@@ -984,7 +873,7 @@
     {
       "path": "/schools",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:04.727Z",
+      "scanned_at": "2026-05-24T07:27:04.725Z",
       "url": "/schools",
       "critical_count": 0,
       "serious_count": 1,
@@ -1006,7 +895,7 @@
     {
       "path": "/faculty",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:06.317Z",
+      "scanned_at": "2026-05-24T07:27:06.186Z",
       "url": "/faculty",
       "critical_count": 0,
       "serious_count": 1,
@@ -1028,7 +917,7 @@
     {
       "path": "/registration",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:07.679Z",
+      "scanned_at": "2026-05-24T07:27:07.431Z",
       "url": "/registration",
       "critical_count": 0,
       "serious_count": 1,
@@ -1050,7 +939,7 @@
     {
       "path": "/degree-audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:08.908Z",
+      "scanned_at": "2026-05-24T07:27:08.584Z",
       "url": "/degree-audit",
       "critical_count": 0,
       "serious_count": 1,
@@ -1072,51 +961,33 @@
     {
       "path": "/financial-aid",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:10.138Z",
+      "scanned_at": "2026-05-24T07:27:09.736Z",
       "url": "/financial-aid",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/audit",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:11.358Z",
+      "scanned_at": "2026-05-24T07:27:10.856Z",
       "url": "/audit",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/analytics",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:12.437Z",
+      "scanned_at": "2026-05-24T07:27:11.846Z",
       "url": "/analytics",
       "critical_count": 0,
       "serious_count": 1,
@@ -1138,29 +1009,20 @@
     {
       "path": "/authoring",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:13.957Z",
+      "scanned_at": "2026-05-24T07:27:13.189Z",
       "url": "/authoring",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/assessment",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:15.214Z",
+      "scanned_at": "2026-05-24T07:27:14.348Z",
       "url": "/assessment",
       "critical_count": 0,
       "serious_count": 1,
@@ -1182,7 +1044,7 @@
     {
       "path": "/bookmarks",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:16.438Z",
+      "scanned_at": "2026-05-24T07:27:15.500Z",
       "url": "/bookmarks",
       "critical_count": 0,
       "serious_count": 1,
@@ -1204,29 +1066,20 @@
     {
       "path": "/classroom",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:17.659Z",
+      "scanned_at": "2026-05-24T07:27:16.741Z",
       "url": "/classroom",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/course",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:19.085Z",
+      "scanned_at": "2026-05-24T07:27:18.036Z",
       "url": "/course",
       "critical_count": 0,
       "serious_count": 1,
@@ -1248,7 +1101,7 @@
     {
       "path": "/recordings",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:20.400Z",
+      "scanned_at": "2026-05-24T07:27:19.275Z",
       "url": "/recordings",
       "critical_count": 0,
       "serious_count": 1,
@@ -1270,7 +1123,7 @@
     {
       "path": "/submission",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:21.740Z",
+      "scanned_at": "2026-05-24T07:27:20.524Z",
       "url": "/submission",
       "critical_count": 0,
       "serious_count": 1,
@@ -1292,7 +1145,7 @@
     {
       "path": "/achievements",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:22.948Z",
+      "scanned_at": "2026-05-24T07:27:21.691Z",
       "url": "/achievements",
       "critical_count": 0,
       "serious_count": 1,
@@ -1314,7 +1167,7 @@
     {
       "path": "/search",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:24.150Z",
+      "scanned_at": "2026-05-24T07:27:22.790Z",
       "url": "/search",
       "critical_count": 0,
       "serious_count": 1,
@@ -1336,7 +1189,7 @@
     {
       "path": "/course/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:25.472Z",
+      "scanned_at": "2026-05-24T07:27:24.031Z",
       "url": "/course/c-cs410",
       "critical_count": 0,
       "serious_count": 1,
@@ -1358,68 +1211,41 @@
     {
       "path": "/course-live/:courseId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:26.886Z",
+      "scanned_at": "2026-05-24T07:27:25.294Z",
       "url": "/course-live/c-cs410",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/assessment-live/:assessmentId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:28.199Z",
+      "scanned_at": "2026-05-24T07:27:26.332Z",
       "url": "/assessment-live/a-1",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     },
     {
       "path": "/virtuallab/:labId",
       "kind": "WORKSPACE",
-      "scanned_at": "2026-05-24T06:04:29.317Z",
+      "scanned_at": "2026-05-24T07:27:27.345Z",
       "url": "/virtuallab/lab-1",
       "critical_count": 0,
-      "serious_count": 1,
+      "serious_count": 0,
       "moderate_count": 0,
       "minor_count": 0,
-      "top_rules": [
-        "color-contrast"
-      ],
+      "top_rules": [],
       "page_title": "دیجی‌یونیورسیتی — دانشگاه آنلاین هوشمند",
-      "violation_samples": [
-        {
-          "rule": "color-contrast",
-          "impact": "serious",
-          "target": ".org-attribution-compact > span",
-          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.97 (foreground color: #768094, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
-        }
-      ]
+      "violation_samples": []
     }
   ]
 }

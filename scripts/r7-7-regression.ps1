@@ -10,6 +10,7 @@ $specs = @(
   "phase-a-r5-login",
   "phase-a-r6-classroom",
   "phase-a-r6-6-navbar-rtl",
+  "phase-a-r7-7-a11y-sweep",
   "phase-a-r7-12-mini-rail",
   "gate-a-role-routing"
 )
