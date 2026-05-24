@@ -5935,3 +5935,149 @@ html[data-theme="dark"] .r5-jahad-mark.is-dark { display: inline-block; }
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ==========================================================================
+   Phase-A R7.12 — Mini-variant persistent sidebar
+   Owner-approved scope (D23 + D25 + D26). Rail replaces the workspace
+   Sheet drawer at ≥1024px; <1024px keeps the R6.6 Sheet (R1.3-D9
+   partially superseded — only ≥1024).
+   ========================================================================== */
+
+/* Rail width token. Set via [data-rail-mode] on the workspace-grid wrapper. */
+.workspace-grid.has-rail {
+  --r7-rail-width: 72px;
+}
+.workspace-grid.has-rail[data-rail-mode="expanded"] {
+  --r7-rail-width: 280px;
+}
+
+/* 2-col grid at ≥1024 when has-rail. The rail extends edge-to-edge
+   while the content column keeps the existing workspace padding. */
+@media (min-width: 1024px) {
+  .workspace-grid.has-rail {
+    grid-template-columns: var(--r7-rail-width) 1fr;
+    padding: 0;
+    gap: 0;
+    /* Width transitions when the rail toggles between mini and
+       expanded. Animation runs on the grid-template-columns change
+       via the CSS variable. */
+    transition: grid-template-columns 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .workspace-grid.has-rail > .workspace-content {
+    /* Restore the workspace padding that the no-rail layout had on
+       the outer grid; only the content column needs it now. */
+    padding: 32px 40px;
+    min-width: 0;
+  }
+}
+
+/* Rail container. Sticky below the topbar (top: 76px = nav height
+   estimate; nav uses z-index: 90 so it overlays the top of the rail
+   if scroll position pushes them together). Same elevation as content
+   per D23 — z-index auto + box-shadow none. */
+.r7-mini-rail {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 76px;
+  height: calc(100vh - 76px);
+  background: var(--surface);
+  border-inline-end: 1px solid var(--line);
+  /* z-index = content (no overlay) per D23 elevation contract */
+  z-index: auto;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  /* Width transition mirrors the grid transition so the rail's
+     children reflow smoothly with the column resize. */
+  transition: width 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Toggle button row at the top of the rail. */
+.r7-rail-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.r7-mini-rail[data-mode="expanded"] .r7-rail-toggle-row {
+  justify-content: flex-end;
+  padding-inline-end: 12px;
+}
+.r7-rail-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg-mute);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.r7-rail-toggle:hover {
+  background: var(--surface-3);
+  color: var(--fg);
+  border-color: var(--line-2);
+}
+.r7-rail-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Inside the rail, the existing .side-nav loses its sticky behavior
+   (the rail itself is sticky now) and lets its content scroll
+   independently when overflowing. */
+.r7-mini-rail .side-nav {
+  position: static !important;
+  top: auto !important;
+  max-height: none !important;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: none !important;
+  background: transparent !important;
+  padding: 12px 8px !important;
+}
+
+/* Mini-mode visuals: icon-only nav, headers hidden (.sr-only spans
+   provide the labels for screen readers). */
+.r7-mini-rail[data-mode="mini"] .side-nav h6:not(.sr-only) { display: none; }
+.r7-mini-rail[data-mode="mini"] .side-nav li a {
+  justify-content: center;
+  gap: 0;
+  padding: 10px 8px;
+}
+/* Active-state border in mini mode → a left-edge accent bar (no room
+   for the 3px-pill the expanded mode uses with its label gap). */
+.r7-mini-rail[data-mode="mini"] .side-nav li a.active::before {
+  display: none;
+}
+.r7-mini-rail[data-mode="mini"] .side-nav li a.active {
+  background: color-mix(in oklch, var(--accent) 12%, var(--surface-2));
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* Expanded-mode tweaks: same as the existing .side-nav but with the
+   rail's tighter padding for the wider 280px column. */
+.r7-mini-rail[data-mode="expanded"] .side-nav {
+  padding: 12px 16px !important;
+}
+
+/* Hide the workspace hamburger at ≥1024 — the rail's chevron is the
+   toggle there. R6.6 hamburger behavior stays intact at <1024. */
+@media (min-width: 1024px) {
+  .nav[data-mode="workspace"] .nav-toggle { display: none !important; }
+}
+
+/* Reduced motion — disable the width animation. */
+@media (prefers-reduced-motion: reduce) {
+  .workspace-grid.has-rail,
+  .r7-mini-rail {
+    transition: none !important;
+  }
+}

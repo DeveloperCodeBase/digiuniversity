@@ -79,17 +79,25 @@ test.describe("R1.1 — Responsive sidebar/hamburger", () => {
     await expect(page.locator(".workspace-grid > .side-nav")).toHaveCount(0);
     await expect(page.locator("button.nav-toggle")).toBeVisible();
   });
-  // R1.1 originally asserted "inline sidebar visible, hamburger hidden"
-  // at lg+. R1.3 D9 changed the contract: sidebar is ALWAYS a Sheet
-  // drawer except at ≥3xl + pref="open". Hamburger is visible at every
-  // viewport in workspace mode. Updated to the D9 contract; the D9 spec
-  // file has the pinned-at-3xl exception test.
-  test("WORKSPACE ≥lg: hamburger visible (D9), no inline sidebar by default", async ({ page }) => {
+  // Contract evolution:
+  //   R1.1 (Phase 14.7) — inline sidebar visible at lg+, hamburger hidden.
+  //   R1.3 D9         — sidebar always a Sheet drawer except 3xl+pref=open;
+  //                      hamburger visible at every workspace viewport.
+  //   R7.12 (D23+D25)  — at ≥1024: persistent rail INLINE in workspace-grid
+  //                      (mini default 72px). Workspace hamburger HIDDEN
+  //                      at ≥1024 (its job is taken by the rail's chevron).
+  //                      <1024 stays D9 (hamburger + Sheet drawer overlay).
+  //   This assertion now matches the R7.12 contract.
+  test("WORKSPACE ≥lg: rail visible inline (R7.12), workspace hamburger HIDDEN", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await login(page);
     await page.goto("/dashboard");
-    await expect(page.locator("button.nav-toggle").first()).toBeVisible();
-    await expect(page.locator(".workspace-grid .side-nav")).toHaveCount(0);
+    // R7.12 — rail is always in the DOM at ≥1024px workspace.
+    await expect(page.locator(".r7-mini-rail")).toBeVisible();
+    // R7.12 — workspace hamburger hidden at ≥1024 (rail chevron is the toggle).
+    await expect(page.locator("#appshell-sidebar-trigger")).toBeHidden();
+    // Sheet drawer NOT mounted at ≥1024 (was mounted before R7.12).
+    await expect(page.locator(".appshell-sidebar-drawer")).toHaveCount(0);
   });
   test("PUBLIC ≥lg: inline nav-links visible", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
