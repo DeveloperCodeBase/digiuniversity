@@ -52,6 +52,9 @@ model Tenant {
   documentChunks  DocumentChunk[]
   tutorSessions   TutorSession[]
   tutorMessages   TutorMessage[]
+  // Phase B (B.1a) — Academic Hierarchy additions:
+  universities    University[]
+  semesters       Semester[]
 
   @@index([slug])
 }
@@ -192,6 +195,75 @@ model Faculty {
 
   @@unique([tenantId, slug])
   @@index([tenantId])
+  @@index([deletedAt])
+}
+
+// ---------- Phase B — Academic Hierarchy (additive) ----------
+//
+// University and Semester are new top-level entities introduced in
+// Phase B per the Compass §B roadmap. They sit alongside the existing
+// Tenant → Faculty → Department → Program → Course graph, NOT replace
+// any of it (additive-only policy from D33/D36).
+//
+// In the demo deployment (single-tenant), Tenant 1:1 University is the
+// expected ratio. The schema allows Tenant 1:N University for any future
+// multi-tenant deployment where one tenant runs multiple separate-named
+// universities under the same admin team.
+//
+// Semester is a time-bucketed term (FALL/SPRING/SUMMER/INTERSESSION)
+// scoped under one University. Dates stored as ISO datetime in DB;
+// frontend renders via toFa() + Jalaali helper per memo Q3 default.
+
+model University {
+  id          String    @id @default(cuid())
+  tenantId    String
+  slug        String
+  nameFa      String
+  nameEn      String?
+  shortCode   String    // e.g., "DIGI" — used in code-style refs (program codes, certificate IDs)
+  charterDate DateTime
+  status      String    @default("active") // active | suspended | dissolved
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  semesters Semester[]
+
+  @@unique([tenantId, slug])
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@index([deletedAt])
+}
+
+model Semester {
+  id                String    @id @default(cuid())
+  tenantId          String
+  universityId      String
+  code              String    // e.g., "S-1404-FALL"
+  nameFa            String    // e.g., "نیمسال اول ۱۴۰۴"
+  termType          String    // FALL | SPRING | SUMMER | INTERSESSION
+  startDate         DateTime
+  endDate           DateTime
+  registrationOpen  DateTime?
+  registrationClose DateTime?
+  status            String    @default("upcoming") // upcoming | open | active | closed | archived
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([universityId, code])
+  @@index([tenantId])
+  @@index([universityId])
   @@index([deletedAt])
 }
 
