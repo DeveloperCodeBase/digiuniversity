@@ -123,15 +123,24 @@ test.describe("R6.6 — Public navbar (logged out): logo right, user-menu left",
   }
 });
 
-test.describe("R6.6 — Workspace navbar (logged in): hamburger right, user-menu left", () => {
-  for (const v of VIEWPORTS) {
+// R7.12 partially supersedes R6.6's workspace contract:
+//   <1024px: hamburger-in-navbar at start edge (R6.6 unchanged). 3 viewports.
+//   ≥1024px: persistent rail at start edge, hamburger HIDDEN from navbar
+//            (the rail's chevron is the toggle). 3 viewports.
+// The public-navbar contract above is unaffected (public mode has no rail).
+
+const WORKSPACE_MOBILE_VIEWPORTS = VIEWPORTS.filter((v) => v.w < 1024);
+const WORKSPACE_DESKTOP_VIEWPORTS = VIEWPORTS.filter((v) => v.w >= 1024);
+
+test.describe("R6.6 — Workspace navbar at <1024 (logged in): hamburger right, user-menu left", () => {
+  for (const v of WORKSPACE_MOBILE_VIEWPORTS) {
     test(`workspace @ ${v.name}: hamburger on right + brand follows + user-menu on left`, async ({ browser }) => {
       const page = await authedPage(browser);
       await page.setViewportSize({ width: v.w, height: v.h });
       await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(300);
 
-      // D12-1 DOM — workspace navbar has the new start-anchored hamburger
+      // D12-1 DOM — workspace navbar has the start-anchored hamburger
       await expect(page.locator("nav.nav[data-mode='workspace']")).toBeVisible();
       const hamburger = page.locator("#appshell-sidebar-trigger");
       await expect(hamburger).toBeVisible();
@@ -143,49 +152,91 @@ test.describe("R6.6 — Workspace navbar (logged in): hamburger right, user-menu
 
       // D12-3 — hamburger center on RIGHT half (start in RTL)
       await assertElementOnRightHalf(page, "#appshell-sidebar-trigger", v.w, "workspace hamburger");
-
       // D12-3 — user-menu trigger on LEFT half (end in RTL)
       await assertElementOnLeftHalf(page, "nav.nav .user-wrap", v.w, "workspace user-menu");
 
-      // Extra: hamburger sits at the EXTREME right (further right than
-      // brand) because it's the new start-anchored element per R6.6.
       const hBox = await hamburger.boundingBox();
       const brandBox = await page.locator("nav.nav .brand").boundingBox();
       expect(hBox).not.toBeNull();
       expect(brandBox).not.toBeNull();
       const hCenter = hBox!.x + hBox!.width / 2;
       const brandCenter = brandBox!.x + brandBox!.width / 2;
-      expect(hCenter, "workspace hamburger center x must be >= brand center x (start edge in RTL)")
-        .toBeGreaterThanOrEqual(brandCenter);
+      expect(hCenter).toBeGreaterThanOrEqual(brandCenter);
 
-      // D12-4 no overlap — hamburger and brand do not overlap horizontally
+      // D12-4 no overlap
+      const userBox = await page.locator("nav.nav .user-wrap").boundingBox();
       const noHBrandOverlap =
         hBox!.x + hBox!.width <= brandBox!.x + 1 ||
         brandBox!.x + brandBox!.width <= hBox!.x + 1;
-      expect(noHBrandOverlap, "workspace navbar: hamburger and brand must not overlap").toBe(true);
-
-      // D12-4 no overlap — hamburger and user-wrap do not overlap
-      const userBox = await page.locator("nav.nav .user-wrap").boundingBox();
-      expect(userBox).not.toBeNull();
       const noHUserOverlap =
         hBox!.x + hBox!.width <= userBox!.x + 1 ||
         userBox!.x + userBox!.width <= hBox!.x + 1;
-      expect(noHUserOverlap, "workspace navbar: hamburger and user-menu must not overlap").toBe(true);
+      expect(noHBrandOverlap).toBe(true);
+      expect(noHUserOverlap).toBe(true);
 
-      // Hamburger toggles the sidebar (a11y wiring sanity).
-      // At <1536px the AppShell renders a Sheet drawer. At ≥1536px
-      // it pins the sidebar inline beside content (data-sidebar-pinned).
-      // Either form is acceptable — both prove the click was wired.
+      // Hamburger toggles the Sheet drawer at <1024.
       await hamburger.click();
-      if (v.w >= 1536) {
-        await expect(page.locator(".workspace-grid[data-sidebar-pinned='true']")).toBeVisible();
-        // Click again to un-pin so the next test starts clean
-        await hamburger.click();
-      } else {
-        await expect(page.locator(".appshell-sidebar-drawer")).toBeVisible();
-        // Close via Escape so subsequent tests don't inherit an open drawer
-        await page.keyboard.press("Escape");
+      await expect(page.locator(".appshell-sidebar-drawer")).toBeVisible();
+      await page.keyboard.press("Escape");
+
+      await shotIfBaseline(page, `workspace-${v.name}`);
+    });
+  }
+});
+
+test.describe("R6.6/R7.12 — Workspace navbar at ≥1024 (logged in): rail right, user-menu left, NO navbar hamburger", () => {
+  for (const v of WORKSPACE_DESKTOP_VIEWPORTS) {
+    test(`workspace @ ${v.name}: rail on right + user-menu on left (R7.12 contract)`, async ({ browser }) => {
+      const page = await authedPage(browser);
+      await page.setViewportSize({ width: v.w, height: v.h });
+      await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(400);
+
+      // D12-1 DOM — workspace navbar present; rail mounted; hamburger HIDDEN
+      await expect(page.locator("nav.nav[data-mode='workspace']")).toBeVisible();
+      const rail = page.locator(".r7-mini-rail");
+      await expect(rail).toBeVisible();
+      const hamburgerEl = page.locator("#appshell-sidebar-trigger");
+      // Element exists in DOM but is display:none at ≥1024 per R7.12 CSS.
+      await expect(hamburgerEl).toBeHidden();
+      await expect(page.locator("nav.nav .brand")).toBeVisible();
+      await expect(page.locator("nav.nav .user-wrap")).toBeVisible();
+
+      // D12 prerequisite
+      await assertHtmlDirRtl(page);
+
+      // D12-3 — rail right edge near viewport.width (start in RTL)
+      const railBox = await rail.boundingBox();
+      expect(railBox).not.toBeNull();
+      expect(railBox!.x + railBox!.width).toBeGreaterThan(v.w - 4);
+
+      // D12-3 — user-menu on LEFT half of the navbar (end in RTL)
+      await assertElementOnLeftHalf(page, "nav.nav .user-wrap", v.w, "workspace user-menu (≥1024)");
+
+      // D12-4 no overlap — rail and content area
+      const contentBox = await page.locator(".workspace-content").boundingBox();
+      expect(contentBox).not.toBeNull();
+      const noRailContentOverlap =
+        railBox!.x + railBox!.width <= contentBox!.x + 1 ||
+        contentBox!.x + contentBox!.width <= railBox!.x + 1;
+      expect(noRailContentOverlap, "rail and content must not overlap at ≥1024").toBe(true);
+
+      // Toggle wiring sanity: chevron flips mode without opening any
+      // Sheet drawer (rail is persistent, not overlay).
+      const toggle = page.locator(".r7-rail-toggle");
+      await expect(toggle).toBeVisible();
+      const gridBefore = await page.locator(".workspace-grid.has-rail").getAttribute("data-rail-mode");
+      await toggle.click();
+      await page.waitForTimeout(300);
+      const gridAfter = await page.locator(".workspace-grid.has-rail").getAttribute("data-rail-mode");
+      expect(gridAfter).not.toBe(gridBefore);
+      // Reset to mini for the next test (clean state)
+      if (gridAfter === "expanded") {
+        await toggle.click();
+        await page.waitForTimeout(200);
       }
+      // Sheet drawer must NOT be mounted at ≥1024
+      await expect(page.locator(".appshell-sidebar-drawer")).toHaveCount(0);
 
       await shotIfBaseline(page, `workspace-${v.name}`);
     });
