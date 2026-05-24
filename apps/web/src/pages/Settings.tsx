@@ -88,7 +88,12 @@ const ProfileTab = () => (
         </div>
       </Row>
       <Row label="نام نمایشی" hint="در کلاس‌ها و پروفایل عمومی نشان داده می‌شود">
-        <input className="rounded-xl" defaultValue="نسرین رضوی"  style={{width: "100%", maxWidth: 400, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
+        {/* R7.7d — Row's <div> label is decorative for screen readers
+            because it isn't wired as <label htmlFor>. aria-label on the
+            input gives axe the same semantic that the visible label
+            provides for sighted users. (Rewiring Row to a proper
+            <label> would touch many call sites — out of R7.7 scope.) */}
+        <input className="rounded-xl" defaultValue="نسرین رضوی" aria-label="نام نمایشی"  style={{width: "100%", maxWidth: 400, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />
       </Row>
       <Row label="بیوگرافی کوتاه" hint="حداکثر ۲۸۰ کاراکتر">
         <textarea className="rounded-xl resize-y" defaultValue="دانشجوی ارشد علوم داده، علاقمند به مدل‌های زبانی فارسی و آموزش." rows={3}  style={{width: "100%", maxWidth: 600, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}} />

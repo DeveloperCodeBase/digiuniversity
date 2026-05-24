@@ -178,7 +178,9 @@ export const AdminPage: React.FC<RolesPageProps> = ({ go }) => {
                 <div key={p.t} className="card-flat p-4" >
                   <div className="flex justify-between mb-2" >
                     <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)" }}>POLICY</span>
-                    <Toggle on={p.on} />
+                    {/* R7.7d — pass the policy name as the toggle's aria-label
+                        so screen-reader users know which switch they're on. */}
+                    <Toggle on={p.on} label={p.t} />
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{p.t}</div>
                   <div className="mt-1"  style={{fontSize: 12, color: "var(--fg-mute)"}}>{p.d}</div>

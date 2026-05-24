@@ -64,8 +64,14 @@ export const DropdownMenuItem = React.forwardRef<
         "text-[color:var(--fg)]",
         "data-[highlighted]:bg-[color:var(--surface-2)]",
         "data-[disabled]:opacity-50 data-[disabled]:pointer-events-none",
+        // R7.7b — was text-[color:var(--gold)]; gold text on white menu
+        // bg fails 4.5:1 contrast. Demoted to --fg (navy) at rest with
+        // gold-soft background on highlight, which preserves the
+        // "destructive" hover affordance while keeping the resting label
+        // legible. Caller-provided icon (warn/trash glyph) carries the
+        // semantic signal at rest.
         destructive &&
-          "text-[color:var(--gold)] data-[highlighted]:bg-[color:var(--gold-soft)]",
+          "text-[color:var(--fg)] data-[highlighted]:bg-[color:var(--gold-soft)]",
         className,
       )}
       {...props}

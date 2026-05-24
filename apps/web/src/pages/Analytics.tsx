@@ -24,7 +24,8 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ go }) => {
               <p className="muted">۸ دانشکده · ۲۳ برنامه · ۱۲۸۴ دانشجو فعال · ۹۴ استاد</p>
             </div>
             <div className="flex gap-2.5" >
-              <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", color: "var(--fg)", fontFamily: "inherit", fontSize: 13}}>
+              {/* R7.7d — <select> needs an accessible name. */}
+              <select className="rounded-xl" aria-label="دوره زمانی تحلیل"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", color: "var(--fg)", fontFamily: "inherit", fontSize: 13}}>
                 <option>ترم بهار ۱۴۰۵</option>
                 <option>سال ۱۴۰۴</option>
                 <option>کل دوره</option>

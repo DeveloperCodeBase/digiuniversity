@@ -628,7 +628,8 @@ export const ResearchPage: React.FC<UniPageProps> = ({ go }) => (
                 <span className={"pill " + (m.s === "done" ? "pill-cyan" : m.s === "current" ? "pill-violet" : "")} style={{ fontSize: 9 }}>
                   {m.s === "done" ? "تکمیل" : m.s === "current" ? "فعال" : "آینده"}
                 </span>
-                <Button variant="ghost" size="sm"><Icon name="arrow" size={13} /></Button>
+                {/* R7.7d — icon-only Button needs an accessible name. */}
+                <Button variant="ghost" size="sm" aria-label="نمایش جزئیات مرحله"><Icon name="arrow" size={13} /></Button>
               </div>
             ))}
           </div>

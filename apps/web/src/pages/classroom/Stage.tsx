@@ -21,7 +21,16 @@ import {
 ============================================================ */
 
 const ParticipantRail: React.FC = () => (
-  <div className="r6-rail scroll-thin" aria-label="فهرست شرکت‌کنندگان">
+  // R7.7d — scrollable-region-focusable: add tabIndex so keyboard users
+  // can scroll the participant rail. aria-label-on-div triggers axe
+  // 'aria-prohibited-attr' without a role — declaring role="region"
+  // (a generic landmark) makes the label valid.
+  <div
+    className="r6-rail scroll-thin"
+    role="region"
+    aria-label="فهرست شرکت‌کنندگان"
+    tabIndex={0}
+  >
     {PARTICIPANTS.map((p) => (
       <div
         key={p.id}
@@ -36,8 +45,11 @@ const ParticipantRail: React.FC = () => (
         <span className="r6-rail-init">{p.init}</span>
         <span className="r6-rail-name">{p.name}</span>
         {p.host ? <span className="r6-rail-host">HOST</span> : null}
+        {/* R7.7d — when mic is off, render an aria-labelled icon
+            (role="img" + aria-label since axe prohibits aria-label on
+            a bare <span>). */}
         {!p.mic ? (
-          <span className="r6-rail-mic-off" aria-label="میکروفون خاموش">
+          <span className="r6-rail-mic-off" role="img" aria-label="میکروفون خاموش">
             <Icon name="micOff" />
           </span>
         ) : null}
@@ -74,7 +86,12 @@ const SlideView: React.FC<SlideViewProps> = ({ idx, setIdx }) => {
   const caption = CAPTION_QUEUE[capIdx];
 
   return (
-    <div className="r6-slide" role="img" aria-label={slide.title}>
+    /* R7.7d — was role="img" aria-label; the slide is a complex region
+       with interactive descendants (slide nav buttons, insight close,
+       caption) which axe flags as 'nested-interactive' under role=img.
+       Drop the role; the h2.r6-slide-title below carries the heading
+       semantic that SR users navigate by. */
+    <div className="r6-slide" aria-labelledby="r6-slide-title-h">
       <SlideCanvas />
       <span className="r6-slide-rec" aria-label="درحال ضبط">
         REC · 00:45:49
@@ -103,7 +120,7 @@ const SlideView: React.FC<SlideViewProps> = ({ idx, setIdx }) => {
 
       <div className="r6-slide-content">
         <div className="r6-slide-eyebrow">{slide.eyebrow}</div>
-        <h2 className="r6-slide-title">{slide.title}</h2>
+        <h2 id="r6-slide-title-h" className="r6-slide-title">{slide.title}</h2>
         <div className="r6-slide-formula">{slide.formula}</div>
         <p className="r6-slide-body-text">{slide.body}</p>
       </div>

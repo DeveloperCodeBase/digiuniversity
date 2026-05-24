@@ -725,6 +725,10 @@ export const VerifyEmailPage = ({ go }: AuthPageProps): React.ReactElement => {
               onKeyDown={(e) => handleKey(i, e)}
               inputMode="numeric"
               maxLength={1}
+              /* R7.7d — was unlabeled (axe critical 'label'). The visible
+                 'کد ۶ رقمی' header is decorative for screen readers;
+                 each input gets its own positional aria-label. */
+              aria-label={`رقم ${i + 1} از کد تأیید ۶ رقمی`}
                style={{width: "100%", aspectRatio: "1",
                 background: "var(--surface)",
                 border: "1px solid var(--line-2)",

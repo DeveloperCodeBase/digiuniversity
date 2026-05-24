@@ -25,7 +25,8 @@ export const RecordingsPage: React.FC<RecordingsPageProps> = ({ go }) => {
               </p>
             </div>
             <div className="flex gap-2" >
-              <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", color: "var(--fg)", fontFamily: "inherit", fontSize: 13}}>
+              {/* R7.7d — <select> needs an accessible name. */}
+              <select className="rounded-xl" aria-label="فیلتر بر اساس درس"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", color: "var(--fg)", fontFamily: "inherit", fontSize: 13}}>
                 <option>همه‌ی دروس</option>
                 <option>یادگیری ماشین</option>
                 <option>NLP پیشرفته</option>

@@ -206,8 +206,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               "flex flex-col items-center justify-center gap-0.5",
               "text-[10px] font-medium leading-none",
               "transition-colors duration-150",
+              // R7.7a — accent-as-text on white nav bg fails 4.5:1 contrast.
+              // The 2px top accent bar (rendered below) carries the
+              // "active" visual signal; the label uses --fg for legibility.
               isActive
-                ? "text-[color:var(--accent)]"
+                ? "text-[color:var(--fg)] font-semibold"
                 : "text-[color:var(--fg-mute)] hover:text-[color:var(--fg)]",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40",
               "focus-visible:ring-inset",

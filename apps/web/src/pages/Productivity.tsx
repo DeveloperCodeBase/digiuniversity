@@ -207,7 +207,10 @@ export const MessagesPage: React.FC<ProductivityPageProps> = ({ go }) => {
             </div>
           </div>
 
-          <div className="flex-1 p-6 overflow-auto flex flex-col gap-3.5"  style={{ background: "var(--bg)"}}>
+          {/* R7.7d — scrollable region must be keyboard-focusable (axe
+              serious 'scrollable-region-focusable'). tabindex=0 lets
+              keyboard users scroll the chat log without a mouse. */}
+          <div role="region" aria-label="پنجره گفت‌وگو" tabIndex={0} className="flex-1 p-6 overflow-auto flex flex-col gap-3.5"  style={{ background: "var(--bg)"}}>
             <ChatBubble side="them" t="نسرین سلام، تمرین ۴ رو بررسی کردم. کار خوبی انجام دادی روی پیاده‌سازی مومنتوم." time="۱۴:۲۰" />
             <ChatBubble side="them" t="فقط یه نکته — در فرمول update، باید نرخ یادگیری رو بعد از warm-up کاهش بدی. در گام ۲۰۰ به بعد متوجه می‌شی که نوسانات زیاد می‌شه." time="۱۴:۲۱" />
             <ChatBubble side="me" t="ممنون از بررسی استاد. یعنی learning rate scheduling؟ کسینوسی پیشنهاد می‌کنید یا خطی؟" time="۱۴:۲۸" />
