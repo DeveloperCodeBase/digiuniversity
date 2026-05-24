@@ -48,23 +48,35 @@ test.describe("@gate-a R7.1+R7.2 — Performance optimizations", () => {
     }
   });
 
-  test("R7.1.b /tutor: navigating to a lazy route triggers/used the Tutor chunk", async ({ page }) => {
-    // Use Performance Resource Timing API to detect both fresh fetches
-    // AND cached-via-prefetch chunks (the network observer misses the
-    // latter when Vite auto-modulepreloads lazy chunks from the entry).
-    // The contract is "the Tutor chunk is available in the page's
-    // resource graph" — whether by fresh fetch or by preload-cache hit.
+  test("R7.1.b lazy workspace routes have their own Rollup chunks (referenced in main bundle map)", async ({ page }) => {
+    // The R7.1.b contract is "each lazy() route becomes its own chunk".
+    // Verified by: every React.lazy import target appears as a chunk URL
+    // in Vite's __vite__mapDeps array inside the main bundle. This
+    // catches future regressions that accidentally inline a workspace
+    // page back into the main bundle.
+    //
+    // Avoids the SW interception + Playwright request-observation quirks
+    // that make on-navigation chunk-fetch detection unreliable.
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.goto("/tutor", { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(500);
-    const resources = await page.evaluate(() =>
-      performance.getEntriesByType("resource").map((e) => e.name),
-    );
-    const tutorLoaded = resources.some((u) => /\/assets\/Tutor-[^/]+\.js$/.test(u));
-    expect(
-      tutorLoaded,
-      "/tutor page must have loaded the Tutor chunk (fresh or preload-cache)",
-    ).toBe(true);
+    const bundleUrl = await page.evaluate(() => {
+      const scripts = Array.from(document.querySelectorAll("script[src]")) as HTMLScriptElement[];
+      return scripts.find((s) => /\/assets\/index-[^/]+\.js$/.test(s.src))?.src || "";
+    });
+    expect(bundleUrl, "main bundle script must be in the DOM").toBeTruthy();
+    const source = await page.evaluate(async (url) => {
+      const r = await fetch(url);
+      return r.text();
+    }, bundleUrl);
+    // Sample 4 workspace routes — proves the split happened across the
+    // diverse set of lazy() boundaries (single-file default exports +
+    // multi-file named exports).
+    for (const stem of ["Tutor", "Classroom", "Dashboard", "Settings"]) {
+      const referenced = new RegExp(`assets/${stem}-[A-Za-z0-9_-]+\\.js`).test(source);
+      expect(
+        referenced,
+        `main bundle must reference a separate ${stem}-*.js chunk (R7.1.b lazy)`,
+      ).toBe(true);
+    }
   });
 
   // ----- R7.2.a/b/c — Self-hosted fonts, no Google Fonts -----
