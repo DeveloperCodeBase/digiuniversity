@@ -482,3 +482,25 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Application:** This is a one-time owner exercise of the dossier-author's discretion permitted by Compass §Gate A's intent ("0 user-blocking violations"). It does NOT establish a precedent for future Gates B-F where similar serious tails appear — each future Gate's §2 verdict is its own owner call. If future regressions re-introduce a critical at any time, this verdict is automatically void and the verdict reverts to 🟡 pending re-fix.
 
 **Source:** owner message 2026-05-24 («Decision 2 (§2 verdict): accept critical-half PASS»).
+
+### R7.3-D32 — R7.3 review accepted with documented role-routing infra flake
+**Context:** R7.3 shipped per memo `docs/PHASE_A_R7_3_MEMO.md`. Headline:
+  - Lighthouse a11y: `/` 88 → **100** ✅, `/login` 88 → **100** ✅, `/programs` 87 → **96** ✅. All three at-or-above the 95+ target.
+  - axe-core: critical 0 → 0 ✅ stable; serious 60 → **41** (-19, footer cascade); clean 7 → **26** (+19).
+  - R7.3 per-fix spec: **15/15 PASS** (after silent-fix #1 — `.user-btn` aria-label collision with form submit text).
+  - Regression (8 specs): 7/8 PASS first run. The 8th, `gate-a-role-routing`, hit a 3-attempt infra flake — failure point moved across attempts (#2 instructor → #1 student → #3 admin) but failure mode was identical (waitForURL timeout after submit click). Diagnosed as cumulative login-bucket depletion from today's many login-touching test runs, not a R7.3 regression. R7.3's own per-fix spec includes an authed-login test that PASSED, proving the login helper works when the bucket isn't contested.
+  - Production bundle (`/assets/index-D0AWi8kr.js`) verified via curl to contain both `"منوی حساب"` (anon user-btn) + `"منوی کاربر"` (authed user-btn).
+
+**Owner decision (2026-05-24):** **R7.3 review accepted.** Verbatim rationale: «R7.3 spec خودش ربطی به rate-limit نداره (anonymous routes). اگه اون green ـه، R7.3 خودش shipped ـه. regression role-routing flaky ـه به دلیل rate-limit، نه R7.3 bug. forward progress متوقف نکن برای یه flake که شناخته‌شده ـه».
+
+**Effect:**
+  - R7.3 closed. `gate-a-role-routing` 10/10 re-confirmation logged as follow-on (run later when the bucket has naturally cleared; not blocking).
+  - Gate A Dossier §1 a11y subset flips to ✅ PASS (100/100/96 on the three sampled pages, all over the 95+ target).
+  - Only Lighthouse Performance subset remains blocking §1 (Perf 66/100/66; target ≥ 90).
+  - Real-device D13 smoke on R7.3 still recommended per R1.3-D13; this acceptance is the automated-evidence equivalent of D13 ack pending real-device verification at the owner's convenience.
+
+**D29 status:** Chrome Extension was not connected on the owner laptop during R7.3 verification. The visual specs themselves caught the one silent-fix-worthy regression (user-btn aria-label collision) on attempt 1/3. Recommendation logged: install/connect Claude in Chrome before the next sub-R for the full D29 pre-flight channel.
+
+**Application:** R7.1 + R7.2 (Performance track) unblocked. Per D25 sequential ordering, they're the next sub-Rs.
+
+**Source:** owner message 2026-05-24 («من R7.3 review رو با (R7.3 spec ✅ + 6/7 regression ✅ + role-routing flake) accept می‌کنم»).

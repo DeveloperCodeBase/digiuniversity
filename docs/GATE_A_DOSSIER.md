@@ -8,7 +8,7 @@
 
 | # | Criterion | Status | Evidence below |
 |---|---|---|---|
-| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🔴 **FAIL** (Perf 59/67/64, A11y 88/88/87) | §1 |
+| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🟡 **partial** (A11y ✅ 100/100/96; Perf 🔴 66/100/66 — R7.1+R7.2 pending) | §1 |
 | 2 | axe-core: 0 critical / serious on every route | ✅ **PASS** (critical 0 across 67; 60 documented serious KEEPs — see D31) | §2 |
 | 3 | TypeScript strict, ≤ 5 `@ts-nocheck` (all in DEFERRED) | ✅ verified | §3 |
 | 4 | All Playwright baseline + D12 assertions pass | ✅ verified | §4 |
@@ -18,7 +18,7 @@
 
 **Gate A passes when:** all six above are ✅ AND every sub-R has owner D13 ack. Until then, **no Phase B work begins.**
 
-**Current state (post-R7.7 D13 + D31 verdict):** Gate A blocked on **§1 only** (Lighthouse, Perf + A11y subset). §2 owner-verdict-PASS per D31. §5 cleared per D24. Next sub-R: **R7.3** (Lighthouse a11y subset 88 → 95+) per owner choice; Performance track (R7.1+R7.2) follows.
+**Current state (post-R7.3 D32):** Gate A blocked on **§1 Performance subset only**. §1 a11y subset ✅ PASS. §2 owner-verdict-PASS per D31. §5 cleared per D24. Next sub-Rs: **R7.1** (Vite chunks) + **R7.2** (Vazirmatn self-host) — Performance track.
 
 | Sub-R | Critical-path impact | Status |
 |---|---|---|
@@ -28,8 +28,10 @@
 | R7.12 | Mini-variant persistent sidebar | ✅ D27 |
 | R7.7 | accent/gold-as-text demote + 9 per-page a11y fixes (critical 6 → 0) | ✅ D30 |
 | **§2 verdict** | critical 0 + serious-KEEPs-documented = §2 PASS | ✅ D31 |
-| R7.3 | Lighthouse a11y audit set (88 → 95+ on /, /login, /programs) | ⏳ memo in flight |
-| R7.1-2 | Performance track (Vite chunks + Vazirmatn self-host) | ⏸ after R7.3 per D25 |
+| R7.3 | Lighthouse a11y subset (88/88/87 → 100/100/96) | ✅ D32 |
+| **§1 a11y subset** | 100/100/96 ≥ 95+ target | ✅ (since D32) |
+| R7.1 | Vite manual chunks + React.lazy route splitting | ⏳ memo next |
+| R7.2 | Self-host Vazirmatn + drop unused font families | ⏳ memo next |
 
 ---
 
@@ -567,7 +569,7 @@ montage docs/gate-a-evidence/role-dashboards/*.png -tile 5x2 -geometry +6+6 \
 
 > **Gate A pass criteria from Compass Roadmap §Gate A — all 6 criteria must verify before Phase B start.**
 >
-> 1. 🔴 Lighthouse mobile ≥ 90 on 3 sampled pages — Perf 59/67/64, A11y 88/88/87 (R7.3 + R7.1/R7.2 pending)
+> 1. 🟡 Lighthouse mobile ≥ 90 on 3 sampled pages — A11y ✅ 100/100/96; Perf 🔴 66/100/66 (R7.1/R7.2 pending)
 > 2. ✅ axe-core 0 critical/serious on all routes — **critical 0 verified across 67 routes; 60 serious documented as KEEPs per D31**
 > 3. ✅ TypeScript ≤ 5 `@ts-nocheck` (all in DEFERRED) — verified, count = 1
 > 4. ✅ All Playwright D12 + baseline assertions pass — verified, 68/68 + 138 frames + R7.7 spec 10/10 + regression 7/7
