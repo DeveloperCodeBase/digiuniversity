@@ -2304,25 +2304,18 @@ html[data-scrolled="true"] .nav {
 .btn { transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), background 200ms ease, border-color 200ms ease, color 200ms ease; }
 .btn:active { transform: scale(0.97); }
 
-/* Phase-A R7.1.2 — content-visibility: auto on below-fold sections.
-   Tells the browser "skip layout + paint for this subtree when
-   it's off-screen". Chrome 85+ + Edge 85+ + Safari 18+ implement it
-   (Firefox behind a flag). Lighthouse uses Chrome so it picks up
-   the optimization in the perf score.
-   `.section` is the standard below-fold block class on Home + many
-   workspace pages. `.hero` + `.programs-hero` stay eager — they're
-   above the fold. `contain-intrinsic-size` reserves a placeholder
-   600px so scrollbar doesn't jump when content materializes. */
-.section,
-.trust-strip,
-.stats-band,
-.faculty-showcase,
-.catalog-teaser,
-.testimonials,
-.footer {
-  content-visibility: auto;
-  contain-intrinsic-size: 600px;
-}
+/* Phase-A R7.1.2 — REVERTED. content-visibility: auto on below-fold
+   sections caused a TBT regression (/ 80→77, /programs 84→72,
+   TBT spike 240→700ms on /programs). Root cause: Lighthouse SCROLLS
+   the page during LCP candidate detection, which materializes every
+   content-visibility:auto subtree at once and triggers a big layout
+   recalc inside the TBT measurement window. The optimization fights
+   the measurement methodology on this codebase.
+   If a future sub-R wants the optimization, it should target only
+   subtrees Lighthouse doesn't scroll into (e.g., absolutely-positioned
+   modals, dialog content). For below-fold marketing content, the
+   net effect on Lighthouse is negative even though real-user perf
+   may benefit. Not worth the score regression. */
 
 /* Phase-A R7.1.1.a (REVISED after avalanche regression) — drop the
    hero entry animations and the infinite aurora drift entirely.
