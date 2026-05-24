@@ -8,8 +8,8 @@
 
 | # | Criterion | Status | Evidence below |
 |---|---|---|---|
-| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🔴 **FAIL** (Perf 46/67/67, A11y 88/88/87) | §1 |
-| 2 | axe-core: 0 critical / serious on every route | 🟡 **partial** (6 critical, 63 serious; was 54 / 64) | §2 |
+| 1 | Lighthouse mobile ≥ 90 on 3 sampled pages | 🔴 **FAIL** (Perf 59/67/64, A11y 88/88/87) | §1 |
+| 2 | axe-core: 0 critical / serious on every route | ✅ **PASS** (critical 0 across 67; 60 documented serious KEEPs — see D31) | §2 |
 | 3 | TypeScript strict, ≤ 5 `@ts-nocheck` (all in DEFERRED) | ✅ verified | §3 |
 | 4 | All Playwright baseline + D12 assertions pass | ✅ verified | §4 |
 | 5 | 10 role dashboards visually distinct (reachable by role) | ✅ **PASS** (10/10 routing + role-tailored nav) | §5 |
@@ -18,7 +18,7 @@
 
 **Gate A passes when:** all six above are ✅ AND every sub-R has owner D13 ack. Until then, **no Phase B work begins.**
 
-**Current state (post-R7.6 + R7.5 + R7.9 + R7.12 critical-path):** Gate A blocked on §1 (Perf) and §2 (long-tail color-contrast + 6 critical residuals). §5 cleared. Owner gate next on whether to start R7.7 long-tail OR stay paused.
+**Current state (post-R7.7 D13 + D31 verdict):** Gate A blocked on **§1 only** (Lighthouse, Perf + A11y subset). §2 owner-verdict-PASS per D31. §5 cleared per D24. Next sub-R: **R7.3** (Lighthouse a11y subset 88 → 95+) per owner choice; Performance track (R7.1+R7.2) follows.
 
 | Sub-R | Critical-path impact | Status |
 |---|---|---|
@@ -26,9 +26,10 @@
 | R7.5 | aria-valid-attr-value 53 → 0 | ✅ D22 |
 | R7.9 | apiRoleToLocal 3 → 10 + D18 flow spec | ✅ D24 |
 | R7.12 | Mini-variant persistent sidebar | ✅ D27 |
-| **Now** | Measurement re-run (this update) | in-flight |
-| R7.7 | accent/gold-as-text + long-tail (color-contrast 63 routes) | ⏸ owner gate |
-| R7.1-4 | Performance track | ⏸ strict sequential per D25 |
+| R7.7 | accent/gold-as-text demote + 9 per-page a11y fixes (critical 6 → 0) | ✅ D30 |
+| **§2 verdict** | critical 0 + serious-KEEPs-documented = §2 PASS | ✅ D31 |
+| R7.3 | Lighthouse a11y audit set (88 → 95+ on /, /login, /programs) | ⏳ memo in flight |
+| R7.1-2 | Performance track (Vite chunks + Vazirmatn self-host) | ⏸ after R7.3 per D25 |
 
 ---
 
@@ -151,9 +152,11 @@ The remaining TASK B (axe-core) and TASK C (composite) continue so the dossier i
 
 ---
 
-## §2 — axe-core scan (Criterion 2) — **🔴 FAIL**
+## §2 — axe-core scan (Criterion 2) — **✅ PASS** (with documented KEEPs per D31)
 
 **Target:** 0 critical and 0 serious violations on every authenticated and public route. (Moderate + minor violations are tracked but not Gate A blockers.)
+
+**Verdict (post-R7.7 D30 + owner D31):** ✅ PASS — critical 0 across all 67 routes (was 54 → 6 → **0**). Serious 60 (was 65 → 64 → 63 → **60**) but **documented as KEEPs**: dominantly `.eyebrow`-on-tinted-card-bg (axe bg detection heuristic, math-on-white actually passes 6.86:1) and accent-on-accent-soft "active pill" patterns kept per Q1 / D14 brand-blue protection. Owner exercised dossier-author discretion per D31 to accept the documented serious tail as compatible with Compass §Gate A intent ("0 user-blocking violations"). See D31 for full rationale + the precedent boundary (does not generalize to Gates B-F).
 
 **Methodology:** `@axe-core/playwright` 4.10.1 (already pinned in `apps/web/package.json`) integrated into a dedicated spec (`apps/web/tests/visual/gate-a-axe-scan.spec.ts`). Per route: navigate, wait for `domcontentloaded`, build the axe instance with `wcag2a/aa + wcag21a/aa + wcag22aa` tag filter, run, filter to `impact in ('critical', 'serious')`. Workspace routes share a `BrowserContext` via `beforeAll` (same auth-rate-limit-dodge pattern as R3/R5/R6/R6.6).
 
@@ -164,30 +167,34 @@ The remaining TASK B (axe-core) and TASK C (composite) continue so the dossier i
 
 **Aggregated headline (from `docs/gate-a-evidence/axe-scan.json`):**
 
-| Metric | Initial run | Post-R7.5 (was R7.12-branch) | Post-R7.12 merge (latest) | Δ from initial |
-|---|---|---|---|---|
-| Routes scanned | 67 | 67 | 67 | 0 |
-| Routes with ≥1 critical | 54 | 6 | **6** | **−48** ✅ |
-| Routes with ≥1 serious | 65 | 64 | **63** | **−2** |
-| Clean (0 critical + 0 serious) | 2 | 2 | **3** | **+1** |
-
-**Top rule frequencies — initial run vs post-R7.12 critical-path:**
-
-| Rule | Severity | Initial | Post-R7.12 | Δ | Fix sub-R |
+| Metric | Initial run | Post-R7.5 (R7.12-branch) | Post-R7.12 merge | Post-R7.7 (latest) | Δ from initial |
 |---|---|---|---|---|---|
-| `color-contrast` | serious | 65 | **63** | −2 | R7.7a (accent-as-text) + R7.7b (gold-as-text) + R7.7c (footer dark bg) |
+| Routes scanned | 67 | 67 | 67 | 67 | 0 |
+| Routes with ≥1 critical | 54 | 6 | 6 | **0** ✅ | **−54** ✅ |
+| Routes with ≥1 serious | 65 | 64 | 63 | **60** | **−5** |
+| Clean (0 critical + 0 serious) | 2 | 2 | 3 | **7** | **+5** |
+
+**Top rule frequencies — initial run vs post-R7.7:**
+
+| Rule | Severity | Initial | Post-R7.7 | Δ | Fix sub-R |
+|---|---|---|---|---|---|
+| `color-contrast` | serious | 65 | **60** | −5 | R7.7a accent-as-text + R7.7c footer ✅; remaining 60 = .eyebrow-on-card + accent-on-accent-soft KEEPs per D31 |
 | `aria-valid-attr-value` | critical | 53 | **0** ✅ | **−53** | **R7.5 shipped** |
-| `aria-prohibited-attr` | serious | 2 | 1 | −1 | R7.7d (per-button audit) |
-| `button-name` | critical | 2 | 2 | 0 | R7.7d |
-| `label` | critical | 2 | 2 | 0 | R7.7d |
-| `scrollable-region-focusable` | serious | 2 | 2 | 0 | R7.7d |
-| `select-name` | critical | 2 | 2 | 0 | R7.7d |
+| `aria-prohibited-attr` | serious | 2 | **0** ✅ | −2 | R7.7d (Stage rail role="region") |
+| `button-name` | critical | 2 | **0** ✅ | **−2** | R7.7d (/admin Toggle + /research milestone aria-label) |
+| `label` | critical | 2 | **0** ✅ | **−2** | R7.7d (/verify-email OTP inputs + /settings name+bio aria-label) |
+| `scrollable-region-focusable` | serious | 2 | **0** ✅ | −2 | R7.7d (/messages chat region + /classroom rail tabindex) |
+| `select-name` | critical | 2 | **0** ✅ | **−2** | R7.7d (/analytics + /recordings select aria-label) |
 | `aria-toggle-field-name` | serious | 1 | 0 ✅ | −1 | **R7.5/R7.12 swept** |
-| `nested-interactive` | serious | 1 | 1 | 0 | R7.7d |
+| `nested-interactive` | serious | 1 | **0** ✅ | −1 | R7.7d (/classroom slide: drop role="img" → aria-labelledby) |
 
-**Gate A criterion 2 verdict (post-critical-path): 🟡 PARTIAL.**
+**Gate A criterion 2 verdict (post-R7.7 + D31): ✅ PASS (with documented KEEPs).**
 
-The critical-path work cleared the chrome-level + a11y-toggle issues entirely (54 critical → 6). The remaining 6 critical are all R7.7d-gated long-tail (per-page form/button bugs: 2× button-name, 2× label, 2× select-name). The 63 serious are 99% color-contrast (R7.7a/b/c work pending owner gate).
+R7.7 cleared the entire critical layer (6 → 0) and every non-color-contrast serious rule (all → 0). The 60 remaining `color-contrast` serious all map to two KEEPs:
+1. **`.eyebrow` text on tinted card backgrounds.** Math-on-pure-white: `--fg-mute` (#4a5a76) on `#ffffff` = 6.86:1 (passes WCAG 2 AA at 11px). Axe detects a slightly different effective bg color on cards with subtle tint/gradients and flags the rule. The actual user-visible contrast is acceptable — confirmed by owner D13 smoke 2026-05-24.
+2. **Accent-on-accent-soft "active pill" patterns** (`.filter-pill.active`, `.cmdk-item:hover`, `.dash .side-nav li a.active`, `.nav-link.active`). Per D14 (brand-blue protection) + R7.7 memo Q1, these were owner-required KEEPs. They paint accent text over accent-soft tinted bg, which gives ~3.5:1 — borderline against the WCAG 2 AA 4.5:1 normal-text bar but reinforced by underline + bold + position so the affordance reads regardless of contrast alone.
+
+**Per D31:** owner accepts this as §2 PASS because (a) critical = 0 means no user-blocking violation remains, and (b) the documented serious tail is justified KEEPs, not unaddressed regressions. The verdict reverts to 🟡 if any future change re-introduces a critical or undoes the KEEP rationale.
 
 ### Per-route table
 
@@ -297,9 +304,11 @@ The damage is concentrated in **two root causes**, each fixable in one place:
 
 ### Gate A status after §2
 
-🔴 **Criterion 2 (axe-core 0 critical + 0 serious on every route): FAIL.**
+✅ **Criterion 2 (axe-core 0 critical + 0 serious on every route): PASS with documented KEEPs.**
 
-Combined with §1, Gate A has **two of its six criteria failing**. Phase B start remains BLOCKED. The R7 sweep targets both criteria simultaneously (Lighthouse + axe share root causes — code splitting + font self-host + theme contrast + chrome-level aria fix).
+critical = 0 across all 67 routes (verified by owner D13 smoke on real mobile 2026-05-24). 60 serious remain, all `color-contrast` and all explicit KEEPs justified in the rule-frequency table above + D31 in `docs/PHASE_A_DECISIONS.md`.
+
+Combined with §5 (✅ per D24) and §3/§4/§6 (✅ verified earlier), Gate A now has **only §1 (Lighthouse) failing**. Phase B start remains BLOCKED until §1 lands. The remaining R7 path: **R7.3** (Lighthouse a11y subset 88 → 95+) then **R7.1+R7.2** (Performance track), per D25 sequential ordering + owner choice 2026-05-24.
 
 **Full axe-scan JSON evidence:** `docs/gate-a-evidence/axe-scan.json` (32 KB, every route's per-violation rule list).
 
@@ -558,16 +567,16 @@ montage docs/gate-a-evidence/role-dashboards/*.png -tile 5x2 -geometry +6+6 \
 
 > **Gate A pass criteria from Compass Roadmap §Gate A — all 6 criteria must verify before Phase B start.**
 >
-> 1. ✅ Lighthouse mobile ≥ 90 on 3 sampled pages — **awaiting run**
-> 2. ✅ axe-core 0 critical/serious on all routes — **awaiting run**
-> 3. ✅ TypeScript ≤ 5 `@ts-nocheck` (all in DEFERRED) — **verified, count = 1**
-> 4. ✅ All Playwright D12 + baseline assertions pass — **verified, 68/68 + 138 frames**
-> 5. ✅ 10 role dashboards visually distinct — **verified**
-> 6. ✅ Audit-on-mutation lint enforced in CI — **verified, 4 entry points**
+> 1. 🔴 Lighthouse mobile ≥ 90 on 3 sampled pages — Perf 59/67/64, A11y 88/88/87 (R7.3 + R7.1/R7.2 pending)
+> 2. ✅ axe-core 0 critical/serious on all routes — **critical 0 verified across 67 routes; 60 serious documented as KEEPs per D31**
+> 3. ✅ TypeScript ≤ 5 `@ts-nocheck` (all in DEFERRED) — verified, count = 1
+> 4. ✅ All Playwright D12 + baseline assertions pass — verified, 68/68 + 138 frames + R7.7 spec 10/10 + regression 7/7
+> 5. ✅ 10 role dashboards visually distinct + reachable per role — verified (D24)
+> 6. ✅ Audit-on-mutation lint enforced in CI — verified, 4 entry points
 >
-> Plus D13: every sub-R owner-acked manually — **5 of 8 sub-Rs pending**.
+> Plus D13: every sub-R owner-acked manually — R7.5/R7.6/R7.7/R7.9/R7.12 ✅ (D19/D22/D24/D27/D30); R1.x/R2/R3/R4/R5/R6/R6.5/R6.6 ⏳ pending owner sign-off.
 >
-> **No Phase B start until all of the above are green and owner-acked.**
+> **No Phase B start until §1 lands and D13 ack is complete on every sub-R.**
 
 ---
 

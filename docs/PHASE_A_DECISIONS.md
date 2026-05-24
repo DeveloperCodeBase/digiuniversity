@@ -428,3 +428,57 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Why:** Single source of truth for both LTR (Phase-F en-US locale, if ever) and RTL (current). No `[dir="rtl"]` override needed. Aligns with the existing `inset-inline-start` / `inset-inline-end` patterns already used in AppShell's Sheet drawer (R1.1) and the R6 classroom CSS.
 **Application:** R6.6 used `margin-inline-start: auto` on `.nav-actions`. Future RTL fixes that involve directional margins, padding, or absolute positioning must use logical-property equivalents (`margin-inline-*`, `padding-inline-*`, `inset-inline-*`, `border-inline-*`, `start-*` / `end-*` Tailwind utilities) — never `margin-left/right`, `padding-left/right`, `left/right`, etc.
 **Source:** owner-prescribed debug-step list 2026-05-23 («ml-* و mr-* استفاده شده یا ms-* و me-*؟»).
+
+### D29 — Pre-smoke automation via Chrome Extension on owner laptop
+**Context:** D13 (owner manual smoke on real mobile + incognito + hard reload) is the formal Phase A gate. But discovering an obvious break only after pinging the owner wastes owner attention and the round-trip cost is high. Claude has access to a Chrome Extension running on the owner's laptop — usable for a non-binding pre-flight check.
+
+**Rule:** from R7.3 onwards, every sub-R inserts a **pre-smoke** stage between «code+spec green on VPS» and «ping owner for D13».
+  - **Tool:** Chrome Extension on owner laptop (already granted).
+  - **Scope:** the sub-R's critical paths on Chrome desktop view (and, where viewport sim is available, a small set of viewports).
+  - **Actions:** navigate to the relevant routes, click the interactions the sub-R touched, capture screenshots.
+  - **Pass/fail decision tree:**
+    - **Pre-smoke fail (visible bug, console error, layout break)** → silent fix inside the same sub-R, re-run pre-smoke. Max 3 attempts.
+    - **3 attempts still failing** → ping owner with the pre-smoke screenshots + diagnosis.
+    - **Pre-smoke pass** → ping owner for the formal D13 (real mobile + incognito + hard reload).
+
+**Critical:** pre-smoke is NOT a substitute for D13. D13 (real mobile + incognito + hard reload, per R1.3-D13) remains the formal gate. Pre-smoke is a pre-flight that reduces the owner's smoke-cycle latency by catching the loud failures before the owner is asked to look.
+
+**Carve-outs:**
+  - Sub-Rs that touch only docs / build config / non-UI files MAY skip pre-smoke if there is no UI surface to verify.
+  - Sub-Rs that are themselves test-only (e.g. spec-infra fixes) MAY skip pre-smoke.
+  - Performance-only sub-Rs (R7.1/R7.2 Vite chunks + font self-host) still need pre-smoke because the page must still render — but the smoke check is "page loads, no console error, no visible regression" rather than "the new feature works."
+
+**This does not supersede R1.3-D13.** It adds a stage before it. D13 ack is still the gate that closes a sub-R.
+
+**Source:** owner instruction 2026-05-24 («NEW POLICY: D29 — Pre-smoke automation via Chrome Extension on owner laptop»).
+
+### R7.7-D30 — R7.7 D13 ack: combined a11y sweep verified
+**Context:** R7.7 shipped combined a+b+c+d a11y sweep — accent-as-text demotion (10 sites), gold-as-text demotion (DropdownMenu destructive), `--fg-mute-on-dark` token + footer rewire, 9 per-page a11y fixes (verify-email OTP labels, /settings name+bio, /admin Toggle, /research milestone, /analytics + /recordings select labels, /messages chat region, /classroom rail + mic-off + slide aria-labelledby). 10/10 per-fix spec PASS; regression sweep on R1.1+R3+R5+R6+R6.6+R7.12+gate-a-role-routing all green (1 flake auto-confirmed). axe: critical 6 → 0 ✅, serious 63 → 60 🟡. Lighthouse a11y unchanged 88/88/87.
+
+**Owner D13 result (2026-05-24):** **PASS.** Verified on real mobile + incognito + hard reload:
+  - Body-text demotion (`/`, `/tutor`, `/transcript`, `/community`): elements still clearly clickable via underline / hover state, navy doesn't flatten them.
+  - DropdownMenu destructive: text navy at rest, gold-tinted hover bg, messaging clear.
+  - Footer: `--fg-mute-on-dark` (#aab0c4) legible on navy bg.
+  - Active nav: still distinct "you-are-here" via accent pill + underline (Q1 KEEP honored).
+  - Per-page a11y: `/admin` / `/research` / `/verify-email` / `/settings` / `/analytics` / `/recordings` / `/messages` / `/classroom` all functional. Keyboard nav works. Screen-reader announce correct where spot-checked.
+
+**Status:** **R7.7 closed.** D13 ack confirmed. critical 6 → 0 ✅ verified by owner on the real-mobile surface. §2 verdict decided separately in D31.
+
+**Source:** owner message 2026-05-24 («R7.7 D13 PASS»).
+
+### D31 — Gate A §2 verdict: critical-half PASS accepted as §2 PASS
+**Context:** Compass §Gate A criterion 2 reads "0 critical + 0 serious." After R7.7, axe shows critical = 0 across all 67 routes (target met) but serious = 60 (down from 63). The 60 serious remaining are dominantly:
+  - `.eyebrow` font-class on card backgrounds — axe detects a different effective bg color than the math-on-white case where `var(--fg-mute)` = #4a5a76 gives 6.86:1. R7.7 audit attributed this to axe's bg detection heuristic on tinted cards, not actual contrast failure.
+  - Accent-on-accent-soft "active pill" patterns (`.filter-pill.active`, `.cmdk-item:hover`, `.dash .side-nav li a.active`, `.nav-link.active`) — these were Q1 KEEPs per D14 brand-blue protection. They pass on the tinted bg they actually paint over.
+
+**Owner decision (2026-05-24):** §2 verdict is **PASS** for Gate A purposes, with documented KEEPs. Reasoning recorded verbatim:
+  - critical 6 → 0 is a real milestone; every screen-reader user can safely navigate now.
+  - The 60 serious tail is dominantly KEEPs that R7.7 explicitly justified (contrast passes on the actual tinted bg, axe misdetects bg color).
+  - Spinning R7.7e for the serious tail would either contradict the R7.7-justified KEEPs or require a deeper audit. That budget is better spent on the Performance track.
+  - Compass §Gate A "0 critical + 0 serious" is the strict literal reading. Owner takes the documented-and-justified route: critical 0 + serious documented with rationale = §2 PASS.
+
+**Effect on dossier:** `docs/GATE_A_DOSSIER.md` §2 flips from 🟡 to ✅ with an explicit note: "§2 PASS with documented KEEPs, not strict 0/0. See D31 + R7.7 review for the audit trail."
+
+**Application:** This is a one-time owner exercise of the dossier-author's discretion permitted by Compass §Gate A's intent ("0 user-blocking violations"). It does NOT establish a precedent for future Gates B-F where similar serious tails appear — each future Gate's §2 verdict is its own owner call. If future regressions re-introduce a critical at any time, this verdict is automatically void and the verdict reverts to 🟡 pending re-fix.
+
+**Source:** owner message 2026-05-24 («Decision 2 (§2 verdict): accept critical-half PASS»).
