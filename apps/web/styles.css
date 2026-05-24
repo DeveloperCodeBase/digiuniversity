@@ -2304,65 +2304,26 @@ html[data-scrolled="true"] .nav {
 .btn { transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), background 200ms ease, border-color 200ms ease, color 200ms ease; }
 .btn:active { transform: scale(0.97); }
 
-/* Phase-A R7.1.1.a — Hero animations gated behind .is-ready class.
-   PRE-fix: eager `animation: title-rise / card-fade-in / aurora-drift`
-   fired from page-load with delays 0-1850ms — squarely inside
-   Lighthouse's TBT window (FCP ~2.3s) and contributing the bulk of
-   the 440 ms TBT cost on / .
-   POST-fix: hero paints in its STATIC final state (full opacity,
-   identity transform) by default. JS in Home.tsx adds `.is-ready` to
-   the `.hero` element via requestIdleCallback (or setTimeout fallback)
-   once the browser is idle (after FCP + LCP). Only THEN do the
-   keyframe animations kick in. Lighthouse's TBT window has typically
-   closed by then, so the animation work isn't counted. Real users
-   still see the entry choreography because requestIdleCallback fires
-   within ~50-200ms of the page becoming idle on a typical device. */
-@keyframes title-rise {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.hero.is-ready .hero-title { animation: title-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-.hero.is-ready .hero-eyebrow { animation: title-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0ms; }
-.hero.is-ready .hero-sub { animation: title-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 200ms; }
-.hero.is-ready .hero-cta { animation: title-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 350ms; }
+/* Phase-A R7.1.1.a (REVISED after avalanche regression) — drop the
+   hero entry animations and the infinite aurora drift entirely.
+   The first .is-ready-gated attempt CONCENTRATED all 8+ animations
+   at a single moment (when JS toggled the class), and Lighthouse
+   measured that concentrated work as a +1290ms TBT spike (440→1730).
+   New approach: the static design IS the design. Hero text + cards
+   paint in their final state with no entry transition. The auroras
+   stay visible (as decorative radial gradients) but don't animate at
+   all — saves the infinite compositor work entirely. Users still
+   see the rich layered hero; what they don't see is a one-time
+   entry choreography that adds no real value.
 
-/* Hero 3D cards — same .is-ready gate.
-   By default the cards paint in their final state (opacity 1, no blur).
-   Only when .is-ready is set do the card-fade-in keyframes engage. */
-@keyframes card-fade-in {
-  from { opacity: 0; filter: blur(8px); }
-  to   { opacity: 1; filter: blur(0); }
-}
-.hero.is-ready .hc-classroom,
-.hero.is-ready .hc-tutor,
-.hero.is-ready .hc-analytics,
-.hero.is-ready .hc-credential {
-  animation: card-fade-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.hero.is-ready .hc-classroom { animation-delay: 500ms; }
-.hero.is-ready .hc-tutor { animation-delay: 650ms; }
-.hero.is-ready .hc-analytics { animation-delay: 800ms; }
-.hero.is-ready .hc-credential { animation-delay: 950ms; }
-
-/* Subtle aurora drift — keyframes preserved, gated on .is-ready.
-   Without .is-ready the auroras are static (no animation work).
-   JS adds .is-ready via requestIdleCallback so Lighthouse's TBT
-   window doesn't see the infinite animation start. */
-@keyframes aurora-drift-1 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-30px, 20px); }
-}
-@keyframes aurora-drift-2 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(40px, -25px); }
-}
-@keyframes aurora-drift-3 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-20px, -30px); }
-}
-.hero.is-ready .aurora-1 { animation: aurora-drift-1 14s ease-in-out infinite; }
-.hero.is-ready .aurora-2 { animation: aurora-drift-2 16s ease-in-out infinite; }
-.hero.is-ready .aurora-3 { animation: aurora-drift-3 18s ease-in-out infinite; }
+   Scroll-triggered .reveal animations elsewhere on the page (Stagger
+   via IntersectionObserver) are UNCHANGED — those only run when
+   their element enters viewport during user scroll, outside the
+   TBT measurement window. */
+/* (no @keyframes title-rise / card-fade-in / aurora-drift here —
+    intentionally removed. If a future content sprint wants entry
+    choreography back, do it via CSS Web Animation API + idleCallback
+    + per-element scheduling, not one big simultaneous trigger.) */
 
 /* Page transition wrapper */
 @keyframes page-in {
