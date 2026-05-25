@@ -62,16 +62,11 @@ export const AppShell: React.FC = () => {
   const kind: RouteKind = getRouteKind(route);
   const isWorkspace = kind === "WORKSPACE";
 
-  // R-Landing (2026-05-25) — auth-redirect from landing REMOVED.
-  // R1.3-B5 added the redirect because the OLD Home leaked user data
-  // (avatar + name in nav chrome) before the redirect fired. The
-  // R-Landing redesign uses anonymous-only HomeNav with no user data,
-  // so authed users can safely see the marketing landing too. Owner
-  // explicit directive 2026-05-25: «i dont see any changes in landing
-  // page....do it now...it an order» — they were stuck behind this
-  // very redirect.
+  // R1.3 B5 — privacy: an authenticated visitor hitting the landing
+  // (/ or /home) must NOT see any chrome rendered with their identity
+  // before the redirect takes effect. Gate the shell behind a skeleton.
   const isLandingRoute = route === "" || route === "home";
-  const redirectAuthedFromLanding = false; // was: isLandingRoute && auth.isAuthenticated;
+  const redirectAuthedFromLanding = isLandingRoute && auth.isAuthenticated;
 
   // R7.12 — sidebar is now viewport-conditional:
   //   ≥1024px (workspace): persistent rail inline in the workspace
@@ -140,19 +135,6 @@ export const AppShell: React.FC = () => {
   }
   if (redirectAuthedFromLanding) {
     return <AuthLoadingSkeleton label="در حال انتقال به داشبورد..." />;
-  }
-
-  // Phase-A R-Landing (D39 / Option B) — for the landing route,
-  // AppShell renders NOTHING and lets Home.tsx own the full chrome
-  // (its own Nav + skip-link + main + Footer, all scoped via
-  // .home-shell-v2). The R6 .r6-classroom-shell precedent is the
-  // model here: a standalone-chrome page inside the router tree.
-  //
-  // Note: this happens AFTER the redirectAuthedFromLanding check
-  // above, so an authed visitor still sees the skeleton + bounce
-  // to /dashboard (Home.tsx never renders for authed users on /).
-  if (isLandingRoute) {
-    return <Outlet />;
   }
 
   const navMode = navModeFor(kind);
