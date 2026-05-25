@@ -673,3 +673,45 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 - Commit `a9f517f` — rebuild
 
 **Source:** owner directive 2026-05-25 PHASE A-D forensic audit + rebuild + verification ladder. Owner expected ≥95% per viewport; 1440 verified ≥99%, narrow viewports pending D13.
+
+### Landing-D41 — EMERGENCY ROLLBACK R-Landing (site-wide breakage)
+**Context:** Within minutes of D40 verification report being delivered to owner, owner reported: «EMERGENCY. owner reports تمام pages وبسایت شکسته بعد از R-Landing commits. ROLLBACK now. NO QUESTIONS. NO DEBUG FIRST. ROLLBACK FIRST، DEBUG بعد.»
+
+**Decision: full rollback of all R-Landing code commits.** Per owner directive 2026-05-25.
+
+**Reverted commits (reverse chronological order, single squashed revert):**
+- `a9f517f` (REBUILD — faithful Nav + Footer 1:1 from template)
+- `2964043` (skip-link hotfix inside .home-shell-v2)
+- `e32acd4` (HOTFIX horizontal scroll body margin)
+- `b761107` (drop auth-redirect from landing)
+- `5bac904` (initial Home rewrite + home-v2.css + landing-spec)
+
+**Rollback commit:** `674462d` titled "EMERGENCY: revert R-Landing — site-wide breakage reported by owner".
+
+**Last-known-good commit:** `7dcf0f4` ("docs(phase-b-r2): memo — CourseOffering + dual-write from Cohort") — the commit immediately before `5bac904`. End-state of HEAD after revert matches `7dcf0f4` exactly for all R-Landing files (verified: `git diff HEAD 7dcf0f4 -- <files>` = 0 lines).
+
+**Files restored to pre-R-Landing state:**
+- `apps/web/src/pages/Home.tsx` (rolled back to generic pre-rewrite version)
+- `apps/web/src/layouts/AppShell.tsx` (auth-redirect intact, isLandingRoute Outlet early-return removed)
+- `docs/PHASE_A_DEFERRED_TYPES.md` (Home.tsx re-added to deferred list)
+
+**Files deleted:**
+- `apps/web/src/pages/home-v2.css` (3306 lines)
+- `apps/web/src/pages/Home.tsx.broken-v1` + `home-v2.css.broken-v1` (rebuild backups)
+- `apps/web/tests/visual/phase-a-landing.spec.ts` (R-Landing contract spec)
+- `scripts/landing-scope-css.mjs` (CSS prefix generator)
+
+**Files preserved (historical record):**
+- `docs/PHASE_A_LANDING_AUDIT.md` (D37 read-only audit)
+- `docs/PHASE_A_LANDING_MEMO.md` (D38 memo)
+- `docs/PHASE_A_R_LANDING_REVIEW.md` (R-Landing post-ship review)
+- `docs/PHASE_A_LANDING_FORENSIC_AUDIT.md` (D40 forensic + side-by-side proof)
+- `docs/PHASE_A_DECISIONS.md` entries D37, D38, D39, D40 — keep for traceability
+
+**Post-rollback verification:** deploy + 5-page Chrome Extension check (/, /login, /dashboard, /classroom, /super) — IN PROGRESS.
+
+**Postmortem doc:** `docs/PHASE_A_R_LANDING_POSTMORTEM.md` — root-cause hypothesis analysis pending site verification.
+
+**R-Landing status: FROZEN.** No rebuild attempt until owner explicit approval. Per directive: «rollback first، diagnose بعد، rebuild بعدتر (اگه owner خواست)».
+
+**Source:** owner directive 2026-05-25 EMERGENCY ROLLBACK PHASE 1 (rollback now) + PHASE 2 (diagnose post-rollback).
