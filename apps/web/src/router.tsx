@@ -144,8 +144,6 @@ const BookmarksPage = React.lazy(() => import("./pages/Productivity").then((m) =
 const AchievementsPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.AchievementsPage })));
 const SubmissionPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.SubmissionPage })));
 const ProfilePage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.ProfilePage })));
-// Phase B B.1b — Academic Hierarchy admin page (workspace, lazy).
-const AcademicsPage = React.lazy(() => import("./pages/admin/AcademicsPage"));
 
 // =====================================================
 // useGo — back-compat shim
@@ -365,8 +363,6 @@ const routes = [
   { path: "/pricing", element: <RouteShell Component={PricingPage} /> },
   { path: "/faculty", element: <RouteShell Component={FacultyPage} /> },
   { path: "/admin", element: <RouteShell Component={AdminPage} /> },
-  // Phase B B.1b — Academic Hierarchy admin (universities + semesters).
-  { path: "/admin/academics", element: <RouteShell Component={AcademicsPage} /> },
   { path: "/parent", element: <RouteShell Component={ParentPage} /> },
   {
     path: "/officehours",

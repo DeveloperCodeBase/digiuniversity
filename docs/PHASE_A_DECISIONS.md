@@ -715,3 +715,90 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **R-Landing status: FROZEN.** No rebuild attempt until owner explicit approval. Per directive: «rollback first، diagnose بعد، rebuild بعدتر (اگه owner خواست)».
 
 **Source:** owner directive 2026-05-25 EMERGENCY ROLLBACK PHASE 1 (rollback now) + PHASE 2 (diagnose post-rollback).
+
+### D42 — SW cache strategy fix critical pre-Gate-A (R7.0)
+**Context:** D41 postmortem identified Service Worker + Workbox precache as the primary amplifier for R-Landing's site-wide breakage. With current `globPatterns: ["**/*.{js,css,html,svg,woff2}"]` + `skipWaiting + clientsClaim`, every deploy precaches all artifacts and serves them immediately to all visitors — so any deploy with a bug gets stuck in users' browsers until the SW phones home again.
+
+**Decision:** Fix SW cache strategy as **R7.0** — pre-Gate-A, not post. Foundational reliability bug.
+
+**Owner rationale verbatim:**
+- SW dispose نکنیم → PWA installability از دست می‌ره (Compass Roadmap mentioned)
+- SW dest نخوریم → هر deploy آینده همین bug رو می‌سازه
+- network-first برای HTML/JS + cache-first برای assets standard practice ـه
+
+**Scope (R7.0):**
+- `apps/web/vite.config.ts` → VitePWA workbox config update:
+  - `runtimeCaching`:
+    - HTML routes (/, /login, all app routes): **networkFirst** with cache fallback only offline
+    - JS bundles (/assets/index-*.js + chunks): **networkFirst** with cache fallback offline
+    - CSS bundles: **networkFirst**
+    - Assets (fonts, images, icons): **cacheFirst** (existing) — no change
+  - `skipWaiting: true` (existing) — keep auto-update
+  - `clientsClaim: true` (existing) — keep tab claiming
+  - **`cleanupOutdatedCaches: true`** — Workbox auto-purges stale precaches
+- SW registration update in `main.tsx` (or wherever registerSW lives):
+  - Post-register version check: if new SW available, silent reload on `window.unload` (consult Phase-14.6 commit for existing pattern)
+- Admin/debug route `/debug/sw-reset` exposing the recovery snippet for manual escape hatch
+- Spec `apps/web/tests/visual/phase-a-sw-cache-strategy.spec.ts`:
+  - mock deploy: build, register SW, navigate /, capture bundle hash
+  - mock re-deploy: change bundle hash, navigate /, expect NEW hash served
+  - verify cache strategy: HTML/JS via network, assets via cache
+
+**Estimated lines:** ~400-600. Main convention, no branch. **Memo first**, owner ack, code.
+
+**Source:** owner directive 2026-05-25 DECISION 1 — Service Worker network-first cache strategy.
+
+### D43 — R-Landing frozen until post-Gate-A
+**Context:** R-Landing rolled back per D41. Owner reflection: scope was ambiguous (Home-only per D38 vs 27 template pages), visual faithfulness not verified pre-revert, Gate A only 3-5 days out, landing pivot drift risks Phase A close.
+
+**Decision:** R-Landing frozen until Gate A closes. Then a dedicated **R-Landing-v2** sub-R in early Phase B with a different approach:
+- Static HTML page served separately (e.g., `apps/landing/` as a separate Vite/Astro build, OR a server-rendered route)
+- **Outside SW scope** — landing's lifecycle separated from the SPA bundle's lifecycle
+- Separate deploy, separate cache strategy, no PWA precache interaction
+
+**Preserved evidence:**
+- `docs/PHASE_A_LANDING_AUDIT.md`
+- `docs/PHASE_A_LANDING_FORENSIC_AUDIT.md`
+- `docs/PHASE_A_R_LANDING_POSTMORTEM.md`
+- `docs/PHASE_A_R_LANDING_REVIEW.md`
+- `docs/PHASE_A_DECISIONS.md` D37/D38/D39/D40/D41 entries
+
+**Source:** owner directive 2026-05-25 DECISION 2 — R-Landing frozen (option 1), R-Landing-v2 in Phase B with static-HTML approach.
+
+### D44 — Phase B work deferred until Gate A close (D11/D25 violation correction)
+**Context:** Phase B commits (`106c725` B.1a, `e939a4a` B.1b, `7dcf0f4` B.2 memo, `267c31c` B.1 review) were pushed while Gate A had not yet closed. This violates D11/D25 sequential ordering («هیچ Phase B work قبل از Gate A pass»).
+
+**Decision:** All Phase B work reverted/deferred. Phase B start permitted **only after** Gate A close formally.
+
+**Action taken (this commit):**
+- `git revert e939a4a 106c725` — application code commits reverted
+- Phase B docs moved to `docs/PHASE_B_DEFERRED/`:
+  - `PHASE_B_MEMO.md`
+  - `PHASE_B_R1_REVIEW.md`
+  - `PHASE_B_R2_MEMO.md`
+- `docs/PHASE_B_DEFERRED/README.md` added documenting restart condition + DB-state note
+
+**DB-state mismatch flagged:**
+- B.1a migration `20260524000000_b1a_university_semester` was applied to production DB **before** the revert
+- Revert removes migration file from source but does NOT drop tables on live DB
+- `University` + `Semester` tables remain on live DB as dormant additive structures with no code references — harmless until Phase B properly restarts
+- Owner decision needed at Phase B restart: reinstate migration (DB already has it, no-op) OR drop tables manually before Phase B re-introduces them
+
+**System-drift note:** if Phase B work started in parallel with Phase A, that itself is workflow drift. To be documented in the eventual `docs/PHASE_A_POSTMORTEM.md` written after Gate A close ceremony.
+
+**Source:** owner directive 2026-05-25 DECISION 3 — Phase B revert + defer, D25 sequencing enforcement.
+
+### D45 — Execution ordering for Gate A close
+**Context:** Owner laid out the path to Gate A close in DECISION 3 tail-end.
+
+**Order (binding):**
+1. **D44** (Phase B revert/defer) — IMMEDIATE, this commit
+2. **R7.0** (SW fix per D42) — memo first → owner ack → code → D13 smoke
+3. R7.0 D13 ack → SW reliability verified
+4. **R7.1+R7.2 resume** (per D33 paused) — Performance track final
+5. R7.1+R7.2 D13 → Lighthouse re-run → Gate A close → ceremony
+6. **Phase B start** (includes R-Landing-v2 as one of the early sub-Rs)
+
+Estimated Gate A close: ~5-7 days (R7.0 1-2 days + R7.1+R7.2 3-5 days). But with SW fixed, landing planned (R-Landing-v2 deferred), Phase B disciplined (post-A only).
+
+**Source:** owner directive 2026-05-25 «ترتیب اجرا» list.

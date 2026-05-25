@@ -159,27 +159,3 @@ export const usersApi = {
   changePassword: ({ currentPassword, newPassword }) =>
     api.post("/v1/users/me/change-password", { currentPassword, newPassword }),
 };
-
-// ---------- academics (Phase B B.1a — University + Semester) ----------
-export const academicsApi = {
-  // Universities
-  listUniversities: () => api.get("/v1/universities"),
-  getUniversity: (id) => api.get("/v1/universities/" + encodeURIComponent(id)),
-  createUniversity: (payload) => api.post("/v1/universities", payload),
-  updateUniversity: (id, payload) =>
-    api.patch("/v1/universities/" + encodeURIComponent(id), payload),
-  deleteUniversity: (id) =>
-    api.delete("/v1/universities/" + encodeURIComponent(id)),
-  // Semesters
-  listSemesters: ({ universityId } = {}) =>
-    api.get(
-      "/v1/semesters" +
-        (universityId ? "?universityId=" + encodeURIComponent(universityId) : ""),
-    ),
-  getSemester: (id) => api.get("/v1/semesters/" + encodeURIComponent(id)),
-  createSemester: (payload) => api.post("/v1/semesters", payload),
-  updateSemester: (id, payload) =>
-    api.patch("/v1/semesters/" + encodeURIComponent(id), payload),
-  deleteSemester: (id) =>
-    api.delete("/v1/semesters/" + encodeURIComponent(id)),
-};

@@ -24,9 +24,6 @@ import { DepartmentsModule } from "./university/departments/departments.module";
 import { EnrollmentsModule } from "./university/enrollments/enrollments.module";
 import { FacultiesModule } from "./university/faculties/faculties.module";
 import { ProgramsModule } from "./university/programs/programs.module";
-// Phase-B B.1a — Academic Hierarchy additions.
-import { UniversitiesModule } from "./university/universities/universities.module";
-import { SemestersModule } from "./university/semesters/semesters.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -64,9 +61,6 @@ import { UsersModule } from "./users/users.module";
     CoursesModule,
     CohortsModule,
     EnrollmentsModule,
-    // Phase-B B.1a — Academic Hierarchy (University + Semester).
-    UniversitiesModule,
-    SemestersModule,
     // Live class + AI bridge (Phase 6).
     AiBridgeModule,
     LiveClassModule,
