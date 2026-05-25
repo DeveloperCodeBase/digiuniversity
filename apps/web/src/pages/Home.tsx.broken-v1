@@ -22,270 +22,72 @@
 import React from "react";
 import { Icon } from "../icons";
 import { Stagger, useMouseParallax } from "../motion";
-import { toFa, KnowledgeGraph, ArchStack } from "../shared";
+import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared";
 import { useAuth } from "../auth/AuthContext";
 import type { Go } from "../router";
 // Scoped landing CSS — only applies inside <div className="home-shell-v2">,
 // which is rendered exclusively by this file.
 import "./home-v2.css";
 
-// =====================================================
-// FAITHFUL Footer port from template's src/shared.jsx (1:1).
-// Production Footer (../shared.tsx) has auth-aware branches that
-// don't match the template — porting the static template Footer
-// verbatim so the redesign is identical to the template.
-// =====================================================
-
-const HomeFooter: React.FC<{ go: Go }> = ({ go }) => (
-  <footer className="footer">
-    <div className="shell">
-      <div className="footer-grid">
-        <div>
-          <div className="brand" style={{ marginBottom: 18 }}>
-            <span className="brand-mark"></span>
-            <span>
-              دیجی‌یونیورسیتی
-              <div className="brand-sub">AI · NATIVE · LEARNING</div>
-            </span>
-          </div>
-          <p style={{ color: "var(--fg-mute)", fontSize: 14, lineHeight: 1.7, maxWidth: 360 }}>
-            یک زیرساخت آموزشی کاملاً دیجیتال که در آن هوش مصنوعی نه یک افزونه، بلکه شالوده‌ی یادگیری،
-            طراحی برنامه و سنجش است.
-          </p>
-          <div className="standards" style={{ marginTop: 20 }}>
-            <span className="std">LTI 1.3</span>
-            <span className="std">xAPI</span>
-            <span className="std">QTI</span>
-            <span className="std">Caliper</span>
-            <span className="std">WCAG 2.2</span>
-          </div>
-        </div>
-        <div>
-          <h5>محصول</h5>
-          <ul>
-            <li><a href="#classroom" onClick={(e) => { e.preventDefault(); go("classroom"); }}>کلاس آنلاین</a></li>
-            <li><a href="#labs" onClick={(e) => { e.preventDefault(); go("labs"); }}>آزمایشگاه‌های مجازی</a></li>
-            <li><a href="#recordings" onClick={(e) => { e.preventDefault(); go("recordings"); }}>آرشیو ضبط‌ها</a></li>
-            <li><a href="#search" onClick={(e) => { e.preventDefault(); go("search"); }}>جستجوی معنایی</a></li>
-            <li><a href="#assessment" onClick={(e) => { e.preventDefault(); go("assessment"); }}>آزمون تطبیقی</a></li>
-          </ul>
-        </div>
-        <div>
-          <h5>دانشگاه</h5>
-          <ul>
-            <li><a href="#schools" onClick={(e) => { e.preventDefault(); go("schools"); }}>دانشکده‌ها</a></li>
-            <li><a href="#faculty" onClick={(e) => { e.preventDefault(); go("faculty"); }}>هیات علمی</a></li>
-            <li><a href="#research" onClick={(e) => { e.preventDefault(); go("research"); }}>پژوهش و دکتری</a></li>
-            <li><a href="#library" onClick={(e) => { e.preventDefault(); go("library"); }}>کتابخانه دیجیتال</a></li>
-            <li><a href="#events" onClick={(e) => { e.preventDefault(); go("events"); }}>رویدادها</a></li>
-            <li><a href="#admissions" onClick={(e) => { e.preventDefault(); go("admissions"); }}>پذیرش</a></li>
-          </ul>
-        </div>
-        <div>
-          <h5>برای کاربران</h5>
-          <ul>
-            <li><a href="#dashboard" onClick={(e) => { e.preventDefault(); go("dashboard"); }}>میز کار دانشجو</a></li>
-            <li><a href="#instructor" onClick={(e) => { e.preventDefault(); go("instructor"); }}>کنسول استاد</a></li>
-            <li><a href="#parent" onClick={(e) => { e.preventDefault(); go("parent"); }}>پورتال والد</a></li>
-            <li><a href="#admin" onClick={(e) => { e.preventDefault(); go("admin"); }}>میز مدیریت</a></li>
-            <li><a href="#community" onClick={(e) => { e.preventDefault(); go("community"); }}>جامعه</a></li>
-            <li><a href="#credential" onClick={(e) => { e.preventDefault(); go("credential"); }}>گواهی دیجیتال</a></li>
-          </ul>
-        </div>
-        <div>
-          <h5>منابع</h5>
-          <ul>
-            <li><a href="#pricing" onClick={(e) => { e.preventDefault(); go("pricing"); }}>پلن‌ها و قیمت</a></li>
-            <li><a href="#help" onClick={(e) => { e.preventDefault(); go("help"); }}>مرکز پشتیبانی</a></li>
-            <li><a href="#about" onClick={(e) => { e.preventDefault(); go("about"); }}>درباره ما</a></li>
-            <li><a href="#officehours" onClick={(e) => { e.preventDefault(); go("officehours"); }}>Office Hours</a></li>
-            <li><a href="#">وضعیت سرویس</a></li>
-            <li><a href="#">API و توسعه‌دهندگان</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
-
 interface HomePageProps {
   go: Go;
 }
 
 // =====================================================
-// FAITHFUL Nav port from template's src/shared.jsx (1:1).
-//
-// Template uses role-aware NAV_ITEMS_BY_ROLE + Notifications dropdown +
-// User dropdown. The prototype defaults to "student" role. The R-Landing
-// rebuild ports this exactly — same nav items, same dropdowns, same
-// visual structure. Owner explicit "متنش هم کاملا درسته" applies to
-// EVERY string here (verbatim from template).
+// HomeNav — standalone marketing nav (anonymous-only)
 // =====================================================
+//
+// Mirrors the visual shape of the template's Nav (brand + nav-links +
+// nav-actions) but with a minimal anonymous-marketing item set. No
+// notifications dropdown, no user menu, no role-aware switching —
+// this nav appears ONLY on `/` for anonymous visitors (logged-in
+// users are bounced to /dashboard by the useEffect below).
 
-interface NavItem { id: string; label: string }
-
-const NAV_ITEMS_STUDENT: NavItem[] = [
-  { id: "home", label: "خانه" },
-  { id: "schools", label: "دانشکده‌ها" },
-  { id: "library", label: "کتابخانه" },
-  { id: "labs", label: "آزمایشگاه" },
-  { id: "dashboard", label: "میز کار" },
-  { id: "calendar", label: "تقویم" },
-  { id: "community", label: "جامعه" },
-];
-
-// Static student role per template's ROLES.student (role.jsx line 5-17).
-// The prototype's localStorage role-switcher is collapsed into a static
-// default here; the marketing landing doesn't need the demo selector.
-const STATIC_ROLE = {
-  id: "student",
-  label: "دانشجو",
-  name: "نسرین رضوی",
-  avatar: "نر",
-  color: "cyan",
-  subtitle: "ارشد علوم داده",
-  code: "ST-84-02-17",
-  homeRoute: "dashboard",
-};
-
-interface NotifRow {
-  ic: string;
-  k: string;
-  t: string;
-  time: string;
-  unread: boolean;
-  action: string;
+interface HomeNavItem {
+  id: string;
+  label: string;
 }
 
-const NOTIF_ROWS: NotifRow[] = [
-  { ic: "live", k: "جلسه کلاس", t: "یادگیری ماشین · جلسه ۸ تا ۱۵ دقیقه دیگر شروع می‌شود", time: "همین الان", unread: true, action: "classroom" },
-  { ic: "sparkle", k: "AI Tutor", t: "خلاصه‌ی پساکلاس جلسه ۷ آماده شد. ۳ کوییز پیشنهاد شده.", time: "۸ دقیقه پیش", unread: true, action: "recordings" },
-  { ic: "check", k: "نمره منتشر شد", t: "تمرین ۴ — بهینه‌سازی: ۸۷ از ۱۰۰", time: "۲ ساعت پیش", unread: true, action: "course" },
-  { ic: "chat", k: "پاسخ به سوال", t: "دکتر عظیمی به سوال شما درباره‌ی مومنتوم پاسخ داد", time: "دیروز", unread: false, action: "community" },
-  { ic: "cert", k: "گواهی صادر شد", t: "گواهی آمار بیزی برای شما صادر شد", time: "۲ روز پیش", unread: false, action: "credential" },
+const HOME_NAV_ITEMS: HomeNavItem[] = [
+  { id: "home", label: "خانه" },
+  { id: "programs", label: "برنامه‌ها" },
+  { id: "about", label: "درباره" },
+  { id: "admissions", label: "پذیرش" },
+  { id: "pricing", label: "قیمت" },
 ];
 
-const NotificationsDropdown: React.FC<{ go: Go }> = ({ go }) => (
-  <div className="dropdown" style={{ width: 380 }}>
-    <div className="dropdown-head">
-      <h4>اعلان‌ها</h4>
-      <span style={{ fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)" }}>۳ جدید</span>
-    </div>
-    <div style={{ maxHeight: 420, overflowY: "auto" }}>
-      {NOTIF_ROWS.map((n, i) => (
-        <div key={i} onClick={() => go(n.action)} className="notif-item">
-          <div className="notif-icon"><Icon name={n.ic} size={14} /></div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-              <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: "0.08em", color: "var(--fg-mute)", textTransform: "uppercase" }}>{n.k}</span>
-              {n.unread && <span style={{ width: 6, height: 6, borderRadius: 50, background: "var(--accent)" }}></span>}
-            </div>
-            <div style={{ fontSize: 13, lineHeight: 1.5 }}>{n.t}</div>
-            <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--fg-dim)", marginTop: 4 }}>{n.time}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-    <div className="dropdown-foot">
-      <button type="button" className="btn btn-ghost btn-sm">علامت‌گذاری همه به‌عنوان خوانده‌شده</button>
-      <button type="button" className="btn btn-outline btn-sm" onClick={() => go("inbox")}>صندوق کامل</button>
-    </div>
-  </div>
-);
-
-const USER_MENU_ITEMS: Array<[string, string, string]> = [
-  ["میز کار", "home", "dashboard"],
-  ["پروفایل عمومی", "user", "profile"],
-  ["پیام‌ها", "chat", "messages"],
-  ["ذخیره‌ها", "star", "bookmarks"],
-  ["دستاوردها", "trophy", "achievements"],
-  ["گواهی‌ها", "cert", "credential"],
-  ["تنظیمات", "settings", "settings"],
-  ["پشتیبانی", "headset", "help"],
-];
-
-const UserDropdown: React.FC<{ go: Go }> = ({ go }) => (
-  <div className="dropdown" style={{ width: 300 }}>
-    <div style={{ padding: 18, borderBottom: "1px solid var(--line)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div className={"avatar " + STATIC_ROLE.color} style={{ width: 44, height: 44 }}>{STATIC_ROLE.avatar}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>{STATIC_ROLE.name}</div>
-          <div style={{ fontSize: 11, color: "var(--fg-mute)", fontFamily: "var(--f-mono)", marginTop: 2 }}>{STATIC_ROLE.code}</div>
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
-        <span className="pill pill-cyan" style={{ fontSize: 10 }}>{STATIC_ROLE.label}</span>
-        <span className="pill" style={{ fontSize: 10 }}>{STATIC_ROLE.subtitle}</span>
-      </div>
-    </div>
-    <div style={{ padding: 6 }}>
-      {USER_MENU_ITEMS.map(([t, ic, r]) => (
-        <button key={t} type="button" onClick={() => go(r)} className="dropdown-item">
-          <Icon name={ic} size={14} />
-          {t}
-        </button>
-      ))}
-    </div>
-    <div style={{ padding: 6, borderTop: "1px solid var(--line)" }}>
-      <button type="button" onClick={() => go("login")} className="dropdown-item" style={{ color: "var(--accent)" }}>
-        <Icon name="end" size={14} />
-        خروج از حساب
-      </button>
-    </div>
-  </div>
-);
-
-const HomeNav: React.FC<{ go: Go; current?: string }> = ({ go, current = "home" }) => {
+const HomeNav: React.FC<{ go: Go }> = ({ go }) => {
   const [open, setOpen] = React.useState(false);
-  const [notifsOpen, setNotifsOpen] = React.useState(false);
-  const [userOpen, setUserOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    setOpen(false);
-    setNotifsOpen(false);
-    setUserOpen(false);
-  }, [current]);
-
-  React.useEffect(() => {
-    const onClick = (e: MouseEvent): void => {
-      const target = e.target as Element | null;
-      if (!target?.closest?.(".notif-wrap")) setNotifsOpen(false);
-      if (!target?.closest?.(".user-wrap")) setUserOpen(false);
-    };
-    document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
-  }, []);
-
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="ناوبری صفحه اصلی">
       <div className="nav-inner">
         <a
-          href={"#home"}
+          href="/"
           onClick={(e) => {
             e.preventDefault();
             go("home");
           }}
           className="brand"
+          aria-label="دیجی‌یونیورسیتی — خانه"
         >
-          <span className="brand-mark"></span>
+          <span className="brand-mark" aria-hidden="true"></span>
           <span>
             دیجی‌یونیورسیتی
-            <div className="brand-sub">AI · NATIVE · LEARNING</div>
+            <span className="brand-sub">AI · NATIVE · LEARNING</span>
           </span>
         </a>
 
         <div className={"nav-links " + (open ? "open" : "")}>
-          {NAV_ITEMS_STUDENT.map((n) => (
+          {HOME_NAV_ITEMS.map((n) => (
             <a
               key={n.id}
-              href={"#" + n.id}
+              href={"/" + (n.id === "home" ? "" : n.id)}
               onClick={(e) => {
                 e.preventDefault();
                 go(n.id);
                 setOpen(false);
               }}
-              className={"nav-link " + (current === n.id ? "active" : "")}
+              className={"nav-link " + (n.id === "home" ? "active" : "")}
             >
               {n.label}
             </a>
@@ -293,42 +95,32 @@ const HomeNav: React.FC<{ go: Go; current?: string }> = ({ go, current = "home" 
         </div>
 
         <div className="nav-actions">
-          {/* Notifications */}
-          <div className="notif-wrap" style={{ position: "relative" }}>
-            <button
-              type="button"
-              className="nav-icon-btn"
-              onClick={() => setNotifsOpen(!notifsOpen)}
-              aria-label="اعلان‌ها"
-            >
-              <Icon name="bell" size={18} />
-              <span className="notif-dot"></span>
-            </button>
-            {notifsOpen && <NotificationsDropdown go={go} />}
-          </div>
-
-          {/* User menu */}
-          <div className="user-wrap" style={{ position: "relative" }}>
-            <button
-              type="button"
-              className="user-btn"
-              onClick={() => setUserOpen(!userOpen)}
-              aria-label="منوی کاربر"
-            >
-              <div className={"avatar " + STATIC_ROLE.color} style={{ width: 32, height: 32, fontSize: 11 }}>{STATIC_ROLE.avatar}</div>
-              <span className="user-name">{STATIC_ROLE.name.split(" ").slice(-1)[0]}</span>
-            </button>
-            {userOpen && <UserDropdown go={go} />}
-          </div>
-
           <button
             type="button"
-            className="nav-toggle"
-            onClick={() => setOpen(!open)}
-            aria-label="منو"
-            aria-expanded={open ? "true" : "false"}
+            className="btn btn-ghost btn-sm"
+            onClick={() => go("login")}
           >
-            <span className="bars"></span>
+            ورود
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => go("register")}
+          >
+            ثبت‌نام
+            <Icon name="arrow" size={14} />
+          </button>
+          <button
+            type="button"
+            className="nav-icon-btn"
+            aria-label="منوی موبایل"
+            aria-expanded={open}
+            aria-controls="home-nav-mobile"
+            onClick={() => setOpen(!open)}
+            style={{ display: "none" }}
+            id="home-nav-mobile-trigger"
+          >
+            <Icon name="menu" size={18} />
           </button>
         </div>
       </div>
@@ -1182,7 +974,7 @@ export const HomePage: React.FC<HomePageProps> = ({ go }) => {
         </section>
       </main>
 
-      <HomeFooter go={go} />
+      <Footer go={go} />
     </div>
   );
 };
