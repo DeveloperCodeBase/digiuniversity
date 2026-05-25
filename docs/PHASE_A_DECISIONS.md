@@ -566,3 +566,19 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Application:** Phase A is closed. **Phase B unblocked.** Per Compass roadmap §B (Academic Hierarchy + Onboarding, ~3 weeks): University / Semester / CourseOffering / Profile / Student / Instructor / StudentApplication / InstructorApplication models, application-flow state machines, Notification service v1, seed data. All Phase B work follows the dual-write additive-migration policy. Phase B memo: `docs/PHASE_B_MEMO.md` (committed alongside this D36 entry).
 
 **Source:** owner directive «continue implement as plan i want to sleep so continue and dont stop on any circumstances» 2026-05-24 + the documented recommendation of Path A in Phase A close memo (D35).
+
+### Landing-D37 — URGENT pivot: landing template redesign is priority #1
+**Owner-referenced label note:** owner's directive referenced this as "D33". D33 was already taken by the R7.1+R7.2 ack. Same decision content under D37; both labels refer to this entry.
+
+**Context:** Owner has hand-designed a complete landing-page template (HTML/CSS/JS/assets) and dropped it at `C:\digiuniversity\docs\my-upload\landing-page\`. Owner's explicit chat 2026-05-23: «من دیزاین و فرانت لندینگ پیج رو بدون بک اند خودم طراحی کردم میخوام فایلش رو برای کلاد کد بفرستم دقیقا مثل این ریسپانسیو پیاده سازی کنه و کدش استفاده کنه بک اند و کارهایی که انجام میشه هم خود کلاد کد انجام بده». Owner reiterated 2026-05-24: «landing redesign الان priority اوله».
+
+**Owner decisions (explicit):**
+  - **Timing:** فوری الان. R7.1+R7.2 + the broader Phase A close + Phase B start (D36) are **PAUSED** retroactively pending landing redesign completion. D25 sequential ordering is **overridden** for this pivot.
+  - **Design source:** the template's palette / fonts / design system override R6.5 D14 (white + navy palette) **on landing scope** until further notice. If the template's global tokens differ from R6.5 tokens, scoped-vs-global is an audit-output question (Section D of the audit doc).
+  - **Workflow:** Phase 1 (audit only, no code) → owner ack → Phase 2 (memo + code) → owner ack on memo → Phase 3 (ship + verify) → owner D13 smoke.
+
+**Application:** all forward work on Phase B (B.1c / B.1-tests / B.2) is **paused**. Any global-token change made for landing must trigger R6.5 + R7.6 + R7.7 effect re-verification on workspace routes. Once landing redesign D13-acks, R7.1+R7.2 plan re-evaluates (font list may change per template), Phase A re-closes, then Phase B resumes.
+
+**Scope delta vs `apps/web/src/pages/Home.tsx`:** Current Home.tsx is 908 lines and one of the two `@ts-nocheck`-deferred files (per `docs/PHASE_A_DEFERRED_TYPES.md`). Landing redesign sub-R retires the `@ts-nocheck` on Home.tsx as a baked-in deliverable.
+
+**Source:** owner explicit directive «URGENT PIVOT — owner explicit message: landing redesign الان priority اوله» 2026-05-24.
