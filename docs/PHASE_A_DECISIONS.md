@@ -613,3 +613,34 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **`@ts-nocheck` cleanup:** Home.tsx is one of the 2 deferred `@ts-nocheck` files in `docs/PHASE_A_DEFERRED_TYPES.md`. **The Home rewrite retires that `@ts-nocheck` as a baked-in deliverable** — the new Home.tsx ships fully typed.
 
 **Source:** owner directive 2026-05-24 with all 7 Q-AUDIT answers.
+
+### Landing-D39 — Nav scope: Home.tsx renders standalone chrome (Option B)
+**Context:** Memo PHASE 2 (commit `6795a22`) outlined three nav-propagation options:
+  - **A:** Conditional swap inside the existing global `<Nav>` based on whether route is in PUBLIC_LANDING_ROUTES set.
+  - **B:** Home.tsx renders its own standalone chrome (own Nav + Footer), AppShell skips its globals on `/`. Mirrors the R6 `.r6-classroom-shell` standalone-chrome precedent.
+  - **C:** Apply template nav items to all PUBLIC routes (broader scope than D38).
+
+**Owner clarification 2026-05-25:** «nav menu items از template **فقط روی landing page (Home/`/`)** اعمال شن. workspace routes (dashboard، profile، classroom، settings، تمام role-specific routes) باید nav menu فعلی R7.12 رو unchanged نگه دارن».
+
+**Decision: Option B.** Owner directive verbatim: «Option B می‌گیری مگر اینکه owner پیش از code Option A یا C رو explicit بگیره».
+
+**Implementation:**
+  - Home.tsx renders a `<HomeNav>` component at the top of its content (scoped to template aesthetic).
+  - Home.tsx renders a `<HomeFooter>` component at the bottom (scoped to template aesthetic).
+  - `AppShell.tsx` adds a guard: if `route === "/"` (or matches HomePage), skip rendering the global Nav + Footer (Home renders its own).
+  - All other routes (PUBLIC `/about` `/programs` `/admissions` `/pricing` `/help` `/honor-code`, AUTH_FLOW `/login` etc., WORKSPACE `/dashboard` `/classroom` `/profile` etc.) continue using the existing AppShell chrome at R6.5 + R6.6 + R7.5 + R7.6 + R7.9 + R7.12 + R7.7 state. **Zero change.**
+
+**Why Option B:**
+  - Cleanest scope match for owner's «فقط روی landing page» requirement.
+  - Precedent: R6 `.r6-classroom-shell` is standalone chrome inside the workspace mode; this is the same shape on the public side.
+  - Zero risk of leakage to other PUBLIC routes (which keep the R6.5 nav).
+  - No conditional logic in the global `<Nav>` (Option A would couple Nav.tsx to a new PUBLIC_LANDING_ROUTES set, harder to reason about + harder to test).
+  - No expanded scope (Option C would touch /about, /programs, etc. without owner approval).
+
+**Regression implication:** the R1.1 spec asserts certain chrome elements visible on PUBLIC routes including `/`. Some of those assertions will become invalid for `/` (Home renders its own chrome, not AppShell's). The R1.1 spec needs adapter — either:
+  - **R1.1.a:** the assertion that "navbar visible on /" must change to "Home's own nav visible on /" via a different selector (`.home-shell-v2 .home-nav` vs `header.appshell-nav`).
+  - **R1.1.b:** OR carve out `/` from R1.1's PUBLIC assertions and let phase-a-landing.spec.ts own the chrome assertions for `/`.
+
+**Memo will adopt R1.1.b** (less brittle; clear separation of concerns).
+
+**Source:** owner directive 2026-05-25 «شروع کن. memo ack confirmed. ... Option B».

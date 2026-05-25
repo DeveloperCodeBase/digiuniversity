@@ -1,25 +1,16 @@
 # Phase A — `@ts-nocheck` files deferred
 
-> R2 retired 43 of 45 active `@ts-nocheck` files. **R6 brought Classroom.tsx down to typed**, leaving only Home.tsx. Hard cap is ≤5; we're at 1.
+> R2 retired 43 of 45 active `@ts-nocheck` files. **R6 brought Classroom.tsx down to typed.** **R-Landing brought Home.tsx down to typed** (rewrite per D37/D38/D39 ships fully typed; the old 908-line @ts-nocheck'd file is replaced). Active deferred count: **0**.
 
-## Deferred files (1 of 5 cap)
+## Deferred files (0 of 5 cap)
 
 ### ~~1. `apps/web/src/pages/Classroom.tsx`~~ — retired in R6
 
 The 644-line monolith was replaced in Phase A R6 (Classroom redesign from owner template). The new shell lives under `apps/web/src/pages/classroom/` (ClassroomShell, Stage, AIPanel, CourseHeader, classroom-atoms) and is fully typed. The old path (`apps/web/src/pages/Classroom.tsx`) now re-exports the new shell so `router.tsx`'s import keeps working. No `@ts-nocheck` anywhere in the classroom tree.
 
-### 1. `apps/web/src/pages/Home.tsx` (908 lines)
+### ~~2. `apps/web/src/pages/Home.tsx`~~ — retired in R-Landing
 
-**Why deferred:** the home/landing page is 908 lines of inline JSX marketing layout. Per the explicit Phase 16 R2 ruling baked into the file header ("Phase-16 R2 deliberately leaves @ts-nocheck in place: the file is 530+ lines of inline JSX and the type sweep is scheduled for R16 (cleanup) after the new sections + primitives land. R2 only adds the auth-aware redirect + outcome-first headline."), R2 honours that decision.
-
-The file already has the `HomePageProps` interface — only the file-wide `@ts-nocheck` prevents it from being checked.
-
-**What blocks immediate typing:**
-- 908 lines of marketing sections (hero, stats, principles, testimonials, FAQ, footer link blocks).
-- Multiple inline sub-components (Hero, StatsStrip, TestimonialCarousel, FAQ, etc.) that would each need their own Props interface.
-- The R3 sub-phase (Ten role dashboard differentiation) will rewrite parts of the landing's stats strip and CTA blocks; typing now would burn effort that R3 changes anyway.
-
-**Follow-up plan:** retire in a dedicated post-Gate-A "Home.tsx polish" commit, after R3 stabilises the landing CTAs. Estimated ~150 lines of net change (mostly new Props interfaces + small narrowings) per the file's own R16 plan.
+The 908-line `@ts-nocheck`'d Home.tsx was replaced in Phase A R-Landing (Landing redesign from owner template per D37 / D38 / D39). The new Home.tsx ships **fully typed**: `HomePageProps` typed, every sub-component (HomeNav, Stat, Feature, TechRow, MasteryRing, Hero3D{Classroom,Tutor,Analytics,Credential}) has explicit Props interfaces, all data tables (COURSES, TOUR_CARDS, MARQUEE_PARTNERS, ANALYTICS_BARS) carry typed row interfaces. **No `@ts-nocheck` anywhere in Home.tsx.**
 
 ## Files NOT deferred (typed in R2)
 

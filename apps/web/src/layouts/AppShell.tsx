@@ -137,6 +137,19 @@ export const AppShell: React.FC = () => {
     return <AuthLoadingSkeleton label="در حال انتقال به داشبورد..." />;
   }
 
+  // Phase-A R-Landing (D39 / Option B) — for the landing route,
+  // AppShell renders NOTHING and lets Home.tsx own the full chrome
+  // (its own Nav + skip-link + main + Footer, all scoped via
+  // .home-shell-v2). The R6 .r6-classroom-shell precedent is the
+  // model here: a standalone-chrome page inside the router tree.
+  //
+  // Note: this happens AFTER the redirectAuthedFromLanding check
+  // above, so an authed visitor still sees the skeleton + bounce
+  // to /dashboard (Home.tsx never renders for authed users on /).
+  if (isLandingRoute) {
+    return <Outlet />;
+  }
+
   const navMode = navModeFor(kind);
 
   return (
