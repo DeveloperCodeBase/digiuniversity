@@ -582,3 +582,34 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 **Scope delta vs `apps/web/src/pages/Home.tsx`:** Current Home.tsx is 908 lines and one of the two `@ts-nocheck`-deferred files (per `docs/PHASE_A_DEFERRED_TYPES.md`). Landing redesign sub-R retires the `@ts-nocheck` on Home.tsx as a baked-in deliverable.
 
 **Source:** owner explicit directive «URGENT PIVOT — owner explicit message: landing redesign الان priority اوله» 2026-05-24.
+
+### Landing-D38 — Home-only scope confirmed; 26 template pages ignored; scoped-CSS approach
+**Context:** Audit (PHASE 1, commit `83dacbb`, doc `PHASE_A_LANDING_AUDIT.md`) surfaced that the template at `docs/my-upload/landing-page/` is a complete 49-route SPA mockup, not just a landing page. Audit Q-AUDIT-1 asked: scope = Home.tsx only / PUBLIC+AUTH_FLOW / global. Audit recommended Option B (PUBLIC+AUTH_FLOW).
+
+**Owner clarification 2026-05-24:** «owner clarification: فقط Home page (landing) خودشون طراحی کردن. ۲۶ page دیگه که در template هست (Programs, Classroom, Auth, Dashboard, ...) ربطی به owner intent نداره — احتمالاً template generator اضافه کرده. ignore شه».
+
+**Decision: Home-only scope.** Owner labeled this "Option C" in their reply; the intent (= Home.tsx only, scoped CSS) corresponds to what the audit labeled Option A. Label irrelevant; intent unambiguous.
+
+**Decisions on all 7 Q-AUDIT questions (verbatim owner):**
+  - **Q-AUDIT-1 Scope:** Home.tsx only, scoped CSS. 26 other template pages are ignored as template-generator artifacts.
+  - **Q-AUDIT-2 Palette propagation tolerance:** N/A (scoped, no global token change).
+  - **Q-AUDIT-3 Hero headline:** keep template text verbatim («متنش هم کاملا درسته»). Silent typo/markup fixes OK; no content rewrite.
+  - **Q-AUDIT-4 Animations:** keep template's `title-rise + card-fade-in + aurora-drift`. If TBT impact is large, **note in review doc only** — do NOT drop without owner ack. R7.1+R7.2 resume after this sub-R will re-decide.
+  - **Q-AUDIT-5 README vs CSS aesthetic discrepancy:** CSS is source of truth ("University Press — Minimal Academic"). Silently update the template directory's README with a clarifying header noting the README's "Cognitive Cathedral" references are outdated.
+  - **Q-AUDIT-6 `--gold` semantic:** take template (muted brick `oklch(0.5 0.16 30)`). Scoped to Home only; R7.7b's gold-as-celebration semantic continues to apply to the rest of the app.
+  - **Q-AUDIT-7 .docx files in `uploads/`:** ignore. Reference material not used by the runtime template.
+
+**Effect on existing Phase A wins:**
+  - R5 (Login redesign), R6 (Classroom redesign), R6.5 (white+navy palette), R6.6 (navbar RTL), R7.6 (token darkening), R7.7 (a/b/c/d a11y sweep) — **all preserved** because scoping is via a `.home-shell-v2` wrapper class on the Home.tsx root. Global tokens (`:root` in styles.css) are NOT modified.
+  - R1.1 (AppShell), R7.12 (mini-rail) — unaffected (Home routes through the public-mode AppShell, no workspace chrome involved).
+  - R7.1+R7.2 (Vite chunks + font self-host) — paused per D37; resume after this sub-R. Fonts unchanged in the new design; @fontsource self-host stays.
+
+**Scoping pattern:** `.home-shell-v2` outer wrapper (mirrors the R6 `.r6-classroom-shell` precedent). All template tokens become `--xxx-home`-suffixed CSS custom properties scoped under that wrapper. Template's class names (`.hero`, `.aurora`, `.btn-primary`, etc.) get a `.home-shell-v2`-prefixed selector or kept as-is if they're already scoped semantically.
+
+**Scope estimate:** ~500 lines (Home.tsx rewrite + scoped CSS in either a new file `apps/web/src/pages/home-v2.css` or inline at top of Home.tsx).
+
+**Application:** PHASE 2 (memo + code) starts. Memo first per the standard workflow («memo بنویس، owner ack بگیر، code بزن»). After memo ack: ship the sub-R, run D29 pre-smoke, run regression (R1.1 + R6.6 + R7.12 + axe-scan on /), ship review doc, owner D13 on real mobile. Then resume R7.1+R7.2.
+
+**`@ts-nocheck` cleanup:** Home.tsx is one of the 2 deferred `@ts-nocheck` files in `docs/PHASE_A_DEFERRED_TYPES.md`. **The Home rewrite retires that `@ts-nocheck` as a baked-in deliverable** — the new Home.tsx ships fully typed.
+
+**Source:** owner directive 2026-05-24 with all 7 Q-AUDIT answers.
