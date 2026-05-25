@@ -43,6 +43,27 @@ body:has(.home-shell-v2) {
   overflow: clip !important;
 }
 
+/* skip-link inside the home wrapper — must be visually hidden until
+   keyboard-focused, then appear at top. Production .skip-link rule
+   isn't winning the cascade inside the home scope for some reason. */
+.home-shell-v2 .skip-link {
+  position: absolute !important;
+  top: -40px !important;
+  inset-inline-start: 16px !important;
+  z-index: 9999;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  text-decoration: none;
+}
+.home-shell-v2 .skip-link:focus-visible {
+  top: 12px !important;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 /* ================================================================
    DigiUniversity — AI-Native Online University
    Aesthetic: "University Press — Minimal Academic"
