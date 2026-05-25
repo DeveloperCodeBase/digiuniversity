@@ -62,11 +62,16 @@ export const AppShell: React.FC = () => {
   const kind: RouteKind = getRouteKind(route);
   const isWorkspace = kind === "WORKSPACE";
 
-  // R1.3 B5 — privacy: an authenticated visitor hitting the landing
-  // (/ or /home) must NOT see any chrome rendered with their identity
-  // before the redirect takes effect. Gate the shell behind a skeleton.
+  // R-Landing (2026-05-25) — auth-redirect from landing REMOVED.
+  // R1.3-B5 added the redirect because the OLD Home leaked user data
+  // (avatar + name in nav chrome) before the redirect fired. The
+  // R-Landing redesign uses anonymous-only HomeNav with no user data,
+  // so authed users can safely see the marketing landing too. Owner
+  // explicit directive 2026-05-25: «i dont see any changes in landing
+  // page....do it now...it an order» — they were stuck behind this
+  // very redirect.
   const isLandingRoute = route === "" || route === "home";
-  const redirectAuthedFromLanding = isLandingRoute && auth.isAuthenticated;
+  const redirectAuthedFromLanding = false; // was: isLandingRoute && auth.isAuthenticated;
 
   // R7.12 — sidebar is now viewport-conditional:
   //   ≥1024px (workspace): persistent rail inline in the workspace

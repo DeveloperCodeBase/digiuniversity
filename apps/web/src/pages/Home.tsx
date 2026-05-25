@@ -24,7 +24,6 @@ import { Icon } from "../icons";
 import { Stagger, useMouseParallax } from "../motion";
 import { Footer, toFa, KnowledgeGraph, ArchStack } from "../shared";
 import { useAuth } from "../auth/AuthContext";
-import { AuthLoadingSkeleton } from "../components/AuthLoadingSkeleton";
 import type { Go } from "../router";
 // Scoped landing CSS — only applies inside <div className="home-shell-v2">,
 // which is rendered exclusively by this file.
@@ -486,18 +485,24 @@ const MARQUEE_PARTNERS: string[] = [
 // =====================================================
 
 export const HomePage: React.FC<HomePageProps> = ({ go }) => {
-  // Logged-in users bounce to /dashboard. Same logic as the pre-redesign
-  // Home.tsx; preserved by D38 (auth-redirect behavior unchanged).
-  const auth = useAuth();
-  React.useEffect(() => {
-    if (auth.isAuthenticated) {
-      go("dashboard");
-    }
-  }, [auth.isAuthenticated, go]);
-  // useMouseParallax must run unconditionally per the rules of hooks.
-  // The hook is a no-op if .hero-bg .aurora doesn't exist in the DOM.
+  // R-Landing — auth-redirect REMOVED.
+  //
+  // The pre-redesign Home.tsx redirected logged-in users to /dashboard
+  // because R1.3-B5 caught a privacy leak: the old landing rendered the
+  // user's avatar + name in its chrome before the redirect fired,
+  // briefly exposing their identity to anyone watching the screen.
+  //
+  // The R-Landing redesign uses HomeNav (anonymous-only — no user data
+  // in chrome). The marketing landing is safe for everyone to view; if
+  // a logged-in user wants to reach their workspace they navigate via
+  // their normal menu paths or by clicking «ورود». Owner verified this
+  // is the desired behavior 2026-05-25 (urgent directive to make the
+  // new design visible regardless of auth state).
+  //
+  // useAuth import + useMouseParallax kept; both are no-ops here but
+  // preserved so future regression of the auth shape surfaces in tests.
+  useAuth();
   useMouseParallax();
-  if (auth.isAuthenticated) return <AuthLoadingSkeleton />;
 
   return (
     <div className="home-shell-v2">
