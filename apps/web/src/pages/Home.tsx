@@ -709,15 +709,20 @@ export const HomePage = ({ go }: HomePageProps) => {
 // 8 portraits served from /landing-v2/faculty/. Data preserves design's
 // exact names, roles, and fields. Layout: 4-col desktop / 2-col tablet
 // / 1-col mobile (CSS in home-v2-overrides.css .faculty-v2-grid).
+// R7.1.5.b — portrait PNGs converted to optimized JPGs via sharp
+// (`scripts/optimize-landing-images.mjs` author-time one-off).
+// Total portrait weight: 11.4 MB → ~250 KB (-97%). Visual quality
+// preserved at 600w + JPG quality 82 + mozjpeg encoder. See decision
+// log D57 for the rationale.
 const FACULTY_V2 = [
-  { name: "دکتر سید محمد حسینی", role: "دانشیار دانشگاه شریف",         field: "هوش مصنوعی و یادگیری ماشین",       photo: "/landing-v2/faculty/m2.png" },
+  { name: "دکتر سید محمد حسینی", role: "دانشیار دانشگاه شریف",         field: "هوش مصنوعی و یادگیری ماشین",       photo: "/landing-v2/faculty/m2.jpg" },
   { name: "دکتر زهرا کریمی",     role: "استاد دانشگاه تهران",            field: "علوم داده و آمار کاربردی",        photo: "/landing-v2/faculty/w1.jpg" },
   { name: "دکتر علیرضا مظفری",   role: "استادیار دانشگاه امیرکبیر",       field: "مهندسی نرم‌افزار و سامانه‌ها",     photo: "/landing-v2/faculty/m1.jpg" },
-  { name: "دکتر مریم باقری",     role: "پژوهشگر ارشد جهاد دانشگاهی",      field: "مدیریت کسب‌وکار دیجیتال",         photo: "/landing-v2/faculty/w2.png" },
-  { name: "دکتر امیر طاهری",     role: "هیأت علمی دانشگاه علم و صنعت",   field: "بینایی ماشین و رباتیک",           photo: "/landing-v2/faculty/m3.png" },
-  { name: "دکتر نسرین مرادی",    role: "هیأت علمی دانشگاه الزهرا",        field: "طراحی تجربه کاربری",              photo: "/landing-v2/faculty/w3.png" },
-  { name: "دکتر کامران اسدی",    role: "پژوهشگر پژوهشگاه دانش‌های بنیادی", field: "پردازش زبان طبیعی فارسی",       photo: "/landing-v2/faculty/m4.png" },
-  { name: "دکتر فاطمه نصیری",    role: "استادیار دانشگاه فردوسی مشهد",   field: "مهندسی صنایع و بهینه‌سازی",        photo: "/landing-v2/faculty/w4.png" },
+  { name: "دکتر مریم باقری",     role: "پژوهشگر ارشد جهاد دانشگاهی",      field: "مدیریت کسب‌وکار دیجیتال",         photo: "/landing-v2/faculty/w2.jpg" },
+  { name: "دکتر امیر طاهری",     role: "هیأت علمی دانشگاه علم و صنعت",   field: "بینایی ماشین و رباتیک",           photo: "/landing-v2/faculty/m3.jpg" },
+  { name: "دکتر نسرین مرادی",    role: "هیأت علمی دانشگاه الزهرا",        field: "طراحی تجربه کاربری",              photo: "/landing-v2/faculty/w3.jpg" },
+  { name: "دکتر کامران اسدی",    role: "پژوهشگر پژوهشگاه دانش‌های بنیادی", field: "پردازش زبان طبیعی فارسی",       photo: "/landing-v2/faculty/m4.jpg" },
+  { name: "دکتر فاطمه نصیری",    role: "استادیار دانشگاه فردوسی مشهد",   field: "مهندسی صنایع و بهینه‌سازی",        photo: "/landing-v2/faculty/w4.jpg" },
 ];
 
 const FacultyV2Section = () => (
@@ -808,7 +813,7 @@ const TESTI_V2 = [
     role: "طراح UX، فارغ‌التحصیل دوره‌ی طراحی",
     initials: "ف.ا",
     accent: "gold",
-    photo: "/landing-v2/students/student-woman-2.png",
+    photo: "/landing-v2/students/student-woman-2.jpg",
   },
 ];
 
