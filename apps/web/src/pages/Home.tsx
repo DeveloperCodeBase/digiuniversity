@@ -274,7 +274,9 @@ export const HomePage = ({ go }: HomePageProps) => {
       <CatalogTeaser go={go} />
 
       {/* ============== TESTIMONIALS + DUAL CTA (R10 §6) ============== */}
-      <Testimonials go={go} />
+      {/* D48 ITEM 5 — Testimonials per design (3 cards with photo avatars).
+          Replaces prior <Testimonials /> which used a different layout. */}
+      <TestiV2Section />
 
       {/* ============== AGENT SYSTEM ============== */}
       <section className="section">
@@ -688,6 +690,71 @@ const Stat = ({ v, unit, l }) => (
     <div className="v">{v}{unit && <span className="unit">{unit}</span>}</div>
     <div className="l">{l}</div>
   </div>
+);
+
+// D48 ITEM 5 — Testimonials per Claude Design data.tsx verbatim.
+// 3 student stories with circular avatar (photo reused from faculty
+// portraits per design's pattern — the design also reuses these as
+// generic student avatars). Initials are the text fallback if photo
+// fails to load. Layout: 3-col desktop / 2-col tablet (≤1024) / 1-col
+// mobile (≤640) via .testi-v2-grid in home-v2-overrides.css.
+const TESTI_V2 = [
+  {
+    body: "فضای آموزشی هوشمند دانشگاه به من اجازه داد همزمان با کار تمام‌وقت، دوره‌ی فول‌استک را با کیفیتی فراتر از انتظار به اتمام برسانم. شش ماه پس از فارغ‌التحصیلی به‌عنوان توسعه‌دهنده در یک شرکت بزرگ مشغول شدم.",
+    name: "حسین رضایی",
+    role: "مهندس نرم‌افزار، فارغ‌التحصیل دوره‌ی فول‌استک",
+    initials: "ح.ر",
+    photo: "/landing-v2/faculty/m4.png",
+  },
+  {
+    body: "پشتیبانی اساتید و دسترسی ۲۴ ساعته به محتوا، تجربه‌ای متفاوت از آموزش‌های برخط معمولی بود. آنچه واقعاً تفاوت ایجاد کرد، کیفیت مشاوران و پروژه‌های واقعی بود که در کارنامه‌ی حرفه‌ای‌ام ماندگار شد.",
+    name: "نگار صفری",
+    role: "متخصص علوم داده، فارغ‌التحصیل MBA دیجیتال",
+    initials: "ن.ص",
+    photo: "/landing-v2/faculty/w2.png",
+  },
+  {
+    body: "به‌عنوان مادر دو فرزند، یافتن زمان برای آموزش حضوری ممکن نبود. این سامانه به من فرصت داد بدون از دست دادن خانواده، در رشته‌ی طراحی UX به سطحی برسم که اکنون از خانه فعالیت حرفه‌ای دارم.",
+    name: "فاطمه احمدی",
+    role: "طراح UX، فارغ‌التحصیل دوره‌ی طراحی",
+    initials: "ف.ا",
+    photo: "/landing-v2/faculty/w4.png",
+  },
+];
+
+const TestiV2Section = () => (
+  <section className="testi-v2-section" data-reveal>
+    <div className="shell">
+      <div className="section-head">
+        <div>
+          <div className="section-eyebrow">پیشنهاد دانشجویان فعلی</div>
+          <h2 className="section-title">
+            <span className="em">تجربه‌ی واقعی</span> از دانشجویان ما.
+          </h2>
+        </div>
+        <p className="section-lead">
+          فارغ‌التحصیلان دوره‌های ما در شرکت‌های فناوری، پژوهشگاه‌ها و کسب‌وکارهای دیجیتال مشغول فعالیت‌اند. صدای آن‌ها معیار ما برای کیفیت یادگیری است.
+        </p>
+      </div>
+      <div className="testi-v2-grid">
+        {TESTI_V2.map((t) => (
+          <article key={t.name} className="testi-v2-card">
+            <div className="quote-mark" aria-hidden="true">&ldquo;</div>
+            <p className="quote-body">{t.body}</p>
+            <div className="person">
+              <div className="person-avatar" aria-hidden="true">
+                {t.photo ? <img src={t.photo} alt="" loading="lazy" /> : <span>{t.initials}</span>}
+              </div>
+              <div className="person-info">
+                <span className="person-name">{t.name}</span>
+                <span className="person-role">{t.role}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 );
 
 const Feature = ({ title, desc, icon }) => (
