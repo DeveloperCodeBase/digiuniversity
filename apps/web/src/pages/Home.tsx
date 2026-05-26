@@ -330,8 +330,13 @@ export const HomePage = ({ go }: HomePageProps) => {
         </div>
       </section>
 
-      {/* ============== TRUST STRIP (R9 §2) ============== */}
-      <TrustStrip />
+      {/* ============== TRUST STRIP (R9 §2) — REMOVED per D54 owner directive.
+           Owner explicit «remove this section in landing page» pointing at the
+           «سازمان‌های همکار و دانشگاه‌های شریک» strip with MSA/UT/Sharif/KHU/IUT
+           /Amirkabir tiles. The structured D53 <PartnersV2Section /> below
+           (rendered further down the page) provides the same affiliations
+           with the visual treatment owner approved. TrustStrip definition is
+           preserved at line ~1043 for potential reuse but not rendered. */}
 
       {/* ============== STATS BAND (R9 §3) ============== */}
       <StatsBand />

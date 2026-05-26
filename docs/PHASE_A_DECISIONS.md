@@ -1038,3 +1038,30 @@ Layout: 4 cols desktop / 3 cols tablet (≤1024) / 2 cols mobile (≤720) / 1 co
 The legacy .marquee CSS rules remain in the file as fallback (no other Home component uses them but staying defensive).
 
 **Source:** owner directive 2026-05-26 round-4 "سازمان‌های همکار جذاب نیست (repeat)".
+
+### D54 — Remove TrustStrip + hero-stats visual upgrade
+**Context:** Owner identified two issues post-D53:
+1. The old `<TrustStrip />` is STILL rendered (showing MSA/UT/Sharif/KHU/IUT/Amirkabir generic monograms above the StatsBand — this is a SEPARATE section from D53's new PartnersV2Section). Owner: «remove this section in landing page».
+2. Hero stats (۸ دانشکده / ۲۴۸ برنامه / ۹۴ استاد / ۸٬۴۰۰ دانشجو) render as plain text rows below CTAs. Owner: «make this section attractive in landing page».
+
+**Fix 1 — TrustStrip removed:**
+- `Home.tsx` line ~333: `<TrustStrip />` render removed (component definition kept at line ~1043 for potential reuse).
+- The D53 `<PartnersV2Section />` (rendered further down with 3-category structured card-grid) provides equivalent + better affiliation display.
+
+**Fix 2 — hero-stats glassy-card upgrade:**
+- `home-v2-overrides.css` new block targeting `.home-shell-v2 .hero-stats` + `.hero-stat`:
+  - 4-col grid (desktop) / 2-col (≤1024) / 1-col (≤520) responsive
+  - Translucent gradient background + `backdrop-filter: blur(8px)` for frosted-glass look on dark hero
+  - 4px gradient accent bar (cobalt → gold) at the start edge of each card
+  - Number text rendered in gradient (`white → navy-200`) via `background-clip: text`
+  - Unit suffix in accent cobalt
+  - Hover: lift -3px + brighter background + accent border tint
+  - Top border separator above the stats group
+- Layout still uses existing `<Stat />` sub-component (no JSX change, only CSS)
+
+**Files:**
+- `apps/web/src/pages/Home.tsx` — TrustStrip render removed (+10 / -2 lines, comment block in place)
+- `apps/web/src/pages/home-v2-overrides.css` — hero-stats card styles (~75 lines)
+- `docs/PHASE_A_DECISIONS.md` — this entry
+
+**Source:** owner directive 2026-05-26 "remove TrustStrip + make hero-stats attractive".

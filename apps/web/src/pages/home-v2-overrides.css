@@ -253,6 +253,85 @@ body[data-home-shell="true"] #root > a.skip-link {
   font-weight: 500;
 }
 
+/* D54 owner directive «make this section attractive» — hero-stats
+   visual upgrade. Each .hero-stat becomes a glassy card with a
+   gradient-text number, separator line above, and a refined label.
+   Stays inside the dark hero so the card uses translucent white +
+   subtle border for the "frosted" look. */
+.home-shell-v2 .hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-block-start: 56px;
+  padding-block-start: 32px;
+  border-block-start: 1px solid rgba(255, 255, 255, 0.12);
+}
+@media (max-width: 1024px) {
+  .home-shell-v2 .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+@media (max-width: 520px) {
+  .home-shell-v2 .hero-stats { grid-template-columns: 1fr; gap: 12px; }
+}
+.home-shell-v2 .hero-stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 22px 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r-md, 14px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  backdrop-filter: saturate(140%) blur(8px);
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
+}
+.home-shell-v2 .hero-stat::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  width: 4px;
+  height: 36px;
+  background: linear-gradient(180deg, var(--accent, #2e6bff), var(--gold, #c9a45c));
+  border-radius: 0 var(--r-xs, 6px) var(--r-xs, 6px) 0;
+}
+.home-shell-v2 .hero-stat:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border-color: rgba(46, 107, 255, 0.45);
+}
+.home-shell-v2 .hero-stat .v {
+  font-family: "Vazirmatn", system-ui, sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, #ffffff 20%, #c5d2e3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.home-shell-v2 .hero-stat .v .unit {
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 600;
+  background: none;
+  -webkit-text-fill-color: var(--accent, #2e6bff);
+  color: var(--accent, #2e6bff);
+}
+.home-shell-v2 .hero-stat .l {
+  font-family: "Vazirmatn", system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.005em;
+}
+
 /* D51 ITEM E — Topbar badges: ensure white on dark navy is fully white
    (not the inherited mute-2). The topbar already has color: white via
    home-v2.css; this override ensures no nested rule overrides it. */
