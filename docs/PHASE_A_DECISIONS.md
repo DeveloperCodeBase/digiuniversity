@@ -1079,3 +1079,31 @@ The legacy .marquee CSS rules remain in the file as fallback (no other Home comp
   - `data-reveal` on the wrapper for IntersectionObserver fade-in
 
 **Source:** owner directive 2026-05-26 "remove EST eyebrow + place big centered logo".
+
+### D56 — R-Landing-v2 closed (D13 owner ack), R7.1+R7.2 resumes per D33 + D25
+**Note:** owner referenced this verbally as «D53» but D53 was previously logged for the Partners section redesign; recording under next-available number D56 to preserve traceability.
+
+**Context:** Owner D13 ack on R-Landing-v2: the ~22-commit chain (vol-1 A-E + D48 F-J + D49 K-N + D51 U-X + D52 + D53 partners + D54 + D55 logo) is **closed** and accepted. Next: resume R7.1+R7.2 (Performance track) that was paused at D33.
+
+**Implementation audit (executed pre-decision):**
+Reviewed current codebase to determine what's still pending vs already shipped from prior R7.1+R7.2 work:
+
+| Item | State | Evidence |
+|---|---|---|
+| R7.1.a — Vite manualChunks (react-vendor / radix-vendor) | ✅ **shipped** | `vite.config.js` `rollupOptions.output.manualChunks` block present |
+| R7.1.b — React.lazy() for workspace routes | ✅ **shipped** | `router.tsx` has 8 lazy routes: AssessmentLive, Catalog, CourseLive, MyCourses, Progress, Tutor, Classroom, Dashboard |
+| R7.1.c — `<link rel="modulepreload">` for vendors | ✅ **shipped** | Vite 5 emits these by default; verified in served HTML: `<link rel="modulepreload" crossorigin href="/assets/radix-vendor-*.js">` + `react-vendor-*.js` |
+| R7.2.a — Vazirmatn self-host (4 weights) | ✅ **shipped** | `main.tsx` imports `@fontsource/vazirmatn/500.css` through `/800.css` |
+| R7.2.b — Bricolage + JetBrains Mono self-host | ✅ **shipped** | `main.tsx` imports both, weights 500/600/700 + 400/500/600 |
+| R7.2.c — Google Fonts `<link>` removed | ✅ **shipped** | `index.html` shows R7.2.c comment + no `<link>` to fonts.googleapis.com or fonts.gstatic.com |
+| R7.2.d — Workbox runtimeCaching strip | ✅ **N/A** | SW disabled per D45; nothing to strip; will be addressed in post-Gate-A SW R7.0 ship |
+
+**All R7.1+R7.2 implementation items are already in production.** Only outstanding work is:
+1. Fresh baseline Lighthouse measurement post-R-Landing-v2 (R-Landing-v2 added ~99KB scoped CSS + Home navbar + 4 logos + 3 student portraits — may have offset some R7.1+R7.2 gains)
+2. Update review doc `PHASE_A_R7_1_R7_2_REVIEW.md` with post-R-Landing-v2 numbers
+3. Regression sweep + R-Landing-v2 visual diff (font swap could cause FOUT)
+4. D13 owner smoke
+
+**SW decision (per owner directive Option A):** SW stays disabled until post-Gate-A. R7.0 (SW network-first cache strategy) ships as its own sub-R after Phase A close.
+
+**Source:** owner directive 2026-05-26 "R-Landing-v2 D13 PASS, resume R7.1+R7.2 per D33+D25".

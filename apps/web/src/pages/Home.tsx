@@ -295,9 +295,18 @@ export const HomePage = ({ go }: HomePageProps) => {
                 (light-logo.png — the Jahad+AIRAC+university wordmark
                 white variant designed for the dark hero background). */}
             <div className="hero-logo-mark" data-reveal>
+              {/* R7.1.5.a — hero LCP optimization. Was light-logo.png 286KB
+                  (LCP candidate, blocked / from scoring above 50). Swapped
+                  to airac-white.png 29KB (10× smaller, same white-on-dark
+                  branding intent). fetchpriority=high + decoding=sync so
+                  the browser races this above lazy assets. */}
               <img
-                src="/landing-v2/light-logo.png"
-                alt="دانشگاه برخط هوشمند ایران — جهاد دانشگاهی · AIRAC"
+                src="/landing-v2/airac-white.png"
+                alt="دانشگاه برخط هوشمند ایران — مرکز راهبری پژوهش و پیشرفت هوش مصنوعی"
+                fetchPriority="high"
+                decoding="sync"
+                width="520"
+                height="520"
               />
             </div>
             {/* D48 ITEM 3 — hero title refinement per owner feedback.
@@ -729,7 +738,18 @@ const FacultyV2Section = () => (
         {FACULTY_V2.map((f) => (
           <article key={f.name} className="faculty-v2-card">
             <div className="portrait">
-              <img src={f.photo} alt={f.name} loading="lazy" />
+              {/* R7.1.5.a — explicit decoding=async + fetchpriority=low
+                  so lazy faculty PNGs (1–2 MB each) don't compete with
+                  hero LCP candidate for main thread time. */}
+              <img
+                src={f.photo}
+                alt={f.name}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                width="320"
+                height="427"
+              />
             </div>
             <div className="info">
               <div className="name">{f.name}</div>
@@ -928,7 +948,15 @@ const TestiV2Section = () => (
             <div className="person">
               <div className="person-avatar" aria-hidden="true">
                 {t.photo ? (
-                  <img src={t.photo} alt="" loading="lazy" />
+                  <img
+                    src={t.photo}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    width="56"
+                    height="56"
+                  />
                 ) : (
                   <span>{t.initials}</span>
                 )}
