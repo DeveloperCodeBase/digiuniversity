@@ -241,6 +241,34 @@ body[data-home-shell="true"] #root > a.skip-link {
   color: #ffffff;
   margin-block: 24px 18px;
 }
+
+/* D55 owner directive — large centered logo lockup replacing the
+   «EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE» pill. The PNG
+   has its own institutional typography baked in (Jahad seal + AIRAC
+   text + university wordmark), so all we need is a clean centered
+   container with responsive sizing. */
+.home-shell-v2 .hero-logo-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 28px;
+  max-width: 100%;
+}
+.home-shell-v2 .hero-logo-mark img {
+  display: block;
+  width: clamp(280px, 42vw, 520px);
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  /* Subtle glow + drop-shadow so the white linework lifts off the
+     dark navy hero without harsh edges. */
+  filter: drop-shadow(0 12px 36px rgba(46, 107, 255, 0.18))
+          drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+@media (max-width: 640px) {
+  .home-shell-v2 .hero-logo-mark img { width: min(80vw, 320px); }
+  .home-shell-v2 .hero-logo-mark { margin-block-end: 20px; }
+}
 .home-shell-v2 .hero-title .em {
   color: var(--accent, #2e6bff);
 }

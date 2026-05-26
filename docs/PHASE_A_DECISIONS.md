@@ -1065,3 +1065,17 @@ The legacy .marquee CSS rules remain in the file as fallback (no other Home comp
 - `docs/PHASE_A_DECISIONS.md` — this entry
 
 **Source:** owner directive 2026-05-26 "remove TrustStrip + make hero-stats attractive".
+
+### D55 — Hero eyebrow replaced with large centered logo lockup
+**Context:** Owner sent a white-on-transparent logo PNG (the `light-logo.png` Jahad + AIRAC + university wordmark already vendored in `public/landing-v2/`) and directed: «این متن رو حذف کن — EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE — و به جاش این لوگو که میفرستم بزرگ جایگذاری کن وسط».
+
+**Fix:**
+- `Home.tsx` hero eyebrow `<div class="hero-eyebrow">` (rendered «· EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE ·» as a pill below the cobrand chips) → replaced with `<div class="hero-logo-mark"><img src="/landing-v2/light-logo.png" alt=...></div>`
+- `home-v2-overrides.css` new `.hero-logo-mark` rules:
+  - `display: flex; justify-content: center;` centered horizontally
+  - `img width: clamp(280px, 42vw, 520px)` responsive sizing — 280px floor on phone, 42vw fluid in middle, 520px ceiling on wide desktop
+  - `filter: drop-shadow(...) drop-shadow(...)` — soft cobalt glow + dark shadow so the white linework lifts off the dark navy hero
+  - Mobile (<640px): width clamped at `min(80vw, 320px)` + tighter bottom margin
+  - `data-reveal` on the wrapper for IntersectionObserver fade-in
+
+**Source:** owner directive 2026-05-26 "remove EST eyebrow + place big centered logo".

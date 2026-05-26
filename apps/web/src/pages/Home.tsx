@@ -288,9 +288,17 @@ export const HomePage = ({ go }: HomePageProps) => {
                 </div>
               </div>
             </div>
-            <div className="hero-eyebrow">
-              <span className="dot"></span>
-              <span>EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE</span>
+            {/* D55 owner directive: «این متن رو حذف کن... و به جاش این لوگو
+                که میفرستم بزرگ جایگذاری کن وسط». The «EST. 2026 ·
+                CHARTERED ONLINE UNIVERSITY · AI-NATIVE» eyebrow pill
+                is replaced with a large centered logo lockup
+                (light-logo.png — the Jahad+AIRAC+university wordmark
+                white variant designed for the dark hero background). */}
+            <div className="hero-logo-mark" data-reveal>
+              <img
+                src="/landing-v2/light-logo.png"
+                alt="دانشگاه برخط هوشمند ایران — جهاد دانشگاهی · AIRAC"
+              />
             </div>
             {/* D48 ITEM 3 — hero title refinement per owner feedback.
                 Title simplified to design's institutional phrasing.
