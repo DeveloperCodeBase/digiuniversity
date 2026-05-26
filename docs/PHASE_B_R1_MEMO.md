@@ -2,9 +2,22 @@
 
 **Author:** Phase A → Phase B handoff (post-Gate-A close per D58/D59)
 **Date:** 2026-05-26
-**Status:** ⏳ DRAFT — awaiting owner ack + Q1-Q4 answers before code
+**Status:** 🔒 **LOCKED per D60** — awaiting owner memo re-review (final ack) before code starts
 **Workflow:** memo-then-code-then-test-then-D13 per D11 + Phase A retrospective lesson #1
 **Compass Roadmap reference:** §Phase B — Academic Hierarchy + Onboarding (~3 weeks)
+
+## 🔒 Locked answers (D60)
+
+Owner answered 2026-05-26: **«Q1.a Q2.a Q3.a Q4.a شروع کن»** with explicit Q2 override.
+
+| Q | Decision | Rationale |
+|---|---|---|
+| Q1.a | `docs/MIGRATION_POLICY.md` is a **separate pre-R1 task** (R0.5) | Clean sub-R boundaries; policy doc owner-reviewable independently. |
+| **Q2.a** **(OVERRIDE)** | **Full CRUD across all 4 levels** in R1 (NOT read-only first) | Read-only = zero value (admin can't populate without dev DB touch); 2 extra days = real deliverable; D18 flow assertion meaningful only on CRUD; R2 "add CRUD" feels like incomplete-by-design. |
+| Q3.a | **Per-tenant hierarchy** (every School/Faculty/Department/Program scoped to `tenantId`) | Phase A precedent; supports Compass multi-tenant evolution. |
+| Q4.a | **Dual-column `nameFa` + `nameEn`** | Phase A precedent (University.nameFa + nameEn); owner controls both translations independently. |
+
+**Locked scope: ~3,000 LOC, 5-7 day timeline.** Conscious tradeoff for deliverable-complete R1 vs scope-compressed-but-inert.
 
 ---
 
@@ -225,7 +238,7 @@ For R1, no dual-write is needed yet — School/Department/Program are brand-new 
 - Cascade soft-delete: School → Faculty → Department → Program
 - Tenant isolation: tenant A's schools never visible to tenant B (per Q3 multi-tenancy decision)
 
-### Estimated scope
+### Estimated scope (post-D60 lock)
 
 | File | LOC |
 |---|---:|
@@ -234,27 +247,34 @@ For R1, no dual-write is needed yet — School/Department/Program are brand-new 
 | `apps/api/src/modules/academic-hierarchy/*` (4 controllers + 4 services + DTOs + module) | +650 |
 | `apps/api/src/prisma/seed.ts` | +80 (seed 3 schools × 2 faculties × 2 depts × 2 programs = ~24 rows) |
 | `apps/web/src/api/endpoints.js` | +90 (4 resource APIs) |
-| `apps/web/src/pages/admin/{Schools,Faculties,Departments,Programs}Page.tsx` | +900 (4 × ~225 each) |
+| `apps/web/src/pages/admin/{Schools,Faculties,Departments,Programs}Page.tsx` (**Q2.a FULL CRUD**) | **+1,200** (4 × ~300 each — list view + create dialog + edit dialog + soft-delete confirm + nested breadcrumb) |
+| `apps/web/src/pages/admin/_shared/*` (CrudDialog + ConfirmDelete + FormField + ValidationToast — extracted to avoid 4× duplication) | +280 |
 | `apps/web/src/sidenav/SIDEBAR_BY_ROLE.ts` (extend admin nav) | +20 |
 | `apps/web/src/router.tsx` | +12 (4 route registrations, lazy-loaded) |
-| `apps/api/test/academic-hierarchy.e2e-spec.ts` | +260 |
-| `apps/web/tests/visual/phase-b-r1-academic-hierarchy.spec.ts` | +180 |
-| `docs/MIGRATION_POLICY.md` (if Q1.inline) | +160 |
+| `apps/api/test/academic-hierarchy.e2e-spec.ts` | +320 (Q2.a expands CRUD assertions: create/edit/delete per level + cascade soft-delete + audit row check) |
+| `apps/web/tests/visual/phase-b-r1-academic-hierarchy.spec.ts` (D12 + D18 flow) | +240 (Q2.a journey: admin login → create School → create Faculty under it → create Department → create Program → return-to-list cascade soft-delete verifies all 4 hidden) |
 | `docs/PHASE_B_R1_REVIEW.md` (post-ship) | +220 |
 
-**Total: ~2,872 lines** if `MIGRATION_POLICY.md` inline (Q1.b), or ~2,712 if separate pre-R1 task (Q1.a). Above Compass §Phase B initial estimate of 800-1200 LOC — see Q2 (admin UI scope) for the lever to compress.
+**Total: ~3,412 LOC.** Per Q1.a, `docs/MIGRATION_POLICY.md` is a **separate R0.5 pre-R1 task** (~160 LOC) — not included in R1 total above.
+
+**Timeline:** 5-7 days for R1 (per D60 locked tradeoff).
+**Above Compass §Phase B initial estimate of 800-1200 LOC** — the expansion is owner-acked under D60 (full-CRUD value > scope compression).
 
 ### Commit ordering (atomic, per Phase A retrospective lesson #1)
 
-1. Commit A — `docs/MIGRATION_POLICY.md` (if Q1.b inline) **OR** skip if Q1.a separate task
-2. Commit B — Prisma schema (4 models + enums) + migration SQL + seed
-3. Commit C — NestJS School module (controller + service + DTOs)
-4. Commit D — NestJS Faculty + Department + Program modules
-5. Commit E — API e2e tests
-6. Commit F — `endpoints.js` + 4 admin pages + router registration
-7. Commit G — sidebar nav extension + role-based access guard
-8. Commit H — D12 + D18 specs
-9. Commit I — review doc + pre-smoke evidence
+Per Q1.a, `MIGRATION_POLICY.md` ships as **R0.5 BEFORE R1 begins** — not a commit inside R1. R1 atomic commits (post-R0.5 + memo re-ack):
+
+1. **Commit A** — Prisma schema (4 models + enums + indexes) + migration SQL + seed (3×2×2×2 = 24 rows)
+2. **Commit B** — NestJS School module (controller + service + DTOs + audit decorators)
+3. **Commit C** — NestJS Faculty module (controller + service + DTOs, with `schoolId` FK additive)
+4. **Commit D** — NestJS Department + Program modules
+5. **Commit E** — API e2e tests (`academic-hierarchy.e2e-spec.ts`) covering all 16 CRUD endpoints + cascade soft-delete + AuditLog assertions
+6. **Commit F** — `endpoints.js` + shared `_shared/CrudDialog.tsx` + `ConfirmDelete.tsx` + `FormField.tsx` extracted (avoid 4× duplication)
+7. **Commit G** — `SchoolsPage.tsx` full CRUD (list + create + edit + soft-delete + nested breadcrumb crumb #1)
+8. **Commit H** — `FacultiesPage.tsx` + `DepartmentsPage.tsx` + `ProgramsPage.tsx` full CRUD (each with the appropriate breadcrumb depth)
+9. **Commit I** — sidebar nav extension (`SIDEBAR_BY_ROLE.ts` admin items) + router registration (4 lazy routes) + role-based access guard (super_admin + admin only)
+10. **Commit J** — D12 + D18 spec (full journey: login → create School → drill down 4 levels → soft-delete cascade verification)
+11. **Commit K** — Review doc + pre-smoke evidence + D29 Chrome Extension verification screenshots
 
 ---
 
@@ -281,40 +301,11 @@ For R1, no dual-write is needed yet — School/Department/Program are brand-new 
 
 ---
 
-## 4 open questions for owner ack
+## Decisions log reference
 
-### Q1 — Migration policy doc: separate pre-R1 task or inline?
+All four Q-questions answered + locked under **D60** in `docs/PHASE_A_DECISIONS.md`. See the «🔒 Locked answers (D60)» block at the top of this memo. No remaining open questions for R1.
 
-The `docs/MIGRATION_POLICY.md` needs to exist before the first dual-write (R2). Two options:
-
-- **Q1.a — Separate pre-R1 task.** Author the doc in its own short sub-R (R0.5 maybe, ~160 lines + owner ack ~1 day). R1 starts assuming the policy is in place.
-- **Q1.b — Inline in R1.** Author the doc as Commit A inside R1. Adds 160 lines to R1 scope but bundles the foundation work.
-
-**Default proposed:** Q1.a — separate. Cleaner sub-R boundaries + the policy doc can be owner-reviewed independently.
-
-### Q2 — Admin UI scope: full CRUD or read-only first iteration?
-
-- **Q2.a — Full CRUD on all 4 levels.** ~900 LOC across 4 page files. Owner can create/edit/delete School/Faculty/Department/Program from R1 ship.
-- **Q2.b — Read-only first iteration.** ~300 LOC across 4 read-only views. CRUD added in R1.x follow-up. Tighter scope, faster D13.
-
-**Default proposed:** Q2.b — read-only first iteration. Aligns with Compass §Phase B incremental shape. CRUD becomes R1.b within 1-2 days post-R1.
-
-### Q3 — Multi-tenancy: per-tenant or global hierarchy?
-
-Compass Roadmap mentions multi-tenant as a placeholder; Phase A built the demo as single-tenant.
-
-- **Q3.a — Per-tenant.** Each tenant has its own School hierarchy. `tenantId` on School (current proposed schema). Matches Phase A pattern.
-- **Q3.b — Global hierarchy.** Single shared School/Faculty/Department/Program list across all tenants. Simpler queries, no `tenantId` FK on these tables.
-- **Q3.c — Hybrid.** School can be either tenant-scoped OR global (via `tenantId NULL = global`). Most flexible, slightly more complex queries.
-
-**Default proposed:** Q3.a — per-tenant. Phase A precedent + supports Compass multi-tenant evolution. Q3.c if owner foresees shared faculty across tenants soon.
-
-### Q4 — Persian-vs-English DB naming convention?
-
-- **Q4.a — Dual column** (`nameFa` + `nameEn`). Phase A precedent (e.g., University.nameFa + nameEn in the deferred B.1a). Each language stored independently.
-- **Q4.b — Single column** with locale resolution (`name` field + i18n at the API layer or Accept-Language header). Simpler schema, harder to enforce both translations.
-
-**Default proposed:** Q4.a — dual column. Phase A consistency + makes the «دانشکده‌ی…» / "School of…" round-trip explicit + easier admin UI for both names.
+The single explicit override (Q2.a) is documented with owner rationale; the other three (Q1.a, Q3.a, Q4.a) match the memo defaults and the Phase A precedents.
 
 ---
 
@@ -350,15 +341,15 @@ Compass Roadmap mentions multi-tenant as a placeholder; Phase A built the demo a
 
 | Item | Status |
 |---|---|
-| Memo | ✅ this file |
-| Owner ack | ⏳ pending — needs Q1-Q4 answers |
-| `docs/MIGRATION_POLICY.md` | ⏳ Q1-gated (Commit A inline OR R0.5 separate) |
-| Code | ⏳ NOT STARTED |
-| Specs | ⏳ NOT STARTED |
-| D29 pre-smoke | ⏳ NOT STARTED |
-| Review doc | ⏳ post-ship |
-| D13 owner smoke | ⏳ post-deploy |
+| Memo (Q1-Q4 answers locked per D60) | ✅ this file |
+| **Owner memo re-ack** (final review of locked scope) | ⏳ **pending** |
+| `docs/MIGRATION_POLICY.md` (R0.5 — Q1.a separate pre-R1 task) | ⏳ post-memo-re-ack |
+| R0.5 owner ack on migration policy | ⏳ post-R0.5 author |
+| R1 code (this memo's atomic commits A-K) | ⏳ post-R0.5 ack |
+| R1 D29 pre-smoke + D13 owner smoke | ⏳ post-deploy |
+| Review doc `PHASE_B_R1_REVIEW.md` | ⏳ post-ship |
 
-— Phase B kickoff, 2026-05-26. Phase A `phase-a-complete` tag in place. Awaiting Q1-Q4 owner answers to begin.
+— Phase B kickoff, 2026-05-26. Phase A `phase-a-complete` tag in place. **Q1.a + Q2.a (override) + Q3.a + Q4.a locked under D60.** Awaiting owner memo re-review (final ack) before R0.5 starts.
 
-**One-line ack format:** «Q1.a Q2.b Q3.a Q4.a شروع کن» (or letter combos).
+**Re-ack format:** «memo OK, شروع R0.5» (or «memo OK، شروع» — any explicit affirmative).
+If memo needs further changes, list them.

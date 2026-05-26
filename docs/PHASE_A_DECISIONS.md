@@ -1189,3 +1189,34 @@ Lighthouse Perf score noise: re-runs on identical code yielded 45 / 29 / 65 on `
 - Phase A retrospective sign-off
 
 **Source:** owner directive 2026-05-26 «الان دیگه ارایه مهم نیست... طبق پلن همه پروژه پیاده سازی بشه».
+
+### D60 — Phase B R1 owner ack with Q2 override (full CRUD)
+**Context:** Owner reviewed `PHASE_B_R1_MEMO.md` (commit `5caf657`) and ack'd with one explicit override:
+
+**Locked decisions:**
+- **Q1.a ✅** — `docs/MIGRATION_POLICY.md` ships as a separate pre-R1 task (clean sub-R boundaries).
+- **Q2.a ✅ (OVERRIDE of memo default Q2.b)** — Full CRUD across all 4 levels. Owner reasoning:
+  - Read-only Admin UI = zero-value (admin can't populate data without developer DB touch).
+  - 2 extra days for CRUD = real value delivered.
+  - D18 flow assertion is meaningful only on full CRUD; weak on view-only path.
+  - R2 with only-CRUD-add bolt-on feels incomplete by design.
+- **Q3.a ✅** — Per-tenant hierarchy (Phase A precedent, supports Compass multi-tenant evolution).
+- **Q4.a ✅** — Dual-column `nameFa` + `nameEn` (Phase A precedent, owner control over both translations).
+
+**Revised R1 scope (post-Q2 override):**
+- 4 Prisma models with cascade soft-delete chain (unchanged)
+- 16 CRUD endpoints (4 levels × 4 verbs) all audit-decorated (unchanged)
+- **4 admin pages with FULL CRUD** (not read-only first iteration) — ~900 LOC
+- Sidebar nav extension for admin role
+- D12 + D18 specs covering full create/edit/delete journey across all 4 levels
+- **Total estimate: ~3,000 LOC, 5-7 day timeline**
+
+**Conscious tradeoff:** owner explicitly chose deliverable-complete over scope-compressed. This is a value-delivery decision, not scope creep — the alternative (Q2.b) would have shipped an inert R1 followed by an awkward R1.b "now make it actually work".
+
+**Execution sequence (post-this-decision):**
+1. **MEMO UPDATE** — refactor `PHASE_B_R1_MEMO.md` to lock the answers, remove conditional Q1-Q4 language, lock scope at ~3,000 LOC.
+2. **OWNER MEMO RE-REVIEW** — pre-code re-ack on updated memo.
+3. **R0.5 (separate pre-R1) — `docs/MIGRATION_POLICY.md`** — author + owner ack before R1.
+4. **R1 implementation begins** with the locked scope per memo.
+
+**Source:** owner directive 2026-05-26 «Q1.a Q2.a Q3.a Q4.a شروع کن» with Q2 override rationale.
