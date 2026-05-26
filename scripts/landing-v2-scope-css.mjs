@@ -106,7 +106,15 @@ function walk(input) {
     if (input[i] === "@") {
       let j = i;
       while (j < n) {
-        if (input[j] === ";" && countBraces(input, i, j) === 0) {
+        // Track paren depth so semicolons inside url(...) don't end
+        // the statement prematurely. Critical for @import url(
+        // https://...?family=X:wght@300;400;500;...) which has
+        // semicolons inside the URL query string.
+        if (
+          input[j] === ";" &&
+          countBraces(input, i, j) === 0 &&
+          countParens(input, i, j) === 0
+        ) {
           // @import, @charset etc — single-statement.
           const sig = input.slice(i, j + 1).trim();
           // DROP @import url(...fonts.googleapis...) — fonts come from
@@ -196,6 +204,18 @@ function countBraces(input, start, end) {
   for (let p = start; p < end; p++) {
     if (input[p] === "{") d++;
     else if (input[p] === "}") d--;
+  }
+  return d;
+}
+
+// Helper: count paren depth between two positions. Used so semicolons
+// inside @import url(...) — like the ones inside a Google Fonts query
+// string family=X:wght@300;400;500 — don't end the @-rule prematurely.
+function countParens(input, start, end) {
+  let d = 0;
+  for (let p = start; p < end; p++) {
+    if (input[p] === "(") d++;
+    else if (input[p] === ")") d--;
   }
   return d;
 }
