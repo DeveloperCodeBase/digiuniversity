@@ -429,39 +429,13 @@ export const HomePage = ({ go }: HomePageProps) => {
         </div>
       </section>
 
-      {/* ============== MARQUEE — TRUSTED BY ============== */}
-      <div className="marquee">
-        <div className="marquee-track">
-          {[
-            "دانشگاه تهران",
-            "صنعتی شریف",
-            "علم و صنعت",
-            "بهشتی",
-            "اصفهان",
-            "خواجه نصیر",
-            "علامه طباطبایی",
-            "تربیت مدرس",
-            "Stanford Online",
-            "MIT OpenCourseWare",
-            "edX",
-            "Coursera Partners",
-            "دانشگاه تهران",
-            "صنعتی شریف",
-            "علم و صنعت",
-            "بهشتی",
-            "اصفهان",
-            "خواجه نصیر",
-            "علامه طباطبایی",
-            "تربیت مدرس",
-            "Stanford Online",
-            "MIT OpenCourseWare",
-            "edX",
-            "Coursera Partners",
-          ].map((n, i) => (
-            <span key={i} className="marquee-item">{n}</span>
-          ))}
-        </div>
-      </div>
+      {/* ============== PARTNERS V2 (D53) — owner: «جذاب نیست درستش کن».
+           Replaces the plain scrolling-text marquee with a structured
+           card-grid section organized into 3 categories. Each card shows
+           a stylized mark (initials in colored circle) + full name +
+           sublabel. Hover lift + accent border. */}
+      <PartnersV2Section />
+
 
       {/* ============== KNOWLEDGE GRAPH ============== */}
       <section className="section pt-0" >
@@ -823,6 +797,97 @@ const GradCapSvg = () => (
     <path d="M6 11v4a6 6 0 0 0 12 0v-4" />
     <path d="M21 10v6" />
   </svg>
+);
+
+// D53 — Partners section per owner directive «سازمان‌های همکار و
+// دانشگاه‌های شریک: جذاب نیست درستش کن». Replaces the plain scrolling
+// marquee with a 3-category grid: Iranian top universities, research
+// institutes, international partners. Each entry has a styled monogram
+// mark + name + sublabel. Hover lift + accent border.
+type PartnerEntry = { mark: string; name: string; sub: string; accent: "navy" | "cobalt" | "gold" };
+
+const PARTNERS_UNIV: PartnerEntry[] = [
+  { mark: "ت", name: "دانشگاه تهران", sub: "UT · ۱۲۹۳", accent: "navy" },
+  { mark: "ش", name: "دانشگاه شریف", sub: "SUT · ۱۳۴۵", accent: "navy" },
+  { mark: "ا", name: "امیرکبیر", sub: "AUT · ۱۳۳۷", accent: "navy" },
+  { mark: "ع", name: "علم و صنعت", sub: "IUST · ۱۳۰۸", accent: "navy" },
+  { mark: "ب", name: "بهشتی", sub: "SBU · ۱۳۳۸", accent: "navy" },
+  { mark: "خ", name: "خواجه نصیر", sub: "KNTU · ۱۳۰۷", accent: "navy" },
+  { mark: "ع", name: "علامه طباطبایی", sub: "ATU · ۱۳۶۲", accent: "navy" },
+  { mark: "ت", name: "تربیت مدرس", sub: "TMU · ۱۳۶۰", accent: "navy" },
+];
+
+const PARTNERS_INSTITUTE: PartnerEntry[] = [
+  { mark: "ج", name: "جهاد دانشگاهی", sub: "ACECR · بنیان‌گذار", accent: "cobalt" },
+  { mark: "ع", name: "وزارت علوم", sub: "MSRT · مرجع آموزش عالی", accent: "cobalt" },
+  { mark: "پ", name: "پژوهشگاه دانش‌های بنیادی", sub: "IPM", accent: "cobalt" },
+  { mark: "ن", name: "بنیاد ملی نخبگان", sub: "BMN", accent: "cobalt" },
+  { mark: "ف", name: "صندوق نوآوری", sub: "INIF", accent: "cobalt" },
+  { mark: "ا", name: "وزارت ارتباطات", sub: "MICT", accent: "cobalt" },
+];
+
+const PARTNERS_INTL: PartnerEntry[] = [
+  { mark: "S", name: "Stanford Online", sub: "United States", accent: "gold" },
+  { mark: "M", name: "MIT OpenCourseWare", sub: "United States", accent: "gold" },
+  { mark: "e", name: "edX Consortium", sub: "Global · OpenEdX", accent: "gold" },
+  { mark: "C", name: "Coursera Partners", sub: "Global", accent: "gold" },
+];
+
+const PartnersV2Section = () => (
+  <section className="partners-v2-section" data-reveal>
+    <div className="shell">
+      <div className="section-head">
+        <div>
+          <div className="section-eyebrow">سازمان‌های همکار و دانشگاه‌های شریک</div>
+          <h2 className="section-title">
+            در <span className="em">شبکه‌ای از مراکز معتبر</span> آموزش‌عالی
+          </h2>
+        </div>
+        <p className="section-lead">
+          همکاری با دانشگاه‌های مادر کشور، پژوهشگاه‌های ملی و شبکه‌های آموزشی بین‌المللی — کیفیت محتوا و اعتبار گواهی‌نامه‌ها از این پشتوانه می‌آید.
+        </p>
+      </div>
+
+      <div className="partners-v2-group">
+        <h3 className="partners-v2-group-title">دانشگاه‌های مادر کشور</h3>
+        <div className="partners-v2-grid">
+          {PARTNERS_UNIV.map((p) => (
+            <PartnerCard key={p.name} {...p} />
+          ))}
+        </div>
+      </div>
+
+      <div className="partners-v2-group">
+        <h3 className="partners-v2-group-title">پژوهشگاه‌ها و نهادهای ملی</h3>
+        <div className="partners-v2-grid">
+          {PARTNERS_INSTITUTE.map((p) => (
+            <PartnerCard key={p.name} {...p} />
+          ))}
+        </div>
+      </div>
+
+      <div className="partners-v2-group">
+        <h3 className="partners-v2-group-title">همکاری‌های بین‌المللی</h3>
+        <div className="partners-v2-grid">
+          {PARTNERS_INTL.map((p) => (
+            <PartnerCard key={p.name} {...p} />
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const PartnerCard = ({ mark, name, sub, accent }: PartnerEntry) => (
+  <article className={`partner-v2-card accent-${accent}`}>
+    <div className="partner-mark" aria-hidden="true">
+      <span>{mark}</span>
+    </div>
+    <div className="partner-info">
+      <div className="partner-name">{name}</div>
+      <div className="partner-sub">{sub}</div>
+    </div>
+  </article>
 );
 
 const TestiV2Section = () => (

@@ -1015,3 +1015,26 @@ cd C:/digiuniversity && git revert --no-edit HEAD~17..HEAD && git push origin ma
 - `docs/PHASE_A_DECISIONS.md` — this entry
 
 **Source:** owner directive 2026-05-26 follow-up 4 items.
+
+### D53 — Partners section redesign (owner repeat-rejected the marquee upgrade)
+**Context:** D52's marquee-pill upgrade was insufficient. Owner re-reported «سازمان‌های همکار و دانشگاه‌های شریک: جذاب نیست درستش کن». Need a real visual structure, not a scrolling-text strip.
+
+**Decision: replace the marquee entirely with a structured card-grid section.** New component `<PartnersV2Section />` renders 3 category groups:
+
+| Group | Entries | Accent |
+|---|---|---|
+| دانشگاه‌های مادر کشور | 8: تهران، شریف، امیرکبیر، علم و صنعت، بهشتی، خواجه نصیر، علامه طباطبایی، تربیت مدرس | navy |
+| پژوهشگاه‌ها و نهادهای ملی | 6: جهاد دانشگاهی، وزارت علوم، پژوهشگاه IPM، بنیاد ملی نخبگان، صندوق نوآوری، وزارت ارتباطات | cobalt |
+| همکاری‌های بین‌المللی | 4: Stanford Online، MIT OCW، edX، Coursera Partners | gold |
+
+Each card: stylized monogram mark (48×48 gradient-filled square with single Persian letter or English initial) + name (Vazirmatn 14.5/700) + sub-label (founding year for universities, code/region for partners). Hover lift + accent border + shadow.
+
+Layout: 4 cols desktop / 3 cols tablet (≤1024) / 2 cols mobile (≤720) / 1 col phone (≤420). Each group separated by a dashed border with the group title above.
+
+**Files:**
+- `apps/web/src/pages/Home.tsx` — `<PartnersV2Section />` replaces the inline marquee div + adds `PARTNERS_UNIV / PARTNERS_INSTITUTE / PARTNERS_INTL` data arrays + `PartnerCard` sub-component
+- `apps/web/src/pages/home-v2-overrides.css` — partners-v2-section + grid + card styles (~85 lines)
+
+The legacy .marquee CSS rules remain in the file as fallback (no other Home component uses them but staying defensive).
+
+**Source:** owner directive 2026-05-26 round-4 "سازمان‌های همکار جذاب نیست (repeat)".
