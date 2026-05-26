@@ -827,3 +827,53 @@ After E: deploy + Chrome Extension pre-smoke + ping owner with rollback command 
 **Emergency stop triggers** (per audit section F hard guards): any change to AppShell.tsx, shared.tsx, workspace routes, auth flow, global tokens, or SW config beyond Commit A's temporary dispose → emergency stop + ping owner immediately.
 
 **Source:** owner directive 2026-05-26 «Q1.a Q2.b Q3.c شروع کن» + Q2.b reasoning.
+
+### D48 — R-Landing-v2 polish round 2 (owner detailed feedback)
+**Context:** R-Landing-v2 vol-1 (D47) deployed and verified. Owner reviewed live deployment + the design tarball assets and identified 6 polish items for round 2 before presentation. All items strictly inside `/` scope; no shared.tsx, AppShell, Footer, or workspace route touch.
+
+**Items shipped (commits F-I, Commit J is this entry + spec + review):**
+
+| Item | Concern | Commit | Scope |
+|---|---|---|---|
+| 1 | Branding/terminology sweep | F | 5 visible text replacements inside .home-shell-v2: hero title simplified, «پلتفرم» → «سکو», «آنلاین» → «برخط» (3 occurrences). Email domain preserved (technical address, not brand label). |
+| 2 | Custom Home Nav with Jahad logo + brand | F | New `<nav.home-nav-v2>` inside .home-shell-v2 wrapper. Brand right = Jahad logo + «دانشگاه برخط هوشمند ایران» + JAHAD·AIRAC subtitle. Buttons left = درباره/دانشکده/ورود/ثبت‌نام. Hides AppShell Nav via `body[data-home-shell="true"]` attribute set by React useEffect (no `:has()` — declarative React state). |
+| 3 | Hero refinement | F | Title shortened to «دانشگاه برخط هوشمند ایران» with elegant clamp(2rem, 5.5vw, 4rem) sizing. Co-brand chips now use real `<img>` tags pointing to `/landing-v2/jahad-dark.png` + `/landing-v2/airac-white.png`. |
+| 4 | Faculty section with 8 portraits | G | New `<FacultyV2Section />` replaces prior `<FacultyShowcase />`. 8 entries verbatim from design's data.tsx FACULTY const. Portraits served from `/landing-v2/faculty/{m1-m4, w1-w4}.{jpg,png}`. Layout 4/2/1 cols responsive. Hover lift + accent border. |
+| 5 | Testimonials with avatars | H | New `<TestiV2Section />` replaces prior `<Testimonials />`. 3 cards verbatim from design's data.tsx TESTIMONIALS const. Circular photo avatars + initials fallback. Layout 3/2/1 cols responsive. Hover lift. |
+| 6 | Global polish (fonts, anim, responsive) | I | Plus Jakarta Sans 500/600/700 added via @fontsource (package.json). Vazirmatn + Plus Jakarta declared on .home-shell-v2 font-family. `overflow-x: clip` on wrapper. `[data-reveal]` fade-in transition (opacity + translateY). |
+
+**Files touched (within scope):**
+- `apps/web/src/pages/Home.tsx` — Nav v2 component, branding sweep, FacultyV2Section, TestiV2Section, hero refinement
+- `apps/web/src/pages/home-v2-overrides.css` (NEW, ~410 lines) — manual additions on top of auto-generated home-v2.css
+- `apps/web/public/landing-v2/` (NEW) — 4 logos + 8 faculty portraits (~13 MB binary)
+- `apps/web/package.json` — added `@fontsource/plus-jakarta-sans@5.2.5`
+
+**Files NOT touched (hard guards verified):**
+- `apps/web/src/layouts/AppShell.tsx` — ✅ untouched
+- `apps/web/src/shared.tsx` — ✅ untouched
+- `apps/web/styles.css` (global tokens) — ✅ untouched
+- `apps/web/src/pages/home-v2.css` (auto-generated) — ✅ untouched (overrides live in separate file)
+- `apps/web/vite.config.js` — ✅ untouched (VitePWA still disabled per D45)
+- `apps/web/src/main.tsx` — ✅ untouched (Plus Jakarta imported in Home.tsx not main.tsx, per owner directive)
+- All workspace + auth-flow routes — ✅ untouched
+
+**Cumulative R-Landing-v2 commit chain (vol-1 + round-2):**
+| # | SHA | Title |
+|---|---|---|
+| A | `e8824ad` | SW dispose |
+| B | (push) + `016aa68` (fix) | home-v2.css scoped |
+| C | `5c9f8d9` | Home.tsx wrap + topbar + cobrand |
+| D | `bdf47e2` | D12 spec |
+| E | `7eb265f` | Review |
+| F | (this round) | Branding + Nav + Hero |
+| G | `fc79b0c` | Faculty 8 portraits |
+| H | `85778f6` | Testimonials |
+| I | `a43c7ac` | Polish |
+| J | (this commit) | D48 + spec update + round-2 review |
+
+**Rollback extended (10 commits):**
+```
+cd C:/digiuniversity && git revert --no-edit HEAD~10..HEAD && git push origin main
+```
+
+**Source:** owner directive 2026-05-26 D48 polish-round-2 spec.

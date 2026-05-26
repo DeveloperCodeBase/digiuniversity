@@ -158,8 +158,18 @@ body[data-home-shell="true"] #root > a.skip-link {
   font-size: clamp(2rem, 5.5vw, 4rem);
   line-height: 1.25;
   letter-spacing: -0.015em;
-  color: var(--navy-800, #0a1830);
+  /* Existing hero retains its dark-navy gradient background from styles.css;
+     title must be high-contrast white to read. Design's white-bg hero
+     uses dark text — our scope keeps existing hero structure (no AppShell
+     touch per scope guards), so we adapt color to the bg we have. */
+  color: #ffffff;
   margin-block: 24px 18px;
+}
+.home-shell-v2 .hero-title .em {
+  color: var(--accent, #2e6bff);
+}
+.home-shell-v2 .hero-sub {
+  color: rgba(255, 255, 255, 0.85);
 }
 .home-shell-v2 .hero-title .hero-title-line {
   display: block;

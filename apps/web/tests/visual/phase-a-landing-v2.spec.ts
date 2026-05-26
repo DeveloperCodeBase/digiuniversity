@@ -153,6 +153,85 @@ test.describe("@gate-a R-Landing-v2 — Home redesign D12 contract", () => {
 
   // ----- SW dispose contract (D45 + D47) -----
 
+  // ----- D48 ROUND-2 polish assertions -----
+
+  test("D48 ITEM 2: Home-local Nav .home-nav-v2 renders inside scope on /", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const nav = page.locator(".home-shell-v2 nav.home-nav-v2");
+    await expect(nav).toBeVisible();
+    // Brand text inside the nav (D48 ITEM 1 verbatim string)
+    await expect(nav).toContainText("دانشگاه برخط هوشمند ایران");
+    // Action buttons present
+    await expect(nav.getByRole("button", { name: /ورود/ })).toBeVisible();
+    await expect(nav.getByRole("button", { name: /ثبت‌نام رایگان/ })).toBeVisible();
+  });
+
+  test("D48 ITEM 2: AppShell global Nav hidden on / via body data-attribute", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // The hide rule targets #root > nav.nav (AppShell's slot). Computed
+    // display should be `none` when the body data-attribute is set.
+    const hidden = await page.evaluate(() => {
+      const nav = document.querySelector("#root > nav.nav") as HTMLElement | null;
+      if (!nav) return true; // already absent
+      return window.getComputedStyle(nav).display === "none";
+    });
+    expect(hidden).toBe(true);
+  });
+
+  test("D48 ITEM 2: body data-home-shell is set on / and absent on /login", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(await page.evaluate(() => document.body.dataset.homeShell)).toBe("true");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    // After unmount, the cleanup removes the attribute. data-* getter returns undefined.
+    expect(await page.evaluate(() => document.body.dataset.homeShell)).toBeFalsy();
+  });
+
+  test("D48 ITEM 3: hero title is the refined single-line text", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const title = page.locator(".home-shell-v2 .hero-title");
+    await expect(title).toContainText("دانشگاه برخط هوشمند ایران");
+    // The longer ۲۴۸ برنامه fragment from vol-1 is no longer in the title slot.
+    expect(await title.textContent()).not.toContain("۲۴۸ برنامه");
+  });
+
+  test("D48 ITEM 3: hero co-brand chips use real <img> tags", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const imgs = page.locator(".home-shell-v2 .hero-crown .logo-card .l-img img");
+    expect(await imgs.count()).toBe(2);
+    expect(await imgs.nth(0).getAttribute("src")).toMatch(/\/landing-v2\/jahad-dark\.png$/);
+    expect(await imgs.nth(1).getAttribute("src")).toMatch(/\/landing-v2\/airac-white\.png$/);
+  });
+
+  test("D48 ITEM 4: Faculty section renders 8 portrait cards", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const cards = page.locator(".home-shell-v2 .faculty-v2-section .faculty-v2-card");
+    expect(await cards.count()).toBe(8);
+    // First card per design's data.tsx order
+    await expect(cards.first()).toContainText("دکتر سید محمد حسینی");
+    await expect(cards.first()).toContainText("هوش مصنوعی و یادگیری ماشین");
+    // Portrait img sourced from /landing-v2/faculty/
+    const firstImg = cards.first().locator(".portrait img");
+    expect(await firstImg.getAttribute("src")).toMatch(/\/landing-v2\/faculty\/m2\.png$/);
+  });
+
+  test("D48 ITEM 5: Testimonials section renders 3 cards with avatars", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const cards = page.locator(".home-shell-v2 .testi-v2-section .testi-v2-card");
+    expect(await cards.count()).toBe(3);
+    // Verbatim text fragment from design's data.tsx first testimonial
+    await expect(cards.first()).toContainText("فضای آموزشی هوشمند دانشگاه");
+    await expect(cards.first()).toContainText("حسین رضایی");
+    // Each card has a circular avatar (img or initials)
+    expect(await cards.locator(".person-avatar").count()).toBe(3);
+  });
+
+  test("D48 ITEM 1: branding sweep — «آنلاین» absent from / inside scope", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const scopeText = await page.locator(".home-shell-v2").innerText();
+    expect(scopeText).not.toMatch(/آنلاین/);
+    expect(scopeText).not.toMatch(/پلتفرم/);
+  });
+
   test("SW dispose: no active service worker after page load", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     // Give main.tsx's unregister IIFE a moment to fire-and-forget.
