@@ -107,7 +107,42 @@ Per owner directive «اگه page یا duo زیر 90: R7.x.1 fine-tuning sub-R،
 
 This keeps the loop tight: 1 commit → 1 deploy → 1 measure → owner decision on next slice.
 
-## R7.1.5.a post-deploy results (Fix 1 + Fix 3 shipped)
+## R7.1.5.b post-deploy results (Option B sharp optimization shipped)
+
+After commit (sharp-optimized images deployed via `scripts/optimize-landing-images.mjs`):
+
+**Objective metric — total page weight (single-source-of-truth, no variance):**
+
+| Page | Before R7.1.5.b | After R7.1.5.b | Δ |
+|---|---:|---:|---:|
+| `/` | 2,953 KiB | **1,525 KiB** | **−1,428 KiB (-48%)** ✅ |
+| `/login` | ~1,470 KiB | **1,095 KiB** | **−375 KiB (-26%)** ✅ |
+| `/programs` | ~1,650 KiB | **1,221 KiB** | **−429 KiB (-26%)** ✅ |
+| Image asset bundle | 12,336 KiB | **691 KiB** | **−11.6 MB (-94%)** ✅ |
+
+**Subjective metric — Lighthouse Perf score (HIGH VARIANCE on Windows + headless Chrome):**
+
+| Page | Run | Perf | LCP | TBT |
+|---|---|---:|---|---|
+| `/` | 1 | 45 | 4.3 s | 2,020 ms |
+| `/` | 2 | 29 | 6.9 s | 5,170 ms |
+| `/login` | 1 | 72 | 3.6 s | 560 ms |
+| `/programs` | 1 | 54 | 4.2 s | 1,520 ms |
+
+**Variance assessment:** `/` showed 16-point Perf spread (29 → 45) across two consecutive runs on identical code. This matches the **R7.1.1 5-run variance study** (24–32 pts per prior memory `feedback_phase14_*` series) — single-run Lighthouse on this Windows + headless-Chrome setup is unreliable as Gate A signal.
+
+**Real-world impact estimate (not Lighthouse simulation):**
+- Cold-load on 3G: -11.6 MB → ~30 s fewer download time
+- Cold-load on 4G: ~3 s faster
+- LCP candidate (hero AIRAC logo) unchanged at 9 KB
+- Faculty + testi portraits no longer block scroll-into-view (lazy + ~30 KB each instead of 1-2 MB each)
+
+**Gate A §1 verdict:** **unable to call from single-run Lighthouse.** Three paths forward:
+1. **5-run median** — adds ~15 min, gives stable Perf number
+2. **D13 owner smoke as authoritative** — owner on real mobile + incognito + 3G/4G throttle answers «is the site fast enough?» definitively
+3. **Document variance band + ship** — accept that Lighthouse score is noisy + bytes-saved is real, close §1 with documented evidence
+
+
 
 After commit `b1b9he6vc` (hero `light-logo.png` → `airac-white.png` + fetchpriority/decoding hints on all portraits) deployed:
 
