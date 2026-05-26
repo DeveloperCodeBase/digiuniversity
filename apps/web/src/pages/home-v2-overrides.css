@@ -242,32 +242,32 @@ body[data-home-shell="true"] #root > a.skip-link {
   margin-block: 24px 18px;
 }
 
-/* D55 owner directive — large centered logo lockup replacing the
-   «EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE» pill. The PNG
-   has its own institutional typography baked in (Jahad seal + AIRAC
-   text + university wordmark), so all we need is a clean centered
-   container with responsive sizing. */
+/* D55 owner directive — centered logo lockup replacing the
+   «EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE» pill.
+   The light-logo.png is portrait-oriented (taller than wide) so we
+   constrain by HEIGHT, not width, to keep proportions sane in the
+   hero. Initial D55 used width: clamp 520px which made the logo
+   render 520×683 (too tall — pushed hero title below fold). Fix:
+   height-clamped sizing + width:auto preserves aspect ratio. */
 .home-shell-v2 .hero-logo-mark {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 28px;
+  margin: 0 auto 24px;
   max-width: 100%;
 }
 .home-shell-v2 .hero-logo-mark img {
   display: block;
-  width: clamp(280px, 42vw, 520px);
-  height: auto;
+  width: auto;
+  height: clamp(140px, 22vh, 240px);
   max-width: 100%;
   object-fit: contain;
-  /* Subtle glow + drop-shadow so the white linework lifts off the
-     dark navy hero without harsh edges. */
   filter: drop-shadow(0 12px 36px rgba(46, 107, 255, 0.18))
           drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
 }
 @media (max-width: 640px) {
-  .home-shell-v2 .hero-logo-mark img { width: min(80vw, 320px); }
-  .home-shell-v2 .hero-logo-mark { margin-block-end: 20px; }
+  .home-shell-v2 .hero-logo-mark img { height: clamp(120px, 18vh, 180px); }
+  .home-shell-v2 .hero-logo-mark { margin-block-end: 18px; }
 }
 .home-shell-v2 .hero-title .em {
   color: var(--accent, #2e6bff);
