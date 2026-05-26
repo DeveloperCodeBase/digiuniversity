@@ -48,3 +48,5 @@ uploads/
 *.sql
 *.sql.gz
 !apps/api/prisma/migrations/**/migration.sql
+docs/my-upload/landing-v2/uploads/
+docs/my-upload/landing-v2/assets/
