@@ -1220,3 +1220,34 @@ Lighthouse Perf score noise: re-runs on identical code yielded 45 / 29 / 65 on `
 4. **R1 implementation begins** with the locked scope per memo.
 
 **Source:** owner directive 2026-05-26 «Q1.a Q2.a Q3.a Q4.a شروع کن» with Q2 override rationale.
+
+### D61 — R1 memo re-ack + workflow + performance reminders baked
+**Context:** Owner re-acked the refactored R1 memo (commit `d5e2b16`) and authorized R0.5 (`docs/MIGRATION_POLICY.md`) start. Two Phase A retrospective lessons attached as hard constraints for R1 and every subsequent Phase B sub-R.
+
+**Reminder 1 — Workflow discipline (retrospective lesson #1):**
+Every Phase B sub-R follows the full pattern with **no skipping**:
+
+  **memo → owner ack → code → spec → deploy → D29 pre-smoke → D13 owner smoke → close**
+
+This first Phase B sub-R sets the precedent for everything downstream. Vertical compression of any stage (e.g., "automated green, ship") creates drift that's expensive to debug weeks later.
+
+**Reminder 2 — Performance budget per sub-R (retrospective lesson learned from R7.1.5):**
+R1 adds 4 admin pages + 4 shared components + 4 NestJS modules. To prevent main-bundle regression:
+
+- **Lazy-load admin routes:** `React.lazy(() => import(...))` for all 4 admin pages, registered with `<Suspense>` boundary in `router.tsx` (matches the R7.1.b pattern already in use for 8 workspace routes).
+- **manualChunks bucket:** add `admin-academic` to `vite.config.js > rollupOptions.output.manualChunks` so the 4 admin pages emit as `admin-academic.{hash}.js` separate from `index.{hash}.js`.
+- **Asset-weight check before final R1 commit:** `npm run build` locally, diff `dist/assets/index-*.js` size vs current production, report in `PHASE_B_R1_REVIEW.md`.
+- **Hard target:** main `index-*.js` bundle delta **< 50 KB** (admin-academic chunk separate, not counted against this budget).
+- **If delta > 50 KB main:** diagnose before D13 owner smoke OR open follow-up R1.5 sub-R to compress.
+
+**Execution sequence (post-this-decision):**
+1. **R0.5 memo author** — short doc-only memo describing the 11-item scope of `MIGRATION_POLICY.md` (already laid out in owner directive).
+2. **Owner R0.5 memo ack** — typical re-ack on the short memo.
+3. **R0.5 code** — write `docs/MIGRATION_POLICY.md` (~160 LOC target per owner estimate).
+4. **Owner R0.5 doc ack** — read + accept the policy doc itself.
+5. **R0.5 close** — entry in decisions log.
+6. **R1 begins** — atomic commits A-K per the locked R1 memo.
+
+R1 memo will be edited to embed the 2 reminders as binding scope.
+
+**Source:** owner directive 2026-05-26 «memo OK، شروع R0.5» + 2 explicit Phase A retrospective reminders.

@@ -19,6 +19,44 @@ Owner answered 2026-05-26: **«Q1.a Q2.a Q3.a Q4.a شروع کن»** with explic
 
 **Locked scope: ~3,000 LOC, 5-7 day timeline.** Conscious tradeoff for deliverable-complete R1 vs scope-compressed-but-inert.
 
+## 🚧 Binding constraints per D61 (Phase A retrospective lessons)
+
+These two are HARD scope requirements for R1, not optional polish. The decisions log entry D61 attaches them as binding.
+
+### Constraint #1 — Workflow discipline (retrospective lesson #1, no skipping)
+
+R1 (and every Phase B sub-R that follows) executes the full pattern:
+
+> **memo → owner ack → code → spec → deploy → D29 pre-smoke → D13 owner smoke → close**
+
+No "automated green, ship" shortcuts. No commit-before-memo-ack. No D13 skip on the assumption pre-smoke covers it. The first Phase B sub-R sets the cadence for everything downstream — drift here compounds.
+
+### Constraint #2 — Performance budget per sub-R (retrospective lesson from R7.1.5)
+
+R1 adds 4 admin pages + 4 shared components + 4 NestJS modules. To prevent main-bundle regression:
+
+- **Lazy-load admin routes.** All 4 admin pages MUST use `React.lazy(() => import("./pages/admin/SchoolsPage"))` etc., registered with `<Suspense>` boundary in `router.tsx`. Matches R7.1.b precedent (8 workspace routes already lazy).
+- **manualChunks bucket.** Add `admin-academic` to `vite.config.js > rollupOptions.output.manualChunks` so the 4 admin pages emit as `admin-academic.{hash}.js`, separate from `index.{hash}.js`.
+- **Asset-weight check before final R1 commit.** Run `npm run build` locally, diff `dist/assets/index-*.js` byte size vs current production. Record in `PHASE_B_R1_REVIEW.md`:
+  ```
+  Main bundle delta:  index-X.js (before) → index-Y.js (after) = +N KB
+  Admin-academic chunk: admin-academic-Z.js = N KB (new, separate)
+  Total page weight delta on `/`: +N KB (target: ≈ 0 since admin routes not used on `/`)
+  ```
+- **Hard target: main `index-*.js` delta < 50 KB.** Admin-academic chunk is separate accounting; not counted against this budget.
+- **If delta > 50 KB:** diagnose before D13 owner smoke. Options:
+  1. Audit what leaked into main (often: a shared dep accidentally imported eagerly).
+  2. Move offending imports inside the lazy boundary.
+  3. Open R1.5 follow-up sub-R if compression needs more than 1 commit.
+
+### What these constraints do NOT change
+
+- Locked LoC estimates (Constraint #2 enforcement doesn't add LoC — it's a structural discipline; the lazy boundary + manualChunks change is ~10 LOC in `router.tsx` + `vite.config.js` combined, already accounted in the R1 estimate).
+- Locked Q1.a/Q2.a/Q3.a/Q4.a decisions — these are about HOW R1 is built, not WHAT R1 ships.
+- Timeline (5-7 days) — the discipline is what makes the timeline reliable.
+
+
+
 ---
 
 ## Why this is R1
