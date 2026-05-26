@@ -190,7 +190,7 @@ const AccountTab = () => (
       <Row label="کد دانشجویی" hint="در پروفایل شما ثابت است">
         <span style={{ fontFamily: "var(--f-mono)", fontSize: 14, color: "var(--fg-mute)" }}>۸۴-۰۲-۱۷-۳۳</span>
       </Row>
-      <Row label="زبان رابط" hint="بر زبان کلی پلتفرم اثر می‌گذارد">
+      <Row label="زبان رابط" hint="بر زبان کلی سکو اثر می‌گذارد">
         <select className="rounded-xl"  style={{padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 14}}>
           <option>فارسی</option>
           <option>English</option>
@@ -322,7 +322,7 @@ const AccessibilityTab = () => (
   <div>
     <SectionH eyebrow="ACCESSIBILITY · WCAG 2.2 AA" title="دسترس‌پذیری" sub="تنظیم رابط برای راحتی شخصی شما." />
     <div className="card p-8" >
-      <Row label="اندازه فونت" hint="بر همه‌ی متون پلتفرم اثر می‌گذارد">
+      <Row label="اندازه فونت" hint="بر همه‌ی متون سکو اثر می‌گذارد">
         <input type="range" min="14" max="22" defaultValue="16" style={{ width: 280, accentColor: "var(--accent)" }} />
       </Row>
       <Row label="کاهش حرکت" hint="انیمیشن‌ها و حرکت‌های ظریف حذف شوند">

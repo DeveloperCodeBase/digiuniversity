@@ -349,7 +349,7 @@ interface AIFloatingFABProps {
 const AIFloatingFAB = ({ onNavigate }: AIFloatingFABProps): React.ReactElement => {
   const [open, setOpen] = React.useState(false);
   const [messages, setMessages] = React.useState<ChatMessage[]>([
-    { from: "ai", t: "سلام! من دستیار AI دیجی‌یونیورسیتی هستم. هر سوالی داری بپرس — درباره دروس، تمرین‌ها یا مسیر تحصیلی." },
+    { from: "ai", t: "سلام! من دستیار AI دانشگاه برخط هوشمند ایران هستم. هر سوالی داری بپرس — درباره دروس، تمرین‌ها یا مسیر تحصیلی." },
   ]);
   const [input, setInput] = React.useState("");
   const bodyRef = React.useRef<HTMLDivElement | null>(null);

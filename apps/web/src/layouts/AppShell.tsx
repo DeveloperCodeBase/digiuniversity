@@ -145,16 +145,25 @@ export const AppShell: React.FC = () => {
         پرش به محتوای اصلی
       </a>
       <ScrollProgress />
-      <Nav
-        current={route}
-        go={go}
-        mode={navMode}
-        onWorkspaceMenuClick={() => setSidebarOpenWithPersist(!sidebarOpen)}
-        // R7.5 — plumb open state for the hamburger's aria-expanded.
-        // At ≥1024px workspace, the hamburger is hidden via CSS
-        // (R7.12), so this value only matters at <1024px.
-        workspaceMenuOpen={sidebarOpen}
-      />
+      {/* D49 (R-Landing-v2 polish round 2 ITEM 0) — owner-explicit
+          minor AppShell exception under D11 urgency umbrella:
+          on landing route `/`, AppShell skips its global Nav because
+          Home.tsx renders its own `.home-nav-v2` inside `.home-shell-v2`
+          (the Q2.b/Q3.c design implementation). Without this gate the
+          two navs stack visibly. All non-landing routes keep AppShell
+          Nav — workspace/auth/public/help routes UNCHANGED. */}
+      {isLandingRoute ? null : (
+        <Nav
+          current={route}
+          go={go}
+          mode={navMode}
+          onWorkspaceMenuClick={() => setSidebarOpenWithPersist(!sidebarOpen)}
+          // R7.5 — plumb open state for the hamburger's aria-expanded.
+          // At ≥1024px workspace, the hamburger is hidden via CSS
+          // (R7.12), so this value only matters at <1024px.
+          workspaceMenuOpen={sidebarOpen}
+        />
+      )}
       <ErrorBoundary key={route + ":" + (routeParam || "")}>
         <main
           id="main-content"

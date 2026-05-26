@@ -258,7 +258,7 @@ export const Wordmark: React.FC = () => (
       د.
     </div>
     <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
-      <span style={{ fontSize: 15, fontWeight: 700, color: "var(--r5-ink)" }}>دیجی‌یونیورسیتی</span>
+      <span style={{ fontSize: 15, fontWeight: 700, color: "var(--r5-ink)" }}>دانشگاه برخط هوشمند ایران</span>
       <span
         style={{
           marginTop: 4,

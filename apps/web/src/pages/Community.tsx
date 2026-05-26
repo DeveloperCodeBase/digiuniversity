@@ -156,7 +156,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ go }) => {
             <div className="card p-5" >
               <div className="mono mb-3.5"  style={{color: "var(--cyan)", fontSize: 11, letterSpacing: "0.08em"}}>
                 <span className="dot dot-live ms-1.5" ></span>
-                همین الان آنلاین
+                همین الان برخط
               </div>
               <div className="flex flex-wrap gap-1.5" >
                 {["AA","NR","MK","SF","BR","MA","TT","JK","+ ۱۲"].map((a, i) => (

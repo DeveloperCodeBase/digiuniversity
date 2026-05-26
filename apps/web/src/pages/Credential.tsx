@@ -20,7 +20,7 @@ const CredentialVerifyForm: React.FC = () => {
           return;
         }
         if (code.startsWith("DU-")) {
-          window.toast?.({ title: "گواهی معتبر است", msg: "این گواهی توسط DigiUniversity در ۱۴۰۴ صادر شده.", kind: "success", ttl: 4500 });
+          window.toast?.({ title: "گواهی معتبر است", msg: "این گواهی توسط دانشگاه برخط هوشمند ایران در ۱۴۰۴ صادر شده.", kind: "success", ttl: 4500 });
         } else {
           window.toast?.({ title: "شناسه نامعتبر", msg: "شناسه باید با DU- شروع شود.", kind: "danger" });
         }

@@ -237,9 +237,20 @@ export const Nav = ({
         ) : null}
 
         <a href={"/" + brandTarget} onClick={(e) => { e.preventDefault(); go(brandTarget); }} className="brand">
-          <span className="brand-mark"></span>
+          {/* D49 ITEM 2 — Jahad institutional logo replaces generic brand-mark.
+              Visible on all routes that render the global AppShell Nav (i.e.,
+              every route except `/` which now uses Home's own .home-nav-v2).
+              dark-logo.png is the «جهاد دانشگاهی + مرکز راهبری» combined logo
+              with dark elements on transparent — works on the light navbar. */}
+          <img
+            src="/landing-v2/jahad-dark.png"
+            alt="جهاد دانشگاهی"
+            width="40"
+            height="40"
+            style={{ width: 40, height: 40, objectFit: "contain", display: "block" }}
+          />
           <span>
-            دیجی‌یونیورسیتی
+            دانشگاه برخط هوشمند ایران
             <div className="brand-sub">AI · NATIVE · LEARNING</div>
           </span>
         </a>
@@ -593,8 +604,15 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
       <div className="footer-grid">
         <div>
           <div className="brand mb-4.5" >
-            <span className="brand-mark"></span>
-            <span>دیجی‌یونیورسیتی
+            {/* D49 ITEM 2 — Footer brand uses the same Jahad logo. */}
+            <img
+              src="/landing-v2/jahad-dark.png"
+              alt="جهاد دانشگاهی"
+              width="40"
+              height="40"
+              style={{ width: 40, height: 40, objectFit: "contain", display: "block" }}
+            />
+            <span>دانشگاه برخط هوشمند ایران
               <div className="brand-sub">AI · NATIVE · LEARNING</div>
             </span>
           </div>
@@ -620,7 +638,7 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
               in styles.css to preserve the visual treatment. */}
           <h3>محصول</h3>
           <ul>
-            <li><a href="#" onClick={(e)=>{e.preventDefault();go("classroom")}}>کلاس آنلاین</a></li>
+            <li><a href="#" onClick={(e)=>{e.preventDefault();go("classroom")}}>کلاس برخط</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("labs")}}>آزمایشگاه‌های مجازی</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("recordings")}}>آرشیو ضبط‌ها</a></li>
             <li><a href="#" onClick={(e)=>{e.preventDefault();go("search")}}>جستجوی معنایی</a></li>
@@ -675,12 +693,12 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
           </ul>
         </div>
       </div>
-      {/* Phase-A R1.3: organizational attribution. DigiUniversity is
+      {/* Phase-A R1.3: organizational attribution. دانشگاه برخط هوشمند ایران is
           the product; ownership and copyright sit with مرکز راهبری
           پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی. */}
       <OrgAttribution variant="full" className="footer-org-attribution" />
       <div className="footer-bot">
-        <span>دیجی‌یونیورسیتی · پلتفرم دانشگاه آنلاین هوشمند</span>
+        <span>دانشگاه برخط هوشمند ایران · سکو دانشگاه برخط هوشمند</span>
         <span>v1.0.0 · build 2026.05 · region: TEH-01</span>
       </div>
     </div>
@@ -836,7 +854,7 @@ export const KnowledgeGraph = (): React.ReactElement => {
 // =====================================================
 export const ArchStack = (): React.ReactElement => {
   const layers = [
-    { name: "Experience Layer", sub: "وب · موبایل · کلاس آنلاین · داشبورد", color: "var(--cyan)" },
+    { name: "Experience Layer", sub: "وب · موبایل · کلاس برخط · داشبورد", color: "var(--cyan)" },
     { name: "Agent Orchestration", sub: "AI Tutor · Coach · Critic · Mentor · Grader", color: "var(--violet)" },
     { name: "Domain Services", sub: "Course · Enrollment · Gradebook · Credential", color: "var(--amber)" },
     { name: "Data & Learning Record Store", sub: "PostgreSQL · ClickHouse · Vector · Object", color: "var(--fg-mute)" },

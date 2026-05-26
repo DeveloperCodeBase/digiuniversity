@@ -877,3 +877,36 @@ cd C:/digiuniversity && git revert --no-edit HEAD~10..HEAD && git push origin ma
 ```
 
 **Source:** owner directive 2026-05-26 D48 polish-round-2 spec.
+
+### D49 — R-Landing-v2 polish round 2 part 2 + dual-navbar fix (AppShell minor exception)
+**Context:** Owner reported /login showing TWO navbars on mobile. DOM inspection at desktop confirmed two `<nav>` elements (AppShell top Nav + a small footer-nav inside CoBrandFooter); on mobile the footer compresses and the second nav appears visually closer to the top, misread as a duplicate navbar. Independent of that diagnosis, the architecture itself had a latent issue: on `/`, both AppShell Nav AND Home's `.home-nav-v2` rendered in DOM (with CSS hiding AppShell via body data-attribute) — fragile coupling.
+
+**Decision: minor AppShell exception under D11 urgency umbrella per owner explicit directive.** `AppShell.tsx` gains a single-line conditional: `{ isLandingRoute ? null : <Nav .../> }`. AppShell still renders Nav for every non-landing route (workspace + auth-flow + other PUBLIC); only `/` (and `/home` alias) gets the Nav suppression, because Home renders its own `.home-nav-v2`. This makes the architecture explicit and removes the body-data-attribute CSS hide-trick reliance (the rule stays as defense but is now redundant).
+
+**Why this isn't a D11 violation:**
+- Scope of change: 1 conditional line in AppShell. Workspace/auth/public-non-/ behavior UNCHANGED.
+- Owner explicit authorization in directive: «implementation: AppShell.tsx یه conditional اضافه کنه ... این یه minor AppShell touch ـه که برای fix bug ضروری ـه — Phase A scope discipline زیر چتر D11 explicit owner urgency ـه».
+- The alternative (continuing with body[data-home-shell] CSS-only hide) was fragile: if React's useEffect timing changed or the cleanup function didn't run on certain navigations, the data attribute could persist and hide AppShell Nav on subsequent routes. The new conditional is bulletproof.
+
+**ITEM 1 — global terminology sweep (D49 inclusive):**
+- `آنلاین` → `برخط` across 8 .tsx files (Home.tsx + 7 page/shared modules)
+- `پلتفرم` → `سکو` across 6 .tsx files
+- `DigiUniversity` (English) → `دانشگاه برخط هوشمند ایران` across 3 files (Credential.tsx, More.tsx, shared.tsx comment)
+- `دیجی‌یونیورسیتی` (Persian variant) → `دانشگاه برخط هوشمند ایران` across 6 files (shared.tsx, Academic.tsx, Admissions.tsx, More.tsx, Roles.tsx, login-atoms.tsx, ui-shell.tsx)
+- Net string changes: ~25 visible occurrences, all in JSX text content + `window.toast({msg:...})` strings. No identifier names, class names, or technical URLs touched. Email `info@digiuniversity.ir` preserved (technical address).
+
+**ITEM 2 — Jahad institutional logo in shared.tsx Nav + Footer:**
+- `apps/web/src/shared.tsx` line ~240: `<span className="brand-mark"></span>` (generic CSS-icon placeholder) replaced with `<img src="/landing-v2/jahad-dark.png" alt="جهاد دانشگاهی" width="40" height="40" />` in the global Nav brand block.
+- `apps/web/src/shared.tsx` line ~607: same replacement in the global Footer brand block.
+- Result: every workspace/auth route now shows the institutional Jahad+AIRAC seal as its primary brand icon. Footer is left intact otherwise (JDO + dvcb co-brand text below still rendered by `<OrgAttribution variant="full" />` per R1.3-Brand).
+
+**Source:** owner directive 2026-05-26 D48 polish-round-2 ITEMS 0 (scope leak fix) + 1 (terminology sweep) + 2 (logo replace).
+
+### D50 — External skill URL noted, NOT fetched
+**Context:** Owner mentioned `https://github.com/nextlevelbuilder/ui-ux-pro-max-skill` as inspiration/reference. Per R-Landing-v1 lessons (D37 audit, D41 postmortem): external repo fetches mid-polish are catastrophic when scope or assets diverge.
+
+**Decision: noted but NOT fetched.** Phase A polish work uses only existing assets in `docs/my-upload/landing-v2/` (already vendored) and existing libraries already in `apps/web/package.json`. If owner explicitly requests features matching common animation library patterns (Framer Motion, GSAP, AOS), those are implemented with existing tools (CSS animations + IntersectionObserver) — no new package install in middle of polish round.
+
+If owner wants a dedicated animation/motion upgrade post-presentation, that becomes a separate sub-R with its own audit + decision.
+
+**Source:** owner directive 2026-05-26 D48 polish-round-2 «NO EXTERNAL SKILL FETCH».

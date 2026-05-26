@@ -182,7 +182,7 @@ export const MessagesPage: React.FC<ProductivityPageProps> = ({ go }) => {
               <div style={{ fontSize: 15, fontWeight: 600 }}>{CONVERSATIONS[active]?.name || "دکتر آرش عظیمی"}</div>
               <div className="flex items-center mt-0.5"  style={{fontSize: 11, color: "var(--sage)", gap: 5}}>
                 <span style={{ width: 6, height: 6, borderRadius: 50, background: "var(--sage)" }}></span>
-                {CONVERSATIONS[active]?.online ? "آنلاین" : "آفلاین"}
+                {CONVERSATIONS[active]?.online ? "برخط" : "آفلاین"}
               </div>
             </div>
             <div className="flex gap-1.5" >

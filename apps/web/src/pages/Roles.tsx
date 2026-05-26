@@ -420,7 +420,7 @@ export const OfficeHoursPage: React.FC<RolesPageProps> = ({ go }) => {
                 <label>
                   <div className="mono mb-1.5 uppercase"  style={{fontSize: 10, color: "var(--fg-mute)", letterSpacing: "0.08em"}}>محل</div>
                   <select className="rounded-lg"  style={{width: "100%", padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--line-2)", fontFamily: "inherit", fontSize: 13}}>
-                    <option>آنلاین · کلاس مجازی</option>
+                    <option>برخط · کلاس مجازی</option>
                     <option>تلفنی</option>
                     <option>چت ناهمزمان</option>
                   </select>
@@ -487,7 +487,7 @@ export const EventsPage: React.FC<RolesPageProps> = ({ go }) => (
           <div className="flex gap-2 mb-4.5" >
             <span className="pill pill-cyan">رویداد ویژه</span>
             <span className="pill">رایگان</span>
-            <span className="pill">آنلاین</span>
+            <span className="pill">برخط</span>
           </div>
           <h2 className="h-1">آینده‌ی LLMها در آموزش — کنفرانس سالانه ۱۴۰۵</h2>
           <p className="lead mt-4"  style={{ maxWidth: "100%"}}>
@@ -587,10 +587,10 @@ export const AboutPage: React.FC<RolesPageProps> = ({ go }) => (
           <OrgAttribution variant="full" />
         </div>
         <p className="mt-8"  style={{fontSize: 17, lineHeight: 1.9, color: "var(--fg-mute)"}}>
-          این پلتفرم توسط <strong style={{ color: "var(--fg)" }}>مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی</strong> طراحی و توسعه یافته است. مرکز راهبری، با اتکا به تجربه‌ی چهار دهه‌ای جهاد دانشگاهی در عرصه‌ی پژوهش و آموزش عالی کشور، مأموریت دارد بسترهای پیشرفته‌ی هوش مصنوعی، یادگیری ترکیبی و آموزش آنلاین را در نظام دانشگاهی ایران توسعه دهد و در دسترس پژوهشگران، دانشجویان و استادان قرار دهد.
+          این سکو توسط <strong style={{ color: "var(--fg)" }}>مرکز راهبری پژوهش و پیشرفت هوش مصنوعی جهاد دانشگاهی</strong> طراحی و توسعه یافته است. مرکز راهبری، با اتکا به تجربه‌ی چهار دهه‌ای جهاد دانشگاهی در عرصه‌ی پژوهش و آموزش عالی کشور، مأموریت دارد بسترهای پیشرفته‌ی هوش مصنوعی، یادگیری ترکیبی و آموزش برخط را در نظام دانشگاهی ایران توسعه دهد و در دسترس پژوهشگران، دانشجویان و استادان قرار دهد.
         </p>
         <p className="mt-5"  style={{fontSize: 17, lineHeight: 1.9, color: "var(--fg-mute)"}}>
-          دیجی‌یونیورسیتی نخستین خروجی عملیاتی این مأموریت است: یک زیرساخت دانشگاه آنلاین کاملاً بومی، استاندارد-محور (LTI 1.3، xAPI، QTI، Caliper) و آماده‌ی استقرار در هر دانشگاه یا سازمان آموزشی.
+          دانشگاه برخط هوشمند ایران نخستین خروجی عملیاتی این مأموریت است: یک زیرساخت دانشگاه برخط کاملاً بومی، استاندارد-محور (LTI 1.3، xAPI، QTI، Caliper) و آماده‌ی استقرار در هر دانشگاه یا سازمان آموزشی.
         </p>
       </div>
     </section>

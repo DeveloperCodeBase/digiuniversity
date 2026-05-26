@@ -108,7 +108,7 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ go }) => {
           <div className="section-head mb-6" >
             <div className="text">
               <span className="eyebrow">DELIVERY MODES</span>
-              <h2 className="h-2 mt-3.5" >چهار حالت یادگیری در یک پلتفرم</h2>
+              <h2 className="h-2 mt-3.5" >چهار حالت یادگیری در یک سکو</h2>
             </div>
           </div>
           <div className="grid grid-4">
@@ -129,7 +129,7 @@ export const ProgramsPage: React.FC<ProgramsPageProps> = ({ go }) => {
                 <span className="absolute"  style={{ top: 0, right: 0, width: 36, height: 3, background: m.c, borderRadius: "0 0 0 4px"}} />
                 <div style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg)", letterSpacing: "0.06em" }}>{m.lat}</div>
                 {/* R7.3 C.3.ii — was `<h4>` directly under the section's
-                    `<h2>` ("چهار حالت یادگیری در یک پلتفرم") which skips
+                    `<h2>` ("چهار حالت یادگیری در یک سکو") which skips
                     h3. Renamed to `<h3>`. Inline font-size is preserved
                     so the visual is unchanged. */}
                 <h3 className="mt-2"  style={{ fontSize: 16, fontWeight: 600 }}>{m.t}</h3>

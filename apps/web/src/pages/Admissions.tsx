@@ -256,7 +256,7 @@ const Step5Onboard = ({ go }) => (
         <Icon name="check" size={36} stroke={2} />
       </div>
     </div>
-    <h2 className="h-2 mt-7" >به دیجی‌یونیورسیتی خوش آمدید، نسرین</h2>
+    <h2 className="h-2 mt-7" >به دانشگاه برخط هوشمند ایران خوش آمدید، نسرین</h2>
     <p className="lead" style={{ margin: "16px auto 0" }}>
       پروفایل شناختی اولیه‌ی شما ساخته شد. اولین درس شما در ۹۰ دقیقه‌ی آینده آغاز می‌شود.
     </p>
