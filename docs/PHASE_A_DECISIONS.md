@@ -1134,8 +1134,8 @@ Lighthouse Perf score noise: re-runs on identical code yielded 45 / 29 / 65 on `
 
 **Source:** owner directive 2026-05-26 «این لوگو رو بزار دیگه هم عوض نکن... جای JAHAD · AIRAC اینو بزار AIRAC-ACECR».
 
-### D59 — Gate A close + cumulative D13 ack
-**Note:** owner referenced this verbally as «D58» in the directive; recording under next-available number D59 to preserve traceability with existing log.
+### D59 — Gate A close + cumulative D13 ack (a.k.a. owner-D58 closure ceremony)
+**Note:** owner referenced this as «D58» in the directive «owner explicit ack: smoke pass and accepted». D58 was already logged for the light-logo restore + AIRAC-ACECR subtitle (commit `403fff5`), so this closure ceremony is recorded under D59 to preserve traceability. Per owner verbal use, this entry can be referred to as «D58 closure ceremony» in conversation; the D-number in the log is authoritative as D59.
 
 **Context:** Owner explicit directive 2026-05-26: «الان دیگه ارایه مهم نیست لندینگ پیج درست شده از الان به طبق پلن همه پروژه پیاده سازی بشه به کلاد کد بگو». This signals two things:
 
