@@ -39,7 +39,11 @@
 
     // 2) One-time kill switch. The flag includes a version so future
     // deploys can re-trigger by bumping it.
-    var KILL_FLAG = "digiu_sw_reset_v3";
+    // R-Landing-v2 Commit A: bumped v3 → v4. Forces one-time
+    // SW unregister + cache clear on every device, even ones that
+    // previously ran v3. Pairs with main.tsx top-of-file unregister
+    // block. Belt-and-suspenders for the demo window — D45 + D47.
+    var KILL_FLAG = "digiu_sw_reset_v4";
     if (localStorage.getItem(KILL_FLAG)) return;
 
     navigator.serviceWorker.getRegistrations().then(function (regs) {

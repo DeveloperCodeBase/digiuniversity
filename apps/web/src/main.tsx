@@ -40,6 +40,28 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "@fontsource/jetbrains-mono/600.css";
 
+// ============================================================
+// R-Landing-v2 Commit A — SW + caches dispose for demo window.
+// Per D45 (SW disabled temporarily) + D47 (R-Landing-v2 approved).
+// Any existing SW from prior deploys gets unregistered, all caches
+// deleted. Future deploys won't register a new SW because VitePWA
+// is disabled (vite.config.js). Fire-and-forget: does not block
+// first paint or any other bootstrap.
+// Paired with sw-recovery.js KILL_FLAG bump (belt-and-suspenders).
+// Re-enable plan: revert this block + ship R7.0 (network-first
+// cache strategy) per D42.
+// ============================================================
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((regs) => regs.forEach((r) => r.unregister()))
+    .catch(() => {});
+  if (typeof caches !== "undefined" && typeof caches.keys === "function") {
+    caches.keys()
+      .then((keys) => keys.forEach((k) => caches.delete(k)))
+      .catch(() => {});
+  }
+}
+
 import "../styles.css";
 // Phase-A R6: classroom redesign CSS, scoped under .r6-classroom-shell so
 // it never bleeds into other pages.

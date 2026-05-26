@@ -6,6 +6,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // ============================================================
+      // R-Landing-v2 Commit A (D47 + D45) — SW DISPOSED for demo window.
+      // R-Landing-v1 broke under SW + Workbox precache amplification
+      // (D41 postmortem). R7.0 memo (D42) will replace this with a
+      // proper network-first cache strategy post-presentation. Until
+      // then: PWA disabled, no SW generated, no precache.
+      // Re-enable: remove this `disable` line + ship R7.0 changes.
+      // ============================================================
+      disable: true,
       registerType: "autoUpdate",
       // Phase-14.8: never let HTTP cache the SW file itself or its
       // imports. Some users were stuck on a pre-Phase-14.6 SW that

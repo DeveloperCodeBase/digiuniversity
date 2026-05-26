@@ -802,3 +802,28 @@ The dossier proposed an 11-sub-R sweep (R7.1-R7.11) clustered on 4 root causes. 
 Estimated Gate A close: ~5-7 days (R7.0 1-2 days + R7.1+R7.2 3-5 days). But with SW fixed, landing planned (R-Landing-v2 deferred), Phase B disciplined (post-A only).
 
 **Source:** owner directive 2026-05-25 «ترتیب اجرا» list.
+
+### D47 — R-Landing-v2 PHASE 2 approved (Q1.a + Q2.b + Q3.c)
+**Context:** R-Landing-v2 audit (commit `eaac6c1`) presented 3 binary questions with proposed defaults. Owner ack'd 2026-05-26 with one override on Q2.
+
+**Decisions:**
+- **Q1.a** — KEEP AGENT ARCHITECTURE (5 pillars: موتور یادگیری / پروفایل شناختی / تسلط / کلاس زنده / حاکمیت AI), restyled with design palette. Drops the 6 generic FEATURES from the design.
+- **Q2.b** — Include topbar (dark navy strip with Jahad badge + autumn admission notice). Override of default Q2.a per owner reasoning:
+  - Topbar wrapped INSIDE `.home-shell-v2` scope
+  - Renders only on `/` route — `position: sticky; top: 0;` inside the wrapper
+  - On `/login`, `/dashboard`, or any other route the wrapper isn't in DOM → topbar literally cannot render
+  - Brand statement (Jahad badge + autumn admission notice) is presentation-valuable per owner
+- **Q3.c** — HYBRID co-brand: Hero badges = Jahad+AIRAC (design fidelity); Footer = JDO+dvcb (R1.3-Brand unchanged, no Footer touch)
+
+**PHASE 2 execution order:** 5 atomic commits per audit section F:
+- **A** — SW dispose (main.tsx unregister/clear + vite.config disable per D45)
+- **B** — home-v2.css scoped via `scripts/landing-v2-scope-css.mjs`
+- **C** — Home.tsx rewrite (visual = design palette/layout/animations, content = existing text/CTAs/stats/auth)
+- **D** — Playwright D12 spec (6 viewport × Home only, semantic assertions)
+- **E** — Regression sweep evidence (R1.1/R5/R6/R6.6/R7.12/gate-a-role-routing)
+
+After E: deploy + Chrome Extension pre-smoke + ping owner with rollback command + 6-step manual smoke checklist.
+
+**Emergency stop triggers** (per audit section F hard guards): any change to AppShell.tsx, shared.tsx, workspace routes, auth flow, global tokens, or SW config beyond Commit A's temporary dispose → emergency stop + ping owner immediately.
+
+**Source:** owner directive 2026-05-26 «Q1.a Q2.b Q3.c شروع کن» + Q2.b reasoning.

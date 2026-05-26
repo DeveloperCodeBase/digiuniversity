@@ -339,4 +339,18 @@ Only if Plan A+B fail. Force-push to main requires owner explicit consent (per s
 
 Until owner ack, **no code, no commits**. NPM scripts not touched. Local working tree clean (verified `git status -s` shows only untracked design files + this audit doc).
 
+---
+
+## H. Owner ack (2026-05-26)
+
+**Decision:** «Q1.a Q2.b Q3.c شروع کن».
+
+- **Q1.a** ✅ — KEEP AGENT ARCHITECTURE, restyle with design palette
+- **Q2.b** ✅ — Include topbar above nav **(reasoning per owner: topbar داخل `.home-shell-v2` scope wrap می‌شه، فقط روی `/` render، login/dashboard دست نخورده. ارائه brand statement — Jahad badge + autumn admission notice — ارزشمند ـه. Default Q2.a omitted in favor of Q2.b for visual richness on the institutional brand statement.)**
+- **Q3.c** ✅ — HYBRID co-brand: Hero badges = Jahad+AIRAC (design fidelity); Footer = JDO+dvcb (R1.3-Brand unchanged)
+
+**Q2.b implementation note:** topbar rendered INSIDE `.home-shell-v2` wrapper (NOT as a separate top-level element). The CSS will use `position: sticky; top: 0;` inside the wrapper so it only sticks for `/`. On `/login` or `/dashboard` or any other route the `.home-shell-v2` wrapper isn't in the DOM, so the topbar literally cannot render. **Hard guarantee: zero workspace/auth-flow visual leak.**
+
+Logged as D47.
+
 — Phase A author, 2026-05-26. R-Landing-v2 PHASE 1 audit per owner directive 2026-05-25. Awaiting Q1/Q2/Q3 ack.
