@@ -104,12 +104,25 @@ export const HomePage = ({ go }: HomePageProps) => {
 
   // D48 ITEM 2 — mark body so home-v2-overrides.css can hide the AppShell
   // global Nav while Home is mounted. No :has() involved — React lifecycle
-  // controls the attribute. Cleanup on unmount restores the AppShell Nav
-  // for any future route that re-uses Home's chrome stack.
+  // controls the attribute. D49 supersedes this with a direct AppShell
+  // conditional but the data attribute stays as belt-and-suspenders.
   React.useEffect(() => {
     document.body.dataset.homeShell = "true";
     return () => { delete document.body.dataset.homeShell; };
   }, []);
+
+  // D49 ITEM 7 — mobile hamburger state for the home Nav. Below 1024px
+  // the nav-actions row collapses behind a hamburger button; tap opens
+  // a drawer from the right edge (RTL start edge). Auto-closes on any
+  // nav-link tap so the user can navigate immediately.
+  const [homeMenuOpen, setHomeMenuOpen] = React.useState(false);
+  // Close on Escape for keyboard a11y.
+  React.useEffect(() => {
+    if (!homeMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setHomeMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [homeMenuOpen]);
 
   // Phase-A R7.1.1.a — REVERTED the .is-ready gated-animation pattern.
   // Initial attempt clustered 8+ animations into one trigger moment
@@ -166,6 +179,20 @@ export const HomePage = ({ go }: HomePageProps) => {
               <span className="home-brand-sub">JAHAD · AIRAC</span>
             </div>
           </div>
+          {/* D49 ITEM 7 — mobile hamburger. CSS hides this above 1024px
+              and hides the inline .home-nav-actions below 1024px. */}
+          <button
+            type="button"
+            className="home-nav-burger"
+            aria-label={homeMenuOpen ? "بستن منو" : "باز کردن منو"}
+            aria-expanded={homeMenuOpen}
+            aria-controls="home-nav-drawer"
+            onClick={() => setHomeMenuOpen((v) => !v)}
+          >
+            <span className="burger-line"></span>
+            <span className="burger-line"></span>
+            <span className="burger-line"></span>
+          </button>
           <div className="home-nav-actions">
             <button type="button" className="home-nav-link" onClick={() => go("about")}>
               درباره‌ی ما
@@ -181,6 +208,46 @@ export const HomePage = ({ go }: HomePageProps) => {
             </button>
           </div>
         </div>
+        {/* Mobile drawer — collapsed at ≥1024 via CSS. */}
+        {homeMenuOpen ? (
+          <>
+            <div
+              className="home-nav-backdrop"
+              onClick={() => setHomeMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <div id="home-nav-drawer" className="home-nav-drawer" role="dialog" aria-label="منوی ناوبری">
+              <button
+                type="button"
+                className="home-nav-link"
+                onClick={() => { setHomeMenuOpen(false); go("about"); }}
+              >
+                درباره‌ی ما
+              </button>
+              <button
+                type="button"
+                className="home-nav-link"
+                onClick={() => { setHomeMenuOpen(false); go("schools"); }}
+              >
+                دانشکده‌ها
+              </button>
+              <button
+                type="button"
+                className="home-nav-link"
+                onClick={() => { setHomeMenuOpen(false); go("login"); }}
+              >
+                ورود
+              </button>
+              <button
+                type="button"
+                className="home-nav-link is-primary"
+                onClick={() => { setHomeMenuOpen(false); go("register"); }}
+              >
+                ثبت‌نام رایگان
+              </button>
+            </div>
+          </>
+        ) : null}
       </nav>
 
       <main data-screen-label="01 خانه">
