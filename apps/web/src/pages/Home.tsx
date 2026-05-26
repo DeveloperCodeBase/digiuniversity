@@ -774,6 +774,10 @@ const Stat = ({ v, unit, l }) => (
 // Replaced with stylized initial-letter avatars on gradient circles +
 // inline graduation-cap SVG decoration in each card. Professional,
 // student-relevant, no external asset dependency.
+// D52 ITEM 2 — owner directive «تجربه واقعی از دانشجویان ما از عکسهایی
+// که تو اپلود فولدر گذاشتم استفاده کنه» — use the real student photos
+// from docs/my-upload/landing-v2/uploads/. Each card now has a real
+// portrait + initial-letter fallback if image fails.
 const TESTI_V2 = [
   {
     body: "فضای آموزشی هوشمند دانشگاه به من اجازه داد همزمان با کار تمام‌وقت، دوره‌ی فول‌استک را با کیفیتی فراتر از انتظار به اتمام برسانم. شش ماه پس از فارغ‌التحصیلی به‌عنوان توسعه‌دهنده در یک شرکت بزرگ مشغول شدم.",
@@ -781,6 +785,7 @@ const TESTI_V2 = [
     role: "مهندس نرم‌افزار، فارغ‌التحصیل دوره‌ی فول‌استک",
     initials: "ح.ر",
     accent: "navy",
+    photo: "/landing-v2/students/student-man-1.jpg",
   },
   {
     body: "پشتیبانی اساتید و دسترسی ۲۴ ساعته به محتوا، تجربه‌ای متفاوت از آموزش‌های برخط معمولی بود. آنچه واقعاً تفاوت ایجاد کرد، کیفیت مشاوران و پروژه‌های واقعی بود که در کارنامه‌ی حرفه‌ای‌ام ماندگار شد.",
@@ -788,6 +793,7 @@ const TESTI_V2 = [
     role: "متخصص علوم داده، فارغ‌التحصیل MBA دیجیتال",
     initials: "ن.ص",
     accent: "cobalt",
+    photo: "/landing-v2/students/student-woman-1.jpg",
   },
   {
     body: "به‌عنوان مادر دو فرزند، یافتن زمان برای آموزش حضوری ممکن نبود. این سامانه به من فرصت داد بدون از دست دادن خانواده، در رشته‌ی طراحی UX به سطحی برسم که اکنون از خانه فعالیت حرفه‌ای دارم.",
@@ -795,6 +801,7 @@ const TESTI_V2 = [
     role: "طراح UX، فارغ‌التحصیل دوره‌ی طراحی",
     initials: "ف.ا",
     accent: "gold",
+    photo: "/landing-v2/students/student-woman-2.png",
   },
 ];
 
@@ -842,7 +849,11 @@ const TestiV2Section = () => (
             <p className="quote-body">{t.body}</p>
             <div className="person">
               <div className="person-avatar" aria-hidden="true">
-                <span>{t.initials}</span>
+                {t.photo ? (
+                  <img src={t.photo} alt="" loading="lazy" />
+                ) : (
+                  <span>{t.initials}</span>
+                )}
               </div>
               <div className="person-info">
                 <span className="person-name">{t.name}</span>

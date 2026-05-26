@@ -604,9 +604,12 @@ export const Footer = ({ go }: FooterProps): React.ReactElement => {
       <div className="footer-grid">
         <div>
           <div className="brand mb-4.5" >
-            {/* D49 ITEM 2 — Footer brand uses the same Jahad logo. */}
+            {/* D49 ITEM 2 — Footer brand uses Jahad logo.
+                D52 owner directive «فوت نوت هم بک گراند تیره هست باید لوگو
+                جهاد روشن بزاره» — footer has dark navy background, so use
+                jahad-light.png (white linework) for visibility. */}
             <img
-              src="/landing-v2/jahad-dark.png"
+              src="/landing-v2/jahad-light.png"
               alt="جهاد دانشگاهی"
               width="40"
               height="40"

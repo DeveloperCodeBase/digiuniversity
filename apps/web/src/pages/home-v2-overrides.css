@@ -291,6 +291,95 @@ body[data-home-shell="true"] #root > a.skip-link {
   color: var(--ink-2, #243352);
   font-weight: 500;
 }
+
+/* D52 owner directive: «تو گوشی عکس اساتید همکار رو کوچیک تر بزاره»
+   On mobile, faculty card portraits compress (smaller aspect + smaller
+   text). Keeps cards reading well on phone without dominating viewport. */
+@media (max-width: 640px) {
+  .home-shell-v2 .faculty-v2-card .portrait {
+    aspect-ratio: 1 / 1;
+    max-width: 220px;
+    margin: 12px auto 0;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .home-shell-v2 .faculty-v2-card .info {
+    padding: 14px 14px 18px;
+    text-align: center;
+  }
+  .home-shell-v2 .faculty-v2-card .info .name { font-size: 14.5px; }
+  .home-shell-v2 .faculty-v2-card .info .role { font-size: 12px; }
+  .home-shell-v2 .faculty-v2-card .info .field { font-size: 12px; }
+}
+
+/* D52 owner directive: «تجربه واقعی از دانشجویان» photo styling.
+   Boost avatar size + circular crop with subtle ring for the real
+   student portraits now wired in TESTI_V2. */
+.home-shell-v2 .testi-v2-card .person-avatar {
+  width: 56px;
+  height: 56px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6),
+              0 4px 12px rgba(10, 24, 48, 0.12);
+}
+.home-shell-v2 .testi-v2-card .person-avatar img {
+  border-radius: 50%;
+}
+
+/* D52 owner directive: «سازمان‌های همکار جذاب نیست». Visual upgrade
+   for the marquee partners strip — give each item a card-pill feel
+   with subtle border + hover lift, instead of plain text. */
+.home-shell-v2 .marquee {
+  background: var(--paper-2, #f8fafc);
+  border-block: 1px solid var(--line, #e6ebf2);
+  padding: 28px 0;
+  overflow: hidden;
+}
+.home-shell-v2 .marquee-track {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  animation: marquee-scroll 38s linear infinite;
+  will-change: transform;
+}
+.home-shell-v2 .marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: #fff;
+  color: var(--ink-2, #243352);
+  border: 1px solid var(--line, #e6ebf2);
+  border-radius: var(--r-md, 14px);
+  font-family: "Vazirmatn", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(10, 24, 48, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.home-shell-v2 .marquee-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(10, 24, 48, 0.1);
+  border-color: var(--accent, #2e6bff);
+  color: var(--accent, #2e6bff);
+}
+.home-shell-v2 .marquee-item::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #2e6bff);
+  flex-shrink: 0;
+}
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-shell-v2 .marquee-track { animation: none; }
+}
 .home-shell-v2 .hero-title .hero-title-line {
   display: block;
 }

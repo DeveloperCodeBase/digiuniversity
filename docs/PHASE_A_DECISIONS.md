@@ -971,3 +971,47 @@ cd C:/digiuniversity && git revert --no-edit HEAD~17..HEAD && git push origin ma
 ```
 
 **Source:** owner directive 2026-05-26 polish-round-3 5-fix directive (ITEMS A-E).
+
+### D52 — R-Landing-v2 polish round 3 follow-up (4 owner-specific feedback items)
+**Context:** Post-D51, owner reviewed live and reported 4 specific visual concerns:
+1. «سازمان‌های همکار و دانشگاه‌های شریک: جذاب نیست درستش کنت» — partners marquee is unattractive
+2. «تجربه واقعی از دانشجویان ما از عکسهایی که تو اپلود فولدر گذاشتم استفاده کنه» — use real student photos from uploads/
+3. «تو گوشی عکس اساتید همکار رو کوچیک تر بزاره» — mobile faculty portraits too large
+4. «فوت نوت هم بک گراند تیره هست باید لوگو جهاد روشن بزاره» — Footer is dark, needs jahad-light logo
+
+**Fixes:**
+
+**ITEM 1 — Partners marquee visual upgrade (`home-v2-overrides.css`):**
+- Wrapper: `var(--paper-2)` background + top/bottom hairline
+- `.marquee-item`: pill cards (white bg, border, padding 10×18, radius 14, font 13.5px weight 600)
+- Hover: translateY(-2px) + shadow lift + accent border + accent text color
+- Pseudo-element `::before`: 8px accent dot (visual punctuation between items)
+- Animation: scrolling marquee 38s linear infinite; respects `prefers-reduced-motion`
+
+**ITEM 2 — Testimonial student photos (`Home.tsx` + `home-v2-overrides.css`):**
+- 3 student portraits copied from `docs/my-upload/landing-v2/uploads/`:
+  - `man (1).jpg` → `/landing-v2/students/student-man-1.jpg` (حسین رضایی)
+  - `woman (1).jpg` → `/landing-v2/students/student-woman-1.jpg` (نگار صفری)
+  - `woman (2).png` → `/landing-v2/students/student-woman-2.png` (فاطمه احمدی)
+- TESTI_V2 const augmented with `photo` field; JSX renders `<img>` if `photo` present, falls back to initials span
+- Avatar circle size: 44px → 56px + inset ring + drop shadow for portrait emphasis
+- Initials still rendered when image fails to load
+
+**ITEM 3 — Mobile faculty portraits compressed (`home-v2-overrides.css`):**
+- @media (max-width: 640px):
+  - `.faculty-v2-card .portrait` aspect-ratio 3:4 → 1:1, max-width 220px, circular crop
+  - `.faculty-v2-card .info` text-align center, smaller font sizes (14.5/12/12)
+- Desktop layout unchanged
+
+**ITEM 4 — Footer Jahad logo white variant (`shared.tsx`):**
+- Footer brand `<img src>` swap: `jahad-dark.png` → `jahad-light.png`
+- Footer has dark navy background (`.footer` global), so white-linework Jahad seal now visible (was black on dark = invisible)
+
+**Files touched:**
+- `apps/web/src/pages/Home.tsx` — TESTI_V2 photo fields + JSX img/span branching
+- `apps/web/src/pages/home-v2-overrides.css` — marquee styles + faculty mobile + testi avatar size
+- `apps/web/src/shared.tsx` — Footer img src
+- `apps/web/public/landing-v2/students/` — 3 new photo files (NEW)
+- `docs/PHASE_A_DECISIONS.md` — this entry
+
+**Source:** owner directive 2026-05-26 follow-up 4 items.
