@@ -266,7 +266,9 @@ export const HomePage = ({ go }: HomePageProps) => {
       <StatsBand />
 
       {/* ============== FACULTY SHOWCASE (R10 §4) ============== */}
-      <FacultyShowcase go={go} />
+      {/* D48 ITEM 4 — Faculty section per design (8 portraits + data verbatim).
+          Replaces the prior FacultyShowcase which used 4 cards + different data. */}
+      <FacultyV2Section />
 
       {/* ============== CATALOG TEASER (R10 §5) ============== */}
       <CatalogTeaser go={go} />
@@ -633,6 +635,54 @@ export const HomePage = ({ go }: HomePageProps) => {
 };
 
 // ====== sub-components for home ======
+
+// D48 ITEM 4 — Faculty section per Claude Design data.tsx verbatim.
+// 8 portraits served from /landing-v2/faculty/. Data preserves design's
+// exact names, roles, and fields. Layout: 4-col desktop / 2-col tablet
+// / 1-col mobile (CSS in home-v2-overrides.css .faculty-v2-grid).
+const FACULTY_V2 = [
+  { name: "دکتر سید محمد حسینی", role: "دانشیار دانشگاه شریف",         field: "هوش مصنوعی و یادگیری ماشین",       photo: "/landing-v2/faculty/m2.png" },
+  { name: "دکتر زهرا کریمی",     role: "استاد دانشگاه تهران",            field: "علوم داده و آمار کاربردی",        photo: "/landing-v2/faculty/w1.jpg" },
+  { name: "دکتر علیرضا مظفری",   role: "استادیار دانشگاه امیرکبیر",       field: "مهندسی نرم‌افزار و سامانه‌ها",     photo: "/landing-v2/faculty/m1.jpg" },
+  { name: "دکتر مریم باقری",     role: "پژوهشگر ارشد جهاد دانشگاهی",      field: "مدیریت کسب‌وکار دیجیتال",         photo: "/landing-v2/faculty/w2.png" },
+  { name: "دکتر امیر طاهری",     role: "هیأت علمی دانشگاه علم و صنعت",   field: "بینایی ماشین و رباتیک",           photo: "/landing-v2/faculty/m3.png" },
+  { name: "دکتر نسرین مرادی",    role: "هیأت علمی دانشگاه الزهرا",        field: "طراحی تجربه کاربری",              photo: "/landing-v2/faculty/w3.png" },
+  { name: "دکتر کامران اسدی",    role: "پژوهشگر پژوهشگاه دانش‌های بنیادی", field: "پردازش زبان طبیعی فارسی",       photo: "/landing-v2/faculty/m4.png" },
+  { name: "دکتر فاطمه نصیری",    role: "استادیار دانشگاه فردوسی مشهد",   field: "مهندسی صنایع و بهینه‌سازی",        photo: "/landing-v2/faculty/w4.png" },
+];
+
+const FacultyV2Section = () => (
+  <section className="faculty-v2-section" data-reveal>
+    <div className="shell">
+      <div className="section-head">
+        <div>
+          <div className="section-eyebrow">اساتید همکار</div>
+          <h2 className="section-title">
+            تجربه‌ی <span className="em">برترین‌ها</span> در کنار شما.
+          </h2>
+        </div>
+        <p className="section-lead">
+          بیش از سیصد استاد از دانشگاه‌های شریف، تهران، امیرکبیر و دیگر مراکز علمی برجسته‌ی کشور به‌همراه متخصصان فعال صنعت، در طراحی و تدریس دوره‌های ما همکاری می‌کنند.
+        </p>
+      </div>
+      <div className="faculty-v2-grid">
+        {FACULTY_V2.map((f) => (
+          <article key={f.name} className="faculty-v2-card">
+            <div className="portrait">
+              <img src={f.photo} alt={f.name} loading="lazy" />
+            </div>
+            <div className="info">
+              <div className="name">{f.name}</div>
+              <div className="role">{f.role}</div>
+              <div className="field">{f.field}</div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 const Stat = ({ v, unit, l }) => (
   <div className="hero-stat">
     <div className="v">{v}{unit && <span className="unit">{unit}</span>}</div>
