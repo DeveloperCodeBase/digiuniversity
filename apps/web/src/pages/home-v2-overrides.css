@@ -245,7 +245,51 @@ body[data-home-shell="true"] #root > a.skip-link {
   color: var(--accent, #2e6bff);
 }
 .home-shell-v2 .hero-sub {
-  color: rgba(255, 255, 255, 0.85);
+  /* D51 ITEM E — contrast boost: 0.85 → 0.95 for 16+pt sub paragraph
+     on dark navy. Computed ratio with #ffffff alpha-blended over
+     #0a1830 was ~10.4:1 at 0.85 (AA pass) but visually muddy on
+     OLED mobile; 0.95 lifts perceived clarity without changing tier. */
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+/* D51 ITEM E — Topbar badges: ensure white on dark navy is fully white
+   (not the inherited mute-2). The topbar already has color: white via
+   home-v2.css; this override ensures no nested rule overrides it. */
+.home-shell-v2 .topbar,
+.home-shell-v2 .topbar .badge,
+.home-shell-v2 .topbar a,
+.home-shell-v2 .topbar .right span {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+.home-shell-v2 .topbar a:hover {
+  color: #ffffff !important;
+}
+
+/* D51 ITEM E — Home Nav brand sub (JAHAD · AIRAC small uppercase text):
+   the mute color was too dim on light bg. Use ink-2 with slight letter
+   tracking for legibility. */
+.home-shell-v2 .home-nav-v2 .home-brand-sub {
+  color: var(--ink-2, #243352);
+  font-weight: 600;
+}
+
+/* D51 ITEM E — Testimonial quote body: increase to var(--ink) (max
+   contrast on white card bg). Person role too dim before, lift to
+   var(--ink-2). */
+.home-shell-v2 .testi-v2-card .quote-body {
+  color: var(--ink, #0a1830);
+  font-weight: 500;
+}
+.home-shell-v2 .testi-v2-card .person-role {
+  color: var(--ink-2, #243352);
+  font-weight: 500;
+}
+
+/* D51 ITEM E — Faculty card role: same lift. */
+.home-shell-v2 .faculty-v2-card .info .role {
+  color: var(--ink-2, #243352);
+  font-weight: 500;
 }
 .home-shell-v2 .hero-title .hero-title-line {
   display: block;
@@ -475,6 +519,47 @@ body[data-home-shell="true"] #root > a.skip-link {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* D51 ITEM C — testimonials upgrade: per-card accent gradient on
+   the avatar circle + a small grad-cap decoration in the top corner. */
+.home-shell-v2 .testi-v2-card .testi-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-shell-v2 .testi-v2-card .testi-card-grad {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--accent, #2e6bff);
+  background: var(--accent-soft, #e0e9ff);
+}
+.home-shell-v2 .testi-v2-card.accent-navy .testi-card-grad {
+  color: var(--navy-800, #0a1830);
+  background: var(--navy-100, #e5ebf3);
+}
+.home-shell-v2 .testi-v2-card.accent-gold .testi-card-grad {
+  color: var(--gold, #c9a45c);
+  background: var(--gold-soft, #f6efdf);
+}
+.home-shell-v2 .testi-v2-card .person-avatar {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent, #2e6bff), var(--accent-2, #1d4ed8));
+  color: #fff;
+}
+.home-shell-v2 .testi-v2-card.accent-navy .person-avatar {
+  background: linear-gradient(135deg, var(--navy-700, #102441), var(--navy-900, #050d1c));
+  color: #fff;
+}
+.home-shell-v2 .testi-v2-card.accent-gold .person-avatar {
+  background: linear-gradient(135deg, var(--gold, #c9a45c), #a07a3a);
+  color: #fff;
 }
 .home-shell-v2 .testi-v2-card .person-name {
   font-family: "Vazirmatn", system-ui, sans-serif;

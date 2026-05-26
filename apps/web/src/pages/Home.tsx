@@ -267,7 +267,11 @@ export const HomePage = ({ go }: HomePageProps) => {
             <div className="hero-crown" data-reveal>
               <div className="logo-card">
                 <div className="l-img">
-                  <img src="/landing-v2/jahad-dark.png" alt="جهاد دانشگاهی" />
+                  {/* D51 round-3 ITEM B — white Jahad seal for the dark
+                      navy cobrand pill. jahad-dark.png renders invisible
+                      on dark bg (was the bug); jahad-light.png is the
+                      white-linework variant designed for dark surfaces. */}
+                  <img src="/landing-v2/jahad-light.png" alt="جهاد دانشگاهی" />
                 </div>
                 <div className="l-text">
                   <b>جهاد دانشگاهی</b>
@@ -765,29 +769,54 @@ const Stat = ({ v, unit, l }) => (
 // generic student avatars). Initials are the text fallback if photo
 // fails to load. Layout: 3-col desktop / 2-col tablet (≤1024) / 1-col
 // mobile (≤640) via .testi-v2-grid in home-v2-overrides.css.
+// D51 ITEM C — testimonials avatars upgraded. Removed faculty-photo reuse
+// (owner reported the faculty headshots looked off as "student" avatars).
+// Replaced with stylized initial-letter avatars on gradient circles +
+// inline graduation-cap SVG decoration in each card. Professional,
+// student-relevant, no external asset dependency.
 const TESTI_V2 = [
   {
     body: "فضای آموزشی هوشمند دانشگاه به من اجازه داد همزمان با کار تمام‌وقت، دوره‌ی فول‌استک را با کیفیتی فراتر از انتظار به اتمام برسانم. شش ماه پس از فارغ‌التحصیلی به‌عنوان توسعه‌دهنده در یک شرکت بزرگ مشغول شدم.",
     name: "حسین رضایی",
     role: "مهندس نرم‌افزار، فارغ‌التحصیل دوره‌ی فول‌استک",
     initials: "ح.ر",
-    photo: "/landing-v2/faculty/m4.png",
+    accent: "navy",
   },
   {
     body: "پشتیبانی اساتید و دسترسی ۲۴ ساعته به محتوا، تجربه‌ای متفاوت از آموزش‌های برخط معمولی بود. آنچه واقعاً تفاوت ایجاد کرد، کیفیت مشاوران و پروژه‌های واقعی بود که در کارنامه‌ی حرفه‌ای‌ام ماندگار شد.",
     name: "نگار صفری",
     role: "متخصص علوم داده، فارغ‌التحصیل MBA دیجیتال",
     initials: "ن.ص",
-    photo: "/landing-v2/faculty/w2.png",
+    accent: "cobalt",
   },
   {
     body: "به‌عنوان مادر دو فرزند، یافتن زمان برای آموزش حضوری ممکن نبود. این سامانه به من فرصت داد بدون از دست دادن خانواده، در رشته‌ی طراحی UX به سطحی برسم که اکنون از خانه فعالیت حرفه‌ای دارم.",
     name: "فاطمه احمدی",
     role: "طراح UX، فارغ‌التحصیل دوره‌ی طراحی",
     initials: "ف.ا",
-    photo: "/landing-v2/faculty/w4.png",
+    accent: "gold",
   },
 ];
+
+// Small inline grad-cap SVG used as a decorative element in each testimonial
+// card. Single-color, currentColor-aware, ~28px square.
+const GradCapSvg = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="28"
+    height="28"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m12 4 10 5-10 5L2 9z" />
+    <path d="M6 11v4a6 6 0 0 0 12 0v-4" />
+    <path d="M21 10v6" />
+  </svg>
+);
 
 const TestiV2Section = () => (
   <section className="testi-v2-section" data-reveal>
@@ -805,12 +834,15 @@ const TestiV2Section = () => (
       </div>
       <div className="testi-v2-grid">
         {TESTI_V2.map((t) => (
-          <article key={t.name} className="testi-v2-card">
-            <div className="quote-mark" aria-hidden="true">&ldquo;</div>
+          <article key={t.name} className={`testi-v2-card accent-${t.accent}`}>
+            <div className="testi-card-top">
+              <div className="quote-mark" aria-hidden="true">&ldquo;</div>
+              <div className="testi-card-grad" aria-hidden="true"><GradCapSvg /></div>
+            </div>
             <p className="quote-body">{t.body}</p>
             <div className="person">
               <div className="person-avatar" aria-hidden="true">
-                {t.photo ? <img src={t.photo} alt="" loading="lazy" /> : <span>{t.initials}</span>}
+                <span>{t.initials}</span>
               </div>
               <div className="person-info">
                 <span className="person-name">{t.name}</span>

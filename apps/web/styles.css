@@ -5940,6 +5940,16 @@ html[data-theme="dark"] .r5-jahad-mark.is-dark { display: inline-block; }
   .r5-login-shell .r5-brand-panel { display: none !important; }
   .r5-login-shell .r5-form-panel { padding: 20px 18px 28px !important; }
   .r5-login-shell .r5-form-panel header { margin-bottom: 18px !important; }
+  /* D51 round-3 ITEM A — owner reports "two navbars on mobile /login".
+     Root cause: AppShell global Nav at top + LoginPage form-panel's own
+     <header> (Wordmark + theme/locale pills) right below. AppShell Nav
+     already shows the Jahad brand + user-utilities, so the form-panel
+     header becomes redundant decoration on mobile. Hide it; on desktop
+     the two-column layout puts them in distinct visual zones so the
+     header stays. Owner-acked direct touch under D49 urgency umbrella. */
+  .r5-login-shell .r5-form-panel > header {
+    display: none !important;
+  }
 }
 
 /* ≤420: very small phones — tighten chips */

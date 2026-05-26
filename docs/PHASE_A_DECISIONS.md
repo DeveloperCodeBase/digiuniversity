@@ -910,3 +910,64 @@ cd C:/digiuniversity && git revert --no-edit HEAD~10..HEAD && git push origin ma
 If owner wants a dedicated animation/motion upgrade post-presentation, that becomes a separate sub-R with its own audit + decision.
 
 **Source:** owner directive 2026-05-26 D48 polish-round-2 «NO EXTERNAL SKILL FETCH».
+
+### D51 — R-Landing-v2 polish round 3 (re-investigated dual nav + contrast + skill conditional)
+**Context:** Owner reported the round-2 «dual navbar on /login mobile» fix as INSUFFICIENT — they still saw two navbars on real mobile device. Round-3 directive instructed a re-investigation via Chrome Extension DOM inspection with mobile viewport simulation.
+
+**ITEM A — /login dual-navbar RE-INVESTIGATION + actual root cause:**
+
+DOM inspection on /login surfaced 8 nav-like elements; the two that visually look like stacked navbars on mobile:
+1. AppShell global `<nav.nav>` at y=0, h=80 (the chrome we kept on /login per D49 — only / suppresses it)
+2. `<header>` element at y=128, h=36 INSIDE `<section.r5-form-panel>` (LoginPage's CoBrandHeader showing the same brand wordmark + theme/locale pills)
+
+On mobile (<720px) the brand-panel collapses (already CSS-handled by R5 design) leaving the form-panel header right below the AppShell Nav — the two visually merge into «دو نوبت brand display» that owner correctly reports as confusing.
+
+**Fix (added to `apps/web/styles.css` @media (max-width: 720px) block):**
+```css
+.r5-login-shell .r5-form-panel > header { display: none !important; }
+```
+Single-rule CSS scoped to mobile + LoginPage only. AppShell Nav already provides Jahad logo + brand name + utility icons; the duplicate decorative header is suppressed on phone where the redundancy was problematic.
+
+**ITEM B — Hero cobrand chip: white Jahad logo instead of dark:**
+- `apps/web/public/landing-v2/jahad-light.png` copied from `docs/my-upload/landing-v2/assets/`
+- `Home.tsx` hero crown img src: `/landing-v2/jahad-dark.png` → `/landing-v2/jahad-light.png`
+- Logo now reads white on the dark navy hero pill (was invisible before).
+
+**ITEM C — Testimonials avatars upgrade:**
+- Removed faculty-photo reuse (`/landing-v2/faculty/m4.png` etc.) — owner reported it looked confusing (professor headshots as "student" testimonials).
+- Replaced with per-card themed initial-letter avatars on gradient circles (navy / cobalt / gold accents) + inline graduation-cap SVG decoration in top-right.
+- Quote body text upgraded to var(--ink) (max contrast on white card bg).
+- 3 testimonial cards each render a distinct accent color and grad-cap badge.
+
+**ITEM D — External skill conditional fetch (D50 OVERRIDE):**
+- Fetched `https://github.com/nextlevelbuilder/ui-ux-pro-max-skill` via WebFetch (succeeded, <30s).
+- Repository TYPE: **(a) markdown/rules SKILL.md style** — AI design-reasoning knowledge base (161 rules + 67 styles).
+- Has a CLI for installing into AI assistants (Claude/Cursor/Windsurf), NOT a code dependency.
+- **Decision: noted, principles applied, NOT installed.** The skill is for AI assistants to consume as knowledge, not for our React app to depend on. The 161 design-reasoning rules informed the round-3 polish work (contrast lifts, testimonials visual hierarchy, brand consistency) but no patterns were directly installed into the codebase.
+- Per ITEM D logic point (a): "اگه repo حاوی فقط markdown / skill rules / config ... ـه: read + apply اون rules ... این OK چون فقط knowledge inject ـه نه code install" — applied.
+
+**ITEM E — Contrast comprehensive sweep:**
+
+Targeted improvements in `home-v2-overrides.css` (.home-shell-v2-scoped only, no global token change):
+- Hero sub: `rgba(255,255,255,0.85)` → `0.95` + `font-weight: 500`
+- Topbar text + badges + link: `color: rgba(255,255,255,0.95) !important` (lifts inherited mute-2 to near-white)
+- Home Nav brand subtitle (JAHAD · AIRAC): `var(--mute)` → `var(--ink-2)` + `font-weight: 600`
+- Testimonial quote body: `var(--ink-2)` → `var(--ink)` + `font-weight: 500`
+- Testimonial person-role + Faculty card role: `var(--mute)` → `var(--ink-2)` + `font-weight: 500`
+
+All inside `.home-shell-v2` scope. `/login` and workspace untouched.
+
+**Cumulative commit chain (vol-1 + D48 + D49 + D51):**
+| Round | Commits |
+|---|---|
+| vol-1 | A-E (5) |
+| D48 round-2 | F-J (5) |
+| D49 round-2 part 2 | K, N (2 — terminology + hamburger) |
+| D51 round-3 | U+V+W+X (combined, this commit) |
+
+Total = ~13 commits. Rollback extended:
+```bash
+cd C:/digiuniversity && git revert --no-edit HEAD~17..HEAD && git push origin main
+```
+
+**Source:** owner directive 2026-05-26 polish-round-3 5-fix directive (ITEMS A-E).
