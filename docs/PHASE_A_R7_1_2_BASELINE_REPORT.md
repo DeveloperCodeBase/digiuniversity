@@ -107,15 +107,40 @@ Per owner directive «اگه page یا duo زیر 90: R7.x.1 fine-tuning sub-R،
 
 This keeps the loop tight: 1 commit → 1 deploy → 1 measure → owner decision on next slice.
 
+## R7.1.5.a post-deploy results (Fix 1 + Fix 3 shipped)
+
+After commit `b1b9he6vc` (hero `light-logo.png` → `airac-white.png` + fetchpriority/decoding hints on all portraits) deployed:
+
+| Metric | Baseline | Post-R7.1.5.a | Δ |
+|---|---:|---:|---:|
+| `/` Perf | 43 | **65** | **+22** ✅ |
+| `/` FCP | 2.7 s | 2.2 s | −0.5 s |
+| `/` LCP | 8.5 s | 5.6 s | **−2.9 s** ✅ |
+| `/` TBT | 1,130 ms | 330 ms | **−800 ms** ✅ |
+| `/` CLS | 0 | 0 | stable |
+| `/` total bytes | 3,240 KiB | 2,953 KiB | −287 KiB (matches logo Δ) |
+| `/` A11y | 100 | 100 | stable ✅ |
+
+**Single-commit impact:** +22 Perf points from one image swap + 3 lines of priority hints. The hero is no longer the LCP-killer; the remaining 5.6 s LCP is now the faculty/testimonial portrait section scrolling into the LH simulation viewport (Fix 2 territory).
+
+## Path to ≥ 90
+
+Remaining gap to ≥ 90 on `/` is ~25 points. Highest-impact remaining lever is **Fix 2 — faculty PNG compression**. Three options for owner decision:
+
+- **A — Reduce 8 → 4 faculty cards.** Use only the 2 small JPGs (m1 + w1) twice each or split into 4 unique JPG slots. Loss: half the faculty diversity. ~9 MB → ~400 KB.
+- **B — Add image-optimize build step.** Install `sharp` + small Vite plugin to auto-resize/recompress PNGs → WebP at build time. ~9 MB → ~500 KB. New dependency, ~5 min npm install in build container.
+- **C — Owner re-uploads optimized JPGs.** Owner provides m2/m3/m4/w2/w3/w4 as 800px-wide JPGs ~80 KB each → drop-in swap. Cleanest, no new dependency, blocks on owner action.
+
 ## Status
 
 | Item | Status |
 |---|---|
-| Baseline measured | ✅ this report |
-| Root cause identified | ✅ image weight (specifically hero LCP + faculty PNGs) |
+| Baseline measured | ✅ |
+| Root cause identified | ✅ image weight (hero LCP + faculty PNGs) |
 | R7.1+R7.2 implementation | ✅ already shipped pre-resume |
-| R7.1.5 fine-tuning sub-R | ⏳ proposed (Fix 1 + Fix 3 next commit) |
-| §1 Perf ≥ 90 on all 3 pages | 🔴 currently 43 / 70 / 63 |
-| Regression sweep | ⏳ post-R7.1.5 |
+| R7.1.5.a hero swap + hints | ✅ shipped, +22 Perf delta verified |
+| Fix 2 faculty PNG compression | ⏳ owner decision: A / B / C |
+| §1 Perf ≥ 90 on all 3 pages | 🟡 currently 65 / 70 / 63 (gap ~25 on /, ~20 on /login, ~27 on /programs) |
+| Regression sweep | ⏳ post-Fix 2 |
 
 — Phase A author, 2026-05-26.
