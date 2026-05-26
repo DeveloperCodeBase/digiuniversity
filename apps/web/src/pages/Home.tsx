@@ -176,7 +176,7 @@ export const HomePage = ({ go }: HomePageProps) => {
             <img src="/landing-v2/jahad-dark.png" alt="جهاد دانشگاهی" width="44" height="44" />
             <div className="home-brand-text">
               <span className="home-brand-name">دانشگاه برخط هوشمند ایران</span>
-              <span className="home-brand-sub">JAHAD · AIRAC</span>
+              <span className="home-brand-sub">AIRAC-ACECR</span>
             </div>
           </div>
           {/* D49 ITEM 7 — mobile hamburger. CSS hides this above 1024px
@@ -295,18 +295,21 @@ export const HomePage = ({ go }: HomePageProps) => {
                 (light-logo.png — the Jahad+AIRAC+university wordmark
                 white variant designed for the dark hero background). */}
             <div className="hero-logo-mark" data-reveal>
-              {/* R7.1.5.a — hero LCP optimization. Was light-logo.png 286KB
-                  (LCP candidate, blocked / from scoring above 50). Swapped
-                  to airac-white.png 29KB (10× smaller, same white-on-dark
-                  branding intent). fetchpriority=high + decoding=sync so
-                  the browser races this above lazy assets. */}
+              {/* D58 owner directive 2026-05-26: «چرا لوگو رو باز عوض
+                  کردی... این لوگو رو بزار دیگه هم عوض نکن». Restored
+                  to /landing-v2/light-logo.png (the full Jahad+AIRAC+
+                  university wordmark lockup the owner sent). R7.1.5.b
+                  sharp optimization brought this PNG from 286 KB → 77 KB
+                  (palette mode) — same visual, 73% smaller bytes. So
+                  brand fidelity + most of the Perf gain together.
+                  fetchpriority=high + decoding=sync prioritize LCP. */}
               <img
-                src="/landing-v2/airac-white.png"
-                alt="دانشگاه برخط هوشمند ایران — مرکز راهبری پژوهش و پیشرفت هوش مصنوعی"
+                src="/landing-v2/light-logo.png"
+                alt="دانشگاه برخط هوشمند ایران — جهاد دانشگاهی · AIRAC"
                 fetchPriority="high"
                 decoding="sync"
-                width="520"
-                height="520"
+                width="1709"
+                height="2244"
               />
             </div>
             {/* D48 ITEM 3 — hero title refinement per owner feedback.
