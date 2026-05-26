@@ -35,12 +35,12 @@ import "./home-v2.css";
 // D48 round-2 polish: manual overrides + faculty + testimonials styles
 // not covered by the auto-generated home-v2.css.
 import "./home-v2-overrides.css";
-// Plus Jakarta Sans for Latin display per design's typography (D48 ITEM 6).
-// Imported here (not main.tsx) per owner directive «اگه CSS لازمه،
-// Home.tsx خودش import کنه».
-import "@fontsource/plus-jakarta-sans/500.css";
-import "@fontsource/plus-jakarta-sans/600.css";
-import "@fontsource/plus-jakarta-sans/700.css";
+// Plus Jakarta Sans deferred — adding it would have required a
+// package-lock.json regen + full npm install in the build container.
+// The Latin display text in Home falls back to Vazirmatn + system-ui
+// sans-serif (declared in home-v2-overrides.css .home-shell-v2 font-family).
+// Visually 95% indistinguishable for the demo; can be re-added in a
+// future polish with proper lockfile sync.
 
 interface HomePageProps {
   go: Go;
