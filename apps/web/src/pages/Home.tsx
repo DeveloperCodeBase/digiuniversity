@@ -32,6 +32,15 @@ import { Button } from "../ui";
 // this file has NO global effect. The CSS only fires inside the
 // wrapper div rendered below.
 import "./home-v2.css";
+// D48 round-2 polish: manual overrides + faculty + testimonials styles
+// not covered by the auto-generated home-v2.css.
+import "./home-v2-overrides.css";
+// Plus Jakarta Sans for Latin display per design's typography (D48 ITEM 6).
+// Imported here (not main.tsx) per owner directive «اگه CSS لازمه،
+// Home.tsx خودش import کنه».
+import "@fontsource/plus-jakarta-sans/500.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
 
 interface HomePageProps {
   go: Go;
@@ -93,6 +102,15 @@ export const HomePage = ({ go }: HomePageProps) => {
     return () => document.removeEventListener("mousemove", handler);
   }, []);
 
+  // D48 ITEM 2 — mark body so home-v2-overrides.css can hide the AppShell
+  // global Nav while Home is mounted. No :has() involved — React lifecycle
+  // controls the attribute. Cleanup on unmount restores the AppShell Nav
+  // for any future route that re-uses Home's chrome stack.
+  React.useEffect(() => {
+    document.body.dataset.homeShell = "true";
+    return () => { delete document.body.dataset.homeShell; };
+  }, []);
+
   // Phase-A R7.1.1.a — REVERTED the .is-ready gated-animation pattern.
   // Initial attempt clustered 8+ animations into one trigger moment
   // and Lighthouse counted that concentrated work as a +1290ms TBT
@@ -135,6 +153,36 @@ export const HomePage = ({ go }: HomePageProps) => {
         </div>
       </div>
 
+      {/* ============== HOME NAV (D48 ITEM 2 — replaces AppShell Nav on /) ============== */}
+      {/* AppShell Nav is hidden via body[data-home-shell] data-attribute set
+          by the useEffect above. This local nav uses the design's logo +
+          brand text and routes to the same public destinations. */}
+      <nav className="home-nav-v2" aria-label="ناوبری اصلی صفحه خانه">
+        <div className="home-nav-inner">
+          <div className="home-brand">
+            <img src="/landing-v2/jahad-dark.png" alt="جهاد دانشگاهی" width="44" height="44" />
+            <div className="home-brand-text">
+              <span className="home-brand-name">دانشگاه برخط هوشمند ایران</span>
+              <span className="home-brand-sub">JAHAD · AIRAC</span>
+            </div>
+          </div>
+          <div className="home-nav-actions">
+            <button type="button" className="home-nav-link" onClick={() => go("about")}>
+              درباره‌ی ما
+            </button>
+            <button type="button" className="home-nav-link" onClick={() => go("schools")}>
+              دانشکده‌ها
+            </button>
+            <button type="button" className="home-nav-link" onClick={() => go("login")}>
+              ورود
+            </button>
+            <button type="button" className="home-nav-link is-primary" onClick={() => go("register")}>
+              ثبت‌نام رایگان
+            </button>
+          </div>
+        </div>
+      </nav>
+
       <main data-screen-label="01 خانه">
       {/* ============== HERO ============== */}
       <section className="hero">
@@ -146,13 +194,13 @@ export const HomePage = ({ go }: HomePageProps) => {
 
         <div className="shell hero-stage">
           <div className="hero-headline">
-            {/* Q3.c hybrid co-brand chips: Jahad + AIRAC (design fidelity).
-                Class names from design's styles.css .hero-crown + .logo-card.
-                Footer remains JDO + dvcb per R1.3-Brand (untouched). */}
+            {/* Q3.c hybrid co-brand chips: Jahad + AIRAC. D48 ITEM 3 update —
+                real <img> tags using the design's PNG assets (light-bg variants)
+                instead of placeholder icons. */}
             <div className="hero-crown" data-reveal>
               <div className="logo-card">
                 <div className="l-img">
-                  <Icon name="grad" size={28} />
+                  <img src="/landing-v2/jahad-dark.png" alt="جهاد دانشگاهی" />
                 </div>
                 <div className="l-text">
                   <b>جهاد دانشگاهی</b>
@@ -161,7 +209,7 @@ export const HomePage = ({ go }: HomePageProps) => {
               </div>
               <div className="logo-card">
                 <div className="l-img">
-                  <Icon name="spark" size={28} />
+                  <img src="/landing-v2/airac-white.png" alt="AIRAC" />
                 </div>
                 <div className="l-text">
                   <b>مرکز راهبری پژوهش و پیشرفت</b>
@@ -173,13 +221,11 @@ export const HomePage = ({ go }: HomePageProps) => {
               <span className="dot"></span>
               <span>EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE</span>
             </div>
-            {/* Phase-16 R2: outcome-first headline (audit B-08).
-                Previously a brand statement; now leads with what owner
-                gets: an accredited online university with 248 programs
-                and verifiable credentials. */}
+            {/* D48 ITEM 3 — hero title refinement per owner feedback.
+                Title simplified to design's institutional phrasing.
+                Sub paragraph rephrased: «برخط» replaces «آنلاین» per ITEM 6 sweep. */}
             <h1 className="hero-title">
-              <span className="hero-title-line">دانشگاه آنلاین هوشمند ایران،</span>
-              <span className="hero-title-line">با <span className="em">۲۴۸ برنامه</span> و گواهی قابل اثبات</span>
+              <span className="hero-title-line">دانشگاه برخط هوشمند ایران</span>
             </h1>
             <p className="hero-sub">
               از کلاس‌های زنده تا آزمایشگاه‌های مجازی، با همراهی هوش مصنوعی — همگام با استانداردهای جهانی LTI، xAPI، QTI و Open Badges 3.0. ۸ دانشکده، ۹۴ استاد، مدارک قابل راستی‌آزمایی.
@@ -480,7 +526,7 @@ export const HomePage = ({ go }: HomePageProps) => {
               <h2 className="h-1 mt-4" >هر نقش، یک محیط کاری مستقل</h2>
             </div>
             <p className="lead">
-              دانشجو، استاد، طراح آموزشی، مدیر — هر یک ابزار خود را دارد. همه روی یک پلتفرم.
+              دانشجو، استاد، طراح آموزشی، مدیر — هر یک ابزار خود را دارد. همه روی یک سکو.
             </p>
           </div>
 
@@ -548,7 +594,7 @@ export const HomePage = ({ go }: HomePageProps) => {
               <span className="eyebrow">GET STARTED</span>
               <h2 className="h-1 mt-4" >دانشگاهی تأسیس کنید که هرگز نمی‌خوابد</h2>
               <p className="lead mt-4" >
-                در کمتر از ۳۰ روز، اولین ترم آنلاین خود را با کلاس زنده، ضبط هوشمند، آزمون تطبیقی و گواهی دیجیتال اجرا کنید.
+                در کمتر از ۳۰ روز، اولین ترم برخط خود را با کلاس زنده، ضبط هوشمند، آزمون تطبیقی و گواهی دیجیتال اجرا کنید.
               </p>
               <div className="flex gap-3 mt-8" >
                 <Button variant="primary" size="lg" onClick={() => go("admissions")}>
@@ -563,7 +609,7 @@ export const HomePage = ({ go }: HomePageProps) => {
             </div>
             <div className="flex flex-col gap-2.5" >
               {[
-                ["MVP در ۳۰ روز", "اولین درس آنلاین قابل اجرا"],
+                ["MVP در ۳۰ روز", "اولین درس برخط قابل اجرا"],
                 ["ترم کامل در ۹۰ روز", "تمام سرویس‌های دانشگاه آماده"],
                 ["مقیاس ملی در ۶ ماه", "چند مستاجره، SLA 99.9٪"],
               ].map(([t, s], i) => (
@@ -953,7 +999,7 @@ const TESTIMONIALS = [
     name: "علی جوادی",
     role: "Senior SWE · Snapp · فارغ‌التحصیل CS-580",
     quote:
-      "گواهی Open Badges که گرفتم رو روی LinkedIn زدم و سه‌تا offer گرفتم. اعتبار پلتفرم خیلی فرق می‌کنه با دوره‌های آنلاین رایج.",
+      "گواهی Open Badges که گرفتم رو روی LinkedIn زدم و سه‌تا offer گرفتم. اعتبار سکو خیلی فرق می‌کنه با دوره‌های برخط رایج.",
   },
   {
     initials: "م. ک",
