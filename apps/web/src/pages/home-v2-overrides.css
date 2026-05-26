@@ -259,18 +259,19 @@ body[data-home-shell="true"] #root > a.skip-link {
 .home-shell-v2 .hero-logo-mark img {
   display: block;
   width: auto;
-  height: clamp(220px, 32vh, 360px);
+  height: clamp(280px, 40vh, 460px);
   max-width: 100%;
   object-fit: contain;
-  /* Boost brightness + contrast so the white linework reads crisp
-     on the dark navy hero (without filter the PNG's semi-transparent
-     edges were ghosting against the gradient bg). */
-  filter: brightness(1.15) contrast(1.08)
-          drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+  /* Stronger filter so the PNG's subtle white linework reads as a
+     prominent brand mark on dark navy. brightness×1.35 + contrast×1.2
+     pushes the alpha-channel white toward solid; drop-shadow adds a
+     dark halo so edges separate from the gradient bg. */
+  filter: brightness(1.35) contrast(1.2)
+          drop-shadow(0 8px 24px rgba(0, 0, 0, 0.55));
 }
 @media (max-width: 640px) {
-  .home-shell-v2 .hero-logo-mark img { height: clamp(180px, 24vh, 240px); }
-  .home-shell-v2 .hero-logo-mark { margin-block-end: 16px; }
+  .home-shell-v2 .hero-logo-mark img { height: clamp(200px, 28vh, 280px); }
+  .home-shell-v2 .hero-logo-mark { margin-block-end: 12px; }
 }
 .home-shell-v2 .hero-title .em {
   color: var(--accent, #2e6bff);
