@@ -4,7 +4,21 @@
 // after the new sections + primitives land. R2 only adds the auth-aware
 // redirect + outcome-first headline.
 // =====================================================
-// Home / Landing page
+// Home / Landing page  —  R-Landing-v2 (D47, 2026-05-26)
+// =====================================================
+// Wrapped in .home-shell-v2 so the design's white+navy palette,
+// typography (Vazirmatn + Plus Jakarta), section layouts, and
+// reveal-on-scroll animations apply ONLY on / (and never on /login,
+// /dashboard, etc.). Per Q1.a: AGENT ARCHITECTURE preserved with
+// new palette. Per Q2.b: topbar wrapped INSIDE this scope (sticky
+// inside the wrapper, so it physically cannot render on other routes
+// since the wrapper isn't in DOM there). Per Q3.c: hero co-brand
+// chips = Jahad + AIRAC (design fidelity); Footer untouched (R1.3-
+// Brand JDO + dvcb).
+//
+// SW dispose (Commit A): VitePWA disabled + main.tsx top-level
+// unregister/clear. This page deploys without any service worker
+// caching it = no R-Landing-v1-style precache stickiness.
 // =====================================================
 import React from "react";
 import { Icon } from "../icons";
@@ -14,6 +28,10 @@ import { useAuth } from "../auth/AuthContext";
 import { AuthLoadingSkeleton } from "../components/AuthLoadingSkeleton";
 import type { Go } from "../router";
 import { Button } from "../ui";
+// Scoped CSS — every selector is .home-shell-v2-prefixed, so loading
+// this file has NO global effect. The CSS only fires inside the
+// wrapper div rendered below.
+import "./home-v2.css";
 
 interface HomePageProps {
   go: Go;
@@ -40,6 +58,41 @@ export const HomePage = ({ go }: HomePageProps) => {
   // isn't mounted (no `.hero-bg .aurora` in the DOM = no work).
   useMouseParallax();
 
+  // R-Landing-v2: reveal-on-scroll IntersectionObserver. Elements with
+  // [data-reveal] get .in class when 8% in view. Pulled from the design's
+  // app.tsx pattern. Lightweight — no TBT hit at the v1 levels (single
+  // observer, no animation clustering).
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.08 }
+    );
+    document.querySelectorAll(".home-shell-v2 [data-reveal]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  // R-Landing-v2: feature card spotlight follows the mouse. Scoped to
+  // .home-shell-v2 .feature elements only (won't fire elsewhere).
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest(".home-shell-v2 .feature") as HTMLElement | null;
+      if (!target) return;
+      const r = target.getBoundingClientRect();
+      target.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+      target.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+    };
+    document.addEventListener("mousemove", handler);
+    return () => document.removeEventListener("mousemove", handler);
+  }, []);
+
   // Phase-A R7.1.1.a — REVERTED the .is-ready gated-animation pattern.
   // Initial attempt clustered 8+ animations into one trigger moment
   // and Lighthouse counted that concentrated work as a +1290ms TBT
@@ -50,7 +103,39 @@ export const HomePage = ({ go }: HomePageProps) => {
   if (auth.isAuthenticated) return <AuthLoadingSkeleton />;
 
   return (
-    <main data-screen-label="01 خانه">
+    <div className="home-shell-v2">
+      {/* ============== TOPBAR (Q2.b — Jahad institutional badge) ============== */}
+      {/* Scoped INSIDE .home-shell-v2 so it cannot render on any other
+          route. position: sticky from home-v2.css makes it stick within
+          this wrapper. */}
+      <div className="topbar">
+        <div className="container topbar-inner">
+          <div className="left">
+            <span className="badge">
+              <Icon name="star" size={14} />
+              زیرمجموعه‌ی <b style={{ color: "white", fontWeight: 600, margin: "0 4px" }}>جهاد دانشگاهی</b> ایران
+            </span>
+            <span className="sep" />
+            <span className="badge">
+              <Icon name="check" size={13} />
+              ثبت‌نام دور پاییز ۱۴۰۵ آغاز شد
+            </span>
+          </div>
+          <div className="right">
+            <a href="mailto:info@digiuniversity.ir">
+              <Icon name="globe" size={12} />
+              info@digiuniversity.ir
+            </a>
+            <span className="sep" />
+            <span>
+              <Icon name="chat" size={12} />
+              پشتیبانی ۲۴ / ۷
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <main data-screen-label="01 خانه">
       {/* ============== HERO ============== */}
       <section className="hero">
         <div className="hero-bg">
@@ -61,6 +146,29 @@ export const HomePage = ({ go }: HomePageProps) => {
 
         <div className="shell hero-stage">
           <div className="hero-headline">
+            {/* Q3.c hybrid co-brand chips: Jahad + AIRAC (design fidelity).
+                Class names from design's styles.css .hero-crown + .logo-card.
+                Footer remains JDO + dvcb per R1.3-Brand (untouched). */}
+            <div className="hero-crown" data-reveal>
+              <div className="logo-card">
+                <div className="l-img">
+                  <Icon name="grad" size={28} />
+                </div>
+                <div className="l-text">
+                  <b>جهاد دانشگاهی</b>
+                  <small>بنیان‌گذار از سال ۱۳۵۹</small>
+                </div>
+              </div>
+              <div className="logo-card">
+                <div className="l-img">
+                  <Icon name="spark" size={28} />
+                </div>
+                <div className="l-text">
+                  <b>مرکز راهبری پژوهش و پیشرفت</b>
+                  <small>هوش مصنوعی · AIRAC</small>
+                </div>
+              </div>
+            </div>
             <div className="hero-eyebrow">
               <span className="dot"></span>
               <span>EST. 2026 · CHARTERED ONLINE UNIVERSITY · AI-NATIVE</span>
@@ -473,7 +581,8 @@ export const HomePage = ({ go }: HomePageProps) => {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </div>
   );
 };
 
