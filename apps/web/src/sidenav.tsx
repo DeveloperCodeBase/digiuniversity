@@ -101,6 +101,14 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     // banner per MIGRATION_POLICY §6 Sunset window.
     { id: "admin/offerings", t: "دوره‌های ارائه‌شده", ic: "live" },
     { id: "admin/cohorts", t: "گروه‌های آموزشی (Legacy)", ic: "users" },
+    // Phase B R3.a Commit G (D68 + D69) — Identity track admin entries.
+    // /admin/profiles is the D69 5th-page addition (admin convenience
+    // pairing with the self-service /profile route). All three pages
+    // land as per-route lazy chunks (D66 Path D — NO admin bucket).
+    { h: "افراد" },
+    { id: "admin/profiles", t: "پروفایل‌ها", ic: "user" },
+    { id: "admin/students", t: "دانشجویان", ic: "users" },
+    { id: "admin/instructors", t: "اساتید", ic: "grad" },
     { h: "محتوا و منابع" },
     { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
     { id: "library", t: "کتابخانه", ic: "folder" },

@@ -113,6 +113,11 @@ export const academicAdminApi = {
   transitionOffering: (id, to) =>
     api.post("/v1/offerings/" + encodeURIComponent(id) + "/transition", { to }),
   deleteOffering: (id) => api.delete("/v1/offerings/" + encodeURIComponent(id)),
+  // Phase B R3.a Commit G (D68 Q3.a + D69) — assign/unassign instructor.
+  // Pass instructorId=null (or "") to unassign. Backend validates the
+  // target User holds the 'instructor' role and lives in the same tenant.
+  assignOfferingInstructor: (id, instructorId) =>
+    api.patch("/v1/offerings/" + encodeURIComponent(id) + "/instructor", { instructorId }),
 
   // --- Cohorts (legacy, Sunset 2026-12-31) — list/CRUD kept alive
   // for the dual-write window. Backend emits Sunset / Deprecation /
@@ -238,4 +243,56 @@ export const usersApi = {
   me: () => api.get("/v1/users/me"),
   changePassword: ({ currentPassword, newPassword }) =>
     api.post("/v1/users/me/change-password", { currentPassword, newPassword }),
+};
+
+// ---------- identity (Phase B R3.a D68 + D69) ----------
+//
+// Profile / Student / Instructor surface. All Profile endpoints use the
+// SelfOrAdminGuard (D69 primitive): a non-admin caller can only access
+// their own resource; admins can access any in the tenant. Backend
+// returns 403 on cross-user attempts by non-admins.
+
+export const profileApi = {
+  // Self-service (uses JWT to resolve target user)
+  getOwn: () => api.get("/v1/profile"),
+  updateOwn: (data) => api.patch("/v1/profile", data),
+
+  // Admin listing — powers /admin/profiles
+  listAdmin: () => api.get("/v1/profiles"),
+
+  // SelfOrAdmin — :userId can be self (any role) or any user (admin only)
+  getByUserId: (userId) => api.get("/v1/users/" + encodeURIComponent(userId) + "/profile"),
+  updateByUserId: (userId, data) =>
+    api.patch("/v1/users/" + encodeURIComponent(userId) + "/profile", data),
+};
+
+export const studentApi = {
+  // Admin list/get/create/update/delete + self-read /me
+  list: ({ status } = {}) =>
+    api.get("/v1/students" + (status ? "?status=" + encodeURIComponent(status) : "")),
+  get: (id) => api.get("/v1/students/" + encodeURIComponent(id)),
+  getOwn: () => api.get("/v1/students/me"),
+  create: (data) => api.post("/v1/students", data),
+  update: (id, data) => api.patch("/v1/students/" + encodeURIComponent(id), data),
+  delete: (id) => api.delete("/v1/students/" + encodeURIComponent(id)),
+};
+
+export const instructorApi = {
+  // List + getById are visible to admin + student (catalog browsing).
+  // All mutations admin-only (backend guarded).
+  list: ({ status, departmentId } = {}) => {
+    const q = [];
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (departmentId) q.push("departmentId=" + encodeURIComponent(departmentId));
+    return api.get("/v1/instructors" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/instructors/" + encodeURIComponent(id)),
+  getOwn: () => api.get("/v1/instructors/me"),
+  create: (data) => api.post("/v1/instructors", data),
+  update: (id, data) => api.patch("/v1/instructors/" + encodeURIComponent(id), data),
+  // Dedicated sub-resource for department reassignment per memo. Pass
+  // departmentId=null (or "") to detach.
+  assignDepartment: (id, departmentId) =>
+    api.patch("/v1/instructors/" + encodeURIComponent(id) + "/department", { departmentId }),
+  delete: (id) => api.delete("/v1/instructors/" + encodeURIComponent(id)),
 };

@@ -539,7 +539,10 @@ const UserDropdown = ({ go, role, setRole, auth }: UserDropdownProps): React.Rea
     <div className="p-1.5" >
       {[
         ["میز کار", "home", role.homeRoute],
-        ["پروفایل عمومی", "user", "profile"],
+        // Phase B R3.a Commit G (D69) — «پروفایل من» per the D69
+        // SelfOrAdmin clarification. Points to /profile, the new R3.a
+        // self-service page that works for every authenticated role.
+        ["پروفایل من", "user", "profile"],
         ["پیام‌ها", "chat", "messages"],
         ["ذخیره‌ها", "star", "bookmarks"],
         ["دستاوردها", "trophy", "achievements"],
