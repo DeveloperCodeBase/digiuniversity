@@ -1455,6 +1455,67 @@ This pattern becomes the template for every future state-machine sub-R (StudentA
 
 **Source:** owner directive 2026-05-27 «R3.a Lesson برای D13 checklist template آینده: هر D13 smoke باید explicit delete operation cover کنه».
 
+### D71 — R3.b Q-answers locked: 9 defaults + Q5.a/Q8.a refinements
+**Context:** Owner reviewed `PHASE_B_R3_B_MEMO.md` (commit `c60d895`) and ack'd 2026-05-27 with «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع».
+
+**Locked decisions (defaults accepted):**
+- **Q1.a ✅** — 7-value AppStatus enum: `SUBMITTED, UNDER_REVIEW, INTERVIEW, ACCEPTED, ENROLLED, REJECTED, WITHDRAWN`
+- **Q2.a ✅** — Verification timestamps on Application row (`applicantEmailVerifiedAt`, `applicantPhoneVerifiedAt`)
+- **Q3.a ✅** — R3.b ships schema + guard only; admin PATCH sets the flags; self-verification UX deferred to R-Notif
+- **Q4.a ✅** — Free-text Persian body inlined in NotificationLog stub
+- **Q6.a ✅** — InstructorApplication ENROLLED side effect: create User + Instructor + grant `instructor` role; no auto-CourseOffering assignment
+- **Q7.a ✅** — Applicant SelfOrAdmin can WITHDRAW own; admin can also WITHDRAW on behalf
+- **Q9.a ✅** — Single unified `/admin/applications` route with type + status + program filters
+
+**Two refinements (defaults' spirit preserved, edge cases hardened):**
+
+**Q5.a → find-or-create-or-link** (eliminates P2002 race during ACCEPTED → ENROLLED side effect)
+
+Original Q5.a pattern: «reuse if userId set; else create new User». Risk: applicant registers separately between submitting application and admin accepting it → ENROLLED transaction throws `P2002` on `(tenantId, email)` UNIQUE.
+
+Refined sequence (all inside the existing transactional boundary):
+1. If `application.userId` set → **reuse**
+2. If `application.userId` null:
+   a. Query `User` where `(tenantId, email)` matches application
+   b. If User exists → **link** (set `application.userId = user.id` first, then proceed without create)
+   c. If User doesn't exist → **create** + queue NotificationLog `user.password.claim` stub + auto-create Profile (via R3.a backfill pattern)
+3. After User available (reuse / link / create), create Student (or Instructor) + Enrollment row inside the same `$transaction`
+
+**Why this is a Q5.a refinement (not pivot to Q5.b/c):** spirit unchanged — applicant doesn't need a pre-existing User. P2002 race eliminated. Q5.b (always create) violates user uniqueness; Q5.c (reject if null) breaks the Q4.a anonymous-applicant convenience. find-or-create-or-link is the production-safe variant of Q5.a.
+
+**Q8.a → @Public POST hardened with rate-limit + spam detection placeholder**
+
+Original Q8.a: `@Public()` POST with `tenantSlug` + idempotency. Risk: `@Public()` endpoint without rate-limit is a spam vector.
+
+Hardening added (defense in depth on top of Q8.a):
+- **Rate-limit on `POST /v1/applications/student` + `/v1/applications/instructor`:** 5 submissions per IP per hour via NestJS Throttler decorator (`@Throttle({ default: { ttl: 3_600_000, limit: 5 } })`). Genuine applicants submit 1-2 times; 5/hr is generous.
+- **Spam-flag placeholder:** when more than 3 submissions arrive from the same `(IP)` or `(tenantId, applicantEmail)` tuple within a 1-hour rolling window, emit a NotificationLog row with `template = "application.spam.suspected"` + the application id. Admin can filter `/admin/applications` by spam-flagged status (UI surface to be confirmed in Commit G).
+- **Idempotency unchanged:** `(tenantId, applicantEmail, programId|departmentId)` UNIQUE returns the existing row id on re-submit (separate from rate-limit; rate-limit is a 429 guard, idempotency is a 200 dedupe).
+
+**Why this is a Q8.a refinement (not pivot to Q8.b/c):** spirit unchanged — `@Public()` POST + `tenantSlug` + idempotency. Q8.b (auth-required) breaks the anonymous-applicant convenience. Defense added without losing the public-submission UX.
+
+**Commit binding (owner-reordered, supersedes memo's original A-I):**
+- **A** — Prisma schema (StudentApplication + InstructorApplication + NotificationLog + AppStatus enum + reverse relations) + migration SQL + seed (sample applications in each status for D13 demo)
+- **B** — NestJS Applications module (controller + service + **state-machine validator only** — no side effects yet)
+- **C** — Verification gate guard (UNDER_REVIEW → INTERVIEW/ACCEPTED requires both verification timestamps set)
+- **D** — ENROLLED side effect service (transactional **find-or-create-or-link** per Q5.a refinement) + Instructor parallel (per Q6.a)
+- **E** — Public submission endpoint with **rate-limit + spam detection placeholder** (per Q8.a refinement)
+- **F** — API e2e tests (full state machine + side effects + verification gate + rate-limit + SelfOrAdmin withdraw)
+- **G** — Frontend `endpoints.js` + sidebar entry + ApplicationsPage list with filters
+- **H** — Transition dialog + withdraw flow + verification manual flag UI
+- **I** — D12+D18 spec + review doc + bundle measurement + deploy
+
+**Stop triggers (per D61, active during R3.b):**
+1. Unexpected discovery → STOP + ping
+2. Scope expand → STOP + ping
+3. Main bundle delta > 50 KB → STOP + ping (per D66 Path D)
+4. ApplicationsPage chunk > 30 KB → proactive ping (target < 25 KB)
+5. ENROLLED side-effect transactional boundary ambiguity (Enrollment FK collision, Profile pre-existing data conflict, etc.) → STOP + ping
+6. **NEW** — rate-limit policy issues (existing rate-limiter library incompatible with `@Public()` + `tenantSlug` pattern) → STOP + ping
+- Else: silent continue. Single complete-evidence ping after Commit I + deploy + D29 + bundle measurement.
+
+**Source:** owner directive 2026-05-27 «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع» + two refinement explanations.
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)

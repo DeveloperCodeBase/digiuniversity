@@ -2,10 +2,11 @@
 
 **Author:** Phase B post-R3.a-D13 (D70)
 **Date:** 2026-05-27
-**Status:** ⏳ DRAFT — awaiting owner ack before R3.b code
+**Status:** ✅ ACKED (D71) — Commit A in flight
 **Workflow:** memo → owner ack → code → spec → deploy → D29 pre-smoke → D13 owner smoke → close (D61 Constraint #1)
 **Split-from:** `PHASE_B_R3_MEMO.md` (parent R3 memo) → R3.a (Identity foundation, closed D70) + R3.b (this — state machines + Applications)
 **Predecessors operational:** D69 SelfOrAdminGuard primitive + audit semantic + R3.a models (Profile/Student/Instructor) shipped per D70.
+**Q-decisions refinements (D71):** Q5.a → find-or-create-or-link (eliminates P2002 race). Q8.a → hardened with rate-limit + spam-detection placeholder. See D71 entry in `PHASE_A_DECISIONS.md` for full rationale.
 
 ---
 
@@ -415,19 +416,19 @@ API e2e in `apps/api/test/applications-r3b.spec.ts` (~450 LOC) covers the matrix
 
 **Timeline: 6-7 days** (state-machine service-layer + transactional side effect + verification gate add complexity vs R3.a's pure CRUD; matches R2's cadence of 7 days).
 
-### Commit ordering (atomic per D61 Constraint #1)
+### Commit ordering (atomic per D61 Constraint #1, owner-reordered per D71)
 
-1. **A** — Prisma schema (2 application models + NotificationLog + AppStatus + reverse relations) + migration SQL + seed (sample SUBMITTED student app + sample ACCEPTED instructor app for D13 smoke)
-2. **B** — NestJS `ApplicationsBaseService` (shared state machine + verification gate + transactional side-effect helpers) + Notification stub writer service (no actual sender)
-3. **C** — NestJS `StudentApplicationsModule` (controller + service + DTOs) — includes public POST + SelfOrAdmin GET/me + WITHDRAW + admin list/get/transition/verify-email/verify-phone/soft-delete
-4. **D** — NestJS `InstructorApplicationsModule` (parallel shape; differs only in Q6.a ENROLLED side effect granting `instructor` role)
-5. **E** — NestJS `NotificationLogModule` (admin read-only list + getById)
-6. **F** — API e2e spec (`applications-r3b.spec.ts`) — parallel state machine + illegal transitions + Q4.a gate + side effect transactional + cross-tenant + SelfOrAdmin matrix + idempotency + WITHDRAW
-7. **G** — Frontend `endpoints.js` extension + sidebar nav extension
-8. **H** — Admin `ApplicationsPage` (unified table + type/status filters + drawer + transition controls + verification badges) + router lazy registration + D12+D18 visual spec
-9. **I** — Review doc (`PHASE_B_R3_B_REVIEW.md`) + bundle measurement + single complete-evidence ping
+1. **A** — Prisma schema (2 application models + NotificationLog + AppStatus + reverse relations) + migration SQL + seed (sample applications in each status for D13 demo)
+2. **B** — NestJS Applications module (controller + service + **state-machine validator only** — no side effects yet). Covers both StudentApplication + InstructorApplication module skeletons + admin list/get/transition/soft-delete. Transition rejects illegal moves with the «Allowed from X: [list]» message; the ACCEPTED → ENROLLED side effect is stubbed (rejected as "not yet implemented") until Commit D.
+3. **C** — **Verification gate guard** (UNDER_REVIEW → INTERVIEW/ACCEPTED requires both `applicantEmailVerifiedAt` + `applicantPhoneVerifiedAt` set). Service-layer guard rejects with the precise «applicant email + phone not verified (Q4.a caveat)» message. Admin verify-email + verify-phone PATCH endpoints land here.
+4. **D** — **ENROLLED side effect service** — transactional **find-or-create-or-link** per Q5.a refinement: (a) reuse existing User if `application.userId` set, (b) link if (tenantId, email) matches an existing User, (c) create otherwise + queue NotificationLog `user.password.claim`. Creates Student/Instructor + Enrollment in the same `$transaction`. Includes the parallel Q6.a Instructor side effect (grants `instructor` role on UserRole).
+5. **E** — **Public submission endpoint** (`@Public()` POST `/v1/applications/student` + `/v1/applications/instructor`) hardened per Q8.a refinement: NestJS `@Throttle` decorator 5/IP/hour, idempotency on `(tenantId, applicantEmail, programId|departmentId)`, spam-flag NotificationLog stub when >3 submissions in 1-hour window. SelfOrAdmin GET/me + WITHDRAW endpoint also land here.
+6. **F** — API e2e spec (`applications-r3b.spec.ts`) — full state machine + side effects + verification gate + rate-limit (429 on 6th rapid submission) + SelfOrAdmin matrix + idempotency + WITHDRAW
+7. **G** — Frontend `endpoints.js` extension (`applicationsApi`, `notificationLogsApi`) + sidebar nav extension + admin `ApplicationsPage` list with type + status + program filters
+8. **H** — Application transition dialog + withdraw flow + verification manual flag UI (admin clicks ✉️/☎️ badges → sets the verification timestamps)
+9. **I** — D12+D18 visual spec (parallel state machine + illegal transitions + verification gate + side effects + **explicit delete-OR-withdraw coverage per D70 lesson**) + router lazy registration + review doc + bundle measurement + deploy
 
-9 atomic commits. Tighter than R3.a's 12 because the single admin page + base service share infrastructure.
+9 atomic commits. Owner's reordering separates concerns cleanly: B = pure CRUD+state-machine, C = gate, D = side effect, E = public surface + rate-limit. Each commit can deploy independently for incremental verification.
 
 ---
 
