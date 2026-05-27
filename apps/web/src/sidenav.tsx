@@ -109,6 +109,10 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     { id: "admin/profiles", t: "پروفایل‌ها", ic: "user" },
     { id: "admin/students", t: "دانشجویان", ic: "users" },
     { id: "admin/instructors", t: "اساتید", ic: "grad" },
+    // Phase B R3.b Commit G (D71) — Applications inbox. Single entry
+    // serves both student + instructor apps (Q9.a unified surface);
+    // type filter inside the page distinguishes them.
+    { id: "admin/applications", t: "درخواست‌ها", ic: "inbox" },
     { h: "محتوا و منابع" },
     { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
     { id: "library", t: "کتابخانه", ic: "folder" },

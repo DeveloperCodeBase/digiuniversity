@@ -296,3 +296,69 @@ export const instructorApi = {
     api.patch("/v1/instructors/" + encodeURIComponent(id) + "/department", { departmentId }),
   delete: (id) => api.delete("/v1/instructors/" + encodeURIComponent(id)),
 };
+
+// ---------- applications (Phase B R3.b D71) ----------
+//
+// Two parallel surfaces: studentApplications + instructorApplications.
+// The public POST (publicSubmitStudent / publicSubmitInstructor) is
+// the only un-authenticated path; everything else is admin-gated or
+// SelfOrAdmin per Q7.a.
+//
+// Public submission is rate-limited (5/IP/hour) + idempotent on
+// (tenantId, applicantEmail, programId|departmentId) per Q8.a.
+// Spam-flag NotificationLog rows surface in notificationLogsApi.list.
+
+export const studentApplicationsApi = {
+  // Public submission. Returns the application row + an _idempotent flag
+  // indicating whether it was a new create (false) or an existing-row
+  // return (true). Caller can branch on that for UX.
+  publicSubmit: (data) => publicApi.post("/v1/applications/student", data),
+
+  // Own application (any authenticated user; 404 if no app).
+  getOwn: () => api.get("/v1/applications/student/me"),
+
+  // SelfOrAdmin withdraw (applicant withdraws own; admin withdraws any).
+  withdraw: (id) => api.post("/v1/applications/student/" + encodeURIComponent(id) + "/withdraw"),
+
+  // Admin list + filters (status, programId).
+  list: ({ status, programId } = {}) => {
+    const q = [];
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (programId) q.push("programId=" + encodeURIComponent(programId));
+    return api.get("/v1/applications/student" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/applications/student/" + encodeURIComponent(id)),
+
+  // Admin transition. Backend enforces state machine + Q4.a verification
+  // gate + Q5.a transactional side effect on ENROLLED.
+  transition: (id, to) =>
+    api.post("/v1/applications/student/" + encodeURIComponent(id) + "/transition", { to }),
+
+  // Q4.a admin escape hatch — manually flag verification.
+  verifyEmail: (id, verified = true) =>
+    api.patch("/v1/applications/student/" + encodeURIComponent(id) + "/verify-email", { verified }),
+  verifyPhone: (id, verified = true) =>
+    api.patch("/v1/applications/student/" + encodeURIComponent(id) + "/verify-phone", { verified }),
+
+  delete: (id) => api.delete("/v1/applications/student/" + encodeURIComponent(id)),
+};
+
+export const instructorApplicationsApi = {
+  publicSubmit: (data) => publicApi.post("/v1/applications/instructor", data),
+  getOwn: () => api.get("/v1/applications/instructor/me"),
+  withdraw: (id) => api.post("/v1/applications/instructor/" + encodeURIComponent(id) + "/withdraw"),
+  list: ({ status, departmentId } = {}) => {
+    const q = [];
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (departmentId) q.push("departmentId=" + encodeURIComponent(departmentId));
+    return api.get("/v1/applications/instructor" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/applications/instructor/" + encodeURIComponent(id)),
+  transition: (id, to) =>
+    api.post("/v1/applications/instructor/" + encodeURIComponent(id) + "/transition", { to }),
+  verifyEmail: (id, verified = true) =>
+    api.patch("/v1/applications/instructor/" + encodeURIComponent(id) + "/verify-email", { verified }),
+  verifyPhone: (id, verified = true) =>
+    api.patch("/v1/applications/instructor/" + encodeURIComponent(id) + "/verify-phone", { verified }),
+  delete: (id) => api.delete("/v1/applications/instructor/" + encodeURIComponent(id)),
+};
