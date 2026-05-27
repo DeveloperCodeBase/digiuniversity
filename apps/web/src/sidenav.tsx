@@ -96,6 +96,11 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     { id: "admin/faculties", t: "هیأت‌ها", ic: "users" },
     { id: "admin/departments", t: "گروه‌ها", ic: "folder" },
     { id: "admin/programs", t: "برنامه‌ها", ic: "cert" },
+    // Phase B R2 Commit F (D65) — Offerings + Cohorts admin entries.
+    // Offerings is the modern surface; Cohorts retains its «Legacy»
+    // banner per MIGRATION_POLICY §6 Sunset window.
+    { id: "admin/offerings", t: "دوره‌های ارائه‌شده", ic: "live" },
+    { id: "admin/cohorts", t: "گروه‌های آموزشی (Legacy)", ic: "users" },
     { h: "محتوا و منابع" },
     { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
     { id: "library", t: "کتابخانه", ic: "folder" },

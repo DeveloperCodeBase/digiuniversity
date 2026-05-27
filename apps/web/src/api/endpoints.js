@@ -95,6 +95,34 @@ export const academicAdminApi = {
   createProgram: (data) => api.post("/v1/programs", data),
   updateProgram: (id, data) => api.patch("/v1/programs/" + encodeURIComponent(id), data),
   deleteProgram: (id) => api.delete("/v1/programs/" + encodeURIComponent(id)),
+
+  // --- CourseOfferings (Phase B R2 D65) — modern surface for the
+  // Cohort → Offering migration. Both APIs live in parallel during
+  // the Sunset window per MIGRATION_POLICY §6.
+  listOfferings: ({ status, programId } = {}) => {
+    const q = [];
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (programId) q.push("programId=" + encodeURIComponent(programId));
+    return api.get("/v1/offerings" + (q.length ? "?" + q.join("&") : ""));
+  },
+  getOffering: (id) => api.get("/v1/offerings/" + encodeURIComponent(id)),
+  createOffering: (data) => api.post("/v1/offerings", data),
+  updateOffering: (id, data) => api.patch("/v1/offerings/" + encodeURIComponent(id), data),
+  // Status transitions guarded by service-layer state machine.
+  // Illegal transitions reject 400 with an allowed-from-current list.
+  transitionOffering: (id, to) =>
+    api.post("/v1/offerings/" + encodeURIComponent(id) + "/transition", { to }),
+  deleteOffering: (id) => api.delete("/v1/offerings/" + encodeURIComponent(id)),
+
+  // --- Cohorts (legacy, Sunset 2026-12-31) — list/CRUD kept alive
+  // for the dual-write window. Backend emits Sunset / Deprecation /
+  // Link headers on every endpoint per MIGRATION_POLICY §6.
+  listCohorts: ({ programId } = {}) =>
+    api.get("/v1/cohorts" + (programId ? "?programId=" + encodeURIComponent(programId) : "")),
+  getCohort: (id) => api.get("/v1/cohorts/" + encodeURIComponent(id)),
+  createCohort: (data) => api.post("/v1/cohorts", data),
+  updateCohort: (id, data) => api.patch("/v1/cohorts/" + encodeURIComponent(id), data),
+  deleteCohort: (id) => api.delete("/v1/cohorts/" + encodeURIComponent(id)),
 };
 
 // ---------- class sessions ----------
