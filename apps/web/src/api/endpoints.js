@@ -20,7 +20,14 @@ export const authApi = {
 
 // ---------- catalog ----------
 export const catalogApi = {
-  listFaculties: () => api.get("/v1/faculties"),
+  // Phase B R1 Commit F (D62) — listSchools added. Existing listFaculties
+  // gains optional schoolId filter (additive — undefined arg behaves
+  // identically to the prior call shape).
+  listSchools: () => api.get("/v1/schools"),
+  listFaculties: ({ schoolId } = {}) =>
+    api.get(
+      "/v1/faculties" + (schoolId ? "?schoolId=" + encodeURIComponent(schoolId) : ""),
+    ),
   listDepartments: ({ facultyId } = {}) =>
     api.get(
       "/v1/departments" + (facultyId ? "?facultyId=" + encodeURIComponent(facultyId) : ""),
@@ -43,6 +50,51 @@ export const catalogApi = {
     api.get(
       "/v1/cohorts" + (programId ? "?programId=" + encodeURIComponent(programId) : ""),
     ),
+};
+
+// ---------- academic admin (Phase B R1 Commit F — D62) ----------
+//
+// Full CRUD across the 4-level Academic Hierarchy. Used by the new
+// admin pages /admin/schools, /admin/faculties, etc. (Commits G + H).
+// All mutations go through @AuditAction-decorated NestJS endpoints
+// and require admin role (server-side guarded; client just receives
+// 403 if a non-admin somehow reaches these pages).
+
+export const academicAdminApi = {
+  // --- Schools ---
+  listSchools: () => api.get("/v1/schools"),
+  getSchool: (id) => api.get("/v1/schools/" + encodeURIComponent(id)),
+  createSchool: (data) => api.post("/v1/schools", data),
+  updateSchool: (id, data) => api.patch("/v1/schools/" + encodeURIComponent(id), data),
+  deleteSchool: (id) => api.delete("/v1/schools/" + encodeURIComponent(id)),
+
+  // --- Faculties ---
+  listFaculties: ({ schoolId } = {}) =>
+    api.get("/v1/faculties" + (schoolId ? "?schoolId=" + encodeURIComponent(schoolId) : "")),
+  getFaculty: (id) => api.get("/v1/faculties/" + encodeURIComponent(id)),
+  createFaculty: (data) => api.post("/v1/faculties", data),
+  updateFaculty: (id, data) => api.patch("/v1/faculties/" + encodeURIComponent(id), data),
+  deleteFaculty: (id) => api.delete("/v1/faculties/" + encodeURIComponent(id)),
+
+  // --- Departments ---
+  listDepartments: ({ facultyId } = {}) =>
+    api.get("/v1/departments" + (facultyId ? "?facultyId=" + encodeURIComponent(facultyId) : "")),
+  getDepartment: (id) => api.get("/v1/departments/" + encodeURIComponent(id)),
+  createDepartment: (data) => api.post("/v1/departments", data),
+  updateDepartment: (id, data) => api.patch("/v1/departments/" + encodeURIComponent(id), data),
+  deleteDepartment: (id) => api.delete("/v1/departments/" + encodeURIComponent(id)),
+
+  // --- Programs ---
+  listPrograms: ({ departmentId, degreeLevel } = {}) => {
+    const q = [];
+    if (departmentId) q.push("departmentId=" + encodeURIComponent(departmentId));
+    if (degreeLevel) q.push("degreeLevel=" + encodeURIComponent(degreeLevel));
+    return api.get("/v1/programs" + (q.length ? "?" + q.join("&") : ""));
+  },
+  getProgram: (id) => api.get("/v1/programs/" + encodeURIComponent(id)),
+  createProgram: (data) => api.post("/v1/programs", data),
+  updateProgram: (id, data) => api.patch("/v1/programs/" + encodeURIComponent(id), data),
+  deleteProgram: (id) => api.delete("/v1/programs/" + encodeURIComponent(id)),
 };
 
 // ---------- class sessions ----------
