@@ -1309,6 +1309,45 @@ This pattern becomes the template for every future state-machine sub-R (StudentA
 
 **Source:** owner directive 2026-05-26 «Q1.a Q3.a Q4.a defaults accepted. Q2 override به Q2.b با instructorId deferred به R3».
 
+### D66 — R2 admin-academic chunk leak fix (3 iterations Path A→B→D)
+**Context:** Post-R2 Commits F-I bundle measurement revealed D61 Constraint #2 violation: admin-academic chunk grew 37 KB → 416 KB AND escalated from lazy to eager-preloaded on every anonymous visitor. Main index-*.js dropped 366→2 KB (shifted, not improved) because main now `import{T,c,f,h,b,m}from"./admin-academic-*.js"`.
+
+**Path A (commit `998ac20`):** `return undefined` for `_shared/*.tsx` → expected Vite default chunker would move shared primitives out. **Result: zero measurable change** (asset filenames bitwise-identical, Vite's default still hoisted _shared into admin-academic).
+
+**Path B (commit chain `bceg59dex`):** explicit 3-bucket split — admin-shared / admin-academic / vendors. **Result: admin-shared chunk created (4 KB) but BOTH admin-shared AND admin-academic STILL in modulepreload** on `/`, `/login`, `/programs`.
+
+**Path D (commit chain `bypsiunhb`):** drop admin grouping rule entirely; let Vite emit per-route chunks (one per admin page, matching R7.1 lazy-route pattern). **Result: PASS.** Main 366→379 KB (+13, under 50 KB budget); admin chunks split into 6 per-route files (SchoolsPage / FacultiesPage / DepartmentsPage / ProgramsPage / OfferingsPage / CohortsPage), each lazy-loaded only on admin nav, none preloaded on anon routes.
+
+**Root cause:** named chunk buckets become "attractive homes" for Vite's shared-symbol hoisting. Once admin-academic became the home for some minified utility symbol that main also references (likely a React.lazy/Suspense helper), Vite escalated admin-academic to an eager dependency of main → modulepreload on every page. Dropping the bucket = no shared-home = no escalation.
+
+**Hard lesson logged for Phase B+:** every sub-R that adds admin pages MUST report post-deploy bundle measurement in its review doc, AND must verify admin chunks are NOT in `<link rel=modulepreload>` on anon routes via `curl /` / `/login` / `/programs` HTML inspection.
+
+**Source:** D66 owner directive 2026-05-27 «Path A shrink admin-academic via refine manualChunks» + chain through Path B and Path D as fallbacks fired.
+
+### D67 — R2 D13 ack: Cohort → CourseOffering shipped + verified
+**Context:** Owner D13 manual smoke 2026-05-27 PASS on the 8-step R2 checklist. All assertions confirmed on real device:
+- `/admin/offerings` full CRUD + state transitions (legal SCHEDULED→OPEN→ACTIVE→COMPLETED ✅, illegal OPEN→SCHEDULED 400 with helpful message ✅)
+- `/admin/cohorts` Legacy banner with «پس از 2026-12-31 حذف می‌شود» + «← رفتن به دوره‌های ارائه‌شده» CTA
+- Dual-write soft-delete cascade verified (cohort soft-delete → linked offering also soft-deleted)
+- Drill chain offering → program → department → faculty → school breadcrumb working
+- Student access guard: no Offerings/Cohorts sidebar items, manual route attempt rejected (admin-only via Roles guard)
+- Phase A routes untouched (`/`, `/login`, `/dashboard`, `/classroom`)
+
+**Significance:** R2 is the first Phase B sub-R with all four:
+- MIGRATION_POLICY usage (§1 dual-write + §6 Sunset window)
+- State machine implementation (`OfferingStatus` with explicit ALLOWED_TRANSITIONS map)
+- D18 flow assertion (illegal-transition rejection + cascade soft-delete + dual-write trace)
+- D61 Constraint #2 verification (Path D bundle fix)
+
+**Precedent locked for R3+:**
+- Every state machine sub-R: ALLOWED_TRANSITIONS map in service layer (not controller) + D18 spec covering happy-path + illegal-transition + soft-delete-at-any-status
+- Every sub-R with admin pages: per-route chunking (no bucket grouping) + post-deploy bundle measurement
+- Every sub-R touching existing models: schema discovery BEFORE memo lock (Lesson #1 from R1's D63 + R2's pre-write inspection)
+
+**R2 closed.** R3 unblocked.
+
+**Source:** owner directive 2026-05-27 «R2 D13 PASS. owner manual smoke confirmed: [8 items] ... R3 memo شروع».
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)
