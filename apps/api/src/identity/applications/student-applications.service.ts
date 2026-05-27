@@ -13,7 +13,9 @@
 
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import type { AppStatus, StudentApplication } from "@prisma/client";
@@ -58,6 +60,8 @@ const STUDENT_APP_SELECT = {
 
 @Injectable()
 export class StudentApplicationsService {
+  private readonly logger = new Logger(StudentApplicationsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     // Phase B R3.b Commit D — ENROLLED side effect orchestrator.
@@ -203,5 +207,209 @@ export class StudentApplicationsService {
   // Re-exported so the spec can introspect the allowed graph.
   static getAllowedTransitions(): Record<AppStatus, AppStatus[]> {
     return ALLOWED_TRANSITIONS;
+  }
+
+  // =====================================================================
+  // Phase B R3.b Commit E (D71 Q8.a refinement) — public submission +
+  // SelfOrAdmin self-read + WITHDRAW.
+  // =====================================================================
+
+  /**
+   * Public idempotent submission. The `@Public()` + `@Throttle` decorators
+   * live on the controller; this method assumes the throttler has already
+   * approved the request.
+   *
+   * Idempotency per Q8.a: if a row with the same (tenantId,
+   * applicantEmail, programId) already exists (and is not soft-deleted),
+   * return it instead of creating a duplicate. Caller distinguishes via
+   * the `created` flag in the response so the HTTP layer can choose
+   * 201 (new) vs 200 (existing).
+   *
+   * Spam-flag side effect: after the create/return, count how many
+   * non-deleted submissions have arrived from this (tenantId,
+   * applicantEmail) in the last hour. If >3, queue a NotificationLog
+   * row with template "application.spam.suspected" so admin can filter
+   * the inbox.
+   */
+  async submitPublic(input: {
+    tenantId: string;
+    programId: string;
+    applicantFullName: string;
+    applicantEmail: string;
+    applicantPhone?: string;
+    applicantNationalId?: string;
+    applicantBio?: string;
+    actorUserId?: string | null;
+  }): Promise<{ application: StudentApplication; created: boolean }> {
+    const normalizedEmail = input.applicantEmail.toLowerCase();
+
+    // Verify the program exists in the tenant (cross-tenant guard).
+    const program = await this.prisma.program.findFirst({
+      where: { id: input.programId, tenantId: input.tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!program) {
+      throw new BadRequestException("program not found in tenant");
+    }
+
+    // Idempotency: existing non-deleted row → return it.
+    const existing = await this.prisma.studentApplication.findUnique({
+      where: {
+        tenantId_applicantEmail_programId: {
+          tenantId: input.tenantId,
+          applicantEmail: normalizedEmail,
+          programId: input.programId,
+        },
+      },
+    });
+
+    let application: StudentApplication;
+    let created = false;
+
+    if (existing) {
+      if (existing.deletedAt) {
+        // Soft-deleted row blocks re-application. Admin must explicitly
+        // restore (out of R3.b scope) before applicant can re-submit.
+        throw new BadRequestException(
+          "an earlier application for this applicant + program was soft-deleted; contact admin to restore or use a different program",
+        );
+      }
+      application = existing;
+    } else {
+      application = await this.prisma.studentApplication.create({
+        data: {
+          tenantId: input.tenantId,
+          programId: input.programId,
+          applicantFullName: input.applicantFullName,
+          applicantEmail: normalizedEmail,
+          applicantPhone: input.applicantPhone,
+          applicantNationalId: input.applicantNationalId,
+          applicantBio: input.applicantBio,
+          status: "SUBMITTED",
+          // If a logged-in user submitted, capture their id immediately.
+          userId: input.actorUserId ?? null,
+          createdBy: input.actorUserId ?? null,
+          updatedBy: input.actorUserId ?? null,
+        },
+      });
+      created = true;
+
+      // application.submitted notification stub.
+      await this.prisma.notificationLog.create({
+        data: {
+          tenantId: input.tenantId,
+          kind: "email",
+          template: "application.submitted",
+          targetEmail: normalizedEmail,
+          subject: "درخواست شما دریافت شد",
+          body:
+            `سلام ${input.applicantFullName}،\n` +
+            `درخواست تحصیلی شما با شناسه ${application.id} ثبت شد. ` +
+            `مدت بازبینی حدود ۱۴ روز است. در صورت تأیید، شما را از طریق ایمیل مطلع خواهیم کرد.\n\n— دیجی‌یونیورسیتی`,
+          studentApplicationId: application.id,
+          status: "queued",
+        },
+      });
+    }
+
+    // Q8.a spam-flag placeholder. Counts submissions from this email
+    // in the last hour; if >3, queue an admin-visible spam notification.
+    // The threshold + window are deliberately fuzzy — R-Notif will
+    // promote this into proper rate-limit + spam-detection logic.
+    await this.maybeFlagSpam(input.tenantId, normalizedEmail, application.id);
+
+    return { application, created };
+  }
+
+  private async maybeFlagSpam(
+    tenantId: string,
+    applicantEmail: string,
+    applicationId: string,
+  ): Promise<void> {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentCount = await this.prisma.studentApplication.count({
+      where: {
+        tenantId,
+        applicantEmail,
+        createdAt: { gte: oneHourAgo },
+      },
+    });
+    if (recentCount <= 3) return;
+
+    // Avoid duplicate spam-flag rows for the same hour-window.
+    const existingFlag = await this.prisma.notificationLog.findFirst({
+      where: {
+        tenantId,
+        template: "application.spam.suspected",
+        studentApplicationId: applicationId,
+      },
+    });
+    if (existingFlag) return;
+
+    await this.prisma.notificationLog.create({
+      data: {
+        tenantId,
+        kind: "in_app",
+        template: "application.spam.suspected",
+        subject: "احتمال spam در درخواست‌های ورودی",
+        body:
+          `بیش از ${recentCount} درخواست در یک ساعت اخیر از ${applicantEmail} دریافت شده است. ` +
+          `لطفاً برای بررسی، فیلتر spam را در /admin/applications اعمال کنید.`,
+        studentApplicationId: applicationId,
+        status: "queued",
+      },
+    });
+    this.logger.warn(
+      `spam suspected: tenant=${tenantId} email=${applicantEmail} count=${recentCount} application=${applicationId}`,
+    );
+  }
+
+  /**
+   * Self-read for /v1/applications/student/me. Returns the authenticated
+   * user's own application (matched by userId), or 404.
+   */
+  async getOwn(tenantId: string, userId: string) {
+    const row = await this.prisma.studentApplication.findFirst({
+      where: { tenantId, userId, deletedAt: null },
+      select: STUDENT_APP_SELECT,
+    });
+    if (!row) {
+      throw new NotFoundException("no student application for this user");
+    }
+    return row;
+  }
+
+  /**
+   * SelfOrAdmin WITHDRAW. The applicant who owns the application (matched
+   * by app.userId) can withdraw it; admins can withdraw on anyone's behalf.
+   * Throws 403 if a non-admin authenticated user tries to withdraw an
+   * application they don't own.
+   *
+   * The transition itself goes through the same ALLOWED_TRANSITIONS
+   * check (only legal from non-terminal states). On terminal apps
+   * (already ENROLLED/REJECTED/WITHDRAWN), throws 400 with the standard
+   * illegal-transition message.
+   */
+  async withdrawSelf(
+    tenantId: string,
+    actor: { userId: string; isAdmin: boolean },
+    applicationId: string,
+  ) {
+    const app = await this.prisma.studentApplication.findFirst({
+      where: { id: applicationId, tenantId, deletedAt: null },
+    });
+    if (!app) throw new NotFoundException("student application not found");
+
+    if (!actor.isAdmin) {
+      if (app.userId == null || app.userId !== actor.userId) {
+        throw new ForbiddenException(
+          "only the application owner or an admin may withdraw this application",
+        );
+      }
+    }
+
+    // Reuse the canonical transition path so state-machine validation +
+    // decidedAt/By stamping stay in one place.
+    return this.transition(tenantId, actor.userId, applicationId, "WITHDRAWN");
   }
 }

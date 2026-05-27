@@ -7,23 +7,38 @@
 // Verification PATCH endpoints land in Commit C.
 
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   Patch,
   Post,
   Query,
+  Res,
 } from "@nestjs/common";
-import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
+import { Throttle } from "@nestjs/throttler";
+import type { Response } from "express";
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
+import { Public } from "../../auth/decorators/public.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { AuditAction } from "../../audit/audit-action.decorator";
+import { PrismaService } from "../../prisma/prisma.service";
 import { StudentApplicationsService } from "./student-applications.service";
 
 const APP_STATUSES = [
@@ -52,9 +67,110 @@ class SetVerifiedDto {
   @IsOptional() @IsBoolean() verified?: boolean;
 }
 
+// Phase B R3.b Commit E — public submission DTO.
+//
+// `tenantSlug` is the only multi-tenant disambiguator the public POST
+// has — there's no JWT to extract tenantId from. Slug is resolved to
+// tenantId in the handler. Q8.a idempotency runs on (tenantId,
+// applicantEmail, programId).
+class SubmitStudentApplicationDto {
+  @IsString() @MinLength(2) @MaxLength(64) tenantSlug!: string;
+  @IsString() @MinLength(2) @MaxLength(64) programId!: string;
+  @IsString() @MinLength(2) @MaxLength(160) applicantFullName!: string;
+  @IsEmail() @MaxLength(160) applicantEmail!: string;
+  @IsOptional() @IsString() @MaxLength(40) applicantPhone?: string;
+  @IsOptional() @IsString() @MinLength(8) @MaxLength(20) applicantNationalId?: string;
+  @IsOptional() @IsString() @MaxLength(2000) applicantBio?: string;
+}
+
+// Q8.a rate-limit: 5 submissions per IP per hour. Genuine applicants
+// submit 1-2 times; 5/hr is generous + leaves headroom for fat-finger
+// retries.
+const SUBMIT_THROTTLE = {
+  default: { limit: 5, ttl: 60 * 60 * 1000 },
+};
+
 @Controller("applications/student")
 export class StudentApplicationsController {
-  constructor(private readonly service: StudentApplicationsService) {}
+  constructor(
+    private readonly service: StudentApplicationsService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  // ---------- Public submission (Q8.a refinement) ----------
+
+  /**
+   * Public submission. @Public() bypasses JwtAuthGuard; @Throttle caps
+   * at 5/IP/hour per Q8.a refinement. Idempotency on (tenantId,
+   * applicantEmail, programId) — same applicant + program returns the
+   * existing row with 200 (not 201).
+   *
+   * @AuditSkip per Phase-A R4 lint: this is a @Public() endpoint, so
+   * there's no authenticated actor to record. Spam-flag NotificationLog
+   * stub captures the abuse signal instead.
+   */
+  @Public()
+  @Throttle(SUBMIT_THROTTLE)
+  @Post()
+  async submit(
+    @Body() dto: SubmitStudentApplicationDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { slug: dto.tenantSlug },
+      select: { id: true, isActive: true },
+    });
+    if (!tenant || !tenant.isActive) {
+      throw new BadRequestException("tenant not found or inactive");
+    }
+    const result = await this.service.submitPublic({
+      tenantId: tenant.id,
+      programId: dto.programId,
+      applicantFullName: dto.applicantFullName,
+      applicantEmail: dto.applicantEmail,
+      applicantPhone: dto.applicantPhone,
+      applicantNationalId: dto.applicantNationalId,
+      applicantBio: dto.applicantBio,
+      actorUserId: null,
+    });
+    res.status(result.created ? HttpStatus.CREATED : HttpStatus.OK);
+    return { ...result.application, _idempotent: !result.created };
+  }
+
+  // ---------- Self-read + WITHDRAW (D69 SelfOrAdmin reuse) ----------
+
+  /**
+   * Own application. Returns 404 if the authenticated user has not yet
+   * submitted (or has linked through ENROLLED side effect creating a
+   * Student — at which point their original application row's userId is
+   * set, and /me finds it).
+   */
+  @Get("me")
+  async getOwn(@CurrentUser() user: AuthenticatedUser) {
+    return this.service.getOwn(user.tenantId, user.userId);
+  }
+
+  /**
+   * SelfOrAdmin WITHDRAW. Service-layer auth: app.userId === user.userId
+   * OR user has admin role. Decorator-based @SelfOrAdmin doesn't fit
+   * cleanly here because the target user id lives on the resource
+   * (looked up by id), not on the URL/body.
+   */
+  @Post(":id/withdraw")
+  @HttpCode(HttpStatus.OK)
+  @AuditAction("application.student.withdraw")
+  async withdraw(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+  ) {
+    return this.service.withdrawSelf(
+      user.tenantId,
+      { userId: user.userId, isAdmin: user.roles.includes("admin") },
+      id,
+    );
+  }
+
+  // ---------- Admin CRUD (Commit B) ----------
 
   @Get()
   @Roles("admin")

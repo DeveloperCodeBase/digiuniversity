@@ -13,10 +13,12 @@
 
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
-import type { AppStatus, InstructorApplication } from "@prisma/client";
+import type { AppStatus, InstructorApplication, InstructorRank } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import { ApplicationEnrollmentService } from "./application-enrollment.service";
@@ -62,6 +64,8 @@ const INSTRUCTOR_APP_SELECT = {
 
 @Injectable()
 export class InstructorApplicationsService {
+  private readonly logger = new Logger(InstructorApplicationsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly enrollment: ApplicationEnrollmentService,
@@ -189,5 +193,171 @@ export class InstructorApplicationsService {
 
   static getAllowedTransitions(): Record<AppStatus, AppStatus[]> {
     return ALLOWED_TRANSITIONS;
+  }
+
+  // =====================================================================
+  // Phase B R3.b Commit E (D71 Q8.a refinement) — public submission +
+  // SelfOrAdmin self-read + WITHDRAW (parallel to StudentApplicationsService).
+  // =====================================================================
+
+  async submitPublic(input: {
+    tenantId: string;
+    departmentId?: string;
+    preferredDepartmentSlug?: string;
+    applicantFullName: string;
+    applicantEmail: string;
+    applicantPhone?: string;
+    applicantNationalId?: string;
+    applicantBio?: string;
+    desiredRank?: InstructorRank;
+    expertise?: string[];
+    cvUrl?: string;
+    actorUserId?: string | null;
+  }): Promise<{ application: InstructorApplication; created: boolean }> {
+    const normalizedEmail = input.applicantEmail.toLowerCase();
+
+    // If departmentId provided, verify it exists in tenant.
+    if (input.departmentId) {
+      const dept = await this.prisma.department.findFirst({
+        where: { id: input.departmentId, tenantId: input.tenantId, deletedAt: null },
+        select: { id: true },
+      });
+      if (!dept) {
+        throw new BadRequestException("departmentId not found in tenant");
+      }
+    }
+
+    // Idempotency: (tenantId, applicantEmail) UNIQUE — single instructor app
+    // per applicant per tenant.
+    const existing = await this.prisma.instructorApplication.findUnique({
+      where: {
+        tenantId_applicantEmail: {
+          tenantId: input.tenantId,
+          applicantEmail: normalizedEmail,
+        },
+      },
+    });
+
+    let application: InstructorApplication;
+    let created = false;
+
+    if (existing) {
+      if (existing.deletedAt) {
+        throw new BadRequestException(
+          "an earlier instructor application for this applicant was soft-deleted; contact admin to restore",
+        );
+      }
+      application = existing;
+    } else {
+      application = await this.prisma.instructorApplication.create({
+        data: {
+          tenantId: input.tenantId,
+          departmentId: input.departmentId,
+          preferredDepartmentSlug: input.preferredDepartmentSlug,
+          applicantFullName: input.applicantFullName,
+          applicantEmail: normalizedEmail,
+          applicantPhone: input.applicantPhone,
+          applicantNationalId: input.applicantNationalId,
+          applicantBio: input.applicantBio,
+          desiredRank: input.desiredRank,
+          expertise: input.expertise ?? [],
+          cvUrl: input.cvUrl,
+          status: "SUBMITTED",
+          userId: input.actorUserId ?? null,
+          createdBy: input.actorUserId ?? null,
+          updatedBy: input.actorUserId ?? null,
+        },
+      });
+      created = true;
+
+      await this.prisma.notificationLog.create({
+        data: {
+          tenantId: input.tenantId,
+          kind: "email",
+          template: "application.submitted",
+          targetEmail: normalizedEmail,
+          subject: "درخواست همکاری شما دریافت شد",
+          body:
+            `سلام ${input.applicantFullName}،\n` +
+            `درخواست همکاری شما به‌عنوان مدرس با شناسه ${application.id} ثبت شد. ` +
+            `پس از بررسی، با شما تماس خواهیم گرفت.\n\n— دیجی‌یونیورسیتی`,
+          instructorApplicationId: application.id,
+          status: "queued",
+        },
+      });
+    }
+
+    await this.maybeFlagSpam(input.tenantId, normalizedEmail, application.id);
+    return { application, created };
+  }
+
+  private async maybeFlagSpam(
+    tenantId: string,
+    applicantEmail: string,
+    applicationId: string,
+  ): Promise<void> {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentCount = await this.prisma.instructorApplication.count({
+      where: { tenantId, applicantEmail, createdAt: { gte: oneHourAgo } },
+    });
+    if (recentCount <= 3) return;
+
+    const existingFlag = await this.prisma.notificationLog.findFirst({
+      where: {
+        tenantId,
+        template: "application.spam.suspected",
+        instructorApplicationId: applicationId,
+      },
+    });
+    if (existingFlag) return;
+
+    await this.prisma.notificationLog.create({
+      data: {
+        tenantId,
+        kind: "in_app",
+        template: "application.spam.suspected",
+        subject: "احتمال spam در درخواست‌های ورودی (instructor)",
+        body:
+          `بیش از ${recentCount} درخواست همکاری در یک ساعت اخیر از ${applicantEmail} دریافت شده است. ` +
+          `لطفاً بررسی کنید.`,
+        instructorApplicationId: applicationId,
+        status: "queued",
+      },
+    });
+    this.logger.warn(
+      `spam suspected (instructor): tenant=${tenantId} email=${applicantEmail} count=${recentCount}`,
+    );
+  }
+
+  async getOwn(tenantId: string, userId: string) {
+    const row = await this.prisma.instructorApplication.findFirst({
+      where: { tenantId, userId, deletedAt: null },
+      select: INSTRUCTOR_APP_SELECT,
+    });
+    if (!row) {
+      throw new NotFoundException("no instructor application for this user");
+    }
+    return row;
+  }
+
+  async withdrawSelf(
+    tenantId: string,
+    actor: { userId: string; isAdmin: boolean },
+    applicationId: string,
+  ) {
+    const app = await this.prisma.instructorApplication.findFirst({
+      where: { id: applicationId, tenantId, deletedAt: null },
+    });
+    if (!app) throw new NotFoundException("instructor application not found");
+
+    if (!actor.isAdmin) {
+      if (app.userId == null || app.userId !== actor.userId) {
+        throw new ForbiddenException(
+          "only the application owner or an admin may withdraw this application",
+        );
+      }
+    }
+
+    return this.transition(tenantId, actor.userId, applicationId, "WITHDRAWN");
   }
 }
