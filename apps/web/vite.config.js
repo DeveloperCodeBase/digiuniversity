@@ -114,20 +114,26 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Phase B R2 Commit J fix4 (D66) — Path B fallback after Path A
-          // measurement showed no chunking change (Vite's default chunker
-          // still hoisted _shared into admin-academic when undefined was
-          // returned). Path B forces explicit 3-bucket split:
-          //   /pages/admin/_shared/* → admin-shared (small, lazy-loaded
-          //     only when an admin page mounts)
-          //   /pages/admin/* (other) → admin-academic (the 6 admin pages)
-          //   main bundle no longer imports anything from admin-* chunks
-          // The two admin chunks are still lazy (React.lazy() boundaries
-          // in router.tsx); admin-shared loads in parallel with whichever
-          // admin page is being mounted.
-          if (id.includes("/pages/admin/_shared/")) return "admin-shared";
-          if (id.includes("/pages/admin/")) return "admin-academic";
-          // Vendor buckets (pre-Phase-B): react + radix.
+          // Phase B R2 Commit J fix5 (D66) — Path D fallback after both
+          // Path A (return undefined for _shared) and Path B (explicit
+          // admin-shared bucket) failed to remove admin chunks from
+          // <link rel="modulepreload"> on anonymous routes.
+          //
+          // Diagnosis: Vite hoisted minified utility symbols (T, c, i, b
+          // — likely React/Suspense helpers) into admin-academic because
+          // the manualChunks rule grouped all admin pages into one bucket
+          // and made them an attractive home for shared modules. Main
+          // bundle eagerly imports those symbols → admin-academic becomes
+          // an eager dependency → preload on every page.
+          //
+          // Path D: drop the admin grouping rule entirely. Each admin
+          // page resolves to its own per-route chunk (Vite's default
+          // when no manualChunks override), matching every other R7.1
+          // lazy route (Tutor, Catalog, Dashboard, etc.) which were
+          // confirmed lazy-only. Trade-off: 6 admin chunks instead of
+          // 1-2, but each ~10-20 KB and none preloaded on anon routes.
+          //
+          // Vendor buckets preserved (small, eagerly used by main).
           if (
             id.includes("/node_modules/react/") ||
             id.includes("/node_modules/react-dom/") ||
@@ -138,10 +144,8 @@ export default defineConfig({
           if (id.includes("/node_modules/@radix-ui/")) return "radix-vendor";
           return undefined;
         },
-        // Prior object-form (pre-Phase-B-R1) is replaced by the function
-        // above. Function form is required because object form can't
-        // express "all files under /pages/admin/" without enumerating
-        // each module path.
+        // Prior object-form (pre-Phase-B-R1) replaced by the function
+        // above. Function form is required for path-based bucket rules.
       },
     },
   },
