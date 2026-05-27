@@ -114,18 +114,18 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Phase B R2 Commit J fix3 (D66) — Path A surgical fix.
-          // Original R1 rule "any /pages/admin/* → admin-academic" caused
-          // Vite to hoist _shared primitives (CrudDialog/ConfirmDelete/
-          // FormField) into the admin chunk AND make main eager-import
-          // from it (modulepreload), forcing 416 KB on every anonymous
-          // visitor (D61 Constraint #2 violation).
-          // Fix: exclude _shared from the admin-academic bucket so it
-          // falls through to Vite's default chunker. Vite then places
-          // _shared wherever it's optimal (usually merged into main
-          // since it's small; or split if size warrants). Either way,
-          // admin-academic is back to admin-page-only and lazy-loaded.
-          if (id.includes("/pages/admin/_shared/")) return undefined;
+          // Phase B R2 Commit J fix4 (D66) — Path B fallback after Path A
+          // measurement showed no chunking change (Vite's default chunker
+          // still hoisted _shared into admin-academic when undefined was
+          // returned). Path B forces explicit 3-bucket split:
+          //   /pages/admin/_shared/* → admin-shared (small, lazy-loaded
+          //     only when an admin page mounts)
+          //   /pages/admin/* (other) → admin-academic (the 6 admin pages)
+          //   main bundle no longer imports anything from admin-* chunks
+          // The two admin chunks are still lazy (React.lazy() boundaries
+          // in router.tsx); admin-shared loads in parallel with whichever
+          // admin page is being mounted.
+          if (id.includes("/pages/admin/_shared/")) return "admin-shared";
           if (id.includes("/pages/admin/")) return "admin-academic";
           // Vendor buckets (pre-Phase-B): react + radix.
           if (
