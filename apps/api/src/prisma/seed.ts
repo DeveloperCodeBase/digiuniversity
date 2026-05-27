@@ -237,37 +237,78 @@ async function main(): Promise<void> {
   // are no-ops once the demo content exists.
   console.log(`[seed] ensuring demo university structure`);
 
-  const faculty = await prisma.faculty.upsert({
-    where: { tenantId_slug: { tenantId: tenant.id, slug: "engineering" } },
-    update: {},
+  // Phase B R1 (D63) — School sits above Faculty. Seed one demo School so
+  // the existing engineering Faculty has a parent. Idempotent: upsert keyed
+  // on (tenantId, slug). Re-runs are no-ops.
+  const school = await prisma.school.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "stem" } },
+    update: {
+      nameEn: "School of Science, Technology, Engineering & Math",
+      shortCode: "STEM",
+    },
     create: {
       tenantId: tenant.id,
+      slug: "stem",
+      nameFa: "دانشکده‌ی علوم، فناوری، مهندسی و ریاضی",
+      nameEn: "School of Science, Technology, Engineering & Math",
+      shortCode: "STEM",
+      description: "دانشکده‌ی پایه‌ای رشته‌های فنی-مهندسی و علوم",
+      sortOrder: 10,
+    },
+  });
+
+  const faculty = await prisma.faculty.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "engineering" } },
+    // Phase B R1 (D63) — update path backfills the new additive columns
+    // on existing seeded Faculty row (idempotent across reseeds).
+    update: {
+      schoolId: school.id,
+      nameEn: "Faculty of Engineering",
+      shortCode: "ENG",
+    },
+    create: {
+      tenantId: tenant.id,
+      schoolId: school.id,
       slug: "engineering",
       name: "دانشکده مهندسی",
+      nameEn: "Faculty of Engineering",
+      shortCode: "ENG",
       description: "Faculty of Engineering",
     },
   });
 
   const department = await prisma.department.upsert({
     where: { tenantId_slug: { tenantId: tenant.id, slug: "computer-science" } },
-    update: {},
+    // Phase B R1 (D63) — backfill nameEn + shortCode on existing seed.
+    update: {
+      nameEn: "Department of Computer Science",
+      shortCode: "CS",
+    },
     create: {
       tenantId: tenant.id,
       facultyId: faculty.id,
       slug: "computer-science",
       name: "علوم کامپیوتر",
+      nameEn: "Department of Computer Science",
+      shortCode: "CS",
       description: "Department of Computer Science",
     },
   });
 
   const program = await prisma.program.upsert({
     where: { tenantId_slug: { tenantId: tenant.id, slug: "bsc-cs" } },
-    update: {},
+    // Phase B R1 (D63) — backfill nameEn + shortCode on existing seed.
+    update: {
+      nameEn: "B.Sc. in Computer Science",
+      shortCode: "BSC-CS",
+    },
     create: {
       tenantId: tenant.id,
       departmentId: department.id,
       slug: "bsc-cs",
       name: "کارشناسی علوم کامپیوتر",
+      nameEn: "B.Sc. in Computer Science",
+      shortCode: "BSC-CS",
       degreeLevel: "bachelor",
       durationSemesters: 8,
     },

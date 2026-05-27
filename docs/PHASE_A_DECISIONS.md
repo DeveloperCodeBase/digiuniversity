@@ -1251,3 +1251,52 @@ R1 adds 4 admin pages + 4 shared components + 4 NestJS modules. To prevent main-
 R1 memo will be edited to embed the 2 reminders as binding scope.
 
 **Source:** owner directive 2026-05-26 «memo OK، شروع R0.5» + 2 explicit Phase A retrospective reminders.
+
+### D62 — R0.5 closed, R1 starts
+**Context:** Owner ack'd `docs/MIGRATION_POLICY.md` (commit `3229758`, 178 LOC). Doc locked, R0.5 sub-R formally closes, R1 begins.
+
+**R0.5 deliverables (locked):**
+- `docs/MIGRATION_POLICY.md` v1.0 — 12 sections (§0 Quick Decision Tree + §1-§11), 178 LOC (3 over revised target of 175, well under 200 flag threshold). Concrete examples from D44, R1, R2.
+
+**R1 unblocks now.** Workflow per memo (atomic commits A-K) + binding constraints per D61 (workflow discipline + performance budget < 50 KB main bundle delta).
+
+**First action:** Commit A — Prisma schema (4 models + 4 enums + indexes) + migration SQL + seed.
+
+**Source:** owner directive 2026-05-26 «MIGRATION_POLICY OK، R0.5 ببند، R1 شروع».
+
+### D63 — Q4.a interpretation: spirit not literal (Path A); R1 Commit A scope locked
+**Context:** Pre-Commit-A discovery: memo assumed all 4 levels greenfield, but only `School` is new. `Faculty / Department / Program` already exist in `apps/api/prisma/schema.prisma` (Phase A B.1a-era scaffolding, lines 177-247). The existing models use single-column `name`, conflicting with the locked Q4.a default (dual `nameFa` + `nameEn`).
+
+**Owner decision (per Path A proposed in pre-Commit-A ping):**
+- **Q4.a interpretation = «dual-language available» (spirit), NOT «rename name to nameFa» (literal).**
+- Implementation per MIGRATION_POLICY §2 (greenfield) + §4 (additive) — no §5 rename pattern, no multi-sprint chain.
+
+**Mapping per model:**
+
+| Model | State | R1 Commit A action |
+|---|---|---|
+| `School` | NEW (not present in schema) | Greenfield (§2): create model with `tenantId`, `slug`, `nameFa`, `nameEn?`, `shortCode?`, `description?`, soft-delete + audit fields, `faculties` relation |
+| `Faculty` | EXISTS | Additive (§4): + `schoolId?` (nullable FK), + `nameEn?`, + `shortCode?`. Existing `name` column untouched. |
+| `Department` | EXISTS | Additive (§4): + `nameEn?`, + `shortCode?` |
+| `Program` | EXISTS | Additive (§4): + `nameEn?`, + `shortCode?` |
+
+**Admin UI ergonomics (decided here, implemented in Commits G+H):**
+- UI labels: existing `name` field labeled «نام فارسی»; new `nameEn` labeled «نام انگلیسی». DB schema unchanged.
+- For `School` (greenfield): UI labels are «نام فارسی» on `nameFa` + «نام انگلیسی» on `nameEn`. Schema uses both columns natively.
+
+**Owner rationale (verbatim from directive):**
+1. Q4.a spirit (dual-language available) achievable via Path A without chain rename.
+2. Phase A precedent: dormant `University.nameFa` + `University.nameEn` (per D44) shows the same hybrid pattern works.
+3. R-Landing v1 catastrophe lesson: literal interpretation that explodes scope = bad; spirit interpretation with minimal-disruption path = good.
+4. MIGRATION_POLICY §4 (additive) defines the safe path — this is the first practical usage of the policy doc.
+
+**Scope clarification, not scope creep.** Q4.a remains valid as a locked decision; D63 only formalizes which interpretation applies given the schema discovery.
+
+**Commit A end-state owner specified:**
+- Schema updated (School new + 3 additive columns × 3 models)
+- Migration SQL generated/written + style-matched to Phase A migrations
+- Seed updated (1 sample School + backfill existing Faculty.schoolId)
+- 26 other models referencing Faculty/Department/Program: **untouched** (Faculty.id stable; new columns are nullable additions)
+- Workflow per D61 unchanged: full memo→ack→code→spec→deploy→D29→D13→close applies to **whole R1**, not per-commit. Owner reserves intermediate-review rights at atomic transitions.
+
+**Source:** owner directive 2026-05-26 «Path A شروع» with 4-point rationale.

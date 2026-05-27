@@ -33,6 +33,7 @@ model Tenant {
   refreshTokens   RefreshToken[]
   aiInteractions  AiInteractionLog[]
   auditLogs       AuditLog[]
+  schools         School[]
   faculties       Faculty[]
   departments     Department[]
   programs        Program[]
@@ -174,12 +175,51 @@ model RefreshToken {
 // the audit fields (`createdAt`, `updatedAt`, `createdBy`, `updatedBy`)
 // and a nullable `deletedAt` for soft delete — see docs/ADRs/0005.
 
+// Phase B R1 (D63) — added BEFORE Faculty so the FK target is declared first.
+// «دانشکده» / "School" sits one level above Faculty in the Academic Hierarchy:
+// School → Faculty → Department → Program → (Course | Cohort).
+// All fields except `nameFa` are nullable so existing Faculty rows can backfill
+// schoolId at admin's pace (or stay null = "not yet assigned").
+model School {
+  id          String    @id @default(cuid())
+  tenantId    String
+  slug        String
+  nameFa      String
+  nameEn      String?
+  shortCode   String?
+  description String?
+  iconName    String?
+  sortOrder   Int       @default(0)
+  charterDate DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  faculties Faculty[]
+
+  @@unique([tenantId, slug])
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@index([deletedAt])
+}
+
 model Faculty {
   id          String    @id @default(cuid())
   tenantId    String
   slug        String
   name        String
   description String?
+
+  // Phase B R1 (D63) — additive Q4.a "spirit" columns (MIGRATION_POLICY §4).
+  // `name` column above stays as the Persian source-of-truth (UI label
+  // «نام فارسی»). `nameEn` is the optional English mirror.
+  nameEn    String?
+  shortCode String?
+  schoolId  String?   // additive FK; existing rows backfill at admin's pace
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -188,10 +228,12 @@ model Faculty {
   updatedBy String?
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  school      School?      @relation(fields: [schoolId], references: [id])
   departments Department[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
+  @@index([schoolId])
   @@index([deletedAt])
 }
 
@@ -202,6 +244,10 @@ model Department {
   slug        String
   name        String
   description String?
+
+  // Phase B R1 (D63) — additive Q4.a "spirit" columns.
+  nameEn    String?
+  shortCode String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -228,6 +274,10 @@ model Program {
   description       String?
   degreeLevel       String    // "bachelor" | "master" | "phd" | "certificate"
   durationSemesters Int?
+
+  // Phase B R1 (D63) — additive Q4.a "spirit" columns.
+  nameEn    String?
+  shortCode String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
