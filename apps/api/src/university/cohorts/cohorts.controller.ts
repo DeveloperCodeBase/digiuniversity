@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -19,6 +20,7 @@ import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
+import { LegacySyncService } from "./legacy-sync.service";
 
 class CreateCohortDto {
   @IsString() @MinLength(2) @MaxLength(64) programId!: string;
@@ -38,9 +40,27 @@ class ListCohortsQueryDto {
   @IsOptional() @IsString() programId?: string;
 }
 
+// Phase B R2 Commit C — Sunset + Deprecation headers per
+// MIGRATION_POLICY §6. The deprecation window starts now; the drop
+// gate (per §5 stage 3) waits for 7 consecutive days of zero
+// MigrationSyncLog rows with `action: create` from the Cohort side
+// AND zero direct reads measured in access logs. Earliest drop date
+// (per §6 ≥4 sprints rule) is 2026-12-31.
+const SUNSET_HEADER = "Wed, 31 Dec 2026 23:59:59 GMT";
+const DEPRECATION_HEADER = "true";
+const LINK_HEADER = '</v1/offerings>; rel="successor-version"';
+
 @Controller("cohorts")
+// Apply deprecation headers to every endpoint in this controller.
+// Frontend + external integrations get an explicit signal to migrate.
+@Header("Sunset", SUNSET_HEADER)
+@Header("Deprecation", DEPRECATION_HEADER)
+@Header("Link", LINK_HEADER)
 export class CohortsController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly legacySync: LegacySyncService,
+  ) {}
 
   @Get()
   async list(
@@ -61,6 +81,7 @@ export class CohortsController {
         startDate: true,
         endDate: true,
         programId: true,
+        upgradedToOfferingId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -87,7 +108,7 @@ export class CohortsController {
     if (!program) {
       throw new BadRequestException("program does not exist in this tenant");
     }
-    return this.prisma.cohort.create({
+    const cohort = await this.prisma.cohort.create({
       data: {
         tenantId: user.tenantId,
         programId: dto.programId,
@@ -99,6 +120,11 @@ export class CohortsController {
         updatedBy: user.userId,
       },
     });
+    // Dual-write: mirror to CourseOffering. Fire-and-await but the
+    // service swallows errors so the cohort write isn't blocked.
+    await this.legacySync.onCohortCreated(cohort, user.userId);
+    // Re-read so the response includes upgradedToOfferingId set by sync.
+    return this.prisma.cohort.findUnique({ where: { id: cohort.id } });
   }
 
   @Roles("admin")
@@ -116,7 +142,7 @@ export class CohortsController {
     if (Object.keys(dto).length === 0) {
       throw new BadRequestException("nothing to update");
     }
-    return this.prisma.cohort.update({
+    const updated = await this.prisma.cohort.update({
       where: { id },
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
@@ -125,6 +151,8 @@ export class CohortsController {
         updatedBy: user.userId,
       },
     });
+    await this.legacySync.onCohortUpdated(updated, user.userId);
+    return updated;
   }
 
   @Roles("admin")
@@ -140,6 +168,7 @@ export class CohortsController {
       where: { id },
       data: { deletedAt: new Date(), updatedBy: user.userId },
     });
+    await this.legacySync.onCohortDeleted(existing, user.userId);
     return { deleted: true };
   }
 }
