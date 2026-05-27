@@ -1264,6 +1264,51 @@ R1 memo will be edited to embed the 2 reminders as binding scope.
 
 **Source:** owner directive 2026-05-26 «MIGRATION_POLICY OK، R0.5 ببند، R1 شروع».
 
+### D65 — R2 Q-answers locked with Q2 modification (instructorId deferred to R3)
+**Context:** Owner reviewed `PHASE_B_R2_MEMO.md` (commit `88ffc2d`) and ack'd Q1.a + Q3.a + Q4.a as defaults; Q2 accepted as Q2.b («richer offering with optional fields») **with one modification**: `instructorId` deferred to R3, where the Identity track (Profile/Student/Instructor models) lands.
+
+**Locked decisions:**
+- **Q1.a ✅** — Cohort kept alive with «Legacy» banner; both `/admin/cohorts` + `/admin/offerings` ship in R2 admin UI.
+- **Q2.b (modified) ✅** — CourseOffering includes `capacity`, `mode` (enum), `status` (enum). **NO `instructorId`** (deferred to R3). Owner rationale:
+  - `capacity` + `mode` are primitives, ~5 LOC each, no validation weight.
+  - `instructorId` realistically needs User FK + role validation + tenant scope + edge cases = 30–50 LOC, not the 5–10 the memo guessed.
+  - R3 identity-track will define instructor structure (InstructorProfile entity; possibly `instructorIds[]` for team-taught). Adding `instructorId` now = likely refactor in R3.
+  - Defer = R3 wires instructor with full architecture knowledge.
+- **Q3.a ✅** — Per-tenant tenancy on CourseOffering, consistent with R1 + Phase A precedent.
+- **Q4.a ✅** — Dual-language `nameFa` + `nameEn` columns (Path A spirit per D63), same as R1.
+
+**Locked scope (post-Q2 modification):**
+- CourseOffering fields: `id, tenantId, programId, slug, nameFa, nameEn, shortCode, startDate, endDate, capacity (Int?), mode (OfferingMode enum), status (OfferingStatus enum), legacyCohortId, audit + soft-delete fields`. **No `instructorId`.**
+- New enums: `OfferingStatus { SCHEDULED, OPEN, ACTIVE, COMPLETED, CANCELED }` + `OfferingMode { SYNCHRONOUS, ASYNCHRONOUS, HYBRID }`
+- Additive: `Enrollment.offeringId` (nullable, dual-source with `cohortId`)
+- Additive: `Cohort.upgradedToOfferingId` (nullable, tracking link)
+- New model: `MigrationSyncLog` (dual-write audit trail per MIGRATION_POLICY §1)
+- Dual-write interceptor on Cohort + CourseOffering mutations
+- `Sunset` + `Deprecation` headers on legacy `/v1/cohorts` per MIGRATION_POLICY §6
+- Admin UI: keep `/admin/cohorts` (with «Legacy» banner) + new `/admin/offerings`
+
+**LOC estimate revised:** ~1,850 LOC (down from 1,880; -30 LOC from instructor service+validation+test deferral).
+**Timeline:** unchanged 5-7 days (instructorId small overall impact).
+
+**Two reminders per Phase A retrospective (binding for R2, like D61 was for R1):**
+
+**Reminder 1 — D18 flow assertion is critical.** R2 is the first SERIOUS state machine in Phase B (`OfferingStatus` transitions). The Commit I spec MUST cover:
+- Happy-path full transition (SCHEDULED → OPEN → ACTIVE → COMPLETED).
+- Illegal transition rejected (e.g., ACTIVE → SCHEDULED, COMPLETED → OPEN).
+- Soft-delete works at any status (allowed from any state).
+- Status-conditioned visibility (e.g., enrollment open only when OPEN).
+This pattern becomes the template for every future state-machine sub-R (StudentApplication, InstructorApplication, etc.).
+
+**Reminder 2 — Admin chunk size watch.** Current `admin-academic-*.js` chunk is 37 KB (post-R1). R2 expected +10–15 KB → ~50 KB. Threshold for proactive ping = 55 KB. If R2 commits trend toward that, ping owner (not stop) to discuss admin-chunk splitting strategy (e.g., separate `admin-offerings` bucket for R3+ chunks). Main `index-*.js` bundle delta still bounded < 50 KB per D61 Constraint #2.
+
+**Execution sequence (post-this-decision):**
+1. **MEMO UPDATE** — refactor `PHASE_B_R2_MEMO.md` to lock the answers + instructorId deferral note.
+2. **R2 implementation starts** with Commit A per memo (Prisma schema + migration + seed + MigrationSyncLog).
+3. Atomic commits A-J per memo. Workflow per D61 (no skip).
+4. Single deploy at end of A-E batch (post-Commit-E e2e tests). Then F-J. Then single deploy at end of R2.
+
+**Source:** owner directive 2026-05-26 «Q1.a Q3.a Q4.a defaults accepted. Q2 override به Q2.b با instructorId deferred به R3».
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)

@@ -42,6 +42,8 @@ model Tenant {
   lessons         Lesson[]
   cohorts         Cohort[]
   enrollments     Enrollment[]
+  courseOfferings    CourseOffering[]
+  migrationSyncLogs  MigrationSyncLog[]
   classSessions   ClassSession[]
   recordings      Recording[]
   attendance      Attendance[]
@@ -285,10 +287,11 @@ model Program {
   createdBy String?
   updatedBy String?
 
-  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  courses    Course[]
-  cohorts    Cohort[]
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department  Department        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  courses     Course[]
+  cohorts     Cohort[]
+  offerings   CourseOffering[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -381,6 +384,12 @@ model Cohort {
   startDate DateTime?
   endDate   DateTime?
 
+  // Phase B R2 (D65) — additive backlink to the CourseOffering this
+  // Cohort upgraded into (if any). Nullable for backward compat;
+  // populated by the dual-write interceptor on first sync. Per
+  // MIGRATION_POLICY §3 (existing-model modification, additive lane).
+  upgradedToOfferingId String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -390,11 +399,15 @@ model Cohort {
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
+  // Cohort.upgradedToOfferingId → CourseOffering.id (no Prisma relation
+  // declaration to avoid a tight FK constraint during the dual-write
+  // window; the interceptor maintains referential integrity in app).
 
   @@unique([tenantId, slug])
   @@index([tenantId])
   @@index([programId])
   @@index([deletedAt])
+  @@index([upgradedToOfferingId])
 }
 
 model Enrollment {
@@ -403,6 +416,10 @@ model Enrollment {
   userId      String
   courseId    String
   cohortId    String?
+  // Phase B R2 (D65) — additive dual-source FK to CourseOffering.
+  // Nullable so existing enrollments (Cohort-only) keep working.
+  // Set-null on offering soft-delete so the enrollment row survives.
+  offeringId  String?
   status      String    @default("active") // "active" | "completed" | "dropped" | "withdrawn"
   enrolledAt  DateTime  @default(now())
   completedAt DateTime?
@@ -413,15 +430,17 @@ model Enrollment {
   createdBy String?
   updatedBy String?
 
-  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  cohort Cohort? @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  cohort   Cohort?         @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  offering CourseOffering? @relation(fields: [offeringId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, userId, courseId])
   @@index([tenantId])
   @@index([userId])
   @@index([courseId])
+  @@index([offeringId])
   @@index([deletedAt])
 }
 
@@ -824,4 +843,86 @@ model AuditLog {
   @@index([action])
   @@index([subject])
   @@index([requestId])
+}
+
+// ---------- Phase B R2 (D65) — CourseOffering + dual-write infra ----------
+//
+// CourseOffering is the modern replacement for Cohort. Both ship in
+// parallel during the dual-write window per MIGRATION_POLICY §3 + §5;
+// a 4-sprint Sunset window precedes Cohort removal. The interceptor in
+// `apps/api/src/university/course-offerings/legacy-sync.service.ts`
+// keeps Cohort.upgradedToOfferingId + Enrollment.offeringId in sync.
+// instructorId DEFERRED to R3 (Identity track) per D65 Q2 modification.
+
+enum OfferingStatus {
+  SCHEDULED
+  OPEN
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum OfferingMode {
+  SYNCHRONOUS
+  ASYNCHRONOUS
+  HYBRID
+}
+
+model CourseOffering {
+  id             String         @id @default(cuid())
+  tenantId       String
+  programId      String
+  slug           String
+  nameFa         String
+  nameEn         String?
+  shortCode      String?
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  capacity       Int?
+  mode           OfferingMode   @default(SYNCHRONOUS)
+  status         OfferingStatus @default(SCHEDULED)
+  /// Cohort.id this offering was upgraded FROM, if any. Populated by
+  /// the dual-write interceptor on first migration. Nullable for
+  /// greenfield offerings that never had a Cohort predecessor.
+  legacyCohortId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status])
+  @@index([programId])
+  @@index([legacyCohortId])
+  @@index([deletedAt])
+}
+
+// MigrationSyncLog — append-only audit trail of dual-write events.
+// Every Cohort↔CourseOffering sync writes a row here so the drop
+// gate (7 consecutive days of zero legacy traffic) can be measured.
+// Per MIGRATION_POLICY §1.
+model MigrationSyncLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  source    String   // "Cohort" | "CourseOffering"
+  target    String   // mirror of source for the other direction
+  rowId     String   // source-side row id
+  targetId  String?  // newly-created or matched target row id
+  action    String   // "create" | "update" | "delete" | "backfill"
+  notes     String?
+  syncedAt  DateTime @default(now())
+  syncedBy  String?  // user id who triggered, or "system" for backfills
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, syncedAt])
+  @@index([source, syncedAt])
+  @@index([rowId])
 }

@@ -2,9 +2,35 @@
 
 **Author:** Phase B post-R1-D13 (D64)
 **Date:** 2026-05-26
-**Status:** ⏳ DRAFT — awaiting owner ack + Q1-Q4 answers before code
+**Status:** 🔒 **LOCKED per D65** — owner ack received; instructorId deferred to R3 (see below)
 **Workflow:** memo → owner ack → code → spec → deploy → D29 pre-smoke → D13 owner smoke → close (D61 Constraint #1)
 **Compass Roadmap reference:** §Phase B — Academic Hierarchy + Onboarding (~3 weeks). Specifically: "Add `CourseOffering` … Dual-write interceptor per migration."
+
+## 🔒 Locked answers (D65)
+
+Owner ack 2026-05-26: **«Q1.a Q3.a Q4.a defaults accepted. Q2 override به Q2.b با instructorId deferred به R3»**.
+
+| Q | Decision | Locked behavior |
+|---|---|---|
+| Q1.a | Cohort kept alive with «Legacy» banner | Both `/admin/cohorts` (legacy) + `/admin/offerings` (new) ship in R2 admin UI |
+| **Q2.b** **(modified)** | **Richer offering MINUS `instructorId`** | CourseOffering has `capacity`, `mode` (enum), `status` (enum); **`instructorId` deferred to R3** where Identity track lands (Profile/Student/Instructor models) |
+| Q3.a | Per-tenant CourseOffering | `tenantId` FK on every row, matches R1 + Phase A precedent |
+| Q4.a | Dual-language `nameFa` + `nameEn` | Same as R1 Path A spirit per D63 |
+
+**Q2 override rationale (per owner directive):** `capacity` + `mode` are primitives (~5 LOC each, zero validation weight); `instructorId` would realistically be 30-50 LOC (User FK + role validation + tenant scope + edge cases), not the 5-10 the memo initially estimated. R3's Identity track (Profile/Student/Instructor) will define how an instructor reference should look (possibly `instructorIds[]` for team-taught) — adding `instructorId` now risks refactor in R3.
+
+**Locked LOC: ~1,850** (down from 1,880; -30 from instructorId deferral). **Timeline: 5-7 days** (unchanged).
+
+## Binding constraints per D65 (R2-specific reminders)
+
+**Reminder 1 — D18 flow assertion is critical.** R2 is the first serious state machine in Phase B (`OfferingStatus` transitions). Commit I spec MUST cover:
+- Happy path: SCHEDULED → OPEN → ACTIVE → COMPLETED
+- Illegal transitions rejected (e.g., ACTIVE → SCHEDULED, COMPLETED → OPEN)
+- Soft-delete allowed at any status
+- Status-conditioned visibility (enrollment open only when OPEN)
+This pattern becomes the template for every future state-machine sub-R.
+
+**Reminder 2 — Admin chunk size watch.** Current `admin-academic-*.js` chunk is 37 KB (post-R1). R2 expected +10-15 KB → ~50 KB. Threshold for proactive ping = 55 KB. Above threshold = ping owner (NOT stop) to discuss admin-chunk splitting strategy. Main bundle delta still bounded < 50 KB per D61 Constraint #2.
 
 ---
 

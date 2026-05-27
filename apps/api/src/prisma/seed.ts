@@ -326,6 +326,52 @@ async function main(): Promise<void> {
     },
   });
 
+  // Phase B R2 (D65) — seed sample CourseOffering linked to existing
+  // Cohort via legacyCohortId. Demonstrates the dual-source pattern:
+  // the offering is the modern surface, the cohort stays alive during
+  // the Sunset window per MIGRATION_POLICY §6.
+  const offering = await prisma.courseOffering.upsert({
+    where: { tenantId_slug: { tenantId: tenant.id, slug: "1405-fall-cs-online" } },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      programId: program.id,
+      slug: "1405-fall-cs-online",
+      nameFa: "ترم پاییز ۱۴۰۵ — مقدمه‌ای بر علوم کامپیوتر (برخط)",
+      nameEn: "Fall 1405 — Intro to Computer Science (Online)",
+      shortCode: "F1405-CS-ON",
+      description: "First offering migrated from cohort 1405-fall as part of Phase B R2 dual-write demo.",
+      startDate: new Date("2026-09-23T00:00:00Z"),
+      endDate: new Date("2027-01-31T23:59:59Z"),
+      capacity: 60,
+      mode: "HYBRID",
+      status: "OPEN",
+      legacyCohortId: cohort.id,
+    },
+  });
+
+  // Mark the Cohort as upgraded — the dual-write interceptor would do
+  // this at runtime; the seed pre-populates the backlink for the demo.
+  await prisma.cohort.update({
+    where: { id: cohort.id },
+    data: { upgradedToOfferingId: offering.id },
+  });
+
+  // Seed a MigrationSyncLog row recording the upgrade. Backfills count
+  // as `action: "backfill"` per MIGRATION_POLICY §1.
+  await prisma.migrationSyncLog.create({
+    data: {
+      tenantId: tenant.id,
+      source: "Cohort",
+      target: "CourseOffering",
+      rowId: cohort.id,
+      targetId: offering.id,
+      action: "backfill",
+      notes: "seed-time backfill: 1405-fall → 1405-fall-cs-online",
+      syncedBy: "system",
+    },
+  });
+
   const course = await prisma.course.upsert({
     where: { tenantId_code: { tenantId: tenant.id, code: "CS101" } },
     update: {},
