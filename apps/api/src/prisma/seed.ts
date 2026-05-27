@@ -616,6 +616,93 @@ async function main(): Promise<void> {
     console.log(`[seed] document ${docId} created with 1 chunk`);
   }
 
+  // ---------- Phase B R3.a (D68 + D69) — Identity backfill ----------
+  // Profile is strict 1:1 with User per Q2.a. Backfill an empty Profile
+  // for every existing tenant user so the /profile self-service page
+  // works for everyone on first login. Idempotent (keyed on userId).
+  //
+  // Student + Instructor are demo-only sample rows wired to existing
+  // demo users (student1@… and instructor1@…) so admin pages have
+  // visible data on first deploy. Idempotent (keyed on userId UNIQUE).
+  console.log(`[seed] ensuring Profile rows for all tenant users`);
+  const tenantUsers = await prisma.user.findMany({
+    where: { tenantId: tenant.id },
+    select: { id: true, email: true },
+  });
+  let profilesCreated = 0;
+  for (const u of tenantUsers) {
+    // upsert keyed on userId UNIQUE — no-op once Profile exists.
+    const existingProfile = await prisma.profile.findUnique({ where: { userId: u.id } });
+    if (!existingProfile) {
+      await prisma.profile.create({
+        data: { userId: u.id, locale: null },
+      });
+      profilesCreated++;
+    }
+  }
+  console.log(`[seed] Profile backfill: ${profilesCreated} created, ${tenantUsers.length - profilesCreated} already existed`);
+
+  // Sample Instructor — wires the existing instructor1 demo user to the
+  // CS Department + assigns rank + a couple of expertise tags. Used by
+  // /admin/instructors and the R2 instructorId wire demo.
+  const instructorUser = await prisma.user.findUnique({
+    where: { tenantId_email: { tenantId: tenant.id, email: "instructor1@digiuniversity.ir" } },
+  });
+  if (instructorUser) {
+    const existingInstructor = await prisma.instructor.findUnique({ where: { userId: instructorUser.id } });
+    if (!existingInstructor) {
+      const inst = await prisma.instructor.create({
+        data: {
+          tenantId: tenant.id,
+          userId: instructorUser.id,
+          instructorCode: "INS-001",
+          departmentId: department.id,
+          rank: "ASSISTANT",
+          expertise: ["machine_learning", "intro_cs"],
+          hireDate: new Date("2024-09-01T00:00:00Z"),
+          status: "ACTIVE",
+        },
+      });
+      console.log(`[seed] sample Instructor ${inst.instructorCode} created for instructor1`);
+
+      // Wire the seed CourseOffering to this sample Instructor (Q3.a demo).
+      // Idempotent — only sets if currently null, so re-runs don't overwrite
+      // a manual reassignment.
+      const offeringRow = await prisma.courseOffering.findUnique({ where: { id: offering.id } });
+      if (offeringRow && offeringRow.instructorId === null) {
+        await prisma.courseOffering.update({
+          where: { id: offering.id },
+          data: { instructorId: inst.id },
+        });
+        console.log(`[seed] linked offering ${offering.slug} → instructor ${inst.instructorCode}`);
+      }
+    } else {
+      console.log(`[seed] Instructor for instructor1 already exists; skipping`);
+    }
+  }
+
+  // Sample Student — wires the existing student1 demo user.
+  const studentUser = await prisma.user.findUnique({
+    where: { tenantId_email: { tenantId: tenant.id, email: "student1@digiuniversity.ir" } },
+  });
+  if (studentUser) {
+    const existingStudent = await prisma.student.findUnique({ where: { userId: studentUser.id } });
+    if (!existingStudent) {
+      await prisma.student.create({
+        data: {
+          tenantId: tenant.id,
+          userId: studentUser.id,
+          studentCode: "STU-1405001",
+          admissionDate: new Date("2026-09-23T00:00:00Z"),
+          status: "ENROLLED",
+        },
+      });
+      console.log(`[seed] sample Student STU-1405001 created for student1`);
+    } else {
+      console.log(`[seed] Student for student1 already exists; skipping`);
+    }
+  }
+
   console.log("[seed] done");
 }
 

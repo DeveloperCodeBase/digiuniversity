@@ -44,6 +44,10 @@ model Tenant {
   enrollments     Enrollment[]
   courseOfferings    CourseOffering[]
   migrationSyncLogs  MigrationSyncLog[]
+  // Phase B R3.a (D68) — Identity track: tenant-scoped Student + Instructor rosters.
+  // Profile is NOT tenant-relationed directly (tenant scope flows through Profile.user).
+  students        Student[]
+  instructors     Instructor[]
   classSessions   ClassSession[]
   recordings      Recording[]
   attendance      Attendance[]
@@ -84,6 +88,12 @@ model User {
   learningEvents LearningEvent[]
   tutorSessions  TutorSession[]
   tutorMessages  TutorMessage[]
+  // Phase B R3.a (D68) — Identity track: strict 1:0..1 to Profile / Student / Instructor.
+  // Profile is 1:1 enforced by Profile.userId UNIQUE per Q2.a; Student/Instructor
+  // are 1:0..1 (a user may be only-student, only-instructor, both, or neither).
+  profile        Profile?
+  student        Student?
+  instructor     Instructor?
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -257,9 +267,12 @@ model Department {
   createdBy String?
   updatedBy String?
 
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  faculty  Faculty   @relation(fields: [facultyId], references: [id], onDelete: Cascade)
-  programs Program[]
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  faculty     Faculty      @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  programs    Program[]
+  // Phase B R3.a (D68) — instructors are pinned to a department (nullable on Instructor
+  // for floating/at-large hires; SetNull on dept delete keeps the instructor row alive).
+  instructors Instructor[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -886,6 +899,12 @@ model CourseOffering {
   /// the dual-write interceptor on first migration. Nullable for
   /// greenfield offerings that never had a Cohort predecessor.
   legacyCohortId String?
+  /// Phase B R3.a (D68 Q3.a) — single lead instructor per offering.
+  /// Nullable so an offering can exist before staffing; SetNull on
+  /// Instructor soft-delete so the offering survives instructor
+  /// departures (admin can reassign via UI). Future team-teaching is
+  /// an additive junction model in R4+ per MIGRATION_POLICY §4 + §5.
+  instructorId   String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -895,12 +914,14 @@ model CourseOffering {
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  instructor  Instructor?  @relation(fields: [instructorId], references: [id], onDelete: SetNull)
   enrollments Enrollment[]
 
   @@unique([tenantId, slug])
   @@index([tenantId, status])
   @@index([programId])
   @@index([legacyCohortId])
+  @@index([instructorId])
   @@index([deletedAt])
 }
 
@@ -925,4 +946,131 @@ model MigrationSyncLog {
   @@index([tenantId, syncedAt])
   @@index([source, syncedAt])
   @@index([rowId])
+}
+
+// ---------- Phase B R3.a (D68) — Identity track ----------
+//
+// Profile / Student / Instructor sit on top of the existing User model
+// (which carries authn + RBAC). The split is per Q2.a + Q3.a:
+//   • Profile  — strict 1:1 with User (personal info: bio, dob, phone,
+//                avatar, address, nationalId, optional locale override).
+//                Self-service editable via @SelfOrAdmin guard per D69.
+//   • Student  — 1:0..1 with User. Holds enrollment lifecycle status
+//                + admission metadata. Created either by admin (R3.a)
+//                or by R3.b StudentApplication acceptance side effect.
+//   • Instructor — 1:0..1 with User. Holds department assignment, rank,
+//                expertise tags, hire date. Created either by admin
+//                (R3.a) or by R3.b InstructorApplication acceptance.
+//
+// State machines (StudentApplication, InstructorApplication, status
+// transition guards) defer to R3.b per D68. R3.a treats `status` as
+// a plain enum that admins can set freely; no transition validation
+// until R3.b ships.
+
+enum StudentStatus {
+  ENROLLED
+  ON_LEAVE
+  GRADUATED
+  WITHDRAWN
+  DISMISSED
+}
+
+enum InstructorStatus {
+  ACTIVE
+  ON_SABBATICAL
+  INACTIVE
+  TERMINATED
+}
+
+enum InstructorRank {
+  ASSISTANT
+  ASSOCIATE
+  FULL
+  EMERITUS
+}
+
+model Profile {
+  id          String    @id @default(cuid())
+  /// Strict 1:1 with User per Q2.a — enforced by @unique.
+  userId      String    @unique
+  bio         String?   @db.Text
+  dateOfBirth DateTime?
+  phoneNumber String?
+  avatarUrl   String?
+  address     String?   @db.Text
+  /// Optional Iranian national ID. Used by R3.b applicant verification
+  /// + de-duplication. R3.a stores it without validation.
+  nationalId  String?
+  /// Optional per-user override of User.locale. NULL = use User.locale.
+  locale      String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  tenantId      String
+  /// 1:0..1 with User — enforced by @unique. A user may be only-instructor.
+  userId        String        @unique
+  /// Human-readable, tenant-unique. e.g. "STU-40219".
+  studentCode   String
+  admissionDate DateTime?
+  status        StudentStatus @default(ENROLLED)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, studentCode])
+  @@index([tenantId, status])
+  @@index([deletedAt])
+}
+
+model Instructor {
+  id             String           @id @default(cuid())
+  tenantId       String
+  /// 1:0..1 with User — enforced by @unique.
+  userId         String           @unique
+  /// Human-readable, tenant-unique. e.g. "INS-781".
+  instructorCode String
+  /// Department pinning. Nullable for floating/at-large hires.
+  /// SetNull on Department delete so the Instructor row survives a
+  /// dept reorg (admin reassigns via UI).
+  departmentId   String?
+  rank           InstructorRank?
+  /// Free-text expertise tags. Controlled vocabulary deferred to R4+
+  /// per memo risks section.
+  expertise      String[]
+  hireDate       DateTime?
+  status         InstructorStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  department      Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  /// Reverse for R2 instructorId wire (Q3.a). One instructor → many offerings.
+  taughtOfferings CourseOffering[]
+
+  @@unique([tenantId, instructorCode])
+  @@index([tenantId, status])
+  @@index([departmentId])
+  @@index([deletedAt])
 }
