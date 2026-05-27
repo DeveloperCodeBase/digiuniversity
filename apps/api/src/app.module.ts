@@ -19,6 +19,7 @@ import { LiveClassModule } from "./live-class/live-class.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TenantsModule } from "./tenants/tenants.module";
 import { CohortsModule } from "./university/cohorts/cohorts.module";
+import { CourseOfferingsModule } from "./university/course-offerings/course-offerings.module";
 import { CoursesModule } from "./university/courses/courses.module";
 import { DepartmentsModule } from "./university/departments/departments.module";
 import { EnrollmentsModule } from "./university/enrollments/enrollments.module";
@@ -64,6 +65,10 @@ import { UsersModule } from "./users/users.module";
     ProgramsModule,
     CoursesModule,
     CohortsModule,
+    // Phase B R2 Commit B (D65) — CourseOffering ships alongside Cohort
+    // during the Sunset window. LegacySyncService in Commit C ties them
+    // together via the dual-write interceptor.
+    CourseOfferingsModule,
     EnrollmentsModule,
     // Live class + AI bridge (Phase 6).
     AiBridgeModule,
