@@ -1417,6 +1417,44 @@ This pattern becomes the template for every future state-machine sub-R (StudentA
 
 **Source:** owner directive 2026-05-27 «R3.a memo OK با یک clarification قبل از شروع — هیچ scope change، فقط explicit کردن authorization pattern... شروع Commit A.».
 
+### D70 — Phase B R3.a D13 ack: Identity foundation shipped + verified
+**Context:** Owner D13 manual smoke (real device + production deploy + bundle verification) — all 8 checks PASS:
+- ✅ `/profile` self-service edit + persist across reload
+- ✅ `/admin/profiles` read-only D69 pattern (admin-only catalog)
+- ✅ `/admin/students` + `/admin/instructors` full CRUD (including **explicit delete verified** per the R1-bug-lesson — see below)
+- ✅ `/admin/offerings` new «استاد» column + assignment dialog (Q3.a wire end-to-end)
+- ✅ Instructor-role validation: assigning a non-instructor User rejected with the precise «assigned user must hold the 'instructor' role» message (D69 explicit requirement)
+- ✅ Student access guard: `/profile` accessible, all `/admin/*` blocked
+- ✅ Production modulepreload: only `react-vendor` + `radix-vendor`; every R3.a admin chunk truly lazy
+- ✅ Deploy + `migrate` + `seed` all clean on VPS
+
+**12-commit chain (A→K + docs prelude):** `8e7d782` → `d151e48`. Review in `docs/PHASE_B_R3_A_REVIEW.md`.
+
+**R3.a primitives now operational + reusable for R3.b:**
+- `SelfOrAdminGuard` (auth/guards/self-or-admin.guard.ts) with `@SelfOrAdmin()` decorator — first non-admin endpoint in Phase B; designed for reuse on `StudentApplication` applicant-self-view in R3.b
+- Audit semantic: `AuditLog.actorId` always = `request.user.userId`; admin editing another's profile logs as `actor=admin`, `subject=Profile:<target>` (R4 audit lint unchanged)
+
+**Unexpected benefit:** Productivity.tsx unwired from /profile route → main bundle shrank by ~25 KB (from 379 KB R2 baseline to 354 KB R3.a). D61 Constraint #2 satisfied with significant margin.
+
+**Latent R1 bug fixed proactively (Commit `25a2d5a`):**
+- `api.delete` was undefined in `apps/web/src/api/client.js`; only `api.del` existed. Every R1+R2 admin delete button (deleteSchool / deleteFaculty / deleteDepartment / deleteProgram / deleteOffering / deleteCohort) silently TypeErrored in the browser — backend never received the call.
+- 1-line additive alias added in Commit I → all prior-R deletes now actually hit the backend.
+- D64+D67 D13 acks didn't catch this because owner smoke focused on create/edit flows; soft-delete may have appeared to succeed via UI optimistic refetch.
+
+**Source:** owner directive 2026-05-27 «R3.a D13 PASS. owner real-device smoke + production deploy + bundle verification confirmed».
+
+### R3.a Lesson logged for Phase B retrospective
+**Rule (binding on every future D13 smoke):** Every D13 smoke checklist MUST include an **explicit delete / destroy / soft-delete test per mutating surface**. The R1 `api.delete` latent bug survived two D13 cycles (D64 R1 + D67 R2) because both smokes only exercised create + edit. R3.a Commit I discovered it accidentally while authoring new identity admin pages.
+
+**Concretely, every D13 checklist now adds (per admin/destructive surface):**
+- «click trash / delete button → confirm dialog → confirm → row disappears»
+- «refresh page → row is absent»
+- «admin GET endpoint → row's `deletedAt` is non-null (or 404)»
+
+**Phase B retrospective entry:** to be added to `docs/PHASE_B_RETROSPECTIVE.md` once R3.b closes; this D70 entry is the authoritative reference until then.
+
+**Source:** owner directive 2026-05-27 «R3.a Lesson برای D13 checklist template آینده: هر D13 smoke باید explicit delete operation cover کنه».
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)
