@@ -50,12 +50,11 @@ const SUNSET_HEADER = "Wed, 31 Dec 2026 23:59:59 GMT";
 const DEPRECATION_HEADER = "true";
 const LINK_HEADER = '</v1/offerings>; rel="successor-version"';
 
+// NestJS @Header() is a METHOD decorator, not a class decorator. Apply
+// the trio to each individual handler below. The Sunset / Deprecation
+// / Link headers are added explicitly to every endpoint in this
+// deprecated controller per MIGRATION_POLICY §6.
 @Controller("cohorts")
-// Apply deprecation headers to every endpoint in this controller.
-// Frontend + external integrations get an explicit signal to migrate.
-@Header("Sunset", SUNSET_HEADER)
-@Header("Deprecation", DEPRECATION_HEADER)
-@Header("Link", LINK_HEADER)
 export class CohortsController {
   constructor(
     private readonly prisma: PrismaService,
@@ -63,6 +62,9 @@ export class CohortsController {
   ) {}
 
   @Get()
+  @Header("Sunset", SUNSET_HEADER)
+  @Header("Deprecation", DEPRECATION_HEADER)
+  @Header("Link", LINK_HEADER)
   async list(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListCohortsQueryDto,
@@ -89,6 +91,9 @@ export class CohortsController {
   }
 
   @Get(":id")
+  @Header("Sunset", SUNSET_HEADER)
+  @Header("Deprecation", DEPRECATION_HEADER)
+  @Header("Link", LINK_HEADER)
   async getById(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const row = await this.prisma.cohort.findFirst({
       where: { id, tenantId: user.tenantId, deletedAt: null },
@@ -100,6 +105,9 @@ export class CohortsController {
   @Roles("admin")
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Header("Sunset", SUNSET_HEADER)
+  @Header("Deprecation", DEPRECATION_HEADER)
+  @Header("Link", LINK_HEADER)
   @AuditAction("cohort.create")
   async create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCohortDto) {
     const program = await this.prisma.program.findFirst({
@@ -129,6 +137,9 @@ export class CohortsController {
 
   @Roles("admin")
   @Patch(":id")
+  @Header("Sunset", SUNSET_HEADER)
+  @Header("Deprecation", DEPRECATION_HEADER)
+  @Header("Link", LINK_HEADER)
   @AuditAction("cohort.update")
   async update(
     @CurrentUser() user: AuthenticatedUser,
@@ -158,6 +169,9 @@ export class CohortsController {
   @Roles("admin")
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
+  @Header("Sunset", SUNSET_HEADER)
+  @Header("Deprecation", DEPRECATION_HEADER)
+  @Header("Link", LINK_HEADER)
   @AuditAction("cohort.delete")
   async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     const existing = await this.prisma.cohort.findFirst({
