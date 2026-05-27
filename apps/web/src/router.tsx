@@ -140,6 +140,11 @@ const SchoolsAdminPage = React.lazy(() => import("./pages/admin/SchoolsPage"));
 const FacultiesAdminPage = React.lazy(() => import("./pages/admin/FacultiesPage"));
 const DepartmentsAdminPage = React.lazy(() => import("./pages/admin/DepartmentsPage"));
 const ProgramsAdminPage = React.lazy(() => import("./pages/admin/ProgramsPage"));
+// Phase B R2 Commit I (D65) — Offerings + Cohorts admin lazy routes.
+// Lazy-loading places both pages in admin-academic.{hash}.js per D61
+// Constraint #2; main bundle delta target: 0 KB.
+const OfferingsAdminPage = React.lazy(() => import("./pages/admin/OfferingsPage"));
+const CohortsAdminPage = React.lazy(() => import("./pages/admin/CohortsPage"));
 const OrgDashboard = React.lazy(() => import("./pages/dashboards/OrgDashboard"));
 // University.tsx + Productivity.tsx are multi-export, all workspace:
 const SchoolsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.SchoolsPage })));
@@ -377,6 +382,9 @@ const routes = [
   { path: "/admin/faculties", element: <RouteShell Component={FacultiesAdminPage} /> },
   { path: "/admin/departments", element: <RouteShell Component={DepartmentsAdminPage} /> },
   { path: "/admin/programs", element: <RouteShell Component={ProgramsAdminPage} /> },
+  // Phase B R2 (D65) — Offerings + Cohorts admin routes.
+  { path: "/admin/offerings", element: <RouteShell Component={OfferingsAdminPage} /> },
+  { path: "/admin/cohorts", element: <RouteShell Component={CohortsAdminPage} /> },
   { path: "/parent", element: <RouteShell Component={ParentPage} /> },
   {
     path: "/officehours",
