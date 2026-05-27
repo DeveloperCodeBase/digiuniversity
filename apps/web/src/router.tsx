@@ -132,6 +132,14 @@ const ContentManagerDashboard = React.lazy(() => import("./pages/dashboards/Cont
 const TADashboard = React.lazy(() => import("./pages/dashboards/TADashboard"));
 const SupportDashboard = React.lazy(() => import("./pages/dashboards/SupportDashboard"));
 const ModeratorDashboard = React.lazy(() => import("./pages/dashboards/ModeratorDashboard"));
+// Phase B R1 Commit I (D62 + D61 Constraint #2) — 4 admin pages lazy-
+// loaded so they land in a separate admin-academic chunk (configured
+// via manualChunks in vite.config.js, also this commit). Main bundle
+// delta target: < 50 KB.
+const SchoolsAdminPage = React.lazy(() => import("./pages/admin/SchoolsPage"));
+const FacultiesAdminPage = React.lazy(() => import("./pages/admin/FacultiesPage"));
+const DepartmentsAdminPage = React.lazy(() => import("./pages/admin/DepartmentsPage"));
+const ProgramsAdminPage = React.lazy(() => import("./pages/admin/ProgramsPage"));
 const OrgDashboard = React.lazy(() => import("./pages/dashboards/OrgDashboard"));
 // University.tsx + Productivity.tsx are multi-export, all workspace:
 const SchoolsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.SchoolsPage })));
@@ -363,6 +371,12 @@ const routes = [
   { path: "/pricing", element: <RouteShell Component={PricingPage} /> },
   { path: "/faculty", element: <RouteShell Component={FacultyPage} /> },
   { path: "/admin", element: <RouteShell Component={AdminPage} /> },
+  // Phase B R1 Commit I (D62) — 4 nested admin academic routes (lazy
+  // per D61 Constraint #2 — land in admin-academic chunk).
+  { path: "/admin/schools", element: <RouteShell Component={SchoolsAdminPage} /> },
+  { path: "/admin/faculties", element: <RouteShell Component={FacultiesAdminPage} /> },
+  { path: "/admin/departments", element: <RouteShell Component={DepartmentsAdminPage} /> },
+  { path: "/admin/programs", element: <RouteShell Component={ProgramsAdminPage} /> },
   { path: "/parent", element: <RouteShell Component={ParentPage} /> },
   {
     path: "/officehours",

@@ -88,8 +88,14 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     { h: "عملیات" },
     { id: "admin", t: "نمای کلی", ic: "home" },
     { id: "analytics", t: "تحلیل سامانه", ic: "chart" },
-    { id: "schools", t: "دانشکده‌ها", ic: "grad" },
-    { id: "faculty", t: "هیات علمی", ic: "users" },
+    // Phase B R1 Commit I (D62) — 4 new academic-hierarchy admin
+    // routes. Existing "schools" and "faculty" items repointed to the
+    // new full-CRUD admin pages; "departments" and "programs" added.
+    { h: "ساختار آکادمیک" },
+    { id: "admin/schools", t: "دانشکده‌ها", ic: "grad" },
+    { id: "admin/faculties", t: "هیأت‌ها", ic: "users" },
+    { id: "admin/departments", t: "گروه‌ها", ic: "folder" },
+    { id: "admin/programs", t: "برنامه‌ها", ic: "cert" },
     { h: "محتوا و منابع" },
     { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
     { id: "library", t: "کتابخانه", ic: "folder" },

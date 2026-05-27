@@ -113,27 +113,28 @@ export default defineConfig({
     // in this repo — confirmed via package.json audit).
     rollupOptions: {
       output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "radix-vendor": [
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-avatar",
-            "@radix-ui/react-checkbox",
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-radio-group",
-            "@radix-ui/react-scroll-area",
-            "@radix-ui/react-select",
-            "@radix-ui/react-separator",
-            "@radix-ui/react-slider",
-            "@radix-ui/react-slot",
-            "@radix-ui/react-switch",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
-          ],
+        manualChunks: (id) => {
+          // Phase B R1 Commit I (D61 Constraint #2) — bundle the 4 admin
+          // academic pages + their shared primitives into a single
+          // `admin-academic-*.js` chunk. Keeps the main index chunk
+          // free of admin code (regular students/instructors never
+          // touch /admin/* so they shouldn't pay download cost).
+          if (id.includes("/pages/admin/")) return "admin-academic";
+          // Vendor buckets (pre-Phase-B): react + radix.
+          if (
+            id.includes("/node_modules/react/") ||
+            id.includes("/node_modules/react-dom/") ||
+            id.includes("/node_modules/react-router-dom/")
+          ) {
+            return "react-vendor";
+          }
+          if (id.includes("/node_modules/@radix-ui/")) return "radix-vendor";
+          return undefined;
         },
+        // Prior object-form (pre-Phase-B-R1) is replaced by the function
+        // above. Function form is required because object form can't
+        // express "all files under /pages/admin/" without enumerating
+        // each module path.
       },
     },
   },
