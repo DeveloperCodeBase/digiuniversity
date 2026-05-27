@@ -156,7 +156,12 @@ const MessagesPage = React.lazy(() => import("./pages/Productivity").then((m) =>
 const BookmarksPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.BookmarksPage })));
 const AchievementsPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.AchievementsPage })));
 const SubmissionPage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.SubmissionPage })));
-const ProfilePage = React.lazy(() => import("./pages/Productivity").then((m) => ({ default: m.ProfilePage })));
+// Phase B R3.a Commit H (D68 + D69) — /profile rerouted to the new
+// self-service editor at pages/ProfilePage.tsx. The legacy mockup at
+// pages/Productivity.tsx ProfilePage export stays in place (dead-code
+// once unreferenced; left there to keep Productivity.tsx untouched in
+// this commit). Per D66 Path D: own lazy chunk, NO admin bucket.
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 
 // =====================================================
 // useGo — back-compat shim
