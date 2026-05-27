@@ -48,6 +48,12 @@ model Tenant {
   // Profile is NOT tenant-relationed directly (tenant scope flows through Profile.user).
   students        Student[]
   instructors     Instructor[]
+  // Phase B R3.b (D71) — Applications + NotificationLog. All three are
+  // tenant-scoped (applications carry tenantId for the rate-limit + spam
+  // detection; NotificationLog joins through applications).
+  studentApplications    StudentApplication[]
+  instructorApplications InstructorApplication[]
+  notificationLogs       NotificationLog[]
   classSessions   ClassSession[]
   recordings      Recording[]
   attendance      Attendance[]
@@ -94,6 +100,13 @@ model User {
   profile        Profile?
   student        Student?
   instructor     Instructor?
+  // Phase B R3.b (D71) — Applications linked back to User.
+  // SetNull on User delete because the application row should survive
+  // (audit + admin review) even if the linked User is deleted.
+  // notificationLogs reflects the actor/target user for each stub row.
+  studentApplications    StudentApplication[]
+  instructorApplications InstructorApplication[]
+  notificationLogs       NotificationLog[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -273,6 +286,10 @@ model Department {
   // Phase B R3.a (D68) — instructors are pinned to a department (nullable on Instructor
   // for floating/at-large hires; SetNull on dept delete keeps the instructor row alive).
   instructors Instructor[]
+  // Phase B R3.b (D71) — instructor applicants target a department. SetNull
+  // on dept delete because the application row should survive a dept reorg
+  // (admin re-maps via update).
+  instructorApplications InstructorApplication[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -305,6 +322,10 @@ model Program {
   courses     Course[]
   cohorts     Cohort[]
   offerings   CourseOffering[]
+  // Phase B R3.b (D71) — student applicants target a program. Cascade on
+  // program delete because an orphan application points nowhere meaningful;
+  // soft-delete the program first if you need to preserve the apps.
+  studentApplications StudentApplication[]
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -1033,6 +1054,11 @@ model Student {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Phase B R3.b (D71) — reverse relation: a Student row may be the
+  // resulting artifact of a StudentApplication (1:0..1; null when the
+  // Student was created by an admin directly without an application
+  // flow, as is the case for R3.a's seed Student).
+  application StudentApplication?
 
   @@unique([tenantId, studentCode])
   @@index([tenantId, status])
@@ -1068,9 +1094,175 @@ model Instructor {
   department      Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   /// Reverse for R2 instructorId wire (Q3.a). One instructor → many offerings.
   taughtOfferings CourseOffering[]
+  // Phase B R3.b (D71) — reverse relation: an Instructor row may be the
+  // resulting artifact of an InstructorApplication (1:0..1; null for
+  // direct admin creates).
+  application     InstructorApplication?
 
   @@unique([tenantId, instructorCode])
   @@index([tenantId, status])
   @@index([departmentId])
   @@index([deletedAt])
+}
+
+// ---------- Phase B R3.b (D71) — Applications + state machines + NotificationLog stub ----------
+//
+// Two parallel application models sharing the AppStatus enum (Q1.a).
+// State machine + verification gate (Q2.a + Q4.a caveat) + transactional
+// ACCEPTED → ENROLLED side effect (Q5.a find-or-create-or-link) live in
+// the service layer at apps/api/src/identity/applications/*. NotificationLog
+// is a write-only stub for R3.b — actual email/SMS sender deferred to
+// R-Notif (post-Phase-B). Bodies stored as free-text Persian per Q4.a.
+//
+// Public submission endpoint (Q8.a) gated by NestJS @Throttle (5/IP/hr)
+// plus per-(tenantId, applicantEmail) idempotency via UNIQUE indices below.
+
+enum AppStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  INTERVIEW
+  ACCEPTED
+  ENROLLED
+  REJECTED
+  WITHDRAWN
+}
+
+model StudentApplication {
+  id                       String    @id @default(cuid())
+  tenantId                 String
+  /// Q4.a (D68): nullable until ACCEPTED → ENROLLED side effect creates
+  /// or links the User per the Q5.a find-or-create-or-link sequence.
+  userId                   String?
+  programId                String
+
+  // Applicant snapshot — captured at submit time so the row stays
+  // meaningful even if the applicant later changes their User profile.
+  applicantFullName        String
+  applicantEmail           String
+  applicantPhone           String?
+  applicantNationalId      String?
+  applicantBio             String?   @db.Text
+
+  /// Q2.a verification gate per D68 Q4.a caveat. Both timestamps must
+  /// be non-null before any forward transition from UNDER_REVIEW.
+  applicantEmailVerifiedAt DateTime?
+  applicantPhoneVerifiedAt DateTime?
+
+  status                   AppStatus @default(SUBMITTED)
+  submittedAt              DateTime  @default(now())
+  decidedAt                DateTime?
+  decidedBy                String?   // admin User.id
+
+  // Linked artifacts created by ACCEPTED → ENROLLED side effect per Q5.a.
+  resultingStudentId       String?   @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  program  Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  student  Student? @relation(fields: [resultingStudentId], references: [id], onDelete: SetNull)
+
+  notificationLogs NotificationLog[]
+
+  // Idempotency per Q8.a — same applicant+program returns existing row.
+  @@unique([tenantId, applicantEmail, programId])
+  @@index([tenantId, status])
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model InstructorApplication {
+  id                       String    @id @default(cuid())
+  tenantId                 String
+  userId                   String?
+  departmentId             String?
+  /// Free-text department preference if applicant doesn't know the FK
+  /// (admin maps to departmentId on review). Parallel to programId.
+  preferredDepartmentSlug  String?
+
+  applicantFullName        String
+  applicantEmail           String
+  applicantPhone           String?
+  applicantNationalId      String?
+  applicantBio             String?   @db.Text
+  desiredRank              InstructorRank?
+  expertise                String[]
+  cvUrl                    String?
+
+  applicantEmailVerifiedAt DateTime?
+  applicantPhoneVerifiedAt DateTime?
+
+  status                   AppStatus @default(SUBMITTED)
+  submittedAt              DateTime  @default(now())
+  decidedAt                DateTime?
+  decidedBy                String?
+
+  resultingInstructorId    String?   @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  department   Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  instructor   Instructor?  @relation(fields: [resultingInstructorId], references: [id], onDelete: SetNull)
+
+  notificationLogs NotificationLog[]
+
+  // Idempotency. departmentId nullable, so use preferredDepartmentSlug as the
+  // dedupe key when departmentId is null — actually simplest: use a single
+  // (tenantId, applicantEmail) unique because instructor applicants usually
+  // submit once per tenant. If admins want to allow re-application later,
+  // they can soft-delete the prior row first.
+  @@unique([tenantId, applicantEmail])
+  @@index([tenantId, status])
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model NotificationLog {
+  id                       String   @id @default(cuid())
+  tenantId                 String
+  /// "email" | "sms" | "in_app" — channel that *would* have been used.
+  kind                     String
+  /// Canonical template id, e.g. "application.submitted",
+  /// "application.accepted", "user.password.claim",
+  /// "application.spam.suspected". Free-text but conventionally
+  /// dotted lowercase.
+  template                 String
+  targetEmail              String?
+  targetPhone              String?
+  subject                  String?
+  /// Free-text Persian body per Q4.a — admin reads this to see what
+  /// would have gone out. R-Notif (post-Phase-B) will swap this for
+  /// template rendering against locale-aware strings.
+  body                     String   @db.Text
+  /// FK references to the trigger source. All nullable — the same
+  /// NotificationLog table serves all future notification sources.
+  studentApplicationId     String?
+  instructorApplicationId  String?
+  userId                   String?
+  /// "queued" | "sent" | "failed". R3.b stub leaves everything "queued";
+  /// R-Notif flips to "sent" or "failed" via an actual sender.
+  status                   String   @default("queued")
+  createdAt                DateTime @default(now())
+
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentApplication    StudentApplication?    @relation(fields: [studentApplicationId], references: [id], onDelete: SetNull)
+  instructorApplication InstructorApplication? @relation(fields: [instructorApplicationId], references: [id], onDelete: SetNull)
+  user                  User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([status])
+  @@index([template])
+  @@index([studentApplicationId])
+  @@index([instructorApplicationId])
 }

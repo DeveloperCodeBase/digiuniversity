@@ -703,6 +703,185 @@ async function main(): Promise<void> {
     }
   }
 
+  // ---------- Phase B R3.b (D71) — sample Applications + NotificationLog ----------
+  // Demonstrates the full AppStatus state machine + verification gate +
+  // (for ENROLLED) the find-or-create-or-link side effect result. All
+  // upserts keyed on `(tenantId, applicantEmail, programId)` (student) or
+  // `(tenantId, applicantEmail)` (instructor) — re-runs are no-ops.
+  //
+  // We seed 5 student apps + 2 instructor apps spanning the canonical states
+  // so admin smoke can verify each transition path + filter UI without
+  // creating apps manually.
+  console.log(`[seed] ensuring R3.b sample applications across AppStatus states`);
+
+  const studentApplicationSamples = [
+    {
+      email: "applicant.submitted@digiuniversity.ir",
+      fullName: "زهرا اسلامی",
+      status: "SUBMITTED" as const,
+      verifyEmail: false,
+      verifyPhone: false,
+      phone: "09120000001",
+      bio: "علاقمند به علوم کامپیوتر و ML",
+    },
+    {
+      email: "applicant.review.partial@digiuniversity.ir",
+      fullName: "علی حسینی",
+      status: "UNDER_REVIEW" as const,
+      verifyEmail: true,
+      verifyPhone: false, // demonstrates the Q4.a verification gate (incomplete)
+      phone: "09120000002",
+      bio: "فارغ‌التحصیل ریاضی، علاقمند به CS",
+    },
+    {
+      email: "applicant.review.full@digiuniversity.ir",
+      fullName: "نگار محمدی",
+      status: "UNDER_REVIEW" as const,
+      verifyEmail: true,
+      verifyPhone: true, // ready to advance
+      phone: "09120000003",
+      bio: "کارآفرین فناوری، علاقمند به MBA + CS",
+    },
+    {
+      email: "applicant.interview@digiuniversity.ir",
+      fullName: "محمد رضایی",
+      status: "INTERVIEW" as const,
+      verifyEmail: true,
+      verifyPhone: true,
+      phone: "09120000004",
+      bio: "برنامه‌نویس فرانت‌اند با ۳ سال تجربه",
+    },
+    {
+      email: "applicant.rejected@digiuniversity.ir",
+      fullName: "فاطمه کریمی",
+      status: "REJECTED" as const,
+      verifyEmail: true,
+      verifyPhone: true,
+      phone: "09120000005",
+      bio: "(درخواست رد شده — نمونه)",
+    },
+  ];
+
+  for (const s of studentApplicationSamples) {
+    const existing = await prisma.studentApplication.findFirst({
+      where: {
+        tenantId: tenant.id,
+        applicantEmail: s.email,
+        programId: program.id,
+      },
+    });
+    if (existing) continue;
+    await prisma.studentApplication.create({
+      data: {
+        tenantId: tenant.id,
+        programId: program.id,
+        applicantFullName: s.fullName,
+        applicantEmail: s.email,
+        applicantPhone: s.phone,
+        applicantBio: s.bio,
+        applicantEmailVerifiedAt: s.verifyEmail ? new Date() : null,
+        applicantPhoneVerifiedAt: s.verifyPhone ? new Date() : null,
+        status: s.status,
+        decidedAt: s.status === "REJECTED" ? new Date() : null,
+      },
+    });
+    console.log(`[seed] sample StudentApplication ${s.email} status=${s.status}`);
+  }
+
+  const instructorApplicationSamples = [
+    {
+      email: "applicant.instructor.submitted@digiuniversity.ir",
+      fullName: "دکتر سعید پارسا",
+      status: "SUBMITTED" as const,
+      verifyEmail: false,
+      verifyPhone: false,
+      phone: "09120000010",
+      bio: "PhD CS، 8 سال سابقه تدریس",
+      expertise: ["algorithms", "distributed_systems"],
+      cvUrl: "https://example.com/cv/parsa.pdf",
+    },
+    {
+      email: "applicant.instructor.accepted@digiuniversity.ir",
+      fullName: "دکتر مریم نوری",
+      status: "ACCEPTED" as const,
+      verifyEmail: true,
+      verifyPhone: true,
+      phone: "09120000011",
+      bio: "PhD AI، خط‌مشی پژوهشی NLP فارسی",
+      expertise: ["nlp", "machine_learning", "persian_language"],
+      cvUrl: "https://example.com/cv/nouri.pdf",
+    },
+  ];
+
+  for (const i of instructorApplicationSamples) {
+    const existing = await prisma.instructorApplication.findFirst({
+      where: { tenantId: tenant.id, applicantEmail: i.email },
+    });
+    if (existing) continue;
+    await prisma.instructorApplication.create({
+      data: {
+        tenantId: tenant.id,
+        departmentId: department.id,
+        applicantFullName: i.fullName,
+        applicantEmail: i.email,
+        applicantPhone: i.phone,
+        applicantBio: i.bio,
+        expertise: i.expertise,
+        cvUrl: i.cvUrl,
+        applicantEmailVerifiedAt: i.verifyEmail ? new Date() : null,
+        applicantPhoneVerifiedAt: i.verifyPhone ? new Date() : null,
+        status: i.status,
+      },
+    });
+    console.log(`[seed] sample InstructorApplication ${i.email} status=${i.status}`);
+  }
+
+  // Seed a couple of NotificationLog rows demonstrating the stub:
+  //   - "application.submitted" template for the SUBMITTED student app
+  //   - "application.spam.suspected" template (per Q8.a) as a demo of the
+  //     spam-flag UI surface admins will filter on
+  // Both idempotent on a deterministic id so re-runs are no-ops.
+  const submittedApp = await prisma.studentApplication.findFirst({
+    where: { tenantId: tenant.id, applicantEmail: "applicant.submitted@digiuniversity.ir" },
+  });
+  if (submittedApp) {
+    const submittedLogId = `seed_${tenant.id}_notif_submitted`;
+    const existing = await prisma.notificationLog.findUnique({ where: { id: submittedLogId } });
+    if (!existing) {
+      await prisma.notificationLog.create({
+        data: {
+          id: submittedLogId,
+          tenantId: tenant.id,
+          kind: "email",
+          template: "application.submitted",
+          targetEmail: submittedApp.applicantEmail,
+          subject: "درخواست شما دریافت شد",
+          body: `سلام ${submittedApp.applicantFullName}،\nدرخواست شما با شناسه ${submittedApp.id} ثبت شد. مدت بازبینی ۱۴ روز.\n\n— دیجی‌یونیورسیتی`,
+          studentApplicationId: submittedApp.id,
+          status: "queued",
+        },
+      });
+      console.log(`[seed] sample NotificationLog application.submitted created`);
+    }
+  }
+
+  const spamLogId = `seed_${tenant.id}_notif_spam_demo`;
+  const existingSpamLog = await prisma.notificationLog.findUnique({ where: { id: spamLogId } });
+  if (!existingSpamLog) {
+    await prisma.notificationLog.create({
+      data: {
+        id: spamLogId,
+        tenantId: tenant.id,
+        kind: "in_app",
+        template: "application.spam.suspected",
+        subject: "احتمال spam در درخواست‌های ورودی",
+        body: `بیش از 3 درخواست در یک ساعت اخیر از 192.0.2.42 دریافت شده است. لطفاً برای بررسی فیلتر spam را در /admin/applications اعمال کنید.`,
+        status: "queued",
+      },
+    });
+    console.log(`[seed] sample NotificationLog application.spam.suspected created`);
+  }
+
   console.log("[seed] done");
 }
 
