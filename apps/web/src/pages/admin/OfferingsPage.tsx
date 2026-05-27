@@ -17,7 +17,7 @@
 
 import React from "react";
 
-import { academicAdminApi } from "../../api/endpoints.js";
+import { academicAdminApi, instructorApi } from "../../api/endpoints.js";
 import { useRole } from "../../role";
 import { ConfirmDelete } from "./_shared/ConfirmDelete";
 import { CrudDialog } from "./_shared/CrudDialog";
@@ -25,6 +25,15 @@ import { FormField } from "./_shared/FormField";
 
 type OfferingStatus = "SCHEDULED" | "OPEN" | "ACTIVE" | "COMPLETED" | "CANCELED";
 type OfferingMode = "SYNCHRONOUS" | "ASYNCHRONOUS" | "HYBRID";
+
+// Phase B R3.a Commit J (D68 Q3.a + D69) — Instructor shape needed for
+// the dropdown in the «تغییر استاد» dialog and for the new column.
+interface InstructorOption {
+  id: string;
+  instructorCode: string;
+  rank: string | null;
+  user: { id: string; fullName: string | null; email: string } | null;
+}
 
 interface Offering {
   id: string;
@@ -39,6 +48,12 @@ interface Offering {
   status: OfferingStatus;
   programId: string;
   legacyCohortId: string | null;
+  // R3.a Commit E backend extension: instructorId additive + instructor
+  // joined (filtered deletedAt:null). When the assigned instructor is
+  // soft-deleted, instructorId stays set but instructor is null — the
+  // UI renders "—" in the column.
+  instructorId: string | null;
+  instructor: InstructorOption | null;
   createdAt: string;
   updatedAt: string;
   _count?: { enrollments: number };
@@ -107,22 +122,36 @@ export const OfferingsPage: React.FC = () => {
 
   const [items, setItems] = React.useState<Offering[]>([]);
   const [programs, setPrograms] = React.useState<Program[]>([]);
+  // Phase B R3.a Commit J — instructor catalog for the assignment dialog.
+  const [instructors, setInstructors] = React.useState<InstructorOption[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [editing, setEditing] = React.useState<FormState | null>(null);
   const [toDelete, setToDelete] = React.useState<Offering | null>(null);
   const [transitionTarget, setTransitionTarget] = React.useState<{ offering: Offering; to: OfferingStatus } | null>(null);
+  // Phase B R3.a Commit J — instructor assignment dialog state.
+  // null = closed; otherwise carries the offering being edited + the
+  // currently-selected dropdown value (which can be "" for unassign).
+  const [assigning, setAssigning] = React.useState<{ offering: Offering; selected: string } | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
 
   const refetch = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [offs, progs] = await Promise.all([
+      const [offs, progs, insts] = await Promise.all([
         academicAdminApi.listOfferings(),
         academicAdminApi.listPrograms(),
+        instructorApi.list().catch(() => [] as InstructorOption[]),
       ]);
-      setItems((offs?.data ?? []) as Offering[]);
-      setPrograms((progs?.data ?? []) as Program[]);
+      // Note: the api.get wrapper returns the parsed body directly (see
+      // client.js apiFetch → readBody). R2's original code used
+      // `offs?.data` which evaluated to undefined and silently fell back
+      // to []. The list happened to display correctly because R2 also
+      // used an empty-array fallback elsewhere. R3.a corrects this
+      // alongside the new instructor wire — `offs` IS the array.
+      setItems((Array.isArray(offs) ? offs : (offs as { data?: Offering[] })?.data ?? []) as Offering[]);
+      setPrograms((Array.isArray(progs) ? progs : (progs as { data?: Program[] })?.data ?? []) as Program[]);
+      setInstructors(Array.isArray(insts) ? insts : []);
     } finally {
       setLoading(false);
     }
@@ -196,6 +225,29 @@ export const OfferingsPage: React.FC = () => {
     }
   };
 
+  // Phase B R3.a Commit J (D68 Q3.a + D69) — assign / unassign instructor.
+  // Backend service-layer (Commit E) validates the assigned User holds
+  // the 'instructor' role and lives in the same tenant. Empty string
+  // → null = unassign (idempotent).
+  const handleAssignInstructor = async () => {
+    if (!assigning) return;
+    setBusy(true);
+    setFormError(null);
+    try {
+      const value = assigning.selected || null;
+      await academicAdminApi.assignOfferingInstructor(assigning.offering.id, value);
+      setAssigning(null);
+      await refetch();
+    } catch (err) {
+      const msg =
+        (err as { body?: { message?: string | string[] } })?.body?.message ??
+        (err instanceof Error ? err.message : "تخصیص استاد با خطا مواجه شد");
+      setFormError(Array.isArray(msg) ? msg.join("\n") : String(msg));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleTransition = async () => {
     if (!transitionTarget) return;
     setBusy(true);
@@ -254,6 +306,7 @@ export const OfferingsPage: React.FC = () => {
               <th>وضعیت</th>
               <th>حالت برگزاری</th>
               <th>ظرفیت</th>
+              <th>استاد</th>
               <th>تاریخ شروع</th>
               <th>پیشینه</th>
               {isAdmin ? <th aria-label="عملیات" /> : null}
@@ -273,6 +326,17 @@ export const OfferingsPage: React.FC = () => {
                   </td>
                   <td>{MODE_LABEL_FA[o.mode]}</td>
                   <td>{o.capacity ?? "—"}</td>
+                  <td data-instructor-cell={o.id}>
+                    {o.instructor ? (
+                      <span title={o.instructor.user?.email || ""}>
+                        {o.instructor.user?.fullName || o.instructor.user?.email || o.instructor.instructorCode}
+                      </span>
+                    ) : (
+                      <span className="text-mute" data-instructor-empty="true">
+                        —
+                      </span>
+                    )}
+                  </td>
                   <td dir="ltr">{o.startDate ? o.startDate.slice(0, 10) : "—"}</td>
                   <td>
                     {o.legacyCohortId ? (
@@ -304,6 +368,20 @@ export const OfferingsPage: React.FC = () => {
                         aria-label={`ویرایش ${o.nameFa}`}
                       >
                         ✎
+                      </button>
+                      {/* Phase B R3.a Commit J — instructor assignment.
+                          Opens a dedicated dialog (separate from the
+                          metadata-edit CrudDialog) because the backend
+                          surface is a separate sub-endpoint with its own
+                          role-validation guard. */}
+                      <button
+                        type="button"
+                        className="btn-icon"
+                        onClick={() => setAssigning({ offering: o, selected: o.instructorId ?? "" })}
+                        aria-label={`تغییر استاد ${o.nameFa}`}
+                        data-action="assign-instructor"
+                      >
+                        👤
                       </button>
                       <button
                         type="button"
@@ -454,6 +532,56 @@ export const OfferingsPage: React.FC = () => {
         onConfirm={handleTransition}
         onCancel={() => setTransitionTarget(null)}
       />
+
+      {/* Phase B R3.a Commit J (D68 Q3.a + D69) — instructor assignment
+          dialog. Reuses CrudDialog for the modal frame; renders a single
+          select inside. Backend rejects 400 if the selected User does not
+          hold the 'instructor' role (D69 explicit validation). */}
+      <CrudDialog
+        open={assigning != null}
+        mode="edit"
+        title={
+          assigning ? `استاد دوره: ${assigning.offering.nameFa}` : "تعیین استاد"
+        }
+        onClose={() => setAssigning(null)}
+        onSubmit={handleAssignInstructor}
+        busy={busy}
+      >
+        {assigning ? (
+          <>
+            <label className="crud-form-label" htmlFor="assign-instructor-select">
+              استاد
+            </label>
+            <select
+              id="assign-instructor-select"
+              value={assigning.selected}
+              onChange={(e) =>
+                setAssigning((c) => (c ? { ...c, selected: e.target.value } : c))
+              }
+              className="crud-form-input"
+              data-control="assign-instructor"
+            >
+              <option value="">(بدون استاد)</option>
+              {instructors.map((i) => (
+                <option key={i.id} value={i.id}>
+                  {i.user?.fullName || i.user?.email || i.instructorCode}
+                  {i.rank ? ` · ${i.rank}` : ""}
+                </option>
+              ))}
+            </select>
+            <div className="crud-form-helper">
+              {instructors.length === 0
+                ? "هیچ استادی ثبت نشده است — ابتدا از /admin/instructors اضافه کنید."
+                : "استاد منتخب باید نقش «instructor» را داشته باشد، در غیر این صورت سرور با خطای ۴۰۰ رد می‌کند."}
+            </div>
+            {formError ? (
+              <div className="crud-form-error" role="alert" style={{ marginTop: 8 }}>
+                {formError}
+              </div>
+            ) : null}
+          </>
+        ) : null}
+      </CrudDialog>
     </main>
   );
 };
