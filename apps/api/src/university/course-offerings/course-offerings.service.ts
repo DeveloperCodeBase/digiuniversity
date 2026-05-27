@@ -62,6 +62,20 @@ export class CourseOfferingsService {
         status: true,
         programId: true,
         legacyCohortId: true,
+        // Phase B R3.a Commit E (D68 Q3.a) — instructor join. Filter by
+        // deletedAt:null so soft-deleted instructors render as null (UI
+        // shows "—"). The instructorId column itself stays set so admins
+        // can see which instructor was assigned before deletion.
+        instructorId: true,
+        instructor: {
+          where: { deletedAt: null },
+          select: {
+            id: true,
+            instructorCode: true,
+            rank: true,
+            user: { select: { id: true, fullName: true, email: true } },
+          },
+        },
         createdAt: true,
         updatedAt: true,
         _count: { select: { enrollments: { where: { deletedAt: null } } } },
@@ -72,6 +86,21 @@ export class CourseOfferingsService {
   async getById(tenantId: string, id: string) {
     const row = await this.prisma.courseOffering.findFirst({
       where: { id, tenantId, deletedAt: null },
+      include: {
+        // Phase B R3.a Commit E — surface the assigned instructor (with
+        // soft-delete filter) so the admin detail view shows current
+        // staffing without N+1.
+        instructor: {
+          where: { deletedAt: null },
+          select: {
+            id: true,
+            instructorCode: true,
+            rank: true,
+            departmentId: true,
+            user: { select: { id: true, fullName: true, email: true } },
+          },
+        },
+      },
     });
     if (!row) throw new NotFoundException("offering not found");
     return row;
@@ -188,5 +217,76 @@ export class CourseOfferingsService {
       data: { deletedAt: new Date(), updatedBy: userId },
     });
     return { deleted: true };
+  }
+
+  /**
+   * Phase B R3.a Commit E (D68 Q3.a + D69) — assign or unassign an
+   * Instructor to this CourseOffering. Pass `instructorId: null` (or
+   * empty string from the UI) to unassign.
+   *
+   * Validation (per D69 explicit role-validation requirement):
+   *   1. The offering exists in tenant (NotFoundException).
+   *   2. If instructorId is non-null:
+   *      a. The instructor exists in the SAME tenant + is not soft-deleted.
+   *      b. The User backing that instructor holds the `instructor` role
+   *         (BadRequestException with a precise message).
+   *   3. Cross-tenant: rejected by (2a) — treats as not-in-tenant rather
+   *      than leak instructor existence across tenants.
+   *
+   * The role check is intentionally service-layer (not DTO) so the
+   * UserRole join + Role lookup stay in one place. Future R3.b
+   * InstructorApplication acceptance side effect MAY also grant the
+   * role; this guard ensures the offering never lands on a User who
+   * isn't role-eligible.
+   */
+  async assignInstructor(
+    tenantId: string,
+    userId: string,
+    offeringId: string,
+    instructorId: string | null,
+  ) {
+    const offering = await this.prisma.courseOffering.findFirst({
+      where: { id: offeringId, tenantId, deletedAt: null },
+    });
+    if (!offering) throw new NotFoundException("offering not found");
+
+    if (instructorId === null || instructorId === "") {
+      // Unassign — null out the FK. Idempotent if already null.
+      return this.prisma.courseOffering.update({
+        where: { id: offeringId },
+        data: { instructorId: null, updatedBy: userId },
+      });
+    }
+
+    // Look up the instructor + their User + the User's roles in a
+    // single query so we can validate everything in one round-trip.
+    const instructor = await this.prisma.instructor.findFirst({
+      where: { id: instructorId, tenantId, deletedAt: null },
+      include: {
+        user: {
+          include: {
+            userRoles: { include: { role: { select: { name: true } } } },
+          },
+        },
+      },
+    });
+
+    if (!instructor) {
+      // Don't leak whether the instructor exists in another tenant —
+      // treat cross-tenant the same as not-found.
+      throw new BadRequestException("instructor not found in this tenant");
+    }
+
+    const roles = instructor.user.userRoles.map((ur) => ur.role.name);
+    if (!roles.includes("instructor")) {
+      throw new BadRequestException(
+        `assigned user must hold the 'instructor' role (got [${roles.join(", ") || "(no roles)"}])`,
+      );
+    }
+
+    return this.prisma.courseOffering.update({
+      where: { id: offeringId },
+      data: { instructorId, updatedBy: userId },
+    });
   }
 }

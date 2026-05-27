@@ -26,6 +26,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
 } from "class-validator";
 
 import type { AuthenticatedUser } from "../../auth/auth.types";
@@ -72,6 +73,17 @@ class UpdateOfferingDto {
 
 class TransitionDto {
   @IsEnum(OFFERING_STATUSES) to!: (typeof OFFERING_STATUSES)[number];
+}
+
+class AssignInstructorDto {
+  // Accept null (explicit unassign) or a non-empty string. Empty
+  // string is treated as null by the service. `ValidateIf` skips
+  // string validation when the value is explicitly null.
+  @ValidateIf((_, v) => v !== null)
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  instructorId!: string | null;
 }
 
 @Controller("offerings")
@@ -142,6 +154,24 @@ export class CourseOfferingsController {
     @Body() dto: TransitionDto,
   ) {
     return this.service.transition(user.tenantId, user.userId, id, dto.to);
+  }
+
+  /**
+   * Phase B R3.a Commit E (D68 Q3.a + D69) — assign or unassign an
+   * instructor to this offering. Body `{ instructorId: <id> }` to
+   * assign, `{ instructorId: null }` (or empty string) to unassign.
+   * Service-layer validates that the assigned User holds the
+   * `instructor` role and that the instructor lives in the same tenant.
+   */
+  @Roles("admin")
+  @Patch(":id/instructor")
+  @AuditAction("course-offering.instructor.assign")
+  async assignInstructor(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: AssignInstructorDto,
+  ) {
+    return this.service.assignInstructor(user.tenantId, user.userId, id, dto.instructorId ?? null);
   }
 
   @Roles("admin")
