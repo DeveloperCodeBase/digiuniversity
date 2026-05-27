@@ -15,6 +15,8 @@ import { AuthModule } from "./auth/auth.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { RolesGuard } from "./auth/guards/roles.guard";
 import { HealthController } from "./health/health.controller";
+// Phase B R3.a Commit B (D68) — Identity track (Profile/Student/Instructor).
+import { IdentityModule } from "./identity/identity.module";
 import { LiveClassModule } from "./live-class/live-class.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TenantsModule } from "./tenants/tenants.module";
@@ -70,6 +72,10 @@ import { UsersModule } from "./users/users.module";
     // together via the dual-write interceptor.
     CourseOfferingsModule,
     EnrollmentsModule,
+    // Phase B R3.a Commit B (D68 + D69) — Identity foundation: Profile +
+    // SelfOrAdminGuard primitive ship together. Student + Instructor
+    // submodules land in C + D. State machines + Applications defer to R3.b.
+    IdentityModule,
     // Live class + AI bridge (Phase 6).
     AiBridgeModule,
     LiveClassModule,
