@@ -145,7 +145,18 @@ export const api = {
   get: (path, opts) => apiFetch("GET", path, opts),
   post: (path, body, opts) => apiFetch("POST", path, { ...opts, body }),
   patch: (path, body, opts) => apiFetch("PATCH", path, { ...opts, body }),
+  // `del` was the original short-form, but the R1 academicAdminApi
+  // helpers (deleteSchool / deleteFaculty / etc.) were authored against
+  // `api.delete` — which previously evaluated to undefined. The R1+R2
+  // admin delete buttons were silently broken at the network layer
+  // (the soft-delete buttons resolved to a TypeError in the browser
+  // console; the server-side soft-delete never ran). Adding `delete`
+  // as an alias here is the minimum-touch fix: keeps `api.del`
+  // working for the legacy tutorApi.deleteSession + makes every
+  // `api.delete(...)` call site (R1, R2, and R3.a's identityApi)
+  // actually hit the backend. Discovered while authoring R3.a Commit I.
   del: (path, opts) => apiFetch("DELETE", path, opts),
+  delete: (path, opts) => apiFetch("DELETE", path, opts),
 };
 
 export const publicApi = {

@@ -145,6 +145,13 @@ const ProgramsAdminPage = React.lazy(() => import("./pages/admin/ProgramsPage"))
 // Constraint #2; main bundle delta target: 0 KB.
 const OfferingsAdminPage = React.lazy(() => import("./pages/admin/OfferingsPage"));
 const CohortsAdminPage = React.lazy(() => import("./pages/admin/CohortsPage"));
+// Phase B R3.a Commit I (D68 + D69) — Identity track admin lazy routes.
+// Per D66 Path D: NO admin manualChunks bucket; each page becomes its
+// own ProfilesPage-<hash>.js / StudentsPage-<hash>.js / InstructorsPage-<hash>.js
+// — none preloaded on anon routes.
+const ProfilesAdminPage = React.lazy(() => import("./pages/admin/ProfilesPage"));
+const StudentsAdminPage = React.lazy(() => import("./pages/admin/StudentsPage"));
+const InstructorsAdminPage = React.lazy(() => import("./pages/admin/InstructorsPage"));
 const OrgDashboard = React.lazy(() => import("./pages/dashboards/OrgDashboard"));
 // University.tsx + Productivity.tsx are multi-export, all workspace:
 const SchoolsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.SchoolsPage })));
@@ -390,6 +397,10 @@ const routes = [
   // Phase B R2 (D65) — Offerings + Cohorts admin routes.
   { path: "/admin/offerings", element: <RouteShell Component={OfferingsAdminPage} /> },
   { path: "/admin/cohorts", element: <RouteShell Component={CohortsAdminPage} /> },
+  // Phase B R3.a Commit I (D68 + D69) — Identity admin routes.
+  { path: "/admin/profiles", element: <RouteShell Component={ProfilesAdminPage} /> },
+  { path: "/admin/students", element: <RouteShell Component={StudentsAdminPage} /> },
+  { path: "/admin/instructors", element: <RouteShell Component={InstructorsAdminPage} /> },
   { path: "/parent", element: <RouteShell Component={ParentPage} /> },
   {
     path: "/officehours",
