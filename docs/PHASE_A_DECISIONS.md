@@ -1264,6 +1264,27 @@ R1 memo will be edited to embed the 2 reminders as binding scope.
 
 **Source:** owner directive 2026-05-26 «MIGRATION_POLICY OK، R0.5 ببند، R1 شروع».
 
+### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
+**Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
+- ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)
+- ✅ `/schools` full CRUD: create / edit / soft-delete all working
+- ✅ Cascade soft-delete School → Faculty propagation verified
+- ✅ Nested drill: School → Faculties breadcrumb path correct
+- ✅ Student login: R7.9 + R7.12 untouched, Schools items hidden (role-based access guard works)
+- ✅ Landing `/` untouched
+- ✅ `/login` untouched
+- ✅ `/dashboard` + `/classroom` untouched
+
+**R1 close:**
+- First Phase B sub-R complete.
+- 11 atomic commits A-K (range `bee5e8d` … `dd55e4a`) all shipped.
+- Bundle delta verified ≤ 50 KB target per D61 Constraint #2 — admin code in separate `admin-academic-DCwo3HC3.js` chunk (37 KB), main `index-Bch2wDJC.js` unaffected for non-admin routes.
+- MIGRATION_POLICY §2 (greenfield) + §4 (additive) patterns validated in practice.
+
+**R2 unblocks now.** Memo authoring begins per D61 workflow.
+
+**Source:** owner directive 2026-05-26 «R1 D13 PASS» + 8-step real-device smoke confirmation.
+
 ### D63 — Q4.a interpretation: spirit not literal (Path A); R1 Commit A scope locked
 **Context:** Pre-Commit-A discovery: memo assumed all 4 levels greenfield, but only `School` is new. `Faculty / Department / Program` already exist in `apps/api/prisma/schema.prisma` (Phase A B.1a-era scaffolding, lines 177-247). The existing models use single-column `name`, conflicting with the locked Q4.a default (dual `nameFa` + `nameEn`).
 
