@@ -114,11 +114,18 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Phase B R1 Commit I (D61 Constraint #2) — bundle the 4 admin
-          // academic pages + their shared primitives into a single
-          // `admin-academic-*.js` chunk. Keeps the main index chunk
-          // free of admin code (regular students/instructors never
-          // touch /admin/* so they shouldn't pay download cost).
+          // Phase B R2 Commit J fix3 (D66) — Path A surgical fix.
+          // Original R1 rule "any /pages/admin/* → admin-academic" caused
+          // Vite to hoist _shared primitives (CrudDialog/ConfirmDelete/
+          // FormField) into the admin chunk AND make main eager-import
+          // from it (modulepreload), forcing 416 KB on every anonymous
+          // visitor (D61 Constraint #2 violation).
+          // Fix: exclude _shared from the admin-academic bucket so it
+          // falls through to Vite's default chunker. Vite then places
+          // _shared wherever it's optimal (usually merged into main
+          // since it's small; or split if size warrants). Either way,
+          // admin-academic is back to admin-page-only and lazy-loaded.
+          if (id.includes("/pages/admin/_shared/")) return undefined;
           if (id.includes("/pages/admin/")) return "admin-academic";
           // Vendor buckets (pre-Phase-B): react + radix.
           if (
