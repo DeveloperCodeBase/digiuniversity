@@ -1348,6 +1348,30 @@ This pattern becomes the template for every future state-machine sub-R (StudentA
 
 **Source:** owner directive 2026-05-27 «R2 D13 PASS. owner manual smoke confirmed: [8 items] ... R3 memo شروع».
 
+### D68 — R3 Q-answers locked: Q1.b split + Q2.a + Q3.a + Q4.a (with verification caveat)
+**Context:** Owner reviewed `PHASE_B_R3_MEMO.md` (commit `5fb2171`) and ack'd 2026-05-27 with the recommended defaults: **«Q1.b Q2.a Q3.a Q4.a شروع کن»**.
+
+**Locked decisions:**
+- **Q1.b ✅** — **Split into R3.a + R3.b.** Reasoning per owner:
+  - R3.b is the first parallel state machine in Phase B (StudentApplication + InstructorApplication share the same `AppStatus` enum with parallel transition maps + ACCEPTED → ENROLLED side effects). Deserves its own atomic shipping window per R2 lesson.
+  - R3.a (identity foundation: Profile + Student + Instructor + R2 instructorId wire) mirrors R1 CRUD pattern — clean scope on its own.
+  - R3.b memo benefits from R3.a deployed schema written first (concrete model references, not assumptions).
+  - Timeline alignment: R1 + R2 each shipped in ~5-7 days. R3 single would have been ~7-10 (outside pattern). Split keeps each in range.
+- **Q2.a ✅** — Strict 1:1 Profile-to-User. Predictable invariants > flexibility without use case. If a future need for nullable shows up, additive migration per MIGRATION_POLICY §4.
+- **Q3.a ✅** — Single `CourseOffering.instructorId String?`. YAGNI; team-teaching is ~5% of Iranian university courses. Junction model can be added in R4+ additively (existing `instructorId` becomes "lead instructor" + new junction rows for co-teachers) per MIGRATION_POLICY §4 + §5.
+- **Q4.a ✅** — Nullable `StudentApplication.userId` until ACCEPTED → ENROLLED side effect creates the User. Reasoning: Iranian applicants are commonly tentative; Q4.b would block engagement at submission. Duplicate detection via `(tenantId, email)` + `(tenantId, nationalId)` unique constraints.
+- **Q4.a CAVEAT (owner-added, MUST land in R3.b):** the **UNDER_REVIEW** stage of `StudentApplication` state machine requires email + phone verification BEFORE a reviewer can advance the application past UNDER_REVIEW. Reviewer-side check prevents spam applications from polluting the inbox. To be recorded in R3.b memo + enforced by the state machine guard on `UNDER_REVIEW → INTERVIEW/ACCEPTED/REJECTED` transitions (rejection: «verify applicant contact before advancing»).
+
+**Execution sequence:**
+1. **R3.a memo** — write `docs/PHASE_B_R3_A_MEMO.md` with Identity-models-only scope (Profile/Student/Instructor + R2 instructorId wire + 3 admin pages). NO state machines, NO Applications, NO NotificationLog (all R3.b).
+2. **Owner R3.a memo ack** with Q-decisions confirmed for the narrower scope.
+3. **R3.a code** atomic commits A-K per memo plan.
+4. **R3.a deploy + smoke + D13 ack.**
+5. **R3.b memo** AFTER R3.a deployed (so R3.b memo references concrete deployed schema for Profile/Student/Instructor).
+6. **R3.b** state machines + Applications + NotificationLog stub + Q4.a verification caveat enforcement.
+
+**Source:** owner directive 2026-05-27 «Q1.b Q2.a Q3.a Q4.a شروع کن» + Q4.a verification caveat.
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)
