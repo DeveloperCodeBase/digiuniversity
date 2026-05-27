@@ -24,6 +24,7 @@ import { DepartmentsModule } from "./university/departments/departments.module";
 import { EnrollmentsModule } from "./university/enrollments/enrollments.module";
 import { FacultiesModule } from "./university/faculties/faculties.module";
 import { ProgramsModule } from "./university/programs/programs.module";
+import { SchoolsModule } from "./university/schools/schools.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -55,6 +56,9 @@ import { UsersModule } from "./users/users.module";
     UsersModule,
     AiLogsModule,
     // University domain (Phase 3).
+    // Phase B R1 Commit B (D62) — Schools sits above Faculty in the
+    // Academic Hierarchy (per D63 Path A).
+    SchoolsModule,
     FacultiesModule,
     DepartmentsModule,
     ProgramsModule,
