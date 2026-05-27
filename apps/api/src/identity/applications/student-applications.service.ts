@@ -15,11 +15,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  NotImplementedException,
 } from "@nestjs/common";
 import type { AppStatus, StudentApplication } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
+import { ApplicationEnrollmentService } from "./application-enrollment.service";
 import {
   ALLOWED_TRANSITIONS,
   illegalTransitionMessage,
@@ -58,7 +58,11 @@ const STUDENT_APP_SELECT = {
 
 @Injectable()
 export class StudentApplicationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    // Phase B R3.b Commit D — ENROLLED side effect orchestrator.
+    private readonly enrollment: ApplicationEnrollmentService,
+  ) {}
 
   async list(
     tenantId: string,
@@ -124,12 +128,12 @@ export class StudentApplicationsService {
       }
     }
 
-    // Commit B stub: ENROLLED transition routes through Commit D's
-    // transactional side effect. Until that lands, refuse to advance.
+    // Commit D: ENROLLED routes through the transactional side-effect
+    // orchestrator (Q5.a find-or-create-or-link + Student + Enrollment).
+    // The orchestrator owns the entire $transaction including the
+    // application status flip + resultingStudentId link.
     if (to === "ENROLLED") {
-      throw new NotImplementedException(
-        "ACCEPTED → ENROLLED side effect not yet implemented (Commit D ships the transactional find-or-create-or-link)",
-      );
+      return this.enrollment.enrollStudent(tenantId, actorUserId, id);
     }
 
     return this.prisma.studentApplication.update({

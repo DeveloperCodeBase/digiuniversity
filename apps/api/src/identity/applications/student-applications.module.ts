@@ -4,12 +4,17 @@
 
 import { Module } from "@nestjs/common";
 
+import { ApplicationEnrollmentService } from "./application-enrollment.service";
 import { StudentApplicationsController } from "./student-applications.controller";
 import { StudentApplicationsService } from "./student-applications.service";
 
 @Module({
   controllers: [StudentApplicationsController],
-  providers: [StudentApplicationsService],
-  exports: [StudentApplicationsService],
+  // Commit D — both services provided here. Orchestrator is also used
+  // by InstructorApplicationsModule, but Nest handles multiple-provider
+  // registration cleanly when the class is provided in each importing
+  // module's scope.
+  providers: [StudentApplicationsService, ApplicationEnrollmentService],
+  exports: [StudentApplicationsService, ApplicationEnrollmentService],
 })
 export class StudentApplicationsModule {}

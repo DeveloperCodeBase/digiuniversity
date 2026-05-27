@@ -15,11 +15,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  NotImplementedException,
 } from "@nestjs/common";
 import type { AppStatus, InstructorApplication } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
+import { ApplicationEnrollmentService } from "./application-enrollment.service";
 import {
   ALLOWED_TRANSITIONS,
   illegalTransitionMessage,
@@ -62,7 +62,10 @@ const INSTRUCTOR_APP_SELECT = {
 
 @Injectable()
 export class InstructorApplicationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly enrollment: ApplicationEnrollmentService,
+  ) {}
 
   async list(
     tenantId: string,
@@ -120,9 +123,9 @@ export class InstructorApplicationsService {
     }
 
     if (to === "ENROLLED") {
-      throw new NotImplementedException(
-        "ACCEPTED → ENROLLED side effect not yet implemented (Commit D ships the transactional find-or-create-or-link + instructor-role grant)",
-      );
+      // Q6.a side effect — orchestrator creates Instructor + grants
+      // `instructor` role + updates the application atomically.
+      return this.enrollment.enrollInstructor(tenantId, actorUserId, id);
     }
 
     return this.prisma.instructorApplication.update({
