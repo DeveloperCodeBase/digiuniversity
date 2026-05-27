@@ -20,16 +20,22 @@ import { Roles } from "../../auth/decorators/roles.decorator";
 import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 
+// Phase B R1 Commit D (D63) — DTOs extended with nameEn + shortCode
+// (additive columns from Commit A's migration).
 class CreateDepartmentDto {
   @IsString() @MinLength(2) @MaxLength(64) facultyId!: string;
   @IsString() @MinLength(2) @MaxLength(64) slug!: string;
   @IsString() @MinLength(2) @MaxLength(160) name!: string;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
+  @IsOptional() @IsString() @MaxLength(160) nameEn?: string;
+  @IsOptional() @IsString() @MaxLength(32)  shortCode?: string;
 }
 
 class UpdateDepartmentDto {
   @IsOptional() @IsString() @MaxLength(160) name?: string;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
+  @IsOptional() @IsString() @MaxLength(160) nameEn?: string;
+  @IsOptional() @IsString() @MaxLength(32)  shortCode?: string;
 }
 
 class ListDepartmentsQueryDto {
@@ -56,10 +62,13 @@ export class DepartmentsController {
         id: true,
         slug: true,
         name: true,
+        nameEn: true,
+        shortCode: true,
         description: true,
         facultyId: true,
         createdAt: true,
         updatedAt: true,
+        faculty: { select: { id: true, slug: true, name: true, shortCode: true } },
         _count: { select: { programs: { where: { deletedAt: null } } } },
       },
     });
@@ -92,6 +101,8 @@ export class DepartmentsController {
         facultyId: dto.facultyId,
         slug: dto.slug.toLowerCase(),
         name: dto.name,
+        nameEn: dto.nameEn,
+        shortCode: dto.shortCode?.toUpperCase(),
         description: dto.description,
         createdBy: user.userId,
         updatedBy: user.userId,
@@ -116,7 +127,11 @@ export class DepartmentsController {
     }
     return this.prisma.department.update({
       where: { id },
-      data: { ...dto, updatedBy: user.userId },
+      data: {
+        ...dto,
+        shortCode: dto.shortCode?.toUpperCase(),
+        updatedBy: user.userId,
+      },
     });
   }
 

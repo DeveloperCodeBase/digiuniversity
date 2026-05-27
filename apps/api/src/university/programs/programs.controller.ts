@@ -22,6 +22,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 
 const DEGREE_LEVELS = ["bachelor", "master", "phd", "certificate"] as const;
 
+// Phase B R1 Commit D (D63) — DTOs extended with nameEn + shortCode.
 class CreateProgramDto {
   @IsString() @MinLength(2) @MaxLength(64) departmentId!: string;
   @IsString() @MinLength(2) @MaxLength(64) slug!: string;
@@ -29,6 +30,8 @@ class CreateProgramDto {
   @IsString() @IsIn([...DEGREE_LEVELS]) degreeLevel!: typeof DEGREE_LEVELS[number];
   @IsOptional() @IsInt() @Min(1) durationSemesters?: number;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
+  @IsOptional() @IsString() @MaxLength(160) nameEn?: string;
+  @IsOptional() @IsString() @MaxLength(32)  shortCode?: string;
 }
 
 class UpdateProgramDto {
@@ -36,6 +39,8 @@ class UpdateProgramDto {
   @IsOptional() @IsString() @IsIn([...DEGREE_LEVELS]) degreeLevel?: typeof DEGREE_LEVELS[number];
   @IsOptional() @IsInt() @Min(1) durationSemesters?: number;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
+  @IsOptional() @IsString() @MaxLength(160) nameEn?: string;
+  @IsOptional() @IsString() @MaxLength(32)  shortCode?: string;
 }
 
 class ListProgramsQueryDto {
@@ -64,12 +69,15 @@ export class ProgramsController {
         id: true,
         slug: true,
         name: true,
+        nameEn: true,
+        shortCode: true,
         degreeLevel: true,
         durationSemesters: true,
         description: true,
         departmentId: true,
         createdAt: true,
         updatedAt: true,
+        department: { select: { id: true, slug: true, name: true, shortCode: true } },
         _count: { select: { courses: { where: { deletedAt: null } } } },
       },
     });
@@ -101,6 +109,8 @@ export class ProgramsController {
         departmentId: dto.departmentId,
         slug: dto.slug.toLowerCase(),
         name: dto.name,
+        nameEn: dto.nameEn,
+        shortCode: dto.shortCode?.toUpperCase(),
         degreeLevel: dto.degreeLevel,
         durationSemesters: dto.durationSemesters,
         description: dto.description,
@@ -127,7 +137,11 @@ export class ProgramsController {
     }
     return this.prisma.program.update({
       where: { id },
-      data: { ...dto, updatedBy: user.userId },
+      data: {
+        ...dto,
+        shortCode: dto.shortCode?.toUpperCase(),
+        updatedBy: user.userId,
+      },
     });
   }
 
