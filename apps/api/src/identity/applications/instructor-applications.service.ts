@@ -24,6 +24,9 @@ import {
   ALLOWED_TRANSITIONS,
   illegalTransitionMessage,
   isLegalTransition,
+  UNDER_REVIEW_FORWARD_TARGETS,
+  verificationGateMessage,
+  verificationGateMissing,
 } from "./applications.types";
 
 const INSTRUCTOR_APP_SELECT = {
@@ -104,6 +107,18 @@ export class InstructorApplicationsService {
       return existing;
     }
 
+    // Q4.a verification gate (Commit C). Same rules as student variant —
+    // WITHDRAWN exit allowed even for unverified applicants.
+    if (
+      existing.status === "UNDER_REVIEW" &&
+      UNDER_REVIEW_FORWARD_TARGETS.includes(to)
+    ) {
+      const missing = verificationGateMissing(existing);
+      if (missing.length > 0) {
+        throw new BadRequestException(verificationGateMessage(missing));
+      }
+    }
+
     if (to === "ENROLLED") {
       throw new NotImplementedException(
         "ACCEPTED → ENROLLED side effect not yet implemented (Commit D ships the transactional find-or-create-or-link + instructor-role grant)",
@@ -133,6 +148,40 @@ export class InstructorApplicationsService {
       data: { deletedAt: new Date(), updatedBy: actorUserId },
     });
     return { deleted: true, previousStatus: existing.status };
+  }
+
+  /**
+   * Q4.a admin verification escape hatch. Parallel to StudentApplication
+   * variant — defers self-verification UX to R-Notif per D71 Q3.a.
+   */
+  async setEmailVerified(tenantId: string, actorUserId: string, id: string, verified: boolean) {
+    const existing = await this.prisma.instructorApplication.findFirst({
+      where: { id, tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) throw new NotFoundException("instructor application not found");
+    return this.prisma.instructorApplication.update({
+      where: { id },
+      data: {
+        applicantEmailVerifiedAt: verified ? new Date() : null,
+        updatedBy: actorUserId,
+      },
+    });
+  }
+
+  async setPhoneVerified(tenantId: string, actorUserId: string, id: string, verified: boolean) {
+    const existing = await this.prisma.instructorApplication.findFirst({
+      where: { id, tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) throw new NotFoundException("instructor application not found");
+    return this.prisma.instructorApplication.update({
+      where: { id },
+      data: {
+        applicantPhoneVerifiedAt: verified ? new Date() : null,
+        updatedBy: actorUserId,
+      },
+    });
   }
 
   static getAllowedTransitions(): Record<AppStatus, AppStatus[]> {

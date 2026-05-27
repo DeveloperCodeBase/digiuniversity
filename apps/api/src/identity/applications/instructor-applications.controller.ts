@@ -11,10 +11,11 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
 } from "@nestjs/common";
-import { IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
 
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
@@ -39,6 +40,10 @@ class TransitionDto {
 class ListQueryDto {
   @IsOptional() @IsEnum(APP_STATUSES) status?: (typeof APP_STATUSES)[number];
   @IsOptional() @IsString() @MaxLength(64) departmentId?: string;
+}
+
+class SetVerifiedDto {
+  @IsOptional() @IsBoolean() verified?: boolean;
 }
 
 @Controller("applications/instructor")
@@ -70,6 +75,28 @@ export class InstructorApplicationsController {
     @Body() dto: TransitionDto,
   ) {
     return this.service.transition(user.tenantId, user.userId, id, dto.to);
+  }
+
+  @Roles("admin")
+  @Patch(":id/verify-email")
+  @AuditAction("application.instructor.verify-email")
+  async verifyEmail(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: SetVerifiedDto,
+  ) {
+    return this.service.setEmailVerified(user.tenantId, user.userId, id, dto.verified ?? true);
+  }
+
+  @Roles("admin")
+  @Patch(":id/verify-phone")
+  @AuditAction("application.instructor.verify-phone")
+  async verifyPhone(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: SetVerifiedDto,
+  ) {
+    return this.service.setPhoneVerified(user.tenantId, user.userId, id, dto.verified ?? true);
   }
 
   @Roles("admin")

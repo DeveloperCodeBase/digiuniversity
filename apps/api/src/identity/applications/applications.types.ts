@@ -74,3 +74,37 @@ export const UNDER_REVIEW_FORWARD_TARGETS: ReadonlyArray<AppStatus> = [
   "ACCEPTED",
   "REJECTED",
 ];
+
+/**
+ * Q4.a caveat enforcement — verification gate (Commit C).
+ *
+ * Any forward transition FROM UNDER_REVIEW requires BOTH
+ * applicantEmailVerifiedAt AND applicantPhoneVerifiedAt to be set.
+ *
+ * Returns a precise list of missing channels so the caller can
+ * compose a single 400 message naming exactly what the admin needs
+ * to fix. Empty array = both verified (gate passes).
+ *
+ * Callers should only invoke this when the (from, to) pair is in
+ * UNDER_REVIEW × UNDER_REVIEW_FORWARD_TARGETS — WITHDRAWN exits and
+ * non-UNDER_REVIEW sources are excluded by the caller's earlier
+ * branch in the transition method.
+ */
+export function verificationGateMissing(app: {
+  applicantEmailVerifiedAt: Date | null;
+  applicantPhoneVerifiedAt: Date | null;
+}): string[] {
+  const missing: string[] = [];
+  if (!app.applicantEmailVerifiedAt) missing.push("email");
+  if (!app.applicantPhoneVerifiedAt) missing.push("phone");
+  return missing;
+}
+
+/**
+ * Compose the Q4.a verification-gate rejection message. Format mirrors
+ * R2's illegalTransitionMessage so admin smoke can match on a single
+ * substring ("not verified (Q4.a caveat)") across both error types.
+ */
+export function verificationGateMessage(missing: string[]): string {
+  return `cannot advance application past UNDER_REVIEW: applicant ${missing.join(" + ")} not verified (Q4.a caveat)`;
+}

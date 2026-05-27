@@ -24,6 +24,9 @@ import {
   ALLOWED_TRANSITIONS,
   illegalTransitionMessage,
   isLegalTransition,
+  UNDER_REVIEW_FORWARD_TARGETS,
+  verificationGateMessage,
+  verificationGateMissing,
 } from "./applications.types";
 
 const STUDENT_APP_SELECT = {
@@ -108,6 +111,19 @@ export class StudentApplicationsService {
       return existing;
     }
 
+    // Q4.a verification gate (Commit C). Only fires on forward exits
+    // from UNDER_REVIEW; WITHDRAWN exit is allowed unconditionally so
+    // applicants who never verified can still bail out.
+    if (
+      existing.status === "UNDER_REVIEW" &&
+      UNDER_REVIEW_FORWARD_TARGETS.includes(to)
+    ) {
+      const missing = verificationGateMissing(existing);
+      if (missing.length > 0) {
+        throw new BadRequestException(verificationGateMessage(missing));
+      }
+    }
+
     // Commit B stub: ENROLLED transition routes through Commit D's
     // transactional side effect. Until that lands, refuse to advance.
     if (to === "ENROLLED") {
@@ -140,6 +156,44 @@ export class StudentApplicationsService {
       data: { deletedAt: new Date(), updatedBy: actorUserId },
     });
     return { deleted: true, previousStatus: existing.status };
+  }
+
+  /**
+   * Q4.a caveat verification — admin manually flips the email-verified
+   * timestamp. The actual end-user self-verification flow (email-token
+   * landing page) defers to R-Notif per D71 Q3.a; this endpoint is the
+   * admin escape hatch + the smoke-test path.
+   *
+   * Pass `verified=false` to clear the timestamp (revoke verification).
+   */
+  async setEmailVerified(tenantId: string, actorUserId: string, id: string, verified: boolean) {
+    const existing = await this.prisma.studentApplication.findFirst({
+      where: { id, tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) throw new NotFoundException("student application not found");
+    return this.prisma.studentApplication.update({
+      where: { id },
+      data: {
+        applicantEmailVerifiedAt: verified ? new Date() : null,
+        updatedBy: actorUserId,
+      },
+    });
+  }
+
+  async setPhoneVerified(tenantId: string, actorUserId: string, id: string, verified: boolean) {
+    const existing = await this.prisma.studentApplication.findFirst({
+      where: { id, tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) throw new NotFoundException("student application not found");
+    return this.prisma.studentApplication.update({
+      where: { id },
+      data: {
+        applicantPhoneVerifiedAt: verified ? new Date() : null,
+        updatedBy: actorUserId,
+      },
+    });
   }
 
   // Re-exported so the spec can introspect the allowed graph.
