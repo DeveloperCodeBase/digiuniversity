@@ -1372,6 +1372,51 @@ This pattern becomes the template for every future state-machine sub-R (StudentA
 
 **Source:** owner directive 2026-05-27 «Q1.b Q2.a Q3.a Q4.a شروع کن» + Q4.a verification caveat.
 
+### D69 — R3.a authorization clarification: SelfOrAdmin pattern
+**Context:** Owner ack'd R3.a memo with one clarification before any code lands. `/profile` is the first non-admin endpoint in Phase B (R1 + R2 were 100% admin-only), so the authorization primitive needs to be explicit before the Profile module ships.
+
+**Authorization primitive — new NestJS guard:**
+- New `SelfOrAdminGuard` at `apps/api/src/auth/guards/self-or-admin.guard.ts`, alongside the existing `JwtAuthGuard` + `RolesGuard`.
+- Behavior: a user can read/write a resource if `request.user.id === resource.userId` OR if the user holds the `admin` role.
+- Designed for **reuse** — R3.b «student own application status check» + any future user-owned resource (preferences, notifications-mark-read, etc.) compose this guard. Not Profile-specific.
+- Implementation pattern: handler annotates the userId-extraction strategy (e.g., `@SelfOrAdmin({ userIdFrom: 'param', paramName: 'userId' })` OR `@SelfOrAdmin({ userIdFrom: 'body', bodyKey: 'targetUserId' })`). Defaults to the authenticated user (no target id needed) for own-profile reads.
+
+**Audit semantic — actor is ALWAYS the calling user:**
+- `AuditLog.actorId` = `request.user.id` in every case. NEVER the target user.
+- User editing own profile: `actor = user.id`, `subject = "Profile:<user.id>"` (actor and subject-user happen to match).
+- Admin editing another user's profile: `actor = admin.id`, `subject = "Profile:<target.id>"`. The two-field separation means "who did the action vs. what resource was touched" is always reconstructable from the log.
+- Existing R4 audit lint (every mutation `@AuditAction`) is sufficient; no new audit fields needed.
+
+**UI implications:**
+- `/profile` route accessible to **every** authenticated user (any role).
+- User dropdown (top-right): «پروفایل من» link added — visible to all roles, not just admin. Sidebar stays admin-grouped for the admin-only views.
+- **New admin-only `/admin/profiles` listing page** (5th admin page touched in R3.a). Admin sees a list of all profiles in tenant; can drill into individual user via `/admin/profiles/:userId` or jump from `/admin/users` (future).
+
+**Owner framing:** «این clarification scope change نمی‌سازه — memo قبلاً 4 page touch لیست کرد. فقط authorization primitive جدید و audit semantic explicit می‌شه». `/admin/profiles` is treated as the small admin convenience that pairs with the self-service `/profile` (not a scope expansion).
+
+**Commit binding (owner-reordered, supersedes memo's original A-K ordering):**
+- **A** — Prisma schema + migration SQL + seed
+- **B** — NestJS Profile module + **SelfOrAdminGuard primitive** (this is where the new guard is built)
+- **C** — NestJS Student module (admin-only)
+- **D** — NestJS Instructor module (admin-only, expertise tags)
+- **E** — CourseOffering instructorId wire + service layer + **instructor-role validation** (assigned User must hold `instructor` role)
+- **F** — API e2e tests (CRUD + SelfOrAdmin behavior + instructor role validation)
+- **G** — frontend `endpoints.js` extension + `auth/role-map.ts` extension if needed
+- **H** — `/profile` page (self-service)
+- **I** — `/admin/students` + `/admin/instructors` + **`/admin/profiles`** pages
+- **J** — `OfferingsPage` extension (instructor dropdown + column)
+- **K** — D12 + D18 specs + review doc + bundle measurement + deploy ping
+
+**Intermediate stop triggers (still per D61, active during R3.a):**
+1. Unexpected discovery → STOP + ping
+2. Scope expand → STOP + ping
+3. Bundle main delta > 50 KB → STOP + ping (per D66 Path D)
+4. Admin chunk individual > 55 KB → proactive ping
+5. **NEW** — SelfOrAdminGuard surface unexpected complexity (audit semantic ambiguity, R7.12 role-map integration conflict, etc.) → STOP + ping
+- Else: silent continue. No commit-by-commit ping. Single complete-evidence ping after Commit K + deploy + D29 pre-smoke.
+
+**Source:** owner directive 2026-05-27 «R3.a memo OK با یک clarification قبل از شروع — هیچ scope change، فقط explicit کردن authorization pattern... شروع Commit A.».
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)

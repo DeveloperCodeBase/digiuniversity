@@ -2,9 +2,10 @@
 
 **Author:** Phase B post-R2-D13 (D67) + R3-split (D68)
 **Date:** 2026-05-27
-**Status:** ⏳ DRAFT — awaiting owner ack before R3.a code
+**Status:** ✅ ACKED (D68) + clarified (D69) — Commit A in flight
 **Workflow:** memo → owner ack → code → spec → deploy → D29 pre-smoke → D13 owner smoke → close (D61 Constraint #1)
 **Split-from:** `PHASE_B_R3_MEMO.md` (parent R3 memo) — split into R3.a (this) + R3.b (state machines + Applications + NotificationLog, deferred until R3.a deployed)
+**Authorization clarification:** D69 — SelfOrAdminGuard primitive built in Commit B; `/admin/profiles` 5th admin page added in Commit I. See D69 entry in `PHASE_A_DECISIONS.md` for full spec.
 
 ---
 
@@ -158,10 +159,17 @@ model CourseOffering {
 
 ### API surface (NestJS, R4 audit-lint compliant)
 
+**Authorization primitives:**
+- Existing: `@Roles("admin")` (RolesGuard) — strict admin gate
+- **NEW per D69**: `@SelfOrAdmin({ userIdFrom: 'param'|'body', paramName?: string, bodyKey?: string })` decorator + `SelfOrAdminGuard` — user-OR-admin gate, built in Commit B (Profile module is the first consumer; reusable for R3.b student own application status check).
+- Audit semantic per D69: `actor = request.user.id` ALWAYS; the target user's id goes in `subject` only.
+
 **Profiles** (1:1 with current User, self-service-first):
-- `GET    /v1/profile`       — own profile (any authenticated user)
-- `PATCH  /v1/profile`       — edit own profile
-- `GET    /v1/users/:id/profile` — admin-only, view another user's profile
+- `GET    /v1/profile`              — own profile (any authenticated user)
+- `PATCH  /v1/profile`              — edit own profile (`@SelfOrAdmin` for symmetry — though body has no target id, the guard short-circuits to own-profile)
+- `GET    /v1/profiles`             — admin-only, list all profiles in tenant (powers `/admin/profiles` page)
+- `GET    /v1/users/:userId/profile` — `@SelfOrAdmin({ userIdFrom: 'param', paramName: 'userId' })` — user reads own, admin reads any
+- `PATCH  /v1/users/:userId/profile` — same gate; admin edits another user's profile
 
 **Students** (admin CRUD; self-read):
 - `GET    /v1/students`         — list (admin)
@@ -187,38 +195,43 @@ All mutations carry `@AuditAction(...)` per Phase A R4 lint. Admin endpoints gat
 
 ### Admin UI
 
-Four pages (3 admin + 1 self-service), **each as its own lazy chunk per D66 Path D**:
+Five pages (4 admin + 1 self-service), **each as its own lazy chunk per D66 Path D**:
 
 1. `/profile` — self-service profile editor for every authenticated user (any role). 1 page, all the personal fields.
-2. `/admin/students` — student list + CRUD (admin only). Includes filter by status (ENROLLED / ON_LEAVE / GRADUATED / …).
-3. `/admin/instructors` — instructor list + CRUD + department assignment + expertise tags input. Includes a column showing `taughtOfferings.length` (live join).
-4. `/admin/offerings` extension — add inline «instructor» column + assign dropdown. ~30 LOC change, NOT a new page (modifies existing R2 page).
+2. `/admin/profiles` (D69) — admin list of all profiles in tenant, with drill-into-user CTA. Lightweight read-only listing for support/admin lookup.
+3. `/admin/students` — student list + CRUD (admin only). Includes filter by status (ENROLLED / ON_LEAVE / GRADUATED / …).
+4. `/admin/instructors` — instructor list + CRUD + department assignment + expertise tags input. Includes a column showing `taughtOfferings.length` (live join).
+5. `/admin/offerings` extension — add inline «instructor» column + assign dropdown. ~30 LOC change, NOT a new page (modifies existing R2 page).
 
 **Sidebar nav extension** (admin role only, after the existing «ساختار آکادمیک» group):
 ```ts
 { h: "افراد" },
+{ id: "admin/profiles", t: "پروفایل‌ها", ic: "users" },
 { id: "admin/students", t: "دانشجویان", ic: "users" },
 { id: "admin/instructors", t: "اساتید", ic: "users" },
 ```
 
-Top-level «پروفایل من» link added to the user dropdown for every role (not sidebar — fits ergonomically in the existing dropdown that already has «خروج»).
+Top-level «پروفایل من» link added to the user dropdown for **every** role (not sidebar — fits ergonomically in the existing dropdown that already has «خروج»). Per D69, this is the SelfOrAdmin entry point for non-admin users.
 
 ### D12 + D18 spec coverage
 
-`apps/web/tests/visual/phase-b-r3a-identity.spec.ts` (~280 LOC estimate):
+`apps/web/tests/visual/phase-b-r3a-identity.spec.ts` (~320 LOC estimate):
 
-**D12 (4 assertions):**
+**D12 (5 assertions):**
 - `/profile` renders form for authenticated user; PATCH round-trip updates the bio field
+- `/admin/profiles` table renders (admin) + row count > 0 + drill CTA visible (D69)
 - `/admin/students` table renders + status pill colors map to StudentStatus enum
 - `/admin/instructors` table renders + department column + expertise tags chip
 - `/admin/offerings` instructor column visible + dropdown populated
 
-**D18 / flow assertions (5 assertions):**
+**D18 / flow assertions (7 assertions):**
 - 1:1 Profile invariant: POSTing a duplicate Profile for the same userId fails (unique constraint enforcement)
 - Seed-time backfill ran (Profile rows exist for every seeded User after first deploy)
 - Student soft-delete sets `deletedAt`; subsequent GET returns 404; admin restore (PATCH `deletedAt: null`) brings it back
 - Instructor soft-delete causes ALL their `CourseOffering.instructorId` to become NULL via `onDelete: SetNull` (verifies cascade behavior end-to-end)
 - Cross-tenant defense: PATCH `/v1/offerings/X/instructor {instructorId}` where instructor belongs to tenant B fails with 400 even if X is in tenant A's session
+- **SelfOrAdmin matrix (D69)**: student logged in → GET `/v1/users/<self>/profile` returns 200 + GET `/v1/users/<other>/profile` returns 403 + admin logged in → both return 200; PATCH same matrix
+- **Instructor role validation (D69)**: PATCH `/v1/offerings/:id/instructor {instructorId: <user-without-instructor-role>}` returns 400 with «assigned user must hold the 'instructor' role»
 
 ### Notification stub: NOT in R3.a
 
@@ -231,41 +244,43 @@ Per Q1.b split, the NotificationLog stub belongs to R3.b (it's triggered by stat
 | `apps/api/prisma/schema.prisma` | +130 (3 models + 3 enums + R2 instructorId wire + reverse relations) |
 | `apps/api/prisma/migrations/20260528000000_phase_b_r3a_identity` | +110 SQL |
 | `apps/api/src/identity/profiles/*` (controller + service + DTOs + module) | +260 |
+| `apps/api/src/auth/guards/self-or-admin.guard.ts` + `decorators/self-or-admin.decorator.ts` (D69) | +110 |
 | `apps/api/src/identity/students/*` | +320 |
 | `apps/api/src/identity/instructors/*` | +380 (extra dept-reassignment endpoint + cross-tenant guard) |
-| `apps/api/src/university/course-offerings/*` extension (instructor assign endpoint) | +60 |
-| `apps/api/src/prisma/seed.ts` extension (Profile backfill + 1 sample instructor) | +80 |
-| `apps/api/test/identity-r3a.e2e-spec.ts` | +320 |
+| `apps/api/src/university/course-offerings/*` extension (instructor assign endpoint + role validation) | +75 |
+| `apps/api/src/prisma/seed.ts` extension (Profile backfill + 1 sample instructor + 1 sample student) | +95 |
+| `apps/api/test/identity-r3a.e2e-spec.ts` | +360 (extra SelfOrAdmin behavior matrix + instructor role validation) |
 | `apps/web/src/api/endpoints.js` extension | +95 |
 | `apps/web/src/pages/admin/StudentsPage.tsx` | +260 |
 | `apps/web/src/pages/admin/InstructorsPage.tsx` | +320 |
+| `apps/web/src/pages/admin/ProfilesPage.tsx` (D69 — list view) | +160 |
 | `apps/web/src/pages/ProfilePage.tsx` (self-service, not in admin/) | +220 |
 | `apps/web/src/pages/admin/OfferingsPage.tsx` (extension: instructor column) | +30 |
-| `apps/web/src/sidenav.tsx` extension | +12 |
-| `apps/web/src/router.tsx` (3 lazy routes per Path D — NO bucket) | +14 |
+| `apps/web/src/sidenav.tsx` extension | +14 |
+| `apps/web/src/router.tsx` (4 lazy routes per Path D — NO bucket) | +18 |
 | `apps/web/src/shared.tsx` (user-dropdown «پروفایل من» link) | +10 |
-| `apps/web/tests/visual/phase-b-r3a-identity.spec.ts` | +280 |
+| `apps/web/tests/visual/phase-b-r3a-identity.spec.ts` | +320 (extra SelfOrAdmin UI gate assertions) |
 | `docs/PHASE_B_R3_A_REVIEW.md` (post-ship) | +220 |
 
-**Total: ~3,120 LOC.** Slightly above the Q1.b ~2,800 estimate; the +320 is from the Instructor cross-tenant guard tests + department-reassignment sub-endpoint that came out of writing the spec mentally.
+**Total: ~3,517 LOC.** Up from the original 3,120 estimate; the +397 comes from D69 (SelfOrAdminGuard + decorator + `/admin/profiles` page + extra spec assertions + extra seed lines + role validation in E).
 
 **Timeline: 5-6 days** (matches R1+R2 cadence).
 
-### Commit ordering (atomic per D61 Constraint #1)
+### Commit ordering (atomic per D61 Constraint #1, owner-reordered per D69)
 
 1. **A** — Prisma schema (3 models + 3 enums + R2 instructorId additive) + migration SQL + seed (Profile backfill + sample instructor)
-2. **B** — NestJS Profile module (controller + service + DTOs + 1:1 invariant guard)
-3. **C** — NestJS Student module
-4. **D** — NestJS Instructor module (incl. dept-reassignment sub-endpoint + cross-tenant guard)
-5. **E** — CourseOffering instructor-assign endpoint (extends R2 module)
-6. **F** — API e2e tests (`identity-r3a.e2e-spec.ts`)
-7. **G** — endpoints.js extension + sidebar nav + user-dropdown «پروفایل من»
-8. **H** — ProfilePage (self-service)
-9. **I** — StudentsPage + InstructorsPage admin pages
-10. **J** — OfferingsPage instructor-column extension + router registration (3 new lazy routes — NO bucket per D66) + D12+D18 spec
-11. **K** — Review doc + bundle measurement + ping
+2. **B** — NestJS Profile module (controller + service + DTOs + 1:1 invariant guard) + **`SelfOrAdminGuard` primitive per D69** (in `apps/api/src/auth/guards/self-or-admin.guard.ts` + `@SelfOrAdmin` decorator)
+3. **C** — NestJS Student module (admin-only)
+4. **D** — NestJS Instructor module (admin-only, incl. dept-reassignment sub-endpoint + cross-tenant guard, expertise tags)
+5. **E** — CourseOffering instructor-assign endpoint (extends R2 module) + service-layer **instructor-role validation** (assigned User must hold `instructor` role)
+6. **F** — API e2e tests (`identity-r3a.e2e-spec.ts`) — CRUD + SelfOrAdmin behavior matrix + instructor role validation
+7. **G** — frontend `endpoints.js` extension + sidebar nav + user-dropdown «پروفایل من» + `auth/role-map.ts` extension if needed
+8. **H** — `/profile` page (self-service, all roles)
+9. **I** — `/admin/students` + `/admin/instructors` + **`/admin/profiles` (per D69)** admin pages — 3 separate lazy chunks
+10. **J** — `OfferingsPage` extension (instructor dropdown + new column)
+11. **K** — D12 + D18 specs + router registration (lazy routes per Path D, NO bucket) + review doc + bundle measurement + single complete-evidence ping
 
-11 atomic commits, identical cadence to R2.
+11 atomic commits, identical cadence to R2. Owner's reordering vs original memo: SelfOrAdminGuard explicit in B, role validation explicit in E, /admin/profiles added in I, specs moved from J → K so J = pure UI extension.
 
 ---
 
