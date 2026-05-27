@@ -14,9 +14,10 @@
 import { Module } from "@nestjs/common";
 
 import { ProfilesModule } from "./profiles/profiles.module";
+import { StudentsModule } from "./students/students.module";
 
 @Module({
-  imports: [ProfilesModule],
-  exports: [ProfilesModule],
+  imports: [ProfilesModule, StudentsModule],
+  exports: [ProfilesModule, StudentsModule],
 })
 export class IdentityModule {}
