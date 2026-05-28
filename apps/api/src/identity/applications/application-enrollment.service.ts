@@ -123,13 +123,52 @@ export class ApplicationEnrollmentService {
         },
       });
 
-      // Update the application — link the resulting Student + flip status.
+      // Phase B R4 (D73 Q0.a + Q5.a) — close the D72 gap: if the
+      // application has a targetOfferingId, create a program-term
+      // Enrollment (offeringId set, courseId null) in the SAME
+      // transaction + link it back. If targetOfferingId is null, the
+      // Student is created but no Enrollment (Q1.a no-regression
+      // fallback — admin enrolls manually via /admin/enrollments later).
+      let resultingEnrollmentId: string | null = null;
+      if (app.targetOfferingId) {
+        // Validate the target offering is in-tenant + (integrity) belongs
+        // to the program the applicant applied to.
+        const offering = await tx.courseOffering.findFirst({
+          where: { id: app.targetOfferingId, tenantId, deletedAt: null },
+          select: { id: true, programId: true },
+        });
+        if (!offering) {
+          throw new BadRequestException(
+            `targetOfferingId not found in tenant (set a valid offering before ENROLLED)`,
+          );
+        }
+        if (offering.programId !== app.programId) {
+          throw new BadRequestException(
+            `targetOffering belongs to a different program than the application — reassign the target offering`,
+          );
+        }
+        const enrollment = await tx.enrollment.create({
+          data: {
+            tenantId,
+            userId,
+            offeringId: app.targetOfferingId,
+            courseId: null, // program-term admission shape (Q0.a)
+            status: "active",
+            createdBy: actorUserId,
+            updatedBy: actorUserId,
+          },
+        });
+        resultingEnrollmentId = enrollment.id;
+      }
+
+      // Update the application — link the resulting Student (+ Enrollment) + flip status.
       const enrolled = await tx.studentApplication.update({
         where: { id: app.id },
         data: {
           status: "ENROLLED" as AppStatus,
           userId, // ensure userId reflects the resolved User (was-null path)
           resultingStudentId: student.id,
+          resultingEnrollmentId, // null if no targetOffering (Q1.a fallback)
           decidedAt: app.decidedAt ?? new Date(),
           decidedBy: app.decidedBy ?? actorUserId,
           updatedBy: actorUserId,
@@ -137,7 +176,10 @@ export class ApplicationEnrollmentService {
       });
 
       this.logger.log(
-        `Student enrolled: applicationId=${app.id} userId=${userId} studentId=${student.id} studentCode=${studentCode}`,
+        `Student enrolled: applicationId=${app.id} userId=${userId} studentId=${student.id} studentCode=${studentCode}` +
+          (resultingEnrollmentId
+            ? ` enrollmentId=${resultingEnrollmentId} (program-term, offeringId=${app.targetOfferingId})`
+            : ` (no targetOffering — Student only, admin enrolls manually)`),
       );
 
       return enrolled;

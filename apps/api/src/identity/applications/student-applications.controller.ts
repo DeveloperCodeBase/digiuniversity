@@ -31,6 +31,7 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from "class-validator";
 
 import type { AuthenticatedUser } from "../../auth/auth.types";
@@ -65,6 +66,16 @@ class ListQueryDto {
 // `{ verified: false }` (revoke verification, e.g. typo correction).
 class SetVerifiedDto {
   @IsOptional() @IsBoolean() verified?: boolean;
+}
+
+// Phase B R4 (D73 Q1.a) — admin sets the target offering for an
+// application. null/empty clears it (→ Student-only on ENROLLED).
+class SetTargetOfferingDto {
+  @ValidateIf((_, v) => v !== null)
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  offeringId!: string | null;
 }
 
 // Phase B R3.b Commit E — public submission DTO.
@@ -202,6 +213,23 @@ export class StudentApplicationsController {
     @Body() dto: TransitionDto,
   ) {
     return this.service.transition(user.tenantId, user.userId, id, dto.to);
+  }
+
+  /**
+   * Phase B R4 (D73 Q1.a) — admin sets the target CourseOffering the
+   * accepted applicant will be enrolled into on ENROLLED. null/empty
+   * clears it (→ Student-only, no regression). Validated in-tenant +
+   * same-program as the application.
+   */
+  @Roles("admin")
+  @Patch(":id/target-offering")
+  @AuditAction("application.student.target-offering")
+  async setTargetOffering(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: SetTargetOfferingDto,
+  ) {
+    return this.service.setTargetOffering(user.tenantId, user.userId, id, dto.offeringId ?? null);
   }
 
   /**

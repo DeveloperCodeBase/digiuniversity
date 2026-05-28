@@ -167,6 +167,51 @@ export class StudentApplicationsService {
   }
 
   /**
+   * Phase B R4 (D73 Q1.a) — admin sets/clears the target CourseOffering
+   * for an application (before ACCEPTED → ENROLLED). The ENROLLED side
+   * effect enrolls the new Student into this offering (program-term
+   * admission). Pass offeringId=null (or "") to clear (→ Student-only
+   * on ENROLLED, no regression).
+   *
+   * Validates the offering is in-tenant + belongs to the application's
+   * program (integrity — you enroll into an offering of the program you
+   * applied to).
+   */
+  async setTargetOffering(
+    tenantId: string,
+    actorUserId: string,
+    id: string,
+    offeringId: string | null,
+  ) {
+    const app = await this.prisma.studentApplication.findFirst({
+      where: { id, tenantId, deletedAt: null },
+      select: { id: true, programId: true },
+    });
+    if (!app) throw new NotFoundException("student application not found");
+
+    const target = offeringId && offeringId.length > 0 ? offeringId : null;
+    if (target) {
+      const offering = await this.prisma.courseOffering.findFirst({
+        where: { id: target, tenantId, deletedAt: null },
+        select: { id: true, programId: true },
+      });
+      if (!offering) {
+        throw new BadRequestException("offeringId not found in this tenant");
+      }
+      if (offering.programId !== app.programId) {
+        throw new BadRequestException(
+          "target offering belongs to a different program than the application",
+        );
+      }
+    }
+
+    return this.prisma.studentApplication.update({
+      where: { id },
+      data: { targetOfferingId: target, updatedBy: actorUserId },
+    });
+  }
+
+  /**
    * Q4.a caveat verification — admin manually flips the email-verified
    * timestamp. The actual end-user self-verification flow (email-token
    * landing page) defers to R-Notif per D71 Q3.a; this endpoint is the
