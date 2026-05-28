@@ -79,7 +79,7 @@ jobs:
         # The trivy-action release tags are v-prefixed (v0.28.0). The
         # bare `@0.28.0` ref doesn't exist → "Unable to resolve action"
         # broke the whole Security workflow. Pin to the valid v-tag.
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         # This job is advisory (it uploads a SARIF report; it is NOT a
         # hard gate — see exit-code:'0' below). continue-on-error keeps a
         # future trivy hiccup (bad version, registry blip, scanner crash)
