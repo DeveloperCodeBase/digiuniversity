@@ -368,6 +368,12 @@ export const studentApplicationsApi = {
   verifyPhone: (id, verified = true) =>
     api.patch("/v1/applications/student/" + encodeURIComponent(id) + "/verify-phone", { verified }),
 
+  // Phase B R4 (D73 Q1.a) — admin sets the target CourseOffering the
+  // accepted applicant enrolls into on ENROLLED. Pass null to clear
+  // (→ Student-only, no regression).
+  setTargetOffering: (id, offeringId) =>
+    api.patch("/v1/applications/student/" + encodeURIComponent(id) + "/target-offering", { offeringId }),
+
   delete: (id) => api.delete("/v1/applications/student/" + encodeURIComponent(id)),
 };
 

@@ -50,6 +50,9 @@ interface BaseApplication {
 interface StudentApplication extends BaseApplication {
   programId: string;
   resultingStudentId: string | null;
+  // Phase B R4 (D73 Q1.a) — target offering for the ENROLLED side effect.
+  targetOfferingId: string | null;
+  resultingEnrollmentId: string | null;
   program?: { id: string; slug: string; name: string };
 }
 
@@ -63,6 +66,8 @@ interface InstructorApplication extends BaseApplication {
 
 interface ProgramOpt { id: string; slug: string; name: string; }
 interface DepartmentOpt { id: string; slug: string; name: string; }
+// Phase B R4 (D73 Q1.a) — offerings for the drawer target-offering selector.
+interface OfferingOpt { id: string; slug: string; nameFa: string; programId: string; }
 
 const STATUS_LABEL_FA: Record<AppStatus, string> = {
   SUBMITTED: "ارسال شده",
@@ -152,6 +157,8 @@ export const ApplicationsPage: React.FC = () => {
   const [instructorApps, setInstructorApps] = React.useState<InstructorApplication[]>([]);
   const [programs, setPrograms] = React.useState<ProgramOpt[]>([]);
   const [departments, setDepartments] = React.useState<DepartmentOpt[]>([]);
+  // Phase B R4 (D73 Q1.a) — offerings for the drawer target selector.
+  const [offerings, setOfferings] = React.useState<OfferingOpt[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   // Phase B R3.b Commit H — drawer + transition state.
@@ -166,7 +173,7 @@ export const ApplicationsPage: React.FC = () => {
       // Always fetch both lists so the «همه» tab can union them; cheap
       // for the demo seed sizes. Future scale-up: fetch only the active
       // type filter, or paginate.
-      const [students, instructors, progs, depts] = await Promise.all([
+      const [students, instructors, progs, depts, offs] = await Promise.all([
         studentApplicationsApi.list({
           status: statusFilter || undefined,
           programId: programFilter || undefined,
@@ -177,11 +184,13 @@ export const ApplicationsPage: React.FC = () => {
         }) as Promise<InstructorApplication[]>,
         academicAdminApi.listPrograms() as Promise<ProgramOpt[]>,
         academicAdminApi.listDepartments() as Promise<DepartmentOpt[]>,
+        academicAdminApi.listOfferings() as Promise<OfferingOpt[]>,
       ]);
       setStudentApps(Array.isArray(students) ? students : []);
       setInstructorApps(Array.isArray(instructors) ? instructors : []);
       setPrograms(Array.isArray(progs) ? progs : []);
       setDepartments(Array.isArray(depts) ? depts : []);
+      setOfferings(Array.isArray(offs) ? offs : []);
     } finally {
       setLoading(false);
     }
@@ -300,6 +309,30 @@ export const ApplicationsPage: React.FC = () => {
       const msg =
         (err as { body?: { message?: string | string[] } })?.body?.message ??
         (err instanceof Error ? err.message : "خطا در تغییر وضعیت تأیید");
+      setDrawerError(Array.isArray(msg) ? msg.join("\n") : String(msg));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Phase B R4 (D73 Q1.a) — set/clear the target offering for a student
+  // application (drives the ENROLLED side effect). Student kind only.
+  const handleSetTargetOffering = async (row: UnifiedRow, offeringId: string) => {
+    if (row.kind !== "student") return;
+    setBusy(true);
+    setDrawerError(null);
+    try {
+      await studentApplicationsApi.setTargetOffering(row.id, offeringId || null);
+      await refetch();
+      window.toast?.({
+        title: offeringId ? "دوره هدف تنظیم شد" : "دوره هدف پاک شد",
+        msg: offeringId ? "هنگام ENROLLED، دانشجو در این دوره ثبت‌نام می‌شود." : "ENROLLED فقط Student می‌سازد (بدون ثبت‌نام).",
+        kind: "success",
+      });
+    } catch (err) {
+      const msg =
+        (err as { body?: { message?: string | string[] } })?.body?.message ??
+        (err instanceof Error ? err.message : "تنظیم دوره هدف با خطا مواجه شد");
       setDrawerError(Array.isArray(msg) ? msg.join("\n") : String(msg));
     } finally {
       setBusy(false);
@@ -617,6 +650,41 @@ export const ApplicationsPage: React.FC = () => {
                 Q4.a caveat: گذر از UNDER_REVIEW نیاز به هر دو تأیید دارد (به‌جز انصراف).
               </div>
             </div>
+
+            {/* Phase B R4 (D73 Q1.a) — target offering selector (student
+                kind only). Admin sets the offering the applicant enrolls
+                into on ENROLLED. Offerings filtered to the application's
+                program (backend rejects cross-program). */}
+            {selectedRow.kind === "student" ? (
+              <div className="card p-4 mb-3" data-section="target-offering">
+                <div className="mb-2" style={{ fontWeight: 600, fontSize: 13 }}>
+                  دوره‌ی هدف برای ثبت‌نام (R4)
+                </div>
+                <select
+                  value={(selectedRow.raw as StudentApplication).targetOfferingId ?? ""}
+                  onChange={(ev) => void handleSetTargetOffering(selectedRow, ev.target.value)}
+                  disabled={busy}
+                  className="crud-form-input"
+                  data-control="target-offering"
+                >
+                  <option value="">— بدون دوره هدف (فقط ساخت دانشجو) —</option>
+                  {offerings
+                    .filter((o) => o.programId === (selectedRow.raw as StudentApplication).programId)
+                    .map((o) => (
+                      <option key={o.id} value={o.id}>{o.nameFa}</option>
+                    ))}
+                </select>
+                <div className="crud-form-helper">
+                  هنگام ENROLLED، یک ثبت‌نام «پذیرش دوره‌ای» در این دوره ساخته می‌شود (Q0.a).
+                  بدون انتخاب، فقط Student ساخته می‌شود (بدون ثبت‌نام — قابل ثبت‌نام دستی بعدی).
+                  {(selectedRow.raw as StudentApplication).resultingEnrollmentId ? (
+                    <span style={{ color: "var(--accent)" }}>
+                      {" "}· ثبت‌نام انجام‌شده: #{(selectedRow.raw as StudentApplication).resultingEnrollmentId!.slice(-8)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {/* Transition controls + WITHDRAW (admin-on-behalf) + Delete */}
             <div className="card p-4">
