@@ -1516,6 +1516,34 @@ Hardening added (defense in depth on top of Q8.a):
 
 **Source:** owner directive 2026-05-27 «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع» + two refinement explanations.
 
+### D72 — Phase B R3.b D13 ack: Applications + parallel state machines shipped + verified
+**Context:** Owner D13 manual smoke (real device + production deploy) — all 9 checks PASS:
+- ✅ `/admin/applications` 7 seeded rows + type/status filters
+- ✅ State machine: SUBMITTED → UNDER_REVIEW → INTERVIEW (verification-gated) → ACCEPTED → ENROLLED
+- ✅ Q4.a verification gate: blocks INTERVIEW without email+phone verified, clear «Q4.a caveat» error
+- ✅ ENROLLED side effect: User + Student created transactionally (see correction below re: Enrollment)
+- ✅ Public submission: idempotency + rate-limit 429 working
+- ✅ WITHDRAW (admin on-behalf) + soft-delete (D70 explicit destructive test) + GET 404
+- ✅ Student access guard: `/admin/applications` blocked
+- ✅ Deploy + migrate + seed clean; production bundle modulepreload = vendor chunks only
+
+**9-commit chain (A→I + docs prelude):** `60b37d8` → `e374e2c`. Review in `docs/PHASE_B_R3_B_REVIEW.md`.
+
+**⚠️ Accuracy correction to the ack (logged for the record):** the owner's ack states «User + Student + Enrollment created transactionally». The R3.b `ApplicationEnrollmentService.enrollStudent()` actually creates **User + Student** (+ links the application + queues a NotificationLog) — it does **NOT** create an `Enrollment` row. This was a deliberate scope deferral in the R3.b memo («Create initial Enrollment in the program's default current offering (if any) OR skip if no current offering — admin enrolls manually later»). There is also no Enrollment admin page in R3.a/R3.b to "verify across", so the owner most likely observed the Student row at `/admin/students` and referred to it as "Enrollment".
+- **No action lost:** the ENROLLED applicant becomes a real Student (roster identity). Course-registration (`Enrollment` row tying Student → CourseOffering/Cohort) is the missing piece.
+- **This gap = R-Next candidate #2** («Enrollment workflow + StudentApplication → Enrollment full lifecycle»), which the owner independently listed. Recorded here so the gap is tracked, not silently assumed-shipped.
+
+**Identity track (R3.a + R3.b) operational primitives:**
+- Parallel state machine (Student + Instructor sharing AppStatus) — first parallel state machine in Phase B
+- Transactional find-or-create-or-link ENROLLED side effect (Q5.a) — P2002 race eliminated
+- Q4.a verification gate enforced at service layer
+- Q8.a rate-limit (5/IP/hr) + spam-flag NotificationLog stub
+- SelfOrAdminGuard (D69) reused for applicant /me + WITHDRAW
+
+**R3.b closed. Identity track (R3.a + R3.b) complete.**
+
+**Source:** owner directive 2026-05-28 «R3.b D13 PASS. owner real-device smoke + production deploy confirmed» + accuracy correction logged by implementer.
+
 ### D64 — Phase B R1 D13 ack: Academic Hierarchy CRUD shipped + verified
 **Context:** Owner D13 manual smoke (real device + incognito + hard reload) — all 8 checks PASS:
 - ✅ Admin sidebar shows 4 new items (Schools / Faculties / Departments / Programs)
