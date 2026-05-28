@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -95,7 +95,7 @@ jobs:
       # `npm install` and skip the lockfile-keyed cache. The
       # ~/.npm directory is still cached automatically by setup-node.
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
