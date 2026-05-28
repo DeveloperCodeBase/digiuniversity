@@ -155,6 +155,9 @@ const InstructorsAdminPage = React.lazy(() => import("./pages/admin/InstructorsP
 // Phase B R3.b Commit G (D71) — Applications inbox (unified, Q9.a).
 // Same per-route lazy pattern; ships as ApplicationsPage-<hash>.js.
 const ApplicationsAdminPage = React.lazy(() => import("./pages/admin/ApplicationsPage"));
+// Phase B R4 Commit E (D73) — Enrollments admin (closes D72 spine gap).
+// Own per-route lazy chunk (D66 Path D).
+const EnrollmentsAdminPage = React.lazy(() => import("./pages/admin/EnrollmentsPage"));
 const OrgDashboard = React.lazy(() => import("./pages/dashboards/OrgDashboard"));
 // University.tsx + Productivity.tsx are multi-export, all workspace:
 const SchoolsPage = React.lazy(() => import("./pages/University").then((m) => ({ default: m.SchoolsPage })));
@@ -406,6 +409,8 @@ const routes = [
   { path: "/admin/instructors", element: <RouteShell Component={InstructorsAdminPage} /> },
   // Phase B R3.b Commit G (D71) — Applications inbox.
   { path: "/admin/applications", element: <RouteShell Component={ApplicationsAdminPage} /> },
+  // Phase B R4 Commit E (D73) — Enrollments admin.
+  { path: "/admin/enrollments", element: <RouteShell Component={EnrollmentsAdminPage} /> },
   { path: "/parent", element: <RouteShell Component={ParentPage} /> },
   {
     path: "/officehours",

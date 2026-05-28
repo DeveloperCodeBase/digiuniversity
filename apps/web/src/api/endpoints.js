@@ -187,6 +187,34 @@ export const enrollmentsApi = {
     api.patch("/v1/enrollments/" + encodeURIComponent(id) + "/status", { status }),
 };
 
+// ---------- enrollments admin (Phase B R4 D73 + D74) ----------
+//
+// The NEW R4 admin surface. Coexists with enrollmentsApi above (the
+// student/instructor flow). Powers /admin/enrollments.
+//   • adminList — offeringId / status / programId filters
+//   • manualEnroll — admin enrolls a user into an offering and/or course
+//   • transition — service-layer state machine (D74; legal moves only)
+//   • softDelete
+export const enrollmentsAdminApi = {
+  adminList: ({ offeringId, status, programId } = {}) => {
+    const q = [];
+    if (offeringId) q.push("offeringId=" + encodeURIComponent(offeringId));
+    if (status) q.push("status=" + encodeURIComponent(status));
+    if (programId) q.push("programId=" + encodeURIComponent(programId));
+    return api.get("/v1/enrollments" + (q.length ? "?" + q.join("&") : ""));
+  },
+  get: (id) => api.get("/v1/enrollments/" + encodeURIComponent(id)),
+  manualEnroll: ({ userId, offeringId, courseId }) =>
+    api.post("/v1/enrollments/manual", {
+      userId,
+      ...(offeringId ? { offeringId } : {}),
+      ...(courseId ? { courseId } : {}),
+    }),
+  transition: (id, to) =>
+    api.post("/v1/enrollments/" + encodeURIComponent(id) + "/transition", { to }),
+  delete: (id) => api.delete("/v1/enrollments/" + encodeURIComponent(id)),
+};
+
 // ---------- analytics + learning events ----------
 export const analyticsApi = {
   studentMe: () => api.get("/v1/analytics/student/me"),

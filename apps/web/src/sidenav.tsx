@@ -113,6 +113,10 @@ export const SIDEBAR_BY_ROLE: Record<RoleId, SidebarEntry[]> = {
     // serves both student + instructor apps (Q9.a unified surface);
     // type filter inside the page distinguishes them.
     { id: "admin/applications", t: "درخواست‌ها", ic: "inbox" },
+    // Phase B R4 Commit E (D73) — Enrollments admin (closes the D72
+    // spine gap). Program-term admissions + course-level enrollments
+    // + manual enroll + status state machine.
+    { id: "admin/enrollments", t: "ثبت‌نام‌ها", ic: "cert" },
     { h: "محتوا و منابع" },
     { id: "authoring", t: "استودیوی درس", ic: "sparkle" },
     { id: "library", t: "کتابخانه", ic: "folder" },
