@@ -1516,6 +1516,33 @@ Hardening added (defense in depth on top of Q8.a):
 
 **Source:** owner directive 2026-05-27 «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع» + two refinement explanations.
 
+### D73 — R4 Q-answers locked (Q0.a + Q1.a–Q5.a + dual-write forward-only) — ⚠️ Q2 implementation hold
+**Context:** Owner reviewed `PHASE_B_R4_MEMO.md` (commit `8a5e6f5`) and ack'd 2026-05-28: «Q0.a Q1.a Q2.a Q3.a Q4.a Q5.a شروع + dual-write decision confirmed».
+
+**Locked decisions:**
+- **Q0.a ✅** — Relax `Enrollment.courseId` to nullable; two-shape model (course-level legacy = courseId set; program-term admission = offeringId set + courseId null). Backward-compatible constraint widening (MIGRATION_POLICY §4 safe, not §5 risky). Partial unique index guards program-term collisions. Chosen over Q0.b (fan-out, needs OfferingCourse join) + Q0.c (ProgramEnrollment, over-engineering / YAGNI).
+- **Q1.a ✅** — `StudentApplication.targetOfferingId` set by admin on the drawer; null = Student-only (no regression).
+- **Q2.a ✅ (intent)** — Enrollment status state machine `ACTIVE → COMPLETED | DROPPED | WITHDRAWN`. **See Q2 implementation hold below.**
+- **Q3.a ✅** — course-level `@@unique([tenantId, userId, courseId])` kept + partial unique for program-term admission.
+- **Q4.a ✅** — full `/admin/enrollments` (list + filters + manual-enroll + transitions + soft-delete) — per D60 (no half-built read-only).
+- **Q5.a ✅** — `StudentApplication.resultingEnrollmentId` back-link (chain: application → student → enrollment traceable).
+- **Dual-write forward-only ✅** — R4 enrollments populate `offeringId` only, NO cohort back-write (writing into deprecated `cohortId` would extend the legacy surface past Sunset 2026-12-31). R2 `LegacySyncService` untouched (it mirrors CourseOffering↔Cohort, not Enrollment). New=offeringId forward, legacy=cohortId read-only until drop. Consistent with MIGRATION_POLICY §5 stage progression.
+
+**⚠️ Q2 IMPLEMENTATION HOLD (raised pre-Commit-A, per stop triggers #1/#2/#6 + the D72 «ack ≠ ground truth» lesson):**
+
+Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that the memo's Q2.a assumption — «existing status values already match the enum» — is **incorrect on two counts**:
+1. **Data**: existing `Enrollment.status` values are lowercase (`"active"`, `"completed"`, `"dropped"`, `"withdrawn"`); a Postgres enum is conventionally uppercase. A direct `String → enum` cast on existing production rows would FAIL.
+2. **Code**: the EXISTING `enrollments.controller.ts` (Phase-7-era, RBAC-gated) uses lowercase strings throughout — `STATUSES` const, `@IsIn` DTOs, self-enroll create (`status: "active"`), and the nuanced status-change RBAC (admin=any, instructor=completed-only, owner=withdrawn/dropped). Converting to a Postgres enum would require rewriting all of it + a data migration.
+
+→ Q2.a-as-literally-stated (Postgres enum) is a **§3 modification** (existing-model change + data migration + existing-code rewrite), NOT the **§4-additive «+60 LOC»** the memo estimated. This trips stop trigger #6 («nullable widening / migration on existing production data — if ambiguity, STOP before proceeding») + #1 (unexpected discovery) + #2 (scope expand).
+
+**Recommended resolution — Q2.a-via-service-layer (Option B):** keep `Enrollment.status` as a String column (storage unchanged, zero data migration, zero existing-code rewrite, zero production-data risk); deliver Q2.a's state-machine INTENT at the SERVICE layer — the new R4 admin transition endpoint enforces `ALLOWED_TRANSITIONS` + illegal-transition-400, exactly where R2/R3.b put the transition LOGIC (the Postgres enum there was just storage for greenfield tables). The existing self-enroll/withdraw RBAC flow stays untouched (lowercase strings). New R4 transition surface formalizes the state machine on top of the existing string field.
+- Awaiting owner confirm: «Q2 = service-layer (string storage)» (recommended) OR «Q2 = full Postgres enum migration» (larger; rewrites existing R7-era enrollments controller + data migration).
+
+**Commit A is PAUSED** pending Q2 resolution. Q0.a / Q1 / Q3 / Q4 / Q5 / dual-write are all unaffected + ready.
+
+**Source:** owner directive 2026-05-28 «Q0.a Q1.a Q2.a Q3.a Q4.a Q5.a شروع + dual-write decision confirmed» + implementer's pre-Commit-A schema/code discovery hold on Q2.
+
 ### D72 — Phase B R3.b D13 ack: Applications + parallel state machines shipped + verified
 **Context:** Owner D13 manual smoke (real device + production deploy) — all 9 checks PASS:
 - ✅ `/admin/applications` 7 seeded rows + type/status filters
