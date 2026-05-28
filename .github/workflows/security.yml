@@ -72,6 +72,15 @@ jobs:
     name: trivy filesystem
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Job-level continue-on-error: this job is ADVISORY (it uploads a
+    # SARIF report to the Security tab; it is not a gate). Step-level
+    # continue-on-error can't catch a "Set up job" failure (action-
+    # resolution / runner-allocation happens before steps run), which
+    # was failing the whole Security workflow + blocking the R-Infra
+    # deploy gate (deploy needs Security green). Job-level
+    # continue-on-error keeps a trivy hiccup — transient infra blip,
+    # action-version issue, scanner crash — from failing the workflow.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
