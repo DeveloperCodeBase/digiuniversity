@@ -3,6 +3,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   HttpCode,
@@ -20,6 +21,7 @@ import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
+import { EnrollmentsService, type EnrollmentStatus } from "./enrollments.service";
 
 const STATUSES = ["active", "completed", "dropped", "withdrawn"] as const;
 
@@ -36,11 +38,36 @@ class ListEnrollmentsQueryDto {
   @IsOptional() @IsString() courseId?: string;
   @IsOptional() @IsString() userId?: string;
   @IsOptional() @IsString() @IsIn([...STATUSES]) status?: typeof STATUSES[number];
+  // Phase B R4 (D73) — additive optional filters for the admin
+  // /admin/enrollments page. Existing callers that don't pass them are
+  // unaffected (regression-safe per D74).
+  @IsOptional() @IsString() offeringId?: string;
+  @IsOptional() @IsString() programId?: string;
+}
+
+// Phase B R4 (D73 Q4.a) — admin manual-enroll DTO (distinct path
+// /enrollments/manual to avoid colliding with the existing self-enroll
+// POST /enrollments).
+class ManualEnrollDto {
+  @IsString() userId!: string;
+  @IsOptional() @IsString() offeringId?: string;
+  @IsOptional() @IsString() courseId?: string;
+}
+
+// Phase B R4 (D73 Q2.a, D74 service-layer) — admin state-machine
+// transition DTO. Distinct from UpdateEnrollmentStatusDto (the existing
+// RBAC status-change); this one is admin-only + ALLOWED_TRANSITIONS-guarded.
+class TransitionEnrollmentDto {
+  @IsString() @IsIn([...STATUSES]) to!: EnrollmentStatus;
 }
 
 @Controller("enrollments")
 export class EnrollmentsController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    // Phase B R4 — admin business logic + state machine.
+    private readonly service: EnrollmentsService,
+  ) {}
 
   /**
    * Self-enrol. The authenticated user enrols themselves in a course of
@@ -144,11 +171,17 @@ export class EnrollmentsController {
         ...(query.courseId ? { courseId: query.courseId } : {}),
         ...(query.userId ? { userId: query.userId } : {}),
         ...(query.status ? { status: query.status } : {}),
+        // Phase B R4 (D73) — additive offering/program filters.
+        ...(query.offeringId ? { offeringId: query.offeringId } : {}),
+        ...(query.programId ? { offering: { programId: query.programId } } : {}),
       },
       orderBy: { enrolledAt: "desc" },
       include: {
         user: { select: { id: true, email: true, fullName: true } },
         course: { select: { id: true, code: true, title: true } },
+        // Phase B R4 — include the offering so the admin page can render
+        // the program-term context (offerings have nameFa, not a course title).
+        offering: { select: { id: true, slug: true, nameFa: true, nameEn: true } },
       },
       take: 500,
     });
@@ -194,5 +227,65 @@ export class EnrollmentsController {
         updatedBy: user.userId,
       },
     });
+  }
+
+  // =====================================================================
+  // Phase B R4 (D73 + D74) — admin surface for /admin/enrollments.
+  // These coexist with the existing student/instructor flow above:
+  //   • POST /enrollments/manual      — admin enrolls another user
+  //   • GET  /enrollments/:id         — admin single
+  //   • POST /enrollments/:id/transition — admin state-machine transition
+  //   • DELETE /enrollments/:id       — admin soft-delete
+  // The existing self-enroll (POST /), listMine (GET /me), list (GET /),
+  // and RBAC status-change (PATCH /:id/status) are untouched (D74).
+  // GET /:id is declared AFTER GET /me so the literal "me" route always
+  // wins (NestJS matches in registration order).
+  // =====================================================================
+
+  /**
+   * Admin manual enroll — enroll a User into an offering and/or course.
+   * Distinct path /manual avoids colliding with the self-enroll POST /.
+   */
+  @Roles("admin")
+  @Post("manual")
+  @HttpCode(HttpStatus.CREATED)
+  @AuditAction("enrollment.admin.create")
+  async manualEnroll(@CurrentUser() user: AuthenticatedUser, @Body() dto: ManualEnrollDto) {
+    return this.service.manualEnroll(user.tenantId, user.userId, {
+      userId: dto.userId,
+      offeringId: dto.offeringId,
+      courseId: dto.courseId,
+    });
+  }
+
+  @Roles("admin")
+  @Get(":id")
+  async adminGetById(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
+    return this.service.getById(user.tenantId, id);
+  }
+
+  /**
+   * Admin state-machine transition (R4 Q2.a, D74 service-layer). Distinct
+   * from PATCH /:id/status (the Phase-7 RBAC status-change, untouched) —
+   * this one is admin-only + ALLOWED_TRANSITIONS-guarded (illegal → 400).
+   */
+  @Roles("admin")
+  @Post(":id/transition")
+  @HttpCode(HttpStatus.OK)
+  @AuditAction("enrollment.transition")
+  async transition(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body() dto: TransitionEnrollmentDto,
+  ) {
+    return this.service.transition(user.tenantId, user.userId, id, dto.to);
+  }
+
+  @Roles("admin")
+  @Delete(":id")
+  @HttpCode(HttpStatus.OK)
+  @AuditAction("enrollment.delete")
+  async softDelete(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
+    return this.service.softDelete(user.tenantId, user.userId, id);
   }
 }
