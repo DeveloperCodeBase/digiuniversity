@@ -51,6 +51,12 @@ jobs:
           node-version: '20'
 
       - name: web
+        # Run inside apps/web — the repo root has no package-lock.json
+        # (monorepo: each workspace owns its lockfile), so a root-level
+        # `npm audit` errored on "no lockfile" and only passed because of
+        # continue-on-error. Pointing it at the real lockfile makes the
+        # advisory meaningful.
+        working-directory: apps/web
         run: npm audit --audit-level=high --omit=dev
         continue-on-error: true   # advisory only until we agree a policy
 
@@ -70,7 +76,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy fs scan
-        uses: aquasecurity/trivy-action@0.28.0
+        # The trivy-action release tags are v-prefixed (v0.28.0). The
+        # bare `@0.28.0` ref doesn't exist → "Unable to resolve action"
+        # broke the whole Security workflow. Pin to the valid v-tag.
+        uses: aquasecurity/trivy-action@v0.28.0
+        # This job is advisory (it uploads a SARIF report; it is NOT a
+        # hard gate — see exit-code:'0' below). continue-on-error keeps a
+        # future trivy hiccup (bad version, registry blip, scanner crash)
+        # from failing the Security workflow + thereby blocking the
+        # R-Infra auto-deploy gate (which requires Security green).
+        continue-on-error: true
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -84,7 +99,11 @@ jobs:
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
+        # if: always() so the report uploads even on prior-step issues.
+        # continue-on-error so a missing/empty SARIF (if the scan step
+        # was skipped/failed) doesn't fail the job either.
         if: always()
+        continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
 
