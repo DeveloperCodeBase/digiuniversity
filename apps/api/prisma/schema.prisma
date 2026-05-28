@@ -448,12 +448,31 @@ model Enrollment {
   id          String    @id @default(cuid())
   tenantId    String
   userId      String
-  courseId    String
+  // Phase B R4 (D73 Q0.a) — courseId RELAXED from required → nullable.
+  // Two-shape model:
+  //   • course-level (legacy / Phase-3): courseId SET    → enrollment in a Course
+  //   • program-term admission (R4 new): courseId NULL + offeringId SET
+  //     → admission to a CourseOffering (a program term), created by the
+  //     R3.b→R4 ACCEPTED→ENROLLED side effect.
+  // Backward-compatible widening (MIGRATION_POLICY §4): existing rows
+  // all keep courseId, stay valid. Postgres treats NULL as distinct in
+  // the @@unique below, so program-term rows aren't constrained by it;
+  // a partial unique index (migration SQL only — Prisma can't express
+  // partial uniques) enforces one program-term admission per
+  // (tenantId, userId, offeringId) WHERE courseId IS NULL AND deletedAt IS NULL.
+  courseId    String?
   cohortId    String?
   // Phase B R2 (D65) — additive dual-source FK to CourseOffering.
   // Nullable so existing enrollments (Cohort-only) keep working.
   // Set-null on offering soft-delete so the enrollment row survives.
+  // Phase B R4 (D74): new R4 enrollments populate offeringId ONLY
+  // (no cohort back-write — respects Sunset 2026-12-31).
   offeringId  String?
+  // Phase B R4 (D74 Q2 = service-layer): status stays a String column
+  // (NOT a Postgres enum). The existing Phase-7 RBAC status controller
+  // + existing lowercase data are preserved. The R4 admin transition
+  // endpoint enforces ALLOWED_TRANSITIONS (ACTIVE→COMPLETED|DROPPED|
+  // WITHDRAWN) at the service layer; values stay lowercase to match.
   status      String    @default("active") // "active" | "completed" | "dropped" | "withdrawn"
   enrolledAt  DateTime  @default(now())
   completedAt DateTime?
@@ -466,9 +485,16 @@ model Enrollment {
 
   tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  // courseId now nullable → relation optional. onDelete stays Cascade:
+  // deleting a Course removes its course-level enrollments; program-term
+  // rows (courseId null) are unaffected.
+  course   Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   cohort   Cohort?         @relation(fields: [cohortId], references: [id], onDelete: SetNull)
   offering CourseOffering? @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  // Phase B R4 (D73 Q5.a) — 1:0..1 back-ref to the StudentApplication
+  // whose ENROLLED side effect created this Enrollment (null for
+  // manually-created or self-enrolled rows).
+  resultingForApplication StudentApplication? @relation("ApplicationResultingEnrollment")
 
   @@unique([tenantId, userId, courseId])
   @@index([tenantId])
@@ -937,6 +963,9 @@ model CourseOffering {
   program     Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
   instructor  Instructor?  @relation(fields: [instructorId], references: [id], onDelete: SetNull)
   enrollments Enrollment[]
+  // Phase B R4 (D73 Q1.a) — applications that target this offering as
+  // their admission destination (admin-set during review).
+  targetedByApplications StudentApplication[] @relation("ApplicationTargetOffering")
 
   @@unique([tenantId, slug])
   @@index([tenantId, status])
@@ -1153,8 +1182,17 @@ model StudentApplication {
   decidedAt                DateTime?
   decidedBy                String?   // admin User.id
 
-  // Linked artifacts created by ACCEPTED → ENROLLED side effect per Q5.a.
-  resultingStudentId       String?   @unique
+  // Phase B R4 (D73 Q1.a) — admin sets the target CourseOffering during
+  // review (before ACCEPTED). The ENROLLED side effect enrolls the new
+  // Student into this offering (program-term admission). Null → Student
+  // created but no Enrollment (no regression vs current R3.b behavior).
+  targetOfferingId         String?
+
+  // Linked artifacts created by ACCEPTED → ENROLLED side effect.
+  resultingStudentId       String?   @unique   // Q5.a (R3.b)
+  // Phase B R4 (D73 Q5.a) — back-link to the program-term Enrollment the
+  // side effect creates, completing application → student → enrollment.
+  resultingEnrollmentId    String?   @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -1166,6 +1204,11 @@ model StudentApplication {
   user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   program  Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
   student  Student? @relation(fields: [resultingStudentId], references: [id], onDelete: SetNull)
+  // Phase B R4 — targetOffering (Q1.a) + resultingEnrollment (Q5.a).
+  // SetNull on both so the application row survives offering/enrollment
+  // deletion (audit history preserved).
+  targetOffering      CourseOffering? @relation("ApplicationTargetOffering", fields: [targetOfferingId], references: [id], onDelete: SetNull)
+  resultingEnrollment Enrollment?     @relation("ApplicationResultingEnrollment", fields: [resultingEnrollmentId], references: [id], onDelete: SetNull)
 
   notificationLogs NotificationLog[]
 
@@ -1173,6 +1216,7 @@ model StudentApplication {
   @@unique([tenantId, applicantEmail, programId])
   @@index([tenantId, status])
   @@index([userId])
+  @@index([targetOfferingId])
   @@index([deletedAt])
 }
 

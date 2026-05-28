@@ -1516,6 +1516,28 @@ Hardening added (defense in depth on top of Q8.a):
 
 **Source:** owner directive 2026-05-27 «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع» + two refinement explanations.
 
+### D74 — R4 Q2 resolved: service-layer state machine, NOT Postgres enum
+**Context:** Following the D73 Q2 implementation hold, owner ack'd 2026-05-28: «Q2 = service-layer، ادامه بده».
+
+**Resolution:** `Enrollment.status` stays a **String** column (storage unchanged). The state-machine intent (Q2.a — legal transitions + illegal-transition-400) is delivered at the **service layer** in the new R4 admin transition endpoint, exactly where R2/R3.b put the transition LOGIC. The existing student-facing flow (self-enroll + the RBAC status-change: admin=any, instructor=completed-only, owner=withdrawn/dropped) is **untouched**. Zero data migration, zero existing-code rewrite, zero production-data cast risk.
+
+**Rationale (owner):**
+1. **Backward-compat is the principle.** The Postgres enum in R2/R3.b was for *greenfield* tables (zero existing data). `Enrollment` is an existing table with existing data + existing RBAC code. MIGRATION_POLICY §0 decision tree: reshape-existing → §3 (risky), not §4 (additive). The convention bends to backward-compat, not the reverse.
+2. **State-machine intent is behavior, not storage type.** Service-layer `ALLOWED_TRANSITIONS` gives the same legal-transition + illegal-400 behavior as R2/R3.b; the user sees no difference.
+3. **Zero prod-data risk.** A full enum cast on production rows could fail if any row carries an off-set value (legacy/typo) → deploy breaks (the R2 migration-failure pattern). Service-layer touches no data.
+4. **Existing RBAC flow is nuanced + working** — rewriting it = regression risk without value.
+5. **Two layers, zero conflict.** The new R4 admin transition endpoint enforces `ALLOWED_TRANSITIONS` for admin-driven transitions; the existing student-facing flow (self-enroll, withdraw) is untouched. They coexist.
+
+**This is the third pre-deploy catch** (after D63 Q4.a Path-A-spirit + R2 @Header method-decorator) where schema+code discovery caught a wrong memo assumption before a deploy-time failure — exactly what Phase B lesson #1 (schema discovery pre-code) + D72 («ack ≠ ground truth on internals») exist for.
+
+**New stop trigger #7 (R4-specific):** service-layer state machine integration conflict with the existing RBAC status flow (e.g., R4 admin transition endpoint clashing with the existing owner/instructor status-change semantics) → STOP + ping.
+
+**Carried (unaffected):** Q0.a nullable widening, Q1.a targetOfferingId, Q3.a partial unique, Q4.a full admin page, Q5.a resultingEnrollmentId, dual-write forward-only. Commit A resumes — `status` stays String; schema work as planned (nullable `courseId` + `offeringId` relation already exists + `resultingEnrollmentId` back-link + `targetOfferingId` + partial unique index).
+
+**D13 mandate (owner):** because Q2 kept the existing RBAC status flow, the D13 smoke MUST verify BOTH (a) existing student self-enroll/withdraw still works (regression check — critical) AND (b) the new R4 admin transition endpoint enforces `ALLOWED_TRANSITIONS`. The two coexist; regression check on the existing flow is mandatory.
+
+**Source:** owner directive 2026-05-28 «Q2 = service-layer، ادامه بده» + rationale.
+
 ### D73 — R4 Q-answers locked (Q0.a + Q1.a–Q5.a + dual-write forward-only) — ⚠️ Q2 implementation hold
 **Context:** Owner reviewed `PHASE_B_R4_MEMO.md` (commit `8a5e6f5`) and ack'd 2026-05-28: «Q0.a Q1.a Q2.a Q3.a Q4.a Q5.a شروع + dual-write decision confirmed».
 

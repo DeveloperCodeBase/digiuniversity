@@ -2,10 +2,12 @@
 
 **Author:** Phase B (post-R3.b-close, R-Next = B picked)
 **Date:** 2026-05-28
-**Status:** ⏳ DRAFT — awaiting owner ack (esp. the Q0 architecture decision) before R4 code
+**Status:** ✅ ACKED (D73 Q0.a/Q1-Q5/dual-write + D74 Q2=service-layer) — Commit A in flight
 **Workflow:** memo → owner ack → code → spec → local build → owner deploy → owner D29 → owner D13 → close (D61 Constraint #1)
 **Predecessor:** Identity track (R3.a + R3.b) complete (D70 + D72). Closes the D72 Enrollment gap.
-**References:** D72 (Enrollment gap), R2 (CourseOffering + Cohort dual-write), R3.b (ENROLLED side effect), PHASE_B_RETROSPECTIVE.md
+**References:** D72 (Enrollment gap), D73 (R4 Q-answers), D74 (Q2 = service-layer, NOT enum), R2 (CourseOffering + Cohort dual-write), R3.b (ENROLLED side effect), PHASE_B_RETROSPECTIVE.md
+
+> **D74 Q2 resolution (supersedes Q2.a-as-written in this memo):** `Enrollment.status` stays a **String** column (no Postgres enum — backward-compat with the existing Phase-7 RBAC status controller + existing lowercase data). The state machine (`ALLOWED_TRANSITIONS` + illegal-400) lives at the **service layer** in the new R4 admin transition endpoint. Existing student self-enroll/withdraw flow untouched. Status values stay lowercase (`active`/`completed`/`dropped`/`withdrawn`) to match existing data + code. The §«State machine design» + §«Data model» enum references below are superseded by this — read `status` as a String field with a service-layer guard.
 
 ---
 

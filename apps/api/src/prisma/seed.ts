@@ -882,6 +882,37 @@ async function main(): Promise<void> {
     console.log(`[seed] sample NotificationLog application.spam.suspected created`);
   }
 
+  // ---------- Phase B R4 (D73 Q0.a) — sample program-term Enrollment ----------
+  // Demonstrates the Q0.a two-shape model: a program-term admission
+  // (offeringId SET + courseId NULL) for student1 into the seed
+  // CourseOffering. This is the shape the R4 ENROLLED side effect
+  // creates. Idempotent (deterministic id). studentUser + offering are
+  // already in scope from the R3.a + R2 seed sections above.
+  if (studentUser) {
+    const programTermEnrollmentId = `seed_${tenant.id}_enr_programterm`;
+    const existingEnr = await prisma.enrollment.findUnique({
+      where: { id: programTermEnrollmentId },
+    });
+    if (!existingEnr) {
+      await prisma.enrollment.create({
+        data: {
+          id: programTermEnrollmentId,
+          tenantId: tenant.id,
+          userId: studentUser.id,
+          // Q0.a program-term admission shape: offering set, course null.
+          offeringId: offering.id,
+          courseId: null,
+          status: "active",
+          createdBy: "system",
+          updatedBy: "system",
+        },
+      });
+      console.log(
+        `[seed] sample program-term Enrollment (offeringId=${offering.slug}, courseId=null) for student1`,
+      );
+    }
+  }
+
   console.log("[seed] done");
 }
 
