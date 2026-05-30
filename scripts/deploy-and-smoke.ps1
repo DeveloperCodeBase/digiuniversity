@@ -52,8 +52,9 @@ $EXIT_GATE_ABORTED  = 40
 $EXIT_UNEXPECTED    = 99
 
 # --- Paths -----------------------------------------------------------------
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$LogDir   = Join-Path $RepoRoot 'logs\deploy'
+$RepoRoot      = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$LogDir        = Join-Path $RepoRoot 'logs\deploy'
+$BaselinePath  = Join-Path $RepoRoot 'docs\BUNDLE_BASELINE.json'
 
 # --- Smoke targets (memo step 8) -------------------------------------------
 # Public ingress base. The api + ai-gateway sit behind Caddy path-strips
@@ -467,6 +468,143 @@ function Add-AuthSmoke {
     }
 }
 
+# --- Bundle check (memo steps 8.5-8.6) ------------------------------------
+function Get-AssetSize {
+    # Identity (uncompressed) byte size of a deployed asset. We deliberately do
+    # NOT send Accept-Encoding (no curl --compressed), so the server returns the
+    # raw representation whose Content-Length matches the local `npm run build`
+    # chunk size -- the apples-to-apples figure the baseline records. (Browsers
+    # get the gzip'd copy; the deploy budget is measured on the raw bytes.)
+    # Primary: Content-Length from a HEAD (the memo's `curl -sI`). Fallback for
+    # a server that omits Content-Length on HEAD: a GET byte count via
+    # %{size_download}. Returns $null if neither yields a size.
+    param([Parameter(Mandatory)][string]$Url)
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $global:LASTEXITCODE = 0
+    $len = $null
+    try {
+        $head = & curl.exe -sI -S --max-time 20 --connect-timeout 10 --retry 2 --retry-delay 1 --retry-connrefused $Url 2>&1
+        $headText = (@($head) | ForEach-Object { "$_" }) -join "`n"
+        if ($headText -match '(?im)^\s*Content-Length:\s*(\d+)\s*$') { $len = [int]$matches[1] }
+        if ($null -eq $len) {
+            $dl = & curl.exe -s -S --max-time 30 --connect-timeout 10 --retry 2 --retry-delay 1 --retry-connrefused -o NUL -w '%{size_download}' $Url 2>&1
+            $dlText = ((@($dl) | ForEach-Object { "$_" }) -join '').Trim()
+            if ($dlText -match '(\d+)') { $len = [int]$matches[1] }
+        }
+    }
+    finally { $ErrorActionPreference = $prevEAP }
+    return $len
+}
+
+function Add-BundleSmoke {
+    # Reads the LIVE deployed index.html, so both checks verify what users
+    # actually receive (not a local build artefact):
+    #   8.5 -- every <link rel=modulepreload> must be an allow-listed vendor
+    #          chunk; any per-route/admin chunk preloaded on the anon shell is
+    #          a fail (the D66 Path D guard -- eager-import leak regression).
+    #   8.6 -- the main (index) chunk's identity size vs docs/BUNDLE_BASELINE.json;
+    #          warn at +warnDeltaKiB, fail at +failDeltaKiB. Only growth trips it
+    #          (a shrink passes). -UpdateBaseline records the measured size.
+    $baseline = $null
+    try { $baseline = Get-Content -Raw -LiteralPath $BaselinePath | ConvertFrom-Json }
+    catch {
+        Add-Step -Section bundle -Name 'bundle baseline' -Status fail -Detail "cannot read/parse docs/BUNDLE_BASELINE.json: $($_.Exception.Message)"
+        return
+    }
+
+    Write-Host ">> GET $BaseUrl/ (index.html for bundle parse)"
+    $r = Invoke-Curl -Url "$BaseUrl/"
+    if ($r.Code -ne 200) {
+        Add-Step -Section bundle -Name 'fetch index.html' -Status fail -Detail "HTTP $($r.Code)"
+        Add-Appendix "GET $BaseUrl/ -> $($r.Code)" $r.Body
+        return
+    }
+    $html = $r.Body
+
+    # --- 8.5 modulepreload allow-list (D66 Path D guard) ------------------
+    $allow       = @($baseline.modulepreloadAllowlist)
+    $preloadTags = [regex]::Matches($html, '<link\b[^>]*\brel="modulepreload"[^>]*>')
+    $preloaded   = New-Object System.Collections.Generic.List[string]
+    $leaks       = New-Object System.Collections.Generic.List[string]
+    foreach ($t in $preloadTags) {
+        if ($t.Value -match 'href="([^"]+)"') {
+            $file = ($matches[1] -split '/')[-1]
+            $preloaded.Add($file)
+            # Match by chunk-name prefix so we never depend on Vite's hash
+            # format/length: react-vendor-<hash>.js -like 'react-vendor-*'.
+            $ok = $false
+            foreach ($a in $allow) { if ($file -like "$a-*") { $ok = $true; break } }
+            if (-not $ok) { $leaks.Add($file) }
+        }
+    }
+    if ($preloaded.Count -eq 0) {
+        Add-Step -Section bundle -Name 'modulepreload allow-list' -Status warn -Detail 'no modulepreload links found (unexpected for this SPA)'
+    } elseif ($leaks.Count -gt 0) {
+        Add-Step -Section bundle -Name 'modulepreload allow-list' -Status fail -Detail "non-vendor chunk(s) preloaded: $($leaks -join ', ')"
+        Add-Appendix 'modulepreload leak (all preloaded chunks)' ($preloaded -join "`n")
+    } else {
+        Add-Step -Section bundle -Name 'modulepreload allow-list' -Status pass -Detail "vendor only ($($preloaded.Count): $($allow -join ', '))"
+    }
+
+    # --- 8.6 main-bundle size delta vs baseline ---------------------------
+    $mainName   = $baseline.mainBundle.name
+    $scriptTags = [regex]::Matches($html, '<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"')
+    $mainUrl    = $null
+    foreach ($s in $scriptTags) {
+        $src  = $s.Groups[1].Value
+        $file = ($src -split '/')[-1]
+        if ($file -like "$mainName-*") {
+            $mainUrl = if ($src -match '^https?://') { $src } else { "$BaseUrl$src" }
+            break
+        }
+    }
+    if (-not $mainUrl) {
+        Add-Step -Section bundle -Name 'main bundle size' -Status fail -Detail "no <script type=module src=/assets/$mainName-*.js> in index.html"
+        return
+    }
+
+    Write-Host ">> HEAD $mainUrl (identity size)"
+    $bytes = Get-AssetSize -Url $mainUrl
+    if ($null -eq $bytes) {
+        Add-Step -Section bundle -Name 'main bundle size' -Status fail -Detail "could not measure $mainUrl (no Content-Length and no download)"
+        return
+    }
+
+    $baseBytes = [int]$baseline.mainBundle.sizeBytes
+    $deltaKiB  = [math]::Round(($bytes - $baseBytes) / 1024, 2)
+    $curKiB    = [math]::Round($bytes / 1024, 2)
+    $warnKiB   = [double]$baseline.thresholds.warnDeltaKiB
+    $failKiB   = [double]$baseline.thresholds.failDeltaKiB
+    $sign      = if ($deltaKiB -ge 0) { '+' } else { '' }
+    $detail    = "$curKiB KiB (delta $sign$deltaKiB KiB vs baseline)"
+
+    if ($deltaKiB -gt $failKiB) {
+        Add-Step -Section bundle -Name 'main bundle size' -Status fail -Detail "$detail; over +$failKiB KiB fail threshold"
+    } elseif ($deltaKiB -gt $warnKiB) {
+        Add-Step -Section bundle -Name 'main bundle size' -Status warn -Detail "$detail; over +$warnKiB KiB warn threshold"
+    } else {
+        Add-Step -Section bundle -Name 'main bundle size' -Status pass -Detail $detail
+    }
+
+    # -UpdateBaseline: explicit operator opt-in to record the measured size as
+    # the new normal (memo flag). Writes regardless of the delta verdict -- that
+    # IS the point (accept an intentional, owner-approved bump). Never silent: it
+    # logs here AND lands as a reviewable git diff on docs/BUNDLE_BASELINE.json.
+    if ($UpdateBaseline) {
+        try {
+            $baseline.mainBundle.sizeBytes = $bytes
+            $baseline.updatedAt = (Get-Date).ToString('yyyy-MM-dd')
+            $baseline.source    = "updated via -UpdateBaseline against $mainUrl"
+            $json = $baseline | ConvertTo-Json -Depth 6
+            [System.IO.File]::WriteAllText($BaselinePath, $json, (New-Object System.Text.UTF8Encoding($false)))
+            Add-Step -Section bundle -Name 'baseline update' -Status info -Detail "mainBundle.sizeBytes -> $bytes (review the git diff)"
+        } catch {
+            Add-Step -Section bundle -Name 'baseline update' -Status warn -Detail "write failed: $($_.Exception.Message)"
+        }
+    }
+}
+
 # --- main ------------------------------------------------------------------
 try {
     Push-Location $RepoRoot
@@ -506,12 +644,13 @@ try {
         Add-HealthStep | Out-Null
     }
 
-    # Step 8 -- API smoke (8.1-8.4 here; bundle 8.5-8.6 in Commit D). Runs in
-    # BOTH modes: under --dry-run we skip the deploy but still smoke current
-    # prod, which is exactly what verifies the report shape end-to-end.
+    # Step 8 -- API smoke (8.1-8.4) + bundle (8.5-8.6). Runs in BOTH modes:
+    # under --dry-run we skip the deploy but still smoke current prod, which is
+    # exactly what verifies the report shape end-to-end against the live system.
     Add-PublicHealthSmoke
     Add-MigrateStatusSmoke
     Add-AuthSmoke
+    Add-BundleSmoke
 
     Write-Report
     exit (Get-ExitCode)

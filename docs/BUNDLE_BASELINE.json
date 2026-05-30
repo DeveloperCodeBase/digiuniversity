@@ -1,11 +1,11 @@
 {
-  "_comment": "Baseline for scripts/deploy-and-smoke.ps1 bundle check (memo docs/PHASE_B_R5_DEPLOY_SCRIPT_MEMO.md, steps 8.5-8.6). Updated ONLY via -UpdateBaseline (Q3.a) so each change lands as a reviewable commit. Initial values: post-R4 local `npm run build` per docs/PHASE_B_R4_REVIEW.md.",
-  "unit": "KiB (1024 bytes)",
+  "_comment": "Baseline for scripts/deploy-and-smoke.ps1 bundle check (memo docs/PHASE_B_R5_DEPLOY_SCRIPT_MEMO.md, steps 8.5-8.6). mainBundle.sizeBytes is the AUTHORITATIVE reference: the identity (uncompressed, no Accept-Encoding) Content-Length in raw bytes of the deployed /assets/index-<hash>.js -- exactly what curl reports -- so there is no KiB-vs-kB ambiguity. thresholds are deltas the operator reasons about in KiB (1024). referenceChunks are informational (the size check only inspects mainBundle; 8.5 checks modulepreload by NAME against modulepreloadAllowlist). Updated ONLY via -UpdateBaseline (Q3.a) so each change lands as a reviewable commit.",
+  "unit": "bytes (identity Content-Length); thresholds + deltas in KiB (1024)",
   "updatedAt": "2026-05-30",
-  "source": "docs/PHASE_B_R4_REVIEW.md",
+  "source": "current deployed build, byte-identical to local `npm run build` (index-DfhXym2z.js, 392947 B; same content hash served by prod). Supersedes the stale R4-review snapshot (356.64), which was a pre-landing-v2 build AND was mis-labelled KiB when the R4 numbers were actually Vite kB=1000 -- see Phase B R5 Commit D message.",
   "mainBundle": {
     "name": "index",
-    "sizeKiB": 356.64
+    "sizeBytes": 392947
   },
   "thresholds": {
     "warnDeltaKiB": 40,
@@ -16,7 +16,7 @@
     "radix-vendor"
   ],
   "referenceChunks": {
-    "react-vendor": 203.57,
-    "radix-vendor": 96.63
+    "react-vendor": 203565,
+    "radix-vendor": 96625
   }
 }
