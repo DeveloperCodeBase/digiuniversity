@@ -1712,3 +1712,27 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Status:** R5 closed at the memo level. R5 D13 stays open until the first R6 real deploy exercises the script end-to-end on production. (Note: if the first R6 is a non-deploying sub-R — e.g. a typecheck-only cleanup with no migration/seed/runtime change — it would not fully exercise the script, so the Phase-2 close waits for the first R6 that actually deploys a runtime change. Surfaced in `docs/PHASE_B_R6_PLANNING_MEMO.md`.)
 
 **Source:** owner directive 2026-05-30 (R5 dogfood ack + baseline ratification + Phase-2 trigger).
+
+### D79 — R6 direction: Candidate C (applicant self-service UX); sequence C → R-CI-Cleanup → A
+**Context:** Owner reviewed `docs/PHASE_B_R6_PLANNING_MEMO.md` (the R-Next round-2 planning memo, commit `8a832cd`) and picked the direction 2026-05-30, agreeing with the memo's recommendation.
+
+**Owner decision (verbatim):** «D79 — R6 direction: Candidate C (applicant self-service UX). sequence C → R-CI-Cleanup → A. C closes Phase B (Onboarding per Compass). C is deploying sub-R → closes R5 D13 Phase 2. debt-second rationale: static debt، blocks nothing، but lands before A's big web surface push. A (content) opens Phase C، deferred to post-debt.»
+
+**Owner rationale (three points):**
+1. **Highest leverage** — C converts the entire admin-only R3.a/R3.b/R4 backend into a real public front door; max value from min backend risk (backend ready since R3.b; only a new UI surface).
+2. **Clean phase closure** — C closes Phase B per Compass (Onboarding is in Phase B's definition), the same clean-phase-boundary discipline as Gate A.
+3. **Two birds** — C is a deploying sub-R, so it also closes R5 D13 Phase 2. Had R-CI-Cleanup gone first (typecheck-only, no deploy), R5 Phase 2 would have stayed dangling.
+
+**Sequencing confirmed (C → R-CI-Cleanup → A), debt-second:**
+- Debt is static (R3.a/b/R4 added 0 of the 198) — it doesn't grow with current feature work.
+- Debt blocks nothing (R5 lean gate guarantees deployability; typecheck errors don't break runtime).
+- But R-CI-Cleanup lands BEFORE A — A is the largest web-surface push; a green baseline keeps A's own debt from mixing with legacy noise.
+- Two non-feature sub-Rs back-to-back (R5 + R-CI) would lose momentum; C in the middle preserves feature momentum.
+
+**R5 Phase-2 binding:** R6 (Candidate C) is the FIRST sub-R to deploy via `deploy-and-smoke.ps1`. When R6 deploys, Claude runs the one script (not the 6 individual `remote.ps1` commands); owner does only the final ~2-min mobile visual. A clean first real run closes R5 D13 Phase 2 concurrently with R6.
+
+**Next:** scoped Candidate-C memo (`docs/PHASE_B_R6_MEMO.md`) with mandatory schema+code discovery → owner ack → code (no code before ack, per D61 #1).
+
+**D77 note:** D77 is intentionally unused (a numbering skip D76→D78, owner-confirmed). Sequence continues from D79; no retroactive assignment unless the owner later directs one.
+
+**Source:** owner directive 2026-05-30 «R6 = C، شروع memo» + three-point rationale + sequencing confirmation.
