@@ -1516,6 +1516,49 @@ Hardening added (defense in depth on top of Q8.a):
 
 **Source:** owner directive 2026-05-27 «Q1.a Q2.a Q3.a Q4.a Q5.a(modified) Q6.a Q7.a Q8.a(modified) Q9.a شروع» + two refinement explanations.
 
+### D76 — R-Infra pivot: lightweight deploy-and-smoke script (Q1.b self-hosted runner abandoned)
+**Context:** During R4 production cleanup (post-D72-smoke orphan removal), it was operationally confirmed that **Claude Code from the owner's session has working SSH/VPS access** — the owner observed Claude execute `remote.ps1 health`, `up`, `migrate`, `seed`, and a precise prisma hard-delete cascade on production. The original R-Infra memo's gating unknown ("can a runner reach the VPS?") is therefore moot for *this* owner's workflow: Claude IS the deploy mechanism today.
+
+**Decision:** abandon Option C (full self-hosted-runner CD pipeline, ~490 LOC, 3-5 days) for **Option B** — a lightweight `deploy-and-smoke` script (~250 LOC, 1-2 days) that wraps the existing `remote.ps1` actions into a single command + adds automated API smoke + bundle measurement + structured markdown output. Sweet spot: zero owner toil per deploy + Claude runs one command + owner only does the final 2-min mobile visual.
+
+**Why Option C now over-engineered:**
+- VPS access is operational from Claude's session — the GitHub-hosted-vs-self-hosted-runner Q1 is solved by an alternative path (Claude-driven manual + automated checks).
+- Self-hosted runner adds: install + register + maintain + secure a long-running runner process; deploy keys / token management; runner-version updates. All of that for an environment with one VPS + one operator + Claude.
+- Option C's value-add (event-driven CD on every push, no operator-in-loop) doesn't apply: Claude IS the operator-in-loop, and the bottleneck isn't "who clicks deploy" — it's "do all the verifications run reliably". A script solves that.
+
+**When Option C would become worth it:** future staging + production environments (two deploy targets), team scale (multiple operators), or the owner deciding to remove Claude from the deploy loop entirely. Defer until any of those.
+
+**Status of the original R-Infra memo Q-decisions:**
+- Q1 (architecture: GitHub-hosted vs self-hosted vs webhook) — **invalidated** by the new info; the script IS the architecture.
+- Q2 (trigger: auto on push vs tag vs dispatch) — **N/A**; Claude triggers when it deploys.
+- Q3.b (migration manual gate) — **preserved as spirit**: the script detects new migration files in the diff + emits a visible warning + brief pause before running `migrate`. A `--yes` flag bypasses for automated runs. Human eyes on schema changes is retained.
+- Q4.a (API-level smoke, not Playwright) — **preserved**: script runs the API-level smoke (health endpoints + migration-applied verify + endpoint probes + bundle modulepreload check). Owner's 2-min mobile visual stays manual.
+- Q5 (rollback on smoke-fail: alert-first) — **preserved as spirit**: script exits non-zero on smoke-fail; Claude reports + owner decides (no auto-revert).
+- Sub-Q on auto-seed → **decided**: seed is always run (idempotent; no harm if no new seedables).
+
+**Naming:** the R-Infra sub-R is now **R5 (deploy-and-smoke script)** — the original `PHASE_B_R_INFRA_MEMO.md` is refactored to `PHASE_B_R5_DEPLOY_SCRIPT_MEMO.md` reflecting the lightweight scope. The original heavyweight memo content is preserved in git history for future reference if/when full-CD becomes worth it.
+
+**Source:** owner directive 2026-05-28 «R-Infra pivot — VPS access روشن شد... owner decision: B (lightweight script)».
+
+### D75 — R4 D13 ack: enrollment spine closed; D72 gap definitively resolved
+**Context:** Owner D13 manual smoke (real device + production deploy, 8-step checklist) — all PASS:
+- ✅ Mobile visual smoke succeeded (enrollment spine end-to-end working)
+- ✅ Step 6 D74 regression: existing student self-enroll/withdraw flow intact (Q2 service-layer decision preserved without breaking Phase-7 RBAC code)
+- ✅ Step 7 D70 destructive: admin soft-delete → row gone + reload absent + GET 404
+- ✅ Production deploy clean (the nullable-`courseId` widening migration applied with zero data risk per design — pure `DROP NOT NULL`, no enum cast, no data migration; D74's correct call)
+- ✅ D72 spine gap **closed**: application → accept → Student + program-term Enrollment, atomic + traceable via `resultingStudentId` + `resultingEnrollmentId`
+
+**7-commit chain (A→G + docs preludes D73/D74):** `37157c5` → `e64baf7`, plus production deploy via Claude-executed `remote.ps1` sequence. Review in `docs/PHASE_B_R4_REVIEW.md`.
+
+**Identity → Enrollment spine now complete (R3.a + R3.b + R4 together):**
+- `R3.a`: Profile (1:1) + Student (1:0..1) + Instructor (1:0..1) + SelfOrAdminGuard primitive (D69)
+- `R3.b`: StudentApplication + InstructorApplication (parallel state machines, Q4.a verification gate, Q5.a find-or-create-or-link ENROLLED side effect, Q8.a public submission with rate-limit)
+- `R4`: closes D72 — Enrollment.courseId nullable widening (Q0.a two-shape model), partial unique index, transactional ENROLLED → Student + Enrollment, `targetOfferingId` on the application drawer, service-layer state machine (Q2/D74)
+
+**R4 closed.**
+
+**Source:** owner directive 2026-05-28 «R4 D13 PASS — owner confirmed: mobile visual smoke موفق...».
+
 ### D74 — R4 Q2 resolved: service-layer state machine, NOT Postgres enum
 **Context:** Following the D73 Q2 implementation hold, owner ack'd 2026-05-28: «Q2 = service-layer، ادامه بده».
 

@@ -101,6 +101,26 @@ Three first-deploy failures, all caught + fixed:
 - D72: owner's ack claimed "Enrollment created" but the code creates User + Student only. Flagged + corrected rather than rubber-stamped.
 - **Rule**: when an ack asserts a specific technical claim, verify it against the code before encoding into the decisions log. Acks are authoritative on "did the user-visible flow work"; they are not authoritative on internal mechanics the owner may have inferred from memo language.
 
+### 4.6 ENTERPRISE LESSON — pre-deploy schema-and-code discovery now operationally proven (added at R4 close, D75)
+The combination of **schema discovery pre-memo (lesson #1)** + **«ack ≠ ground truth on internals» (D72)** has now caught **four** memo-stated assumptions BEFORE they reached deploy-time, across four consecutive sub-Rs:
+
+| # | Sub-R | Catch | Would have caused | Resolved by |
+|---|---|---|---|---|
+| 1 | R1 / D63 | Q4.a literal-vs-spirit (existing Faculty/Dept/Program already exist) | Either FK violation or destructive rename (§5) instead of additive (§4) | Path A "spirit" interpretation — additive `nameEn` |
+| 2 | R2 | `@Header` class-decorator (TS1238) + schema edit without migration SQL | Build failure + production 500s on first POST/PATCH | Method-decorator move + hand-authored migration SQL (now standing rule) |
+| 3 | R3.b / D71 | Q5.a "reuse if userId set; else create" raced P2002 on parallel registrations | Transaction failure mid-ENROLLED for an applicant who self-registered between submit + accept | Refinement to find-**or**-link-**or**-create (LINK branch added) |
+| 4 | R4 / D74 | Memo's "values already match the enum" — existing data was lowercase + the Phase-7 RBAC controller built on lowercase strings | Migration cast failure on production rows AND a regression in the existing student self-enroll/withdraw flow | Service-layer state machine; storage stays String; existing flow untouched |
+
+Each catch was the result of doing schema **and code** discovery *before* the memo locked + verifying the memo's stated assumption against the actual repo state. Four for four = the discipline is **operationally proven**, not aspirational. Every future memo continues with the same schema+code discovery section + flags any wrong-assumption finding as a STOP+ping (per the D61 stop triggers).
+
+The discipline now lives in three concrete artifacts that don't depend on any one person remembering them:
+- The memo template's `Schema discovery` section (table form, mandatory)
+- The standing 5-6 stop triggers per sub-R (D61), with #1 always being "unexpected discovery"
+- The retrospective itself (this file) being read as part of every R-Next planning memo
+
+### 4.7 Deploy-mechanism finding (updated at D76)
+The earlier rule («deploy is OWNER-executed via remote.ps1; session SSH unreliable», §4.4) was **refined** at D76 after R4 closeout. The owner observed Claude Code execute `remote.ps1 health`/`up`/`migrate`/`seed` + a precise prisma cascade on production successfully during R4 cleanup → **Claude-from-session CAN deploy reliably enough for this single-VPS / single-operator setup** (intermittent SSH retries succeed within a couple of tries; not a hard block). This invalidated the original R-Infra Q1 assumption (need a self-hosted runner to sidestep SSH). The pivot to a lightweight `deploy-and-smoke` script (R5) reflects this: keep Claude in the loop as the operator, but collapse the 6 individual `remote.ps1` calls + the manual API smoke into one command that produces a structured markdown report. Full CD (self-hosted runner) is deferred until staging+prod environments or team scale make it worth the maintenance cost.
+
 ---
 
 ## 5. What R-Next / Phase C should know

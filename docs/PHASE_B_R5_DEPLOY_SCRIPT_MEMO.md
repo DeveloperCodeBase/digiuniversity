@@ -1,178 +1,182 @@
-# R-Infra — Automated Deploy + Smoke (CD pipeline) — Memo
+# Phase B R5 — Deploy-and-Smoke Script — Memo
 
-**Author:** Phase B (R4 held, infra pivot)
+**Author:** Phase B post-R4 close (D75) + R-Infra pivot (D76)
 **Date:** 2026-05-28
-**Status:** ⏳ DRAFT — awaiting owner direction (pick deploy architecture Q1) before any code
-**Workflow:** THIS planning memo → owner picks architecture + Q-answers → scoped impl → ack → code (D61 Constraint #1)
-**Goal (owner):** Claude Code pushes → CI auto-deploys to VPS → automated smoke → owner only does a final ~2-min mobile visual check. No more manual `remote.ps1` per deploy.
-**Context:** R4 is on hold pending owner final smoke. This memo is infra, not data — but it required infra discovery (below).
+**Status:** ⏳ DRAFT — awaiting owner ack before R5 code
+**Workflow:** memo → owner ack → code A-F → script test run (dogfood) → close (D61 Constraint #1 — adapted for a tooling sub-R; see §«D13 in this case» below)
+**Predecessor:** R4 closed (D75); R-Infra original (self-hosted runner CD) abandoned per D76 because Claude Code has working VPS access from session and Option C was over-engineered for the current single-VPS / single-operator setup.
+**Goal:** collapse the 6-step manual `remote.ps1` deploy sequence + the manual API smoke + the bundle measurement into **one script** Claude Code invokes per sub-R. Zero owner toil per deploy; owner only does the final 2-min mobile visual.
+
+> **History note**: this file was renamed from `PHASE_B_R_INFRA_MEMO.md` (the heavier R-Infra plan). The original R-Infra Q-decisions are now mostly invalid (D76); the relevant ones (Q3.b spirit, Q4.a API smoke, Q5 alert-first) are preserved in this memo's design as script behaviors, not as gates.
 
 ---
 
-## Infra discovery (done)
+## Scope (R5)
 
-| Surface | Current state |
-|---|---|
-| `.github/workflows/ci.yml` | **EXISTS.** On push→main + PR: `web` job (npm ci → typecheck → vitest → vite build → upload dist artifact) + `api` job (npm install → prisma generate → `prisma migrate deploy` against ephemeral pg → tsc build → jest). **Build + test only — NO deploy step.** |
-| `.github/workflows/security.yml` | **EXISTS.** gitleaks secret scan (+ likely trivy/codeql) on push/PR/daily-cron. |
-| `.github/dependabot.yml` | EXISTS. |
-| `deploy.yml` (CD) | **DOES NOT EXIST.** Explicitly noted as "future deploy.yml" in `remote.ps1` (line 631). This is the gap R-Infra fills. |
-| CI secrets configured | Only the built-in `secrets.GITHUB_TOKEN`. **No SSH key / VPS host / deploy secrets exist yet.** |
-| Deploy mechanism (`remote.ps1`) | `Remote($cmd)` = `ssh my-vps "cd /var/www/digiuniversity && $cmd"`. SSH alias `my-vps` → host `193.163.201.141:22`, **key-based auth in the owner's local `~/.ssh/config`** (NOT in the repo). |
-| VPS layout | Ubuntu, `/var/www/digiuniversity` git checkout, Docker + compose, `docker-rollout` plugin (zero-downtime), nightly pg_dump backup cron (`bootstrap-vps.sh`). |
-| Deploy steps (the remote.ps1 sequence to replicate) | `pull` (git checkout docs/ + clean + `git pull origin main`) → `build`/`up` (`docker compose up -d --build`) → `migrate` (`docker compose exec -T api npx prisma migrate deploy`) → `seed` (`docker compose exec -T api npm run seed`) → `health` (docker exec curl on 4 services: nginx app, api, ai-gateway, postgres) |
-| Rollback mechanisms | `remote.ps1 rollback` (git-revert HEAD + redeploy, OR image-tag `IMAGE_TAG=$sha` rollback if `pin-image` ran). `pin-image` tags running images with git short-SHA. |
-| Migration safety | `prisma migrate deploy` is the production-safe command (idempotent, applies only pending migrations, never resets — unlike `migrate dev`). |
+A single script `scripts/deploy-and-smoke.ps1` that, when invoked from the project root with the repo on its target branch (typically `main`):
 
-**Critical finding — the SSH reachability question.** The Claude Code session couldn't SSH to the VPS (`193.163.201.141:22` timed out). Two possible causes, with very different implications for the CD architecture:
-1. The Claude **sandbox** blocks outbound SSH (likely) — in which case GitHub-hosted runners (real internet egress) would reach the VPS fine.
-2. The **VPS firewall** allowlists only the owner's IP for port 22 (good security hygiene) — in which case **GitHub-hosted runners (dynamic IPs) would ALSO be blocked**, and we'd need a self-hosted runner or webhook-pull.
+### Steps (in order)
+1. **`git pull` on the local repo** (Windows side — Claude operates from the laptop).
+2. **Migration detection gate (Q3.b spirit)** — diff the `apps/api/prisma/migrations/` directory between `HEAD@{1}` and `HEAD`. If any new directory appears:
+   - Print a visible warning: «⚠️ NEW MIGRATION DETECTED: <name(s)>. This will modify the production database schema.»
+   - Pause **5 seconds** with a countdown.
+   - Offer an abort prompt: «Type `abort` to cancel, anything else (or Enter) to proceed.» (skipped by `--yes`).
+   - If no new migration, skip the gate silently.
+3. **`remote.ps1 build`** — push `main` to origin + remote `git pull` + `docker compose build`.
+4. **`remote.ps1 up`** — `docker compose up -d --build` (idempotent re-up; the `up` action already includes pull+build).
+5. **`remote.ps1 migrate`** (skippable via `--skip-migrate` if you know there are none) — `docker compose exec -T api npx prisma migrate deploy`. Output captured for the report.
+6. **`remote.ps1 seed`** (always run; idempotent on natural keys; skippable via `--skip-seed`).
+7. **`remote.ps1 health`** — the existing 4-service docker-exec probe.
+8. **Automated API smoke** (Q4.a) — sequential curl checks against `https://digiuniversity.ir`:
+   - 8.1 Public health endpoints — `/v1/health` (api) + `/v1/health` (ai-gateway) + `/healthz` (nginx app). All must respond 200.
+   - 8.2 Migration-applied verify — re-run `prisma migrate status` via `docker compose exec`; expect "Database schema is up to date" (a single line we grep for).
+   - 8.3 Login round-trip — POST `/v1/auth/login` admin → 200 with `accessToken`. Catches "API booted but auth broken" cases.
+   - 8.4 Authed sample probe — GET `/v1/auth/me` with the token → 200. Catches JWT/strategy regression.
+   - 8.5 Bundle modulepreload check — `curl https://digiuniversity.ir/` + grep `<link rel="modulepreload"`. Assert ONLY `react-vendor` + `radix-vendor` appear. **Any admin/page chunk in the modulepreload = fail** (the D66 Path D guard).
+   - 8.6 Main-bundle size delta — `curl -sI https://digiuniversity.ir/assets/index-*.js | grep -i content-length`, parse, compare to a stored baseline in `docs/BUNDLE_BASELINE.json`. **Warn if Δ > +40 KB; fail if Δ > +50 KB** (D61 #2). The script updates the baseline only when explicitly told (`--update-baseline`); never silently.
+9. **Structured markdown report** — emit to stdout AND a timestamped log file at `logs/deploy/YYYY-MM-DD-HHMMSS.md`. The report is what Claude pastes into the owner ping. Format:
+   ```
+   # Deploy & Smoke Report — <commit short-sha> — <ISO-8601>
+   ## Steps
+   - [✓/✗] git pull
+   - [✓/✗] migration gate (N new migrations OR skipped)
+   - [✓/✗] build / up / migrate / seed / health
+   ## API smoke
+   - [✓/✗] api /v1/health … (one line per check)
+   ## Bundle
+   - main index: X KB (Δ vs baseline +Y KB) — pass/warn/fail
+   - modulepreload: vendor only ✓ / admin chunks leaked ✗ (list)
+   ## Verdict
+   - all green / FAIL (summary of failures)
+   ```
+10. **Exit code** — `0` if all green; non-zero with a specific code per failure family (10 = remote step failed, 20 = api smoke failed, 30 = bundle constraint failed, 40 = migration gate aborted, 99 = unexpected).
 
-→ **We must confirm which before committing to Q1.a (GitHub-hosted SSH).** The owner can check: `sudo ufw status` / cloud-provider firewall rules on the VPS. If port 22 is owner-IP-locked, Q1.b or Q1.c is mandatory. This is the gating unknown.
+### Flags (CLI)
+- `--skip-migrate` — skip step 5 if you know no migration is pending
+- `--skip-seed` — skip step 6
+- `--yes` — bypass the migration-gate confirm prompt (default for Claude automation; owner uses interactive mode if running from terminal)
+- `--verbose` — full step-by-step output (default is a summary; full output always lands in the log file)
+- `--dry-run` — go through steps 1, 2 (warn only), and 8 (probes against current prod) without 3-7 (no deploy mutation). For verifying the report shape end-to-end.
+- `--update-baseline` — after a successful run, overwrite `docs/BUNDLE_BASELINE.json` with the new main-bundle size + (optional) per-chunk sizes. Manual + explicit; the script never updates the baseline silently.
 
----
+### Outputs
+- **stdout**: the markdown report (Claude pastes this into the owner reply).
+- **exit code** (above).
+- **log file**: `logs/deploy/<timestamp>.md` — same content as stdout + a verbose appendix with all captured command output for postmortems. (`logs/` is gitignored; one deploy log per invocation.)
 
-## ❓ Q1 — Deploy architecture (the primary decision)
-
-| | Approach | How it works | Firewall-robust? | Trade-off |
-|---|---|---|---|---|
-| **Q1.a** | GitHub-hosted runner + SSH | `deploy.yml` job SSHes to the VPS (deploy key in GitHub Secrets) + runs the pull/build/migrate/health sequence | ❌ Needs VPS:22 reachable from GitHub's (large, rotating) IP ranges | Simplest workflow; brittle if VPS firewall is IP-locked |
-| **Q1.b (Recommended)** | Self-hosted runner on the VPS | A GitHub Actions runner process runs ON the VPS; polls GitHub over **outbound HTTPS** (no inbound SSH); runs the deploy locally (it's already on the box — no `ssh` at all) | ✅ Outbound-only; no firewall change | A long-running runner process to install + keep updated; must scope to this repo + main branch only (runner executes workflow code) |
-| **Q1.c** | Webhook-pull / poll | A tiny listener (or systemd timer) on the VPS pulls + redeploys on a GitHub webhook (or polls `git fetch` every N min) | ✅ Outbound or single inbound webhook port | Build + secure the listener; webhook secret; less "native CI" feel |
-
-**Recommendation: Q1.b (self-hosted runner on the VPS).** Reasons:
-1. **Sidesteps the SSH reachability unknown entirely** — outbound HTTPS only; works regardless of whether VPS:22 is IP-locked.
-2. **No SSH key in GitHub Secrets** — smaller attack surface; the runner is already authenticated on the box.
-3. **Reuses the exact bash the `remote.ps1` actions run** — the deploy job is just `cd /var/www/digiuniversity && git pull && docker compose up -d --build && ... migrate ... health`, executed locally by the runner.
-4. Standard pattern for single-VPS solo deploys.
-
-Security note for Q1.b: a self-hosted runner runs any workflow code from the repo. Mitigations: restrict the runner to the `deploy` workflow triggered only by push-to-main (not PRs from forks — this is a private repo so fork-PR risk is nil), pin the runner to a dedicated low-priv user, and never run untrusted PR code on it.
-
-Q1.a is viable IF the owner confirms VPS:22 accepts GitHub IPs (or is willing to allowlist them). It's the least new infrastructure if the firewall cooperates.
-
----
-
-## ❓ Q2 — Deploy trigger
-
-- **Q2.a (Recommended)** — Auto-deploy on every push to `main` **after** `ci.yml` + `security.yml` pass (via `workflow_run` dependency or a combined pipeline). Matches the owner's "Claude pushes → auto-deploy" goal. Claude only pushes vetted work, so every main push is deploy-intended.
-- **Q2.b** — Deploy only on tagged releases (`v*` tags). Safer (explicit release gate) but adds a tagging step to every ship — friction against the "just push" goal.
-- **Q2.c** — `workflow_dispatch` (manual button in GitHub UI) + auto on tags. Owner clicks deploy. Half-automated.
-
-### ❓ Q2-dep — gate on CI passing?
-- **Q2-dep.a (Recommended)** — Deploy job `needs:` the CI build+test jobs (or `workflow_run` after CI succeeds). Never deploy a red build. This is the safety spine.
-
----
-
-## ❓ Q3 — Migration gate (sensitive — prod data)
-
-- **Q3.a (Recommended)** — Auto-run `prisma migrate deploy` in the pipeline, BUT wrapped in safety: (1) **pre-deploy pg_dump backup** (the `backup` action already exists), (2) run migrate, (3) **post-migrate health check**, (4) **auto-rollback on health-fail** (image-tag rollback if pinned, else alert). `migrate deploy` is idempotent + only applies pending migrations + never resets — the production-safe command. The R2/R4 migration-failure lessons are mitigated by backup + health-gate.
-- **Q3.b** — **Manual approval gate** via GitHub Environments: the deploy pauses before `migrate deploy` and waits for the owner to click "approve" in the GitHub UI. Maximum safety for the sensitive step; small friction. Good if the owner wants eyes on every schema change hitting prod.
-- **Q3.c** — Split: auto-deploy code (compose up) on every push, but migrations only on manual `workflow_dispatch`. Decouples risky migrations from routine code deploys.
-
-**Lean:** Q3.a (auto with backup + health-gate) for velocity, OR Q3.b (manual gate) if the owner wants a human checkpoint on every migration given the D74 lesson. Owner's call — this is the one place "fully automated" trades against "human eyes on prod schema changes".
+### Documentation
+- `docs/DEPLOY_SCRIPT_USAGE.md` — operator runbook covering:
+  - how Claude Code invokes it (the canonical `.\scripts\deploy-and-smoke.ps1 --yes` form)
+  - when to fall back to individual `remote.ps1` actions (e.g., a hot rollback, a one-off `shell` or `logs-live`)
+  - failure-mode handling per exit code
+  - when to re-run with `--update-baseline` (after an intentional main-bundle bump that's been owner-approved)
 
 ---
 
-## ❓ Q4 — Automated smoke depth
+## Platform decision (script form)
 
-- **Q4.a (Recommended)** — **API-level smoke** post-deploy: (1) `health` action (4 services respond), (2) migration-applied check (`prisma migrate status` shows no pending), (3) a handful of endpoint probes (login → 200, a couple of authed GETs → 200, an anon route → 200), (4) bundle modulepreload check (curl `/` → only vendor chunks — the D66 guard). Fast (~30s), reliable, no browser. The owner's final 2-min mobile visual covers the rest.
-- **Q4.b** — Q4.a **+ Playwright headless** visual regression (the existing `apps/web/tests/visual/*.spec.ts` against the deployed URL). Catches UI regressions automatically but is heavier (~3-5 min) + flakier (headless Chrome variance — the R7.1.1/R7.1.5.b lesson: single-run Lighthouse/headless is unreliable on this stack).
-- **Q4.c** — API smoke + a single Playwright "does the app paint + login work" happy-path (one test, not the full visual suite). Middle ground.
-
-**Recommendation: Q4.a.** The owner explicitly wants to keep the final visual manual ("owner فقط final 2-min visual موبایل"). Automated smoke should be the fast, reliable API gate; the existing visual specs stay as a separate manual/CI-on-demand suite (they already run in `ci.yml`'s build context for unit-level, and as D13 owner smoke for real-device). Don't put flaky headless visual in the deploy gate.
+- **`.ps1` is the primary** — matches the existing `remote.ps1` ecosystem and the owner's Windows dev box. Claude invokes via `powershell.exe -File scripts/deploy-and-smoke.ps1`.
+- A `.sh` mirror is **NOT planned for R5** to avoid maintaining two implementations. If a future operator/CI needs bash, we extract a tiny shared `smoke.sh` for steps 7-10 (the curl-based checks) — but the orchestration stays in PowerShell where `remote.ps1` already lives.
 
 ---
 
-## ❓ Q5 — Rollback automation on smoke-fail
+## ❓ Q-decisions (mostly carried-forward as design constraints; a few new)
 
-- **Q5.a (Recommended)** — **Alert-first, no auto-revert.** On smoke-fail: halt the pipeline, leave the (possibly half-broken) deploy as-is, and notify the owner (GitHub Actions failure notification + optional push/email). Owner decides: `remote.ps1 rollback` or fix-forward. Rationale: auto-revert on a transient health blip could revert a good deploy; a human should judge.
-- **Q5.b** — **Auto image-tag rollback** on smoke-fail: if `pin-image` tagged the previous good images, the pipeline auto-runs `IMAGE_TAG=<prev> docker compose up -d --no-build` to restore the last-known-good, then alerts. Safer than git-revert (no history rewrite), fast. Requires the pin-image step to run on every successful deploy.
-- **Q5.c** — Auto git-revert on smoke-fail. Most aggressive; rewrites main history via a revert commit. Not recommended (the transient-blip risk + the revert-commit noise).
+### Q1 — script form (.ps1 primary vs bash + .ps1 vs cross-platform node)
+- **Q1.a (Recommended)** — `.ps1` only, matches the `remote.ps1` ecosystem. Bash mirror only if a real second consumer appears.
+- Q1.b — `.ps1` + `.sh` mirror from day one. Doubles the maintenance.
+- Q1.c — single node CLI (`scripts/deploy-and-smoke.mjs`). Platform-portable, but adds a deps surface + diverges from the `remote.ps1` convention.
 
-**Lean:** Q5.a (alert-first) for the first iteration — get the pipeline working + trusted before adding auto-rollback. Q5.b is a good fast-follow once `pin-image`-on-deploy is wired.
+### Q2 — migration-gate behavior when running with `--yes`
+- **Q2.a (Recommended)** — print the warning + a 5-second pause WITHOUT prompting (so it's visible in the log + Claude's report, but proceeds non-interactively). Owner sees the warning in the report after the fact.
+- Q2.b — silently proceed (no pause, no warning). Less safe; reduces signal.
+- Q2.c — error out on new migrations + `--yes` (require explicit `--yes-migrate`). Highest safety; double-flag friction.
 
----
+### Q3 — bundle baseline storage
+- **Q3.a (Recommended)** — `docs/BUNDLE_BASELINE.json` (tracked in git). Each baseline update is a commit — review-able + version-controlled. Initial baseline: post-R4 production (`docs/PHASE_B_R4_REVIEW.md` has the numbers).
+- Q3.b — `.deploy-baseline.json` at repo root (gitignored). Per-machine baseline; can't catch drift between operators. Not preferred.
 
-## Secret management
+### Q4 — `seed` behavior when remote already has data (current R5 plan: always run)
+- **Q4.a (Recommended)** — always run; the seed is idempotent on natural keys (proven through 5 sub-Rs). The `--skip-seed` flag is the explicit override for the rare case (e.g., known prod re-seeding causing a known cosmetic side effect).
+- Q4.b — auto-skip when no migration was applied (no schema change → no new seed). Saves ~5 seconds per deploy; small.
 
-Regardless of Q1:
-- **Q1.a**: VPS SSH **private key** + host + user go in GitHub Secrets (`secrets.VPS_SSH_KEY`, `VPS_HOST`, `VPS_USER`). Use a **dedicated deploy key** (not the owner's personal key), scoped to the deploy user on the VPS with the minimum sudo needed (ideally none — docker group membership covers compose).
-- **Q1.b**: **no SSH secret needed** — the runner registers with a GitHub runner token (one-time, during setup) + thereafter authenticates over its own channel. The deploy uses the runner's local VPS user.
-- **Q1.c**: a **webhook secret** (`secrets.DEPLOY_WEBHOOK_SECRET`) shared between GitHub + the VPS listener.
-- Never plaintext. `security.yml`'s gitleaks already guards against committed secrets — that stays the backstop.
+### Q5 — log retention
+- **Q5.a (Recommended)** — keep last 30 days of `logs/deploy/*.md`, prune older on each run. Cheap; sufficient for postmortems.
+- Q5.b — keep forever; let the operator prune. Disk grows.
 
----
-
-## Proposed pipeline shape (assuming Q1.b + Q2.a + Q3.a + Q4.a + Q5.a)
-
-```
-push to main
-  └─ ci.yml (web + api build/test)         [existing]
-  └─ security.yml (gitleaks etc.)          [existing]
-        │ (both green)
-        ▼
-  deploy.yml  [NEW]  — runs on self-hosted runner on the VPS
-     1. checkout (fetch the pushed sha)
-     2. pre-deploy backup    (pg_dump, 14-day rotation — existing backup action logic)
-     3. git pull + docker compose up -d --build
-     4. prisma migrate deploy
-     5. (optional) seed       [Q: auto-seed or skip on prod? see note]
-     6. pin-image (tag good images for fast rollback)
-     7. smoke (API-level: health + migrate status + endpoint probes + modulepreload check)
-        ├─ pass → done; notify "deployed <sha> ✓"
-        └─ fail → halt + notify owner (Q5.a)  [or auto image-tag rollback if Q5.b]
-```
-
-**Seed-on-prod note:** `remote.ps1 seed` re-runs the seeder (idempotent upserts). On every auto-deploy, re-seeding is *usually* a no-op but does run upserts against prod. Q-decision sub-point: **auto-seed every deploy (idempotent, keeps demo data fresh) vs seed only on first deploy / manual**. Recommend auto-seed only when a new migration adds seedable demo data, else skip — or make seed a separate manual action. Flag for owner.
+(Q3.b spirit, Q4.a API smoke, Q5-original alert-first from the old R-Infra memo are baked into the script's design above; they're no longer Q-decisions but design constraints.)
 
 ---
 
-## Risks + mitigations
+## Commits planned (atomic per D61)
 
-| Risk | Mitigation |
-|---|---|
-| VPS:22 firewall blocks GitHub runners (Q1.a) | Q1.b/Q1.c sidestep it; confirm firewall before choosing Q1.a |
-| Self-hosted runner executes malicious workflow code (Q1.b) | Private repo (no fork PRs); restrict runner to push-to-main; dedicated low-priv user |
-| Migration fails on prod data mid-deploy | Pre-deploy backup (Q3.a) + `migrate deploy` is non-destructive + health-gate + rollback |
-| Auto-deploy ships a bad commit | CI+security must pass first (Q2-dep.a); smoke gate catches runtime breakage; pin-image enables fast rollback |
-| Smoke false-negative reverts a good deploy | Q5.a alert-first (no auto-revert) for v1 |
-| Secret leakage | Dedicated deploy key (Q1.a) or no-SSH (Q1.b); gitleaks backstop |
-| Concurrent deploys (two quick pushes) | `concurrency: deploy-${{ github.ref }}` cancel-in-progress (same pattern ci.yml uses) |
+1. **A** — script skeleton + flag parsing + logging infrastructure (`scripts/deploy-and-smoke.ps1` shell + `logs/deploy/` directory + `.gitignore` entry + the initial `docs/BUNDLE_BASELINE.json` seeded from R4 numbers).
+2. **B** — git pull + migration-detection gate (steps 1-2) + the `remote.ps1` wrappers (steps 3-7) + captured output collection.
+3. **C** — API smoke checks (steps 8.1-8.4): health + migration-status + login round-trip + authed GET.
+4. **D** — bundle measurement (steps 8.5-8.6): modulepreload parse + main-bundle size delta vs baseline.
+5. **E** — structured markdown report generation + exit-code mapping (steps 9-10).
+6. **F** — `docs/DEPLOY_SCRIPT_USAGE.md` runbook + a **`--dry-run`** test execution against current prod (no mutation; verifies the script end-to-end against the live system) + a brief dogfood `--yes` run on a no-op commit to confirm the full deploy path.
 
----
-
-## What R-Infra is NOT (scope guard)
-- ❌ Not a Kubernetes / multi-node migration — single VPS stays.
-- ❌ Not replacing `remote.ps1` — it stays as the manual escape hatch + for one-off ops (backup, rollback, shell, logs).
-- ❌ Not auto-running the full Playwright visual suite in the deploy gate (Q4.a keeps it API-level; visual stays owner-manual).
-- ❌ Not changing the app, schema, or R4 (R4 stays held; this is orthogonal infra).
+**6 atomic commits.** **~280 LOC total estimated.** **1-2 days** of focused work; closer to 1 since this is orchestration + curl, no new business logic.
 
 ---
 
-## Estimated scope (assuming Q1.b)
-| Item | Effort |
-|---|---|
-| `scripts/runner-bootstrap.sh` (install + register self-hosted runner on VPS, idempotent) | ~80 LOC |
-| `.github/workflows/deploy.yml` (the CD job: backup → pull → up → migrate → pin → smoke → notify) | ~120 LOC |
-| `scripts/smoke.sh` (API-level smoke: health + migrate status + endpoint probes + modulepreload) | ~120 LOC |
-| `docs/DEPLOY_AUTOMATION.md` (runbook: how it works, how to pause, how to roll back, how to re-register the runner) | ~150 LOC |
-| `remote.ps1` — optional: a `runner-status` action to check the runner from Windows | ~20 LOC |
+## Intermediate stop triggers (per D61, active during R5)
 
-**Total: ~490 LOC**, 3-5 days. Q1.a is similar; Q1.c adds a small listener service (~+100 LOC).
+1. **Unexpected discovery** about `remote.ps1`'s internal structure that invalidates a wrapping assumption (e.g., an action that writes to stdin differently than expected) → STOP + ping.
+2. **Scope expand** (e.g., the migration-gate request balloons into a full pre-flight schema validator) → STOP + ping.
+3. **Script needs admin/sudo on the owner's box** to run (would break "Claude invokes one command" — the owner shouldn't be in the loop for every deploy) → STOP + ping.
+4. The bundle baseline check surfaces a **production main-bundle that doesn't match local builds** by more than ±10 KB (a sign of a build-environment divergence that needs separate investigation) → STOP + ping at first occurrence.
 
-**No D13 in the usual sense** — verification is: trigger a no-op deploy (push a trivial change) → watch the pipeline run green end-to-end → confirm the deployed sha matches + smoke passed + owner's 2-min visual. The first real deploy through the pipeline IS the acceptance test.
+Else: silent continue. Single dogfood report at Commit F.
+
+---
+
+## What R5 is NOT
+
+- ❌ Not full CD with a self-hosted runner (deferred per D76 until staging+prod or team scale make it worth the maintenance cost).
+- ❌ Not a replacement for `remote.ps1` — the script *wraps* + *orchestrates* it. Manual `remote.ps1` calls remain the fallback for one-off ops (`shell`, `logs-live`, `backup`, `rollback`, `rollout`).
+- ❌ Not running Playwright headless visual in the deploy gate (Q4.a — owner's 2-min mobile visual stays manual; per the R7.1.x lesson about headless variance).
+- ❌ Not changing app, schema, or any sub-R's code (this is pure tooling).
+- ❌ Not gating on the broken `npm run typecheck` / `npm test` in CI — those are pre-existing debt (see `docs/PHASE_B_CI_DEBT_REPORT.md`); the script's smoke is **runtime deployability** (the things that must pass to know "this deploy works"), independent of the static-analysis debt.
+
+---
+
+## D13 in this case (acceptance for a tooling sub-R)
+
+R5 doesn't ship a user-visible feature; the standard "8-step owner mobile smoke" doesn't fit. Adapted acceptance, two phases:
+
+- **Phase 1 — Commit F dogfood:** Claude runs `.\scripts\deploy-and-smoke.ps1 --dry-run` on current main. Verifies the report shape + that all smoke checks pass against current prod (no deploy mutation). Claude pastes the report. Owner reads + says «R5 dogfood looks good» → memo-level R5 ack.
+- **Phase 2 — operational ack (after first real R6 deploy):** the **next sub-R after R5** (whatever it is — R-CI-Cleanup, Candidate A content, Candidate C applicant UX, etc.) uses `deploy-and-smoke.ps1` as its deploy step. If that goes smoothly + the report is useful + the owner only does the final mobile visual, R5 is fully accepted in operational use. The post-R6 ping confirms this in writing → **R5 D13 PASS**.
+
+So R5 closes in two phases. The D-decision for the dogfood ack can be logged immediately; the operational-ack supplement comes after R6.
+
+---
+
+## Estimated scope (recap)
+
+| Item | LOC | Notes |
+|---|---:|---|
+| `scripts/deploy-and-smoke.ps1` | ~200 | orchestration + smoke + report |
+| `docs/BUNDLE_BASELINE.json` | ~20 | initial baseline from R4 numbers |
+| `docs/DEPLOY_SCRIPT_USAGE.md` | ~60 | runbook |
+| `.gitignore` | +2 | `logs/deploy/` entry |
+| **Total** | **~280** | within the "~250 LOC, 1-2 days" envelope |
 
 ---
 
 ## Status
-| Item | Status |
+
+| Item | State |
 |---|---|
-| Infra discovery | ✅ (existing ci.yml/security.yml, no deploy.yml, SSH-alias mechanism, VPS layout) |
-| **Q1 deploy architecture** | ⏳ owner picks (gated on the VPS-firewall confirmation) |
-| Q2–Q5 + seed-on-prod sub-Q | ⏳ owner ack |
-| `deploy.yml` + runner + smoke + runbook | ⏳ NOT STARTED |
-| R4 | ⏸️ HELD (orthogonal; resumes after owner final smoke) |
+| Predecessor: R4 closed | ✅ D75 |
+| Predecessor: R-Infra pivot decision | ✅ D76 |
+| Memo (this file, refactored from old R-Infra memo) | ✅ |
+| Owner ack on R5 memo + Q1–Q5 | ⏳ pending |
+| Code (A–F) | ⏳ NOT STARTED |
+| Dogfood test run | ⏳ post-Commit-F |
+| Operational ack (after first real use in R6) | ⏳ post-R6 |
 
-**Re-ack format:** «Q1.b Q2.a Q3.a Q4.a Q5.a شروع» (all recommended) — or pick alternatives. **Please also confirm the VPS firewall reachability** (`sudo ufw status` / cloud firewall on port 22) so Q1.a viability is settled. If Q1.b, the scoped impl memo + runner-bootstrap come next.
+**Re-ack format:** «Q1.a Q2.a Q3.a Q4.a Q5.a شروع» (all recommended) — or pick alternatives. R5 starts immediately on ack since this is tooling with no schema-discovery dependency.
 
-— R-Infra planning, 2026-05-28. Recommendation: self-hosted runner (Q1.b) to sidestep the SSH-reachability unknown; API-level smoke (Q4.a) keeping the owner's final visual manual. Owner decides architecture.
+— R5 (deploy-and-smoke script) kickoff, 2026-05-28. Pivoted from the heavier R-Infra plan after R4-cycle proved Claude-from-session can deploy reliably. Sweet spot: single command + zero owner toil per deploy.
