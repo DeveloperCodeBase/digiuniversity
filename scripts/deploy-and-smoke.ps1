@@ -116,8 +116,12 @@ function Initialize-Log {
 }
 
 function Format-Section {
-    param([Parameter(Mandatory)][string]$Title, [Parameter(Mandatory)][string]$Section)
-    $rows = @($script:Steps | Where-Object { $_.Section -eq $Section })
+    # $Section is one or more section keys; rows render in insertion order across
+    # all of them. 'Steps' pulls both 'remote' and 'gate' so the migration-gate
+    # warning lands in the report next to the deploy steps (Q2.a), not just the
+    # live console.
+    param([Parameter(Mandatory)][string]$Title, [Parameter(Mandatory)][string[]]$Section)
+    $rows = @($script:Steps | Where-Object { $Section -contains $_.Section })
     $out  = New-Object System.Collections.Generic.List[string]
     $out.Add("## $Title")
     if ($rows.Count -eq 0) {
@@ -176,9 +180,9 @@ function Write-Report {
     $report = New-Object System.Collections.Generic.List[string]
     $report.Add("# Deploy & Smoke Report - $sha - $iso$mode")
     $report.Add('')
-    foreach ($l in (Format-Section 'Steps'     'remote')) { $report.Add($l) }
-    foreach ($l in (Format-Section 'API smoke' 'smoke'))  { $report.Add($l) }
-    foreach ($l in (Format-Section 'Bundle'    'bundle')) { $report.Add($l) }
+    foreach ($l in (Format-Section 'Steps'     @('remote','gate'))) { $report.Add($l) }
+    foreach ($l in (Format-Section 'API smoke' 'smoke'))            { $report.Add($l) }
+    foreach ($l in (Format-Section 'Bundle'    'bundle'))           { $report.Add($l) }
     $report.Add('## Verdict')
     $report.Add("- $(Get-Verdict)")
 
@@ -202,17 +206,149 @@ function Write-Report {
     Write-Host "Report written to logs/deploy/$($script:RunId).md"
 }
 
+# --- Deploy orchestration (memo steps 1-7) --------------------------------
+function Invoke-RemoteScript {
+    # Call remote.ps1 in-process: $LASTEXITCODE then reflects the action's last
+    # native command (ssh). Safe because build/up/migrate/seed/health are all
+    # exit-free, so & cannot terminate this script. EAP is relaxed first: ssh/
+    # git write to stderr, which would throw under Stop + 2>&1.
+    param([Parameter(Mandatory)][string]$Action)
+    $remote  = Join-Path $PSScriptRoot 'remote.ps1'
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $global:LASTEXITCODE = 0
+    try { $raw = & $remote -Action $Action 2>&1 }
+    finally { $ErrorActionPreference = $prevEAP }
+    $code = $LASTEXITCODE
+    $text = (@($raw) | ForEach-Object { "$_" }) -join "`n"
+    if ($VerbosePreference -ne 'SilentlyContinue' -and $text) { Write-Host $text }
+    return [pscustomobject]@{ Code = $code; Output = $text }
+}
+
+function Invoke-GitPull {
+    Write-Host '>> git pull --ff-only origin main'
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $global:LASTEXITCODE = 0
+    try { $raw = & git -C $RepoRoot pull --ff-only origin main 2>&1 }
+    finally { $ErrorActionPreference = $prevEAP }
+    $code = $LASTEXITCODE
+    $text = (@($raw) | ForEach-Object { "$_" }) -join "`n"
+    Add-Appendix 'git pull --ff-only origin main' $text
+    if ($code -eq 0) {
+        Add-Step -Section remote -Name 'git pull (local)' -Status pass
+        return $true
+    }
+    Add-Step -Section remote -Name 'git pull (local)' -Status fail -Detail "exit $code (diverged or dirty tree)"
+    return $false
+}
+
+function Invoke-MigrationGate {
+    # Detect via origin/main..HEAD (everything this deploy will push to prod),
+    # NOT HEAD@{1}..HEAD which sees only the tip commit and would miss a
+    # migration committed earlier in the sub-R (the R4 A->G case). The post-
+    # deploy ground-truth check is prisma migrate status at step 8.2, not here.
+    $migDir  = 'apps/api/prisma/migrations'
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { $diff = & git -C $RepoRoot diff --name-status origin/main..HEAD -- $migDir 2>&1 }
+    finally { $ErrorActionPreference = $prevEAP }
+    $added = @(@($diff) | Where-Object { $_ -match '^A\s' -and $_ -match 'migration\.sql$' })
+    if ($added.Count -eq 0) {
+        Add-Step -Section gate -Name 'migration gate' -Status pass -Detail 'no new migration'
+        return $true
+    }
+    $names = @($added | ForEach-Object {
+        (($_ -split "`t")[1]) -replace '^apps/api/prisma/migrations/', '' -replace '/migration\.sql$', ''
+    } | Sort-Object -Unique)
+    $nameList = $names -join ', '
+    Write-Host ''
+    Write-Host "!! NEW MIGRATION DETECTED: $nameList"
+    Write-Host '   This will modify the production database schema on deploy.'
+    Add-Step -Section gate -Name 'migration gate' -Status warn -Detail "$($names.Count) new: $nameList"
+    if ($DryRun) {
+        Write-Host '   (dry-run: warning only, no deploy)'
+        return $true
+    }
+    for ($i = 5; $i -ge 1; $i--) { Write-Host "   proceeding in $i ..."; Start-Sleep -Seconds 1 }
+    if (-not $Yes) {
+        $ans = Read-Host "   Type 'abort' to cancel, anything else (or Enter) to proceed"
+        if ($ans -eq 'abort') {
+            Add-Step -Section gate -Name 'migration gate' -Status fail -Detail 'aborted by operator'
+            return $false
+        }
+    }
+    return $true
+}
+
+function Add-RemoteStep {
+    param([Parameter(Mandatory)][string]$Action, [string]$Label = $Action)
+    Write-Host ">> remote.ps1 $Action"
+    $r = Invoke-RemoteScript -Action $Action
+    Add-Appendix "remote.ps1 $Action (exit $($r.Code))" $r.Output
+    if ($r.Code -eq 0) {
+        Add-Step -Section remote -Name $Label -Status pass
+        return $true
+    }
+    Add-Step -Section remote -Name $Label -Status fail -Detail "exit $($r.Code)"
+    return $false
+}
+
+function Add-HealthStep {
+    # health echoes 'FAILED' per down service and always exits 0, so its exit
+    # code is meaningless -- parse the output for FAILED instead.
+    Write-Host '>> remote.ps1 health'
+    $r = Invoke-RemoteScript -Action health
+    Add-Appendix "remote.ps1 health (exit $($r.Code))" $r.Output
+    $failed = @([regex]::Matches($r.Output, 'FAILED')).Count
+    if ($failed -gt 0) {
+        Add-Step -Section remote -Name 'health (4 services)' -Status fail -Detail "$failed service(s) FAILED"
+        return $false
+    }
+    Add-Step -Section remote -Name 'health (4 services)' -Status pass
+    return $true
+}
+
 # --- main ------------------------------------------------------------------
 try {
+    Push-Location $RepoRoot
     Initialize-Log
     $banner = "deploy-and-smoke - run $($script:RunId)"
     if ($DryRun) { $banner += ' (dry-run)' }
     Write-Host $banner
 
-    # Deploy + smoke phases are wired in here across commits B-E:
-    #   B -> git pull + migration gate + remote.ps1 build/up/migrate/seed/health
-    #   C -> API smoke (health / migrate-status / login round-trip / authed GET)
-    #   D -> bundle (modulepreload allow-list + main-bundle delta vs baseline)
+    # Step 1 -- local git pull (refreshes origin/main for the gate below).
+    if (-not (Invoke-GitPull)) { Write-Report; exit $EXIT_REMOTE_FAILED }
+
+    # Step 2 -- migration-detection gate (Q2.a). Operator abort -> exit 40.
+    if (-not (Invoke-MigrationGate)) { Write-Report; exit $EXIT_GATE_ABORTED }
+
+    if ($DryRun) {
+        Add-Step -Section remote -Name 'deploy (build/up/migrate/seed/health)' -Status skip -Detail 'dry-run'
+    } else {
+        # Steps 3-4 -- build + up. Halt on failure: smoking a broken deploy is noise.
+        if (-not (Add-RemoteStep -Action build -Label 'build')) { Write-Report; exit $EXIT_REMOTE_FAILED }
+        if (-not (Add-RemoteStep -Action up    -Label 'up'))    { Write-Report; exit $EXIT_REMOTE_FAILED }
+
+        # Step 5 -- migrate (skippable).
+        if ($SkipMigrate) {
+            Add-Step -Section remote -Name 'migrate' -Status skip -Detail '-SkipMigrate'
+        } elseif (-not (Add-RemoteStep -Action migrate -Label 'migrate')) {
+            Write-Report; exit $EXIT_REMOTE_FAILED
+        }
+
+        # Step 6 -- seed (always run unless skipped; idempotent, Q4.a).
+        if ($SkipSeed) {
+            Add-Step -Section remote -Name 'seed' -Status skip -Detail '-SkipSeed'
+        } elseif (-not (Add-RemoteStep -Action seed -Label 'seed')) {
+            Write-Report; exit $EXIT_REMOTE_FAILED
+        }
+
+        # Step 7 -- health. Records but does not halt; the smoke (step 8) adds detail.
+        Add-HealthStep | Out-Null
+    }
+
+    # Step 8 API smoke (C) + bundle (D) are wired in by later commits.
 
     Write-Report
     exit (Get-ExitCode)
@@ -222,4 +358,7 @@ catch {
     Add-Appendix 'unexpected-exception' ($_ | Out-String)
     try { Write-Report } catch { }
     exit $EXIT_UNEXPECTED
+}
+finally {
+    Pop-Location -ErrorAction SilentlyContinue
 }
