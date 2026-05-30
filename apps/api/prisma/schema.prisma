@@ -1194,6 +1194,16 @@ model StudentApplication {
   // side effect creates, completing application → student → enrollment.
   resultingEnrollmentId    String?   @unique
 
+  // Phase B R6 (D80) — public anon-applicant tracking token. Minted in
+  // submitPublic via crypto.randomBytes(24).toString("base64url") (192-bit,
+  // app-level — NO DB default reaches the >=128-bit hardening floor;
+  // uuid v4 = 122-bit, cuid is not crypto-random). Nullable: only public
+  // submissions mint a token; admin-created rows stay null (tracked via
+  // /admin/applications). Grants the anon applicant read-status + withdraw
+  // on /track (bearer capability). Postgres treats NULL as DISTINCT in a
+  // unique index, so many null rows coexist.
+  trackingToken            String?   @unique
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -1247,6 +1257,11 @@ model InstructorApplication {
   decidedBy                String?
 
   resultingInstructorId    String?   @unique
+
+  // Phase B R6 (D80) — public anon-applicant tracking token (see
+  // StudentApplication.trackingToken). 192-bit app-level mint in
+  // submitPublic, nullable, NO DB default.
+  trackingToken            String?   @unique
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
