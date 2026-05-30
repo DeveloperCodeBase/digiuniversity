@@ -2,7 +2,7 @@
 
 **Author:** Phase B (post-R3.b-close, D72)
 **Date:** 2026-05-28
-**Status:** ⏳ DRAFT — awaiting owner direction (pick a candidate) before a scoped sub-R memo is written
+**Status:** ⛔ SUPERSEDED by `docs/PHASE_B_R6_PLANNING_MEMO.md` (2026-05-30). This memo's recommendation — **Candidate B, Enrollment lifecycle** — *shipped as R4 and is acked at D75*. Candidates A (content) and C (applicant UX) are carried forward into the R6 memo, which also adds R-CI-Cleanup as a third option. Kept for historical provenance only; do not act on the recommendation below.
 **Workflow:** THIS planning memo → owner picks candidate → full scoped memo (schema discovery + Q-decisions) → ack → code (D61 Constraint #1)
 **Predecessor:** Identity track (R3.a + R3.b) complete per D72. See `PHASE_B_RETROSPECTIVE.md`.
 
