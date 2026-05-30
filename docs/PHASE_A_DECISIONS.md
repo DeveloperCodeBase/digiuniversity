@@ -1693,3 +1693,22 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 - Workflow per D61 unchanged: full memo→ack→code→spec→deploy→D29→D13→close applies to **whole R1**, not per-commit. Owner reserves intermediate-review rights at atomic transitions.
 
 **Source:** owner directive 2026-05-26 «Path A شروع» with 4-point rationale.
+
+### D78 — R5 Phase 1 ack (dogfood) + baseline ratification
+**Context:** R5 (`scripts/deploy-and-smoke.ps1`) shipped as 6 atomic commits A–F (`605d01f` skeleton → `7161519` git-pull + migration gate + `remote.ps1` wrappers → `c3839d4` API smoke 8.1–8.4 + read-only `remote.ps1 migrate-status` → `5d0b525` bundle 8.5–8.6 + baseline refresh → `5bb9ee6` report/exit-codes finalize → `948a469` usage doc + dogfood). Owner ran the Phase-1 dogfood ack 2026-05-30 and ratified the Commit-D baseline refresh. Per D76 this collapses the manual 6-step `remote.ps1` deploy + API smoke + bundle check into one command; spec in `docs/PHASE_B_R5_DEPLOY_SCRIPT_MEMO.md`, runbook in `docs/DEPLOY_SCRIPT_USAGE.md`.
+
+**Owner decision (verbatim):** «D78 — R5 Phase 1 ack (dogfood) + baseline ratification. deploy-and-smoke.ps1 shipped (6 commits A-F). dogfood clean (exit 0 live prod). exit-code contract verified (unreachable → exit 20 fail-closed). owner ratified baseline refresh (Commit D): stale R4 snapshot + KiB/kB mislabel fixed to exact bytes؛ +36kB confirmed already-live landing-v2/Gate-A growth، not regression. R5 memo-level closed. Phase 2 (full D13) بعد از اولین R6 real deploy via script.»
+
+**What this ratifies:**
+- **Dogfood clean** — the `-DryRun -Yes` self-test at sha `948a469` exited 0 against live prod (report shape verified end-to-end; no deploy mutation, no build/up/migrate/seed).
+- **Exit-code contract verified** — fail-closed proven: unreachable prod → exit `20` (never a false green, never a hang). Full family `0/10/20/30/40/99` is documented in `Get-ExitCode` + the usage-doc exit-code table.
+- **Baseline refresh ratified (Commit D)** — the stale R4-review snapshot (356.64, mislabelled KiB when the R4 figures were actually Vite kB=1000) is superseded by the exact identity byte count `mainBundle.sizeBytes = 392947` in `docs/BUNDLE_BASELINE.json`. The ~+36 kB versus the old figure is confirmed **already-live landing-v2 / Gate-A growth, not an R5 regression** — owner directed «baseline نگه‌دار, don't investigate +36kB». The Commit-D message + the owner ping surfaced the diagnosis transparently; owner verdict: «Claude Code درست stop trigger hit کرد + شفاف surface کرد… ratified».
+- **In-scope additions accepted** — `remote.ps1 migrate-status` (read-only `prisma migrate status`, used by step 8.2; mutates nothing) + the optional `SMOKE_*` auth round-trip opt-in (8.3/8.4 upgrade; minted token never written to report or log).
+
+**Two-phase D13 for this tooling sub-R:**
+- **Phase 1 = memo-level close, DONE** (this entry). The script is shipped, dogfooded, and its exit-code/fail-closed contract verified; there is nothing left to build.
+- **Phase 2 = full D13, deferred** to the first real deploy. Trigger (owner, verbatim): «اولین R6 (هر direction picked) از deploy-and-smoke.ps1 استفاده می‌کنه. owner فقط final mobile visual. اون R5 D13 رو full close می‌کنه.» — i.e. the first R6 (whichever R-Next direction is picked) deploys via `deploy-and-smoke.ps1` through the full path (build → up → migrate → seed → health → smoke → bundle); the owner does only the final ~2-min mobile visual; that real-deploy run closes R5 D13 in full.
+
+**Status:** R5 closed at the memo level. R5 D13 stays open until the first R6 real deploy exercises the script end-to-end on production. (Note: if the first R6 is a non-deploying sub-R — e.g. a typecheck-only cleanup with no migration/seed/runtime change — it would not fully exercise the script, so the Phase-2 close waits for the first R6 that actually deploys a runtime change. Surfaced in `docs/PHASE_B_R6_PLANNING_MEMO.md`.)
+
+**Source:** owner directive 2026-05-30 (R5 dogfood ack + baseline ratification + Phase-2 trigger).
