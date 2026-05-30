@@ -1,0 +1,22 @@
+{
+  "_comment": "Baseline for scripts/deploy-and-smoke.ps1 bundle check (memo docs/PHASE_B_R5_DEPLOY_SCRIPT_MEMO.md, steps 8.5-8.6). Updated ONLY via -UpdateBaseline (Q3.a) so each change lands as a reviewable commit. Initial values: post-R4 local `npm run build` per docs/PHASE_B_R4_REVIEW.md.",
+  "unit": "KiB (1024 bytes)",
+  "updatedAt": "2026-05-30",
+  "source": "docs/PHASE_B_R4_REVIEW.md",
+  "mainBundle": {
+    "name": "index",
+    "sizeKiB": 356.64
+  },
+  "thresholds": {
+    "warnDeltaKiB": 40,
+    "failDeltaKiB": 50
+  },
+  "modulepreloadAllowlist": [
+    "react-vendor",
+    "radix-vendor"
+  ],
+  "referenceChunks": {
+    "react-vendor": 203.57,
+    "radix-vendor": 96.63
+  }
+}

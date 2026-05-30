@@ -11,6 +11,9 @@ storybook-static/
 playwright-report/
 test-results/
 
+# Deploy-and-smoke run logs (scripts/deploy-and-smoke.ps1); pruned to 30 days.
+logs/
+
 # Claude / agent local state
 .claude/
 
