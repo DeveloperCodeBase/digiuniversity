@@ -13,9 +13,13 @@
     Runbook: docs/DEPLOY_SCRIPT_USAGE.md
 
 .NOTES
-    Built in atomic commits A-F (memo, Commits section). THIS commit is the
-    skeleton (A): flags + logging + report rendering + exit-code contract.
-    The deploy / smoke / bundle steps are wired into main() across B-E.
+    Built in atomic commits A-F (see the memo's Commits section). The script is
+    now complete: local git pull + migration-detection gate + the 7-step
+    remote.ps1 deploy (B), the API smoke 8.1-8.4 (C), the bundle check 8.5-8.6
+    (D), and the structured report + exit-code contract (machinery in the A
+    skeleton, finalized in E). Steps 9-10 emit a markdown report to stdout AND a
+    timestamped logs/deploy/*.md (with a raw-output appendix for postmortems),
+    plus an exit code per failure family (see Get-ExitCode for the contract).
 
     ASCII-only on purpose: Windows PowerShell 5.1 decodes a BOM-less .ps1 as
     the system ANSI code page, so non-ASCII glyphs (check marks, em dashes)
@@ -160,7 +164,7 @@ function Get-Verdict {
         return "FAIL - $($fails.Count) failure(s): $names"
     }
     if ($script:Steps.Count -eq 0) {
-        return 'no steps executed (skeleton run)'
+        return 'no steps executed'
     }
     if ($warns.Count -gt 0) {
         return "PASS with $($warns.Count) warning(s)"
@@ -169,9 +173,13 @@ function Get-Verdict {
 }
 
 function Get-ExitCode {
-    # Gate aborts are returned at the call site (EXIT_GATE_ABORTED). Otherwise
-    # map the first failing family in cascade order: a remote failure usually
-    # causes downstream smoke/bundle failures, so report the root family.
+    # The full contract (memo step 10): 0 ok / 10 remote / 20 smoke / 30 bundle
+    # / 40 gate-aborted / 99 unexpected. Gate aborts (40) return at their call
+    # site and 99 is the catch block, so this maps only the three "a step
+    # failed" families. Cascade order remote->smoke->bundle returns the FIRST
+    # failing family: a remote failure usually cascades into smoke/bundle, so
+    # reporting the root family is more actionable. (Verified: an unreachable
+    # prod fails smoke+bundle and exits 20, not 30 -- smoke precedes bundle.)
     $map = @{ remote = $EXIT_REMOTE_FAILED; smoke = $EXIT_SMOKE_FAILED; bundle = $EXIT_BUNDLE_FAILED }
     foreach ($sec in 'remote','smoke','bundle') {
         $failed = @($script:Steps | Where-Object { $_.Section -eq $sec -and $_.Status -eq 'fail' })
@@ -183,7 +191,16 @@ function Get-ExitCode {
 function Write-Report {
     $sha  = Get-HeadSha
     $iso  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
-    $mode = if ($DryRun) { ' (dry-run)' } else { '' }
+    # Self-documenting header: a pasted report shows how it was invoked, so the
+    # owner can see at a glance whether this was a real deploy and which steps
+    # were skipped (the Steps section also marks each [SKIP], but the header is
+    # the one-line summary that travels with the ping).
+    $mods = New-Object System.Collections.Generic.List[string]
+    if ($DryRun)         { $mods.Add('dry-run') }
+    if ($SkipMigrate)    { $mods.Add('-SkipMigrate') }
+    if ($SkipSeed)       { $mods.Add('-SkipSeed') }
+    if ($UpdateBaseline) { $mods.Add('-UpdateBaseline') }
+    $mode = if ($mods.Count -gt 0) { ' (' + ($mods -join '; ') + ')' } else { '' }
 
     $report = New-Object System.Collections.Generic.List[string]
     $report.Add("# Deploy & Smoke Report - $sha - $iso$mode")
