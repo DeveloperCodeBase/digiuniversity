@@ -1736,3 +1736,32 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **D77 note:** D77 is intentionally unused (a numbering skip D76→D78, owner-confirmed). Sequence continues from D79; no retroactive assignment unless the owner later directs one.
 
 **Source:** owner directive 2026-05-30 «R6 = C، شروع memo» + three-point rationale + sequencing confirmation.
+
+### D80 — R6 Q-answers locked: Q1.a PUBLIC + Q2.b token-tracking (hardened) + Q3.a defer-verify + Q4.a both + Q5.a confirmation
+**Context:** Owner reviewed the scoped Candidate-C memo (`docs/PHASE_B_R6_MEMO.md`, commit `91bdcdb`) and locked the five Q-decisions 2026-05-30, adding a mandatory security-hardening rider on Q2.b. Code starts at Commit A per the memo's 5-commit plan (A migration → B backend → C form → D track+flow → E close).
+
+**Owner decision (verbatim-blend):** «R6 = Q1.a + Q2.b + Q3.a + Q4.a + Q5.a، شروع code از Commit A. + یک hardening روی Q2.b.»
+
+**Locked answers:**
+- **Q1.a — PUBLIC route.** `/apply` + `/track` classified PUBLIC (not WORKSPACE). Owner ratified the memo's correction to the original brief: WORKSPACE would trip the AppShell auth gate (`AppShell.tsx:129`) and force a login redirect, breaking the anon-applicant premise. This is the **first anon *writable* route** (existing PUBLIC routes are anon *read* / marketing), not a workspace route. PUBLIC = zero dual-nav / auth-gate conflict (the R-Landing-v2 class of bug from auth-aware chrome is avoided because only the landing route is Nav-special-cased).
+- **Q2.b — token-based anon tracking, HARDENED** (see rider). Rationale: full applicant vision (self status + withdraw), R-Notif-independent (token shown on the confirmation page, not emailed), and migration-bearing → exercises `deploy-and-smoke.ps1`'s migration gate for real (R5 Phase-2 dogfood).
+- **Q3.a — defer self-verify to R-Notif.** Verification stays admin-set (the R3.b position — "self-verification UX defers to R-Notif per D71 Q3.a"). Email/phone token-redemption / SMS-OTP = R-Notif territory; building it now is scope creep. The `/apply` form collects email/phone as plain fields; the `UNDER_REVIEW`→forward verification gate is untouched.
+- **Q4.a — both student + instructor.** Backend + web API clients already exist from R3.b (`endpoints.js:339-397`); zero new backend, just two form variants. Q4.b (student-first) would leave the instructor public path half-built.
+- **Q5.a — confirmation = reference id + `/track` link + timeline.** After submit, the applicant lands on a confirmation with the reference id, the `/track?token=…` link (the primary access mechanism), and a what-happens-next timeline.
+
+**Discovery surfaced (5th Phase B catch):** The R3.b self-service endpoints (`GET …/me`, `POST …/:id/withdraw`) require a JWT **and** `app.userId === actor.userId` (`student-applications.service.ts:416-459`), but an anon applicant has **no User until ENROLLED** (`userId` is null SUBMITTED→ACCEPTED; the `find-or-create-or-link` runs only in the ACCEPTED→ENROLLED side effect, `application-enrollment.service.ts:84-187`). So anon status-tracking + withdraw is **structurally unsupported today** — a real architecture decision, not wiring. Resolved by Q2.b.
+
+**Q2.b security-hardening rider (MANDATORY — application data is sensitive PII: name/email/phone/national-id/status):**
+1. **Unguessable token** — `trackingToken` = crypto-random, ≥128-bit, NOT a sequential id. A guessable token = one applicant reading another's PII. (Implementation: in-repo precedent is `crypto.randomBytes(24).toString("base64url")` = 192-bit, `application-enrollment.service.ts:62-65`; final generator confirmed in Commit A ping — see stop-trigger #6.)
+2. **Token shown on confirmation page** (applicant copies it) — this is the primary access mechanism for R6 (R-Notif emails it later).
+3. **Rate-limit `/track`** — `@Throttle` (reuse the R3.b submission pattern) to block brute-force enumeration.
+4. **Token never logged** — same discipline as the R5 `SMOKE_*` credential pattern (minted secret never written to report/log).
+5. **`/track` GET returns a non-sensitive subset where possible** — status + timeline + reference id; mask or omit full PII (e.g. nationalId). Exact mask scope = a Commit-B micro-decision (owner-delegated).
+
+**Active intermediate stop triggers (D61 discipline, owner-set for R6):** (1) unexpected discovery → STOP+ping; (2) scope expand → STOP+ping; (3) main-bundle Δ > 50 KB → STOP+ping (D66 Path D — `/apply` + `/track` per-route lazy); (4) `/apply` or `/track` chunk > 30 KB → proactive ping; (5) anon route causes an AppShell auth-gate conflict (R-Landing-v2 dual-navbar class) → STOP+ping; (6) `trackingToken` security-impl ambiguity (crypto-random-in-Prisma-default, uniqueness/collision handling, or PII-mask scope) → STOP+ping. Else silent continue A→E.
+
+**Deploy + close (R5 Phase 2):** After Commit E, Claude deploys via the one command `deploy-and-smoke.ps1` (not 6 `remote.ps1` calls); the new `trackingToken` migration fires the migration gate (step 2 + 8.2) for real — the first complete script exercise. Owner does only the ~2-min final mobile visual + the D13 anon-journey checklist (submit → confirmation → `/track` status → withdraw → admin sees it; forged-token = no leak; rate-limit holds; D70 explicit withdraw/delete). A clean run closes **R5 D13 Phase 2** concurrently and the review doc records that evidence.
+
+**Phase B closure:** R6 (Candidate C) closes Phase B per Compass (Onboarding complete) — a Gate-A-style milestone. After R6 D13 PASS, the review doc carries a Phase B closure note + retrospective update.
+
+**Source:** owner directive 2026-05-30 (Q-answers lock + Q2.b hardening rider + stop-trigger set + deploy/close plan).
