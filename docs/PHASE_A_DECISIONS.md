@@ -1765,3 +1765,17 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Phase B closure:** R6 (Candidate C) closes Phase B per Compass (Onboarding complete) — a Gate-A-style milestone. After R6 D13 PASS, the review doc carries a Phase B closure note + retrospective update.
 
 **Source:** owner directive 2026-05-30 (Q-answers lock + Q2.b hardening rider + stop-trigger set + deploy/close plan).
+
+#### D80 addendum — trackingToken entropy resolved (stop-trigger #6, Option 1)
+**Catch (pre-code, ~6th Phase B):** Commit A's brief said "trackingToken column **crypto-random default** + index", but no Prisma/Postgres DB `@default` reaches the owner's own **≥128-bit** floor — `@default(uuid())`/`gen_random_uuid()` = UUID v4 = **122-bit** (under floor, violates hardening #1), and `@default(cuid())` is **not crypto-random** (timestamp+counter, partially guessable). Going blind with `@default(uuid())` would have shipped a **122-bit token under the owner's stated floor** — a subtle PII-protection weakness that might not surface until an audit. Surfaced at stop-trigger #6 before any migration was written.
+
+**Resolution (owner: «Option 1، برو»):** App-level mint — `crypto.randomBytes(24).toString("base64url")` = **192-bit**, URL-safe — in `submitPublic` (Commit B), **NOT** a DB `@default`. Reuses the in-repo `generateSecurePassword()` pattern (`application-enrollment.service.ts:62-65`) for consistency + zero reinvention.
+- **Schema:** `trackingToken String? @unique` — **nullable** (only public submissions mint a token; admin-created rows stay null and are tracked via `/admin/applications`, not a token). Token is a public-applicant access mechanism, not a universal column.
+- **Migration (Commit A):** `ADD COLUMN` (nullable, NO DEFAULT clause) + unique index, both application tables. §4 additive.
+- **Collision:** `@unique` + regenerate-on-P2002 retry (≤3) — the find-or-create-or-link spirit from R3.b. (At 192-bit, collision is astronomical; the retry is defense-in-depth.)
+- **PII-mask (Commit B micro-decision, owner-delegated):** `/track` GET masks `applicantNationalId`, drops internal ids, returns `status + timeline + reference + masked contact`.
+- **Only deviation from the A-line:** the crypto-random lives in **app code (Commit B)**, not a DB `DEFAULT` in the **A** migration — forced by the entropy floor (no DB default meets ≥128-bit). Minting location matches the acked memo's commit table exactly.
+
+**Owner note:** «این catch عالی بود — اگه blind با @default(uuid()) می‌رفتیم، token 122-bit می‌شد، زیر floor خودم … exactly اون نوع pre-code discovery که Phase B discipline برای آن وجود داره.»
+
+**Source:** owner directive 2026-05-30 «Option 1، برو» (token entropy resolution; A→E silent execution authorized; stop-triggers remain active for new items).
