@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe","visual","lint")]
+    [ValidateSet("push","pull","build","up","down","restart","logs","logs-live","test","status","shell","domain-probe","caddy-install","caddy-reload","caddy-verify","caddy-logs","caddy-probe-and-logs","caddy-which-config","backup","restore","migrate","migrate-status","seed","health","rollout","rollback","provision-env","show-env","pin-image","list-images","spa-probe","security-probe","visual","lint")]
     [string]$Action,
 
     # Optional positional args for the new ops actions:
@@ -413,6 +413,16 @@ for sname,srv in cfg.items():
         # never resets data (unlike `migrate dev`). Kept separate from
         # `up` so we can run it standalone after a schema change.
         Remote "docker compose exec -T api npx prisma migrate deploy"
+    }
+
+    "migrate-status" {
+        # Read-only post-deploy verification (deploy-and-smoke.ps1 step 8.2):
+        # report whether the live DB schema matches the committed migration
+        # history. `migrate status` exits non-zero on pending migrations, so
+        # the smoke parses stdout for "Database schema is up to date" rather
+        # than trusting the exit code (same pattern as `health`). Mutates
+        # nothing — safe to run on every smoke, including --dry-run.
+        Remote "docker compose exec -T api npx prisma migrate status"
     }
 
     "seed" {

@@ -55,6 +55,13 @@ $EXIT_UNEXPECTED    = 99
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $LogDir   = Join-Path $RepoRoot 'logs\deploy'
 
+# --- Smoke targets (memo step 8) -------------------------------------------
+# Public ingress base. The api + ai-gateway sit behind Caddy path-strips
+# (/api/* -> api:4000/v1, /ai/* -> ai-gateway:8000/v1; infra/Caddyfile.snippet),
+# so the public api root is /api/v1 and the SPA health is /healthz.
+$BaseUrl = 'https://digiuniversity.ir'
+$ApiBase = "$BaseUrl/api/v1"
+
 # --- Run state -------------------------------------------------------------
 # Each step is a record: { Section; Name; Status; Detail }. Section is one of
 # remote | smoke | bundle | gate. Status drives both the verdict and the exit
@@ -309,6 +316,157 @@ function Add-HealthStep {
     return $true
 }
 
+# --- API smoke (memo steps 8.1-8.4) ---------------------------------------
+function Invoke-Curl {
+    # Thin wrapper over the real curl.exe -- NOT PowerShell's `curl` alias to
+    # Invoke-WebRequest, which throws on 4xx/5xx and would break the
+    # expect-401 probe. Appends the HTTP status after the body via -w, then
+    # splits it back off, so callers get both without a throw. A transport
+    # failure (DNS/TLS/timeout) yields curl's "000" -> Code 0, which callers
+    # treat as a failure. EAP is relaxed because curl -S writes to stderr.
+    param(
+        [Parameter(Mandatory)][string]$Url,
+        [string]$Method = 'GET',
+        [string]$Body,
+        [string[]]$Header = @(),
+        [int]$TimeoutSec = 20
+    )
+    # --retry rides out transient blips (timeouts, conn-refused, 5xx/429) so a
+    # one-off network hiccup never fails the deploy verdict; genuine 4xx (401,
+    # 404) are NOT retried, so the expect-401 probe still returns immediately.
+    $curlArgs = @(
+        '-s', '-S', '--max-time', "$TimeoutSec", '--connect-timeout', '10',
+        '--retry', '2', '--retry-delay', '1', '--retry-connrefused',
+        '-w', "`n%{http_code}", '-X', $Method
+    )
+    foreach ($h in $Header) { $curlArgs += @('-H', $h) }
+
+    $bodyFile = $null
+    if ($PSBoundParameters.ContainsKey('Body')) {
+        # Windows PowerShell 5.1 mangles embedded double-quotes when a JSON
+        # string is passed as a native-command argument, so the API received
+        # malformed JSON and 400'd instead of authenticating. Hand curl the
+        # body through a UTF-8 (no BOM) temp file: the `@path` arg has no
+        # quotes to mangle, and the file bytes are exactly what we wrote.
+        $bodyFile = [System.IO.Path]::GetTempFileName()
+        [System.IO.File]::WriteAllText($bodyFile, $Body, (New-Object System.Text.UTF8Encoding($false)))
+        $curlArgs += @('--data-binary', "@$bodyFile")
+    }
+    $curlArgs += $Url
+
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $global:LASTEXITCODE = 0
+    try { $raw = & curl.exe @curlArgs 2>&1 }
+    finally {
+        $ErrorActionPreference = $prevEAP
+        if ($bodyFile -and (Test-Path $bodyFile)) { Remove-Item $bodyFile -Force -ErrorAction SilentlyContinue }
+    }
+    $text = (@($raw) | ForEach-Object { "$_" }) -join "`n"
+    $code = 0
+    $respBody = $text
+    if ($text -match '(?s)^(.*)\n(\d{3})\s*$') { $respBody = $matches[1]; $code = [int]$matches[2] }
+    elseif ($text -match '^(\d{3})\s*$')        { $respBody = '';          $code = [int]$matches[1] }
+    return [pscustomobject]@{ Code = $code; Body = $respBody }
+}
+
+function Add-PublicHealthSmoke {
+    # 8.1 -- public health through the full ingress path (Caddy -> nginx/api/
+    # ai-gateway). Distinct from step 7's `health` action, which probes each
+    # container from INSIDE the VPS via docker exec: this catches "containers
+    # healthy but Caddy upstream stale" (the 502-after-recreate failure mode).
+    $endpoints = @(
+        [pscustomobject]@{ Name = 'public /healthz (app)';        Url = "$BaseUrl/healthz" }
+        [pscustomobject]@{ Name = 'public /api/v1/health (api)';  Url = "$ApiBase/health" }
+        [pscustomobject]@{ Name = 'public /ai/v1/health (ai-gw)'; Url = "$BaseUrl/ai/v1/health" }
+    )
+    foreach ($e in $endpoints) {
+        Write-Host ">> GET $($e.Url)"
+        $r = Invoke-Curl -Url $e.Url
+        if ($r.Code -eq 200) {
+            Add-Step -Section smoke -Name $e.Name -Status pass -Detail '200'
+        } else {
+            Add-Step -Section smoke -Name $e.Name -Status fail -Detail "HTTP $($r.Code)"
+            Add-Appendix "GET $($e.Url) -> $($r.Code)" $r.Body
+        }
+    }
+}
+
+function Add-MigrateStatusSmoke {
+    # 8.2 -- post-deploy ground truth: does the live schema match the committed
+    # migration history? Parses stdout for Prisma's up-to-date line (the exit
+    # code is unreliable through the remote.ps1 + ssh layering).
+    Write-Host '>> remote.ps1 migrate-status'
+    $r = Invoke-RemoteScript -Action migrate-status
+    Add-Appendix "remote.ps1 migrate-status (exit $($r.Code))" $r.Output
+    if ($r.Output -match 'Database schema is up to date') {
+        Add-Step -Section smoke -Name 'prisma migrate status' -Status pass -Detail 'schema up to date'
+    } else {
+        Add-Step -Section smoke -Name 'prisma migrate status' -Status fail -Detail 'not up to date (pending migration or drift)'
+    }
+}
+
+function Add-AuthSmoke {
+    # 8.3 + 8.4 -- the hybrid the owner chose (Probe 401 + env upgrade):
+    #   * default (no SMOKE_* env): POST a well-formed login for a non-existent
+    #     tenant; the auth path must answer 401 (proves "API booted AND auth is
+    #     validating"). 429 = throttled but up -> warn; anything else -> fail.
+    #   * upgraded (SMOKE_TENANT_SLUG + _ADMIN_EMAIL + _ADMIN_PASSWORD all set):
+    #     real round-trip -> 200 + accessToken, then GET /auth/me with it -> 200.
+    # The minted token is never logged (success bodies are not appended).
+    $slug  = $env:SMOKE_TENANT_SLUG
+    $email = $env:SMOKE_ADMIN_EMAIL
+    $pw    = $env:SMOKE_ADMIN_PASSWORD
+    $haveCreds = $slug -and $email -and $pw
+
+    $loginUrl = "$ApiBase/auth/login"
+    $meUrl    = "$ApiBase/auth/me"
+    $jsonHdr  = 'Content-Type: application/json'
+
+    if (-not $haveCreds) {
+        $body = '{"tenantSlug":"smoke-probe","email":"smoke-probe@invalid.example","password":"smoke-not-a-real-pw"}'
+        Write-Host ">> POST $loginUrl (bogus -> expect 401)"
+        $r = Invoke-Curl -Url $loginUrl -Method POST -Body $body -Header $jsonHdr
+        switch ($r.Code) {
+            401     { Add-Step -Section smoke -Name 'auth probe (no creds)' -Status pass -Detail '401 as expected; set SMOKE_* env for full round-trip' }
+            429     { Add-Step -Section smoke -Name 'auth probe (no creds)' -Status warn -Detail '429 rate-limited (auth up)' }
+            default {
+                Add-Step -Section smoke -Name 'auth probe (no creds)' -Status fail -Detail "expected 401, got $($r.Code)"
+                Add-Appendix "POST $loginUrl (bogus) -> $($r.Code)" $r.Body
+            }
+        }
+        Add-Step -Section smoke -Name 'authed GET /auth/me' -Status skip -Detail 'no SMOKE_* creds configured'
+        return
+    }
+
+    $payload = @{ tenantSlug = $slug; email = $email; password = $pw } | ConvertTo-Json -Compress
+    Write-Host ">> POST $loginUrl (round-trip; creds from SMOKE_* env)"
+    $r = Invoke-Curl -Url $loginUrl -Method POST -Body $payload -Header $jsonHdr
+    if ($r.Code -ne 200) {
+        Add-Step -Section smoke -Name 'login round-trip' -Status fail -Detail "expected 200, got $($r.Code)"
+        Add-Appendix "POST $loginUrl (round-trip) -> $($r.Code)" $r.Body
+        Add-Step -Section smoke -Name 'authed GET /auth/me' -Status skip -Detail 'login failed'
+        return
+    }
+    $token = $null
+    if ($r.Body -match '"accessToken"\s*:\s*"([^"]+)"') { $token = $matches[1] }
+    if (-not $token) {
+        Add-Step -Section smoke -Name 'login round-trip' -Status fail -Detail '200 but no accessToken in body'
+        Add-Step -Section smoke -Name 'authed GET /auth/me' -Status skip -Detail 'no token'
+        return
+    }
+    Add-Step -Section smoke -Name 'login round-trip' -Status pass -Detail '200 + accessToken'
+
+    Write-Host ">> GET $meUrl (authed)"
+    $m = Invoke-Curl -Url $meUrl -Header "Authorization: Bearer $token"
+    if ($m.Code -eq 200) {
+        Add-Step -Section smoke -Name 'authed GET /auth/me' -Status pass -Detail '200'
+    } else {
+        Add-Step -Section smoke -Name 'authed GET /auth/me' -Status fail -Detail "expected 200, got $($m.Code)"
+        Add-Appendix "GET $meUrl (authed) -> $($m.Code)" $m.Body
+    }
+}
+
 # --- main ------------------------------------------------------------------
 try {
     Push-Location $RepoRoot
@@ -348,7 +506,12 @@ try {
         Add-HealthStep | Out-Null
     }
 
-    # Step 8 API smoke (C) + bundle (D) are wired in by later commits.
+    # Step 8 -- API smoke (8.1-8.4 here; bundle 8.5-8.6 in Commit D). Runs in
+    # BOTH modes: under --dry-run we skip the deploy but still smoke current
+    # prod, which is exactly what verifies the report shape end-to-end.
+    Add-PublicHealthSmoke
+    Add-MigrateStatusSmoke
+    Add-AuthSmoke
 
     Write-Report
     exit (Get-ExitCode)
