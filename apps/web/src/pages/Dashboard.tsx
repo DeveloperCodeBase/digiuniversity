@@ -189,7 +189,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ go }) => {
 // imports.)
 
 
-const ActionCard = ({ icon, label, title, sub }) => (
+const ActionCard = ({ icon, label, title, sub }: { icon: string; label: string; title: string; sub: string }) => (
   <div className="card-flat p-3.5" >
     <div className="flex items-center gap-2 mb-2"  style={{ color: "var(--cyan)"}}>
       <Icon name={icon} size={13} />
@@ -200,7 +200,7 @@ const ActionCard = ({ icon, label, title, sub }) => (
   </div>
 );
 
-const CredMini = ({ title, sub, date }) => (
+const CredMini = ({ title, sub, date }: { title: string; sub: string; date: string }) => (
   <div className="card-flat flex items-center gap-3.5 p-3.5" >
     <div className="relative"  style={{width: 44, height: 44, borderRadius: 50, background: "conic-gradient(from 0deg, var(--amber), var(--cyan), var(--violet), var(--amber))", flexShrink: 0}}>
       <div className="absolute grid"  style={{ inset: 3, borderRadius: 50, background: "var(--surface-2)", placeItems: "center", fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--amber)", fontWeight: 700}}>VC</div>

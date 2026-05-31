@@ -163,7 +163,7 @@ export const CoursePage: React.FC<CoursePageProps> = ({ go }) => {
   );
 };
 
-const ModuleRow = ({ module, idx, active, onClick }) => {
+const ModuleRow = ({ module, idx, active, onClick }: { module: { status?: string; title?: string; sub?: string; kinds: string[]; duration?: string }; idx: number; active: boolean; onClick: () => void }) => {
   const status = module.status; // done / current / locked
   const locked = status === "locked";
   const statusLabel = status === "done" ? "تکمیل شده" : status === "current" ? "در حال انجام" : "قفل";

@@ -108,7 +108,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ go }) => {
                 <div key={range} className="bar-chart-row">
                   <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--fg-mute)" }}>{range}</span>
                   <div className="rounded-full overflow-hidden"  style={{height: 10, background: "var(--surface-2)"}}>
-                    <div className="rounded-full"  style={{width: pct * 2 + "%", height: "100%", background: c}} />
+                    <div className="rounded-full"  style={{width: Number(pct) * 2 + "%", height: "100%", background: String(c)}} />
                   </div>
                   <span className="text-left"  style={{fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600}}>{toFa(pct)}٪</span>
                 </div>
@@ -187,8 +187,8 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ go }) => {
                 ["پایش", 72, "var(--fg-mute)"],
               ].map(([level, count, c]) => (
                 <div className="p-4 rounded-xl" key={level}  style={{ background: "var(--surface-2)", border: `1px solid ${c}33`}}>
-                  <div className="mono" style={{ fontSize: 10, color: c, letterSpacing: "0.08em" }}>{level}</div>
-                  <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 28, fontWeight: 700, color: c}}>{toFa(count)}</div>
+                  <div className="mono" style={{ fontSize: 10, color: String(c), letterSpacing: "0.08em" }}>{level}</div>
+                  <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 28, fontWeight: 700, color: String(c)}}>{toFa(count)}</div>
                 </div>
               ))}
             </div>
@@ -222,7 +222,7 @@ const AnalyticsSideNav = () => (
   </aside>
 );
 
-const Legend = ({ color, label }) => (
+const Legend = ({ color, label }: { color: string; label: string }) => (
   <div className="flex items-center gap-2"  style={{ fontSize: 12, color: "var(--fg-mute)"}}>
     <span className="rounded-full"  style={{width: 12, height: 3, background: color}} />
     {label}
