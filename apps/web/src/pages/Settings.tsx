@@ -46,7 +46,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ go }) => {
           {tab === "ai" && <AITab />}
           {tab === "privacy" && <PrivacyTab />}
           {tab === "accessibility" && <AccessibilityTab />}
-          {tab === "billing" && <BillingTab />}
+          {tab === "billing" && <BillingTab go={go} />}
           {tab === "wallet" && <WalletTab />}
         </div>
       </div>
@@ -55,7 +55,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ go }) => {
   );
 };
 
-const SectionH = ({ eyebrow, title, sub }) => (
+const SectionH = ({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: React.ReactNode }) => (
   <div className="mb-7" >
     <span className="eyebrow">{eyebrow}</span>
     <h1 className="h-2 mt-2.5" >{title}</h1>
@@ -63,7 +63,7 @@ const SectionH = ({ eyebrow, title, sub }) => (
   </div>
 );
 
-const Row = ({ label, hint, children }) => (
+const Row = ({ label, hint, children }: { label: React.ReactNode; hint?: React.ReactNode; children?: React.ReactNode }) => (
   <div className="grid gap-8 items-start"  style={{ gridTemplateColumns: "240px 1fr", padding: "20px 0", borderBottom: "1px solid var(--line)"}}>
     <div>
       <div style={{ fontSize: 14, fontWeight: 500 }}>{label}</div>
@@ -82,8 +82,8 @@ const ProfileTab = () => (
           <div className="avatar cyan" style={{ width: 76, height: 76, fontSize: 22 }}>نر</div>
           <Button variant="outline" onClick={() => window.toast?.("انتخاب‌گر فایل به‌زودی")}>آپلود تصویر جدید</Button>
           <Button variant="ghost" onClick={async () => {
-            const ok = await window.confirmAction?.({ title: "حذف عکس پروفایل", body: "آیا مطمئن هستید؟", confirmLabel: "حذف", danger: true });
-            if (ok) window.toast?.({ title: "حذف شد", kind: "success" });
+            const ok = await window.confirmAction?.({ title: "حذف عکس پروفایل", body: "آیا مطمئن هستید؟", confirmLabel: "حذف" });
+            if (ok) window.toast?.({ title: "حذف شد", msg: "عکس پروفایل حذف شد.", kind: "success" });
           }}>حذف</Button>
         </div>
       </Row>
@@ -149,7 +149,7 @@ const SecurityTab = () => (
                 <div style={{ fontSize: 13, fontWeight: 500 }}>{d}</div>
                 <div className="mt-1"  style={{fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--fg-mute)"}}>{w}</div>
               </div>
-              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <Button variant="ghost" size="sm" onClick={() => window.toast?.({ title: "نشست بسته شد", kind: "success" })}>خروج</Button>}
+              {s === "current" ? <span className="pill pill-cyan" style={{ fontSize: 10 }}>این نشست</span> : <Button variant="ghost" size="sm" onClick={() => window.toast?.({ title: "نشست بسته شد", msg: "این نشست از راه دور خارج شد.", kind: "success" })}>خروج</Button>}
             </div>
           ))}
         </div>
@@ -158,13 +158,13 @@ const SecurityTab = () => (
         <div className="flex gap-2.5" >
           <Button variant="outline" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
             onClick={async () => {
-              const ok = await window.confirmAction?.({ title: "غیرفعال‌سازی موقت حساب", body: "حساب شما تا فعال‌سازی مجدد قابل دسترس نخواهد بود.", confirmLabel: "غیرفعال کن", danger: true });
-              if (ok) window.toast?.({ title: "حساب غیرفعال شد", kind: "warn" });
+              const ok = await window.confirmAction?.({ title: "غیرفعال‌سازی موقت حساب", body: "حساب شما تا فعال‌سازی مجدد قابل دسترس نخواهد بود.", confirmLabel: "غیرفعال کن" });
+              if (ok) window.toast?.({ title: "حساب غیرفعال شد", msg: "حساب شما تا فعال‌سازی مجدد غیرفعال شد.", kind: "warn" });
             }}
           >غیرفعال‌سازی موقت</Button>
           <Button variant="outline" style={{ borderColor: "var(--rose)", color: "var(--rose)" }}
             onClick={async () => {
-              const ok = await window.confirmAction?.({ title: "حذف کامل حساب", body: "این عملیات غیرقابل بازگشت است و همه‌ی داده‌های شما حذف می‌شوند.", confirmLabel: "حذف کامل", danger: true });
+              const ok = await window.confirmAction?.({ title: "حذف کامل حساب", body: "این عملیات غیرقابل بازگشت است و همه‌ی داده‌های شما حذف می‌شوند.", confirmLabel: "حذف کامل" });
               if (ok) window.toast?.({ title: "درخواست حذف ثبت شد", msg: "تا ۳۰ روز قابل لغو است.", kind: "danger" });
             }}
           >حذف کامل حساب</Button>
@@ -248,7 +248,7 @@ const ToneSelector = () => {
   const [tone, setTone] = React.useState(() => {
     try { return localStorage.getItem("digiu_tone") || "سقراطی"; } catch { return "سقراطی"; }
   });
-  const set = (t) => {
+  const set = (t: string) => {
     setTone(t);
     try { localStorage.setItem("digiu_tone", t); } catch {}
     window.toast?.({ title: "لحن دستیار", msg: `به «${t}» تغییر یافت.`, kind: "success" });
@@ -341,7 +341,7 @@ const AccessibilityTab = () => (
   </div>
 );
 
-const BillingTab = () => (
+const BillingTab = ({ go }: { go: Go }) => (
   <div>
     <SectionH eyebrow="BILLING · صورتحساب" title="پرداخت و فاکتور" sub="مدیریت روش‌های پرداخت، فاکتورها و اشتراک." />
     <div className="card p-8 mb-4" >
@@ -400,7 +400,7 @@ const WalletTab = () => (
         ><Icon name="plus" size={14} />شارژ کیف پول</Button>
         <Button variant="outline" onClick={async () => {
             const ok = await window.confirmAction?.({ title: "برداشت از کیف پول", body: "مبلغ به حساب بانکی متصل به حساب شما واریز می‌شود.", confirmLabel: "ادامه" });
-            if (ok) window.toast?.({ title: "درخواست برداشت ثبت شد", kind: "success" });
+            if (ok) window.toast?.({ title: "درخواست برداشت ثبت شد", msg: "مبلغ ظرف چند روز کاری به حساب شما واریز می‌شود.", kind: "success" });
           }}
         ><Icon name="download" size={14} />برداشت</Button>
       </div>

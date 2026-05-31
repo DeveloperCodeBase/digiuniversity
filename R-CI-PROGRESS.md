@@ -5,3 +5,4 @@ Standing authorization (owner, 2026-05-31): autonomous bucket-by-bucket to tsc=0
 
 - 2026-05-31 08:28 · conservative codemod (errorMessage helper + {go}:Go) · 198→185 · `f77adee` · —
 - 2026-05-31 08:40 · Catalog.tsx (data/state interfaces + typed params + user guard) · 185→161 · `a65762b` · —
+- 2026-05-31 08:50 · CourseLive.tsx (AiEnvelope/CourseDetail/Module/Lesson types + typed params + Icon span-wrap) · 161→139 · `0d774b2` · —
