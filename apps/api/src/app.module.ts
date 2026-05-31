@@ -41,9 +41,17 @@ import { UsersModule } from "./users/users.module";
     // `trust proxy: true` is set in main.ts (we sit behind Caddy +
     // nginx). In-memory store is fine while we run a single api
     // replica — swap to ThrottlerStorageRedisService once we scale out.
-    ThrottlerModule.forRoot([
-      { name: "default", ttl: 60_000, limit: 600 },
-    ]),
+    // skipIf disables throttling entirely when NODE_ENV=test (the api-test
+    // compose service sets it). The integration suite boots the real
+    // AppModule and runs --runInBand, so every request shares one in-memory
+    // bucket keyed on the single loopback IP — without this, cumulative
+    // volume across 120+ tests trips 429 and the suite is non-hermetic
+    // (R-CI capstone D88). Prod is NODE_ENV=production, so the guard is
+    // unchanged there. The proper per-test throttler control is R-CI-Api.
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: "default", ttl: 60_000, limit: 600 }],
+      skipIf: () => process.env.NODE_ENV === "test",
+    }),
     PrismaModule,
     AuthModule,
     // Phase-15 R2: audit-log infra. Global so AuditLogService is

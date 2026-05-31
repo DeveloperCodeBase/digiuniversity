@@ -16,6 +16,12 @@
       3. audit-lint   repo root   tools/eslint-rules/audit-on-mutation.js
       4. api jest     VPS         `remote.ps1 test`    (DB-backed, docker test profile)
 
+    Gate 4 is ADVISORY by default (runs + reports, never blocks the run)
+    because the jest suite is not yet hermetic -- it shares the prod DB and
+    the throttler is only env-skipped, so a few drift/state failures remain
+    (R-CI capstone D88; the hermetic refactor is the R-CI-Api follow-up).
+    -EnforceJest makes it blocking once R-CI-Api greens it.
+
     Gates 1-3 are local, fast, and SIDE-EFFECT-FREE -- they check the current
     working tree. Gate 4 is the DB-backed jest suite; it runs on the VPS via
     `remote.ps1 test`, which FIRST does `git push origin main` (so the VPS tests
@@ -45,11 +51,11 @@
     for the static gates.
 
     Exit codes (one per failure family; first failing gate in gate order wins):
-      0   all gates green
+      0   all blocking gates green (jest is advisory by default)
       10  web tsc failed
       20  api tsc failed
       30  audit-lint failed
-      40  api jest failed
+      40  api jest failed (ONLY when -EnforceJest; advisory jest never exits non-zero)
       99  unexpected exception
 #>
 [CmdletBinding()]
@@ -57,7 +63,13 @@ param(
     # Static-only: run gates 1-3 (web tsc + api tsc + audit-lint) and skip the
     # DB-backed jest gate. No `git push`, no VPS, no docker. Use for fast local
     # iteration or a CI static-analysis pass.
-    [switch]$SkipJest
+    [switch]$SkipJest,
+
+    # Make the jest gate BLOCKING (a jest failure -> exit 40). Default is
+    # advisory: jest runs + reports but never fails the run, because the
+    # suite is not yet hermetic (R-CI capstone D88 -> R-CI-Api). Flip this on
+    # once R-CI-Api greens jest so the deploy gate enforces it too.
+    [switch]$EnforceJest
 )
 
 Set-StrictMode -Version Latest
@@ -90,7 +102,7 @@ $script:RunId    = (Get-Date).ToString('yyyy-MM-dd-HHmmss')
 function Add-Step {
     param(
         [Parameter(Mandatory)][string]$Name,
-        [Parameter(Mandatory)][ValidateSet('pass','fail','skip','info')][string]$Status,
+        [Parameter(Mandatory)][ValidateSet('pass','fail','warn','skip','info')][string]$Status,
         [string]$Detail = '',
         [int]$ExitOnFail = 0
     )
@@ -103,6 +115,7 @@ function Add-Step {
     $glyph = switch ($Status) {
         'pass' { '[OK]  ' }
         'fail' { '[FAIL]' }
+        'warn' { '[WARN]' }
         'skip' { '[skip]' }
         default { '[..]  ' }
     }
@@ -213,14 +226,22 @@ function Add-JestGate {
     Write-Host '   note: this pushes origin/main, then runs DB-backed jest on the VPS.'
     $r = Invoke-Native { & $RemoteScript -Action test }
     Add-Appendix "remote.ps1 test (exit $($r.Code))" $r.Output
+    $summary = ''
+    $m = [regex]::Match($r.Output, 'Tests:\s+([^\r\n]+)')
+    if ($m.Success) { $summary = "Tests: $($m.Groups[1].Value.Trim())" }
     if ($r.Code -eq 0) {
-        $detail = 'jest suite passed'
-        $m = [regex]::Match($r.Output, 'Tests:\s+([^\r\n]+)')
-        if ($m.Success) { $detail = "Tests: $($m.Groups[1].Value.Trim())" }
+        $detail = if ($summary) { $summary } else { 'jest suite passed' }
         Add-Step -Name 'api jest (DB-backed)' -Status pass -Detail $detail
         return $true
     }
-    Add-Step -Name 'api jest (DB-backed)' -Status fail -Detail "exit $($r.Code) (see log appendix)" -ExitOnFail $EXIT_JEST
+    $detail = if ($summary) { $summary } else { "exit $($r.Code)" }
+    if ($EnforceJest) {
+        Add-Step -Name 'api jest (DB-backed)' -Status fail -Detail "$detail (see log appendix)" -ExitOnFail $EXIT_JEST
+        return $false
+    }
+    # Advisory (default): jest is reported but never blocks -- the suite is
+    # non-hermetic until R-CI-Api (D88).
+    Add-Step -Name 'api jest (DB-backed)' -Status warn -Detail "$detail -- ADVISORY, non-blocking (R-CI-Api; see appendix)"
     return $false
 }
 
@@ -231,9 +252,13 @@ function Get-Verdict {
         $names = ($fails | ForEach-Object { $_.Name }) -join '; '
         return "FAIL - $($fails.Count) gate(s): $names"
     }
+    $warns = @($script:Steps | Where-Object { $_.Status -eq 'warn' })
+    if ($warns.Count -gt 0) {
+        return "PASS - static gates green; $($warns.Count) advisory (non-blocking)"
+    }
     $skips = @($script:Steps | Where-Object { $_.Status -eq 'skip' })
     if ($skips.Count -gt 0) {
-        return "PASS (with $($skips.Count) skipped gate(s))"
+        return "PASS - static gates green; $($skips.Count) skipped"
     }
     return 'all green'
 }
@@ -261,6 +286,7 @@ function Write-Report {
             $tag = switch ($s.Status) {
                 'pass' { '[PASS]' }
                 'fail' { '[FAIL]' }
+                'warn' { '[WARN]' }
                 'skip' { '[SKIP]' }
                 default { '[INFO]' }
             }

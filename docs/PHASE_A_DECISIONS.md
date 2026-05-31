@@ -1901,3 +1901,32 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Resume pointer:** everything on `main`; `R-CI-PROGRESS.md` current; decisions **D85** (Hybrid scope), **D86** (Icon contract), **D87** (this) logged. A fresh session resumes at capstone phase 1 (write `scripts/verify.*`).
 
 **Source:** owner directive 2026-05-31 (agree: capstone with fresh context; log D87 as the resume anchor before /clear).
+
+### D88 — R-CI capstone: jest structural → R-CI-Api split (Q1.a escape hatch fired)
+**Context:** Capstone phase 1 (`scripts/verify.ps1`) was written + dogfooded. Static gates (web tsc + api tsc + audit-lint) green; the jest gate's first full run surfaced **api jest RED on the VPS — 20/122 fail, 4 suites** (applications-r3b, course-offerings, identity-r3a, academic-hierarchy; 9 suites + 102 tests pass). Silently-red because the deploy path never runs jest — the exact D81 divergence `verify` exists to expose (the script worked on its first run). Claude root-caused read-only + presented A/B/C; owner ruled Option 1.
+
+**Owner decision (verbatim-blend):** «Split: R-CI-Api، برو (Option 1).»
+
+**Why structural (the Q1.a trigger condition):** api jest is **non-hermetic** — a harness-refactor problem, NOT a type-fix. Three causes, all confirmed read-only:
+1. **Throttler active in tests** — global `ThrottlerGuard` (600/min + 10/min on auth/submit), in-memory per `req.ip`; `test/helpers.ts` boots the real `AppModule` and never resets/disables it → `--runInBand` shares one bucket + one loopback IP → cumulative volume trips `429` (~13 of 20 fails).
+2. **Tests run against the PROD database** — `api-test` `DATABASE_URL` == prod `api`'s (`digiuniversity`/`public`, docker-compose); no teardown → fixed-slug collisions on re-run + test tenants accumulate in prod.
+3. **~3 genuine test-vs-code drifts** — studentCode min-len 2, empty-PATCH now 200, audit-subject id.
+None are product regressions — the running app is fine (static green; deploy smoke/health pass).
+
+**Why Option 1 (owner rationale):**
+1. Q1.a's escape hatch was acked *exactly* for this ("single sub-R + split R-CI-Api only if jest structural"). jest IS structural → a pre-planned decision, not a surprise.
+2. jest debt is a DIFFERENT KIND than the tsc cleanup — tsc was proper-types (clean, mechanical-ish); jest is a harness refactor (non-hermetic, throttle bleed, teardown gaps, drift). Mixing them pollutes R-CI's scope.
+3. Static gates hard-enforced NOW → the D81 divergence is closed immediately for the static gates (audit-lint, the original silently-red gate, is now hard-enforced). jest advisory until R-CI-Api makes it hermetic. A partial-but-solid D81 closure.
+4. The capstone proceeds unblocked (verify + gate-flip + deploy with static gates hard-enforced). R-CI closes with tsc 0 + static-gate unification.
+5. Option 2 (fix jest now) = scope creep — the harness refactor (DB teardown + 3 drift + throttle isolation) is its own epic; mixing turns R-CI's tsc-cleanup into a jest-harness-refactor too. Two concerns must stay separate.
+6. Option 3 (triage first) = delay without value — root cause already confident; a per-suite estimate wouldn't change the decision (jest is a separate sub-R regardless).
+
+**Resolution (Option 1):**
+- Capstone `verify` + gate flip **hard-enforce the static gates** (web tsc + api tsc + audit-lint) — D81 structural closure for static.
+- jest is **ADVISORY** in `verify` (run + report, non-blocking) with a `NODE_ENV=test` throttle-skip (`ThrottlerModule.skipIf`) + a `test-*`-scoped DB-cleanup wrapper (jest globalSetup+globalTeardown, cascade-clean, resilient) to cut flakiness, until R-CI-Api makes it hermetic.
+- R-CI closes with tsc 0 + static-gate unification (D89). The jest hermetic refactor — disposable/ephemeral test DB (off prod) + the 3 drifts + per-test throttle isolation — is a follow-up **R-CI-Api** sub-R (memo stub authored at capstone close).
+- This splits the full D81 closure into two clean-scope stages: **static** (now, R-CI) + **jest-hermetic** (next, R-CI-Api).
+
+**Active stop triggers (D61, capstone-revised):** (1) unexpected discovery → STOP+ping; (2) verify surfaces another hidden gate → ping; (3) gate-flip regression (a static gate blocks a deploy that should pass) → STOP+ping; (4) jest advisory-mode hermeticity itself turns structural (e.g. the `NODE_ENV=test` setup is itself a structural issue) → STOP+ping. + stop-trigger #7 (gate-flip regression on the 31 KB R5 deploy script) remains armed for phase 2.
+
+**Source:** owner directive 2026-05-31 «Split: R-CI-Api، برو (Option 1)» (jest structural → R-CI-Api split; static hard-enforce + jest advisory; capstone proceeds unblocked).

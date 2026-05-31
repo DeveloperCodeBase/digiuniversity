@@ -17,4 +17,10 @@ module.exports = {
   },
   testTimeout: 30_000,
   verbose: true,
+  // R-CI capstone D88: tests share the (currently prod) DB, so leftover
+  // `test-*` tenants from prior runs collide on fixed slugs. Sweep them
+  // before AND after the run so DB-state never fails a re-run. Resilient:
+  // the cleaner never throws. Disposable test DB = R-CI-Api.
+  globalSetup: "<rootDir>/test/global-db-clean.cjs",
+  globalTeardown: "<rootDir>/test/global-db-clean.cjs",
 };
