@@ -1794,3 +1794,20 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Lesson (R-CI handoff):** the **deploy path (`deploy-and-smoke.ps1`) and the test path (`pretest` → `lint:audit`) are divergent** — a gate that lives only in the test path can stay silently red while deploys go green. R-CI-Cleanup must unify all quality gates (audit-lint + typecheck + tests) into one CI check so a silent-red can't recur. To be recorded in `PHASE_B_CI_DEBT_REPORT.md` / the R-CI memo when R-CI starts.
 
 **Source:** owner directive 2026-05-30 «Option A، green all 4» (audit-lint discovery resolution; B→E silent execution; R-CI handoff finding noted).
+
+### D82 — R6 Commit C public programs-list dependency (7th Phase B catch)
+**Context:** Starting Commit C (the `/apply` form), a dependency the memo's schema discovery missed surfaced (stop-trigger #1 unexpected + #2 scope-expand): the anon **student** form needs a program picker, and the submit DTO requires a **valid `programId`** (backend validates `program.findFirst({id, tenantId})`), but **no public programs read exists**.
+
+**Discovery:** `GET /v1/programs` is authed (the global `JwtAuthGuard`; only `health` + R6's new `track` are `@Public`). The `/programs` marketing page is static (~0 API calls, no real IDs). So the anon student form is **non-functional** without a public source of real program IDs. (`tenantSlug` is fine — defaults to `"demo"` per `Auth.tsx:144`. Instructor form is unaffected — optional `departmentId` + free-text `preferredDepartmentSlug`, no picker.)
+
+**Resolution (owner: «Option A، برو»):** add a small public catalog read —
+`@Public() @Throttle @Get("/v1/programs/public?tenantSlug=")` → `[{ id, slug, name, nameEn, degreeLevel }]`, active only (`deletedAt: null`), tenant-scoped (resolves tenantSlug→tenantId exactly like the submit). ~20 LOC backend inside the "frontend" Commit C.
+- **Why not Option B (deep-linked `?programId=`):** no public source produces such links (marketing is static); standalone dead-end. A future dynamic marketing page would itself need Option A first — so A is the more fundamental primitive.
+- **Why not Option C (instructor-only):** violates Q4.a (both) and drops the likely-majority student path.
+- **Security:** unlike application PII, the **program catalog is public by nature** (names/levels/degrees — the very data meant for the marketing site). Throttled + tenant-scoped + active-only. Zero PII concern.
+- **Scope bleed (stop-trigger #2):** a backend endpoint in a "frontend" commit — flagged + acked as a **legitimate necessary exception** (D49 / D81 family: the feature can't work without it).
+- **Bonus:** a **reusable public-catalog primitive** — future dynamic marketing, public catalog browsing, or deep-link apply all reuse it.
+
+**Lesson:** anon/public-feature discovery must check **all data dependencies for public-accessibility**, not just the primary models — an authed read that the form depends on is a hidden blocker. (Added to the R-CI / process-hygiene notes.)
+
+**Source:** owner directive 2026-05-30 «Option A، برو» (public programs-list resolution; C→E silent execution; stop-triggers remain active).
