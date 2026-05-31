@@ -140,7 +140,7 @@ const Step1Programs = ({ go }: { go: Go }) => (
   </div>
 );
 
-const Step2Info = ({ onNext }) => (
+const Step2Info = ({ onNext }: { onNext: () => void }) => (
   <div>
     <h2 className="h-2">مشخصات و مدارک</h2>
     <p className="mt-3"  style={{color: "var(--fg-mute)"}}>اطلاعات با کلید سازمانی رمز می‌شود. می‌توانید در هر مرحله ذخیره و ادامه دهید.</p>
@@ -174,7 +174,7 @@ const Step2Info = ({ onNext }) => (
   </div>
 );
 
-const Step3Assessment = ({ onNext }) => (
+const Step3Assessment = ({ onNext }: { onNext: () => void }) => (
   <div>
     <h2 className="h-2">ارزیابی ورودی تطبیقی</h2>
     <p className="mt-3"  style={{color: "var(--fg-mute)"}}>۱۲ سوال تطبیقی برای تعیین سطح ورود. این آزمون نمره ندارد — صرفاً مسیر شخصی‌سازی‌شده‌ی شما را می‌سازد.</p>
@@ -206,7 +206,7 @@ const Step3Assessment = ({ onNext }) => (
   </div>
 );
 
-const Step4Payment = ({ onNext }) => (
+const Step4Payment = ({ onNext }: { onNext: () => void }) => (
   <div>
     <h2 className="h-2">شهریه و پرداخت</h2>
     <p className="mt-3"  style={{color: "var(--fg-mute)"}}>گزینه‌های انعطاف‌پذیر برای پرداخت ترمی، اقساطی یا کامل.</p>
@@ -272,7 +272,7 @@ const Step5Onboard = ({ go }: { go: Go }) => (
   </div>
 );
 
-const FormField = ({ label, placeholder, type = "text", mono, full }) => (
+const FormField = ({ label, placeholder, type = "text", mono, full }: { label: string; placeholder?: string; type?: string; mono?: boolean; full?: boolean }) => (
   <label style={{ gridColumn: full ? "1 / -1" : "auto" }}>
     <div className="mono mb-2 uppercase"  style={{color: "var(--fg-mute)", fontSize: 10, letterSpacing: "0.1em"}}>{label}</div>
     <input className="rounded-xl" type={type} placeholder={placeholder}  style={{width: "100%",
@@ -287,7 +287,7 @@ const FormField = ({ label, placeholder, type = "text", mono, full }) => (
   </label>
 );
 
-const Upload = ({ label, status }) => {
+const Upload = ({ label, status }: { label: string; status?: string }) => {
   const color = status === "done" ? "var(--cyan)" : status === "pending" ? "var(--amber)" : "var(--fg-mute)";
   return (
     <div className="p-4.5 rounded-xl flex items-center gap-3.5"  style={{
