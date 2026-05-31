@@ -1884,3 +1884,20 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **AssessmentLive Q5.a — resolved:** false flag (the debt-report grep matched the *comment* on line 59; there is no active `@ts-nocheck`). AssessmentLive is a normal 13-error bucket, not gated.
 
 **Source:** owner directive 2026-05-31 «Icon = A، برو» (shared-contract fix aligned with existing usage; finish R-CI in one pass — grind to 0 + verify + gate-flip + deploy).
+
+### D87 — R-CI grind complete (web tsc 198→0); capstone deferred to fresh context
+**Context:** The R-CI manual phase ran autonomously to completion. `apps/web` typecheck is now **GREEN (198 → 0)**. Per Claude Code's judgment (owner-agreed), the capstone is deferred to a fresh session — the marathon (R6 ship+deploy+close → Phase B closure ceremony → R-CI 198→0) made context thin, and the capstone is production-affecting (surgery on the 31 KB R5 deploy script + a production deploy; stop-trigger #7 armed). Correctness-over-speed — the same discipline that kept the 198→0 proper.
+
+**Grind result (durable, all on `main`):**
+- **web tsc 198 → 0** with proper per-site types across **13 verified buckets** — **zero new `any`, zero `@ts-ignore`/`@ts-nocheck`, zero new error codes** (anti-patchwork mandate held end-to-end). Fixes were real types, the known-shared `IconProps` (D86), or precise coercions (`String()`/`Number()`/`=== true`/`as keyof`).
+- **api tsc + audit-on-mutation** already green. `vite build` clean (zero-runtime fixes; main bundle unchanged ≈357 kB local).
+- Bucket-by-bucket trail with commit hashes: `R-CI-PROGRESS.md` (current on `main`). Key commits: `f77adee` (codemod) → … → `2c66e77` (Icon/D86) → … → `9b24f73` (tail → 0).
+
+**Capstone — 3 phases, deferred to fresh session:**
+1. **Q3.a — unified `verify` script:** web tsc + api tsc + audit-lint (local) + api jest (DB-backed, via `remote.ps1 test`). One gate consumed by both a CI check and the deploy gate — the structural **D81 closure** (no more silent-red divergence).
+2. **Q4.a — R5 gate flip lean→full-CI:** wire `verify` into `deploy-and-smoke.ps1` as a pre-deploy gate.
+3. **Deploy** via `deploy-and-smoke.ps1` (full-CI-gated) + owner ~2-min mobile check + **R-CI review doc** + decision-log close.
+
+**Resume pointer:** everything on `main`; `R-CI-PROGRESS.md` current; decisions **D85** (Hybrid scope), **D86** (Icon contract), **D87** (this) logged. A fresh session resumes at capstone phase 1 (write `scripts/verify.*`).
+
+**Source:** owner directive 2026-05-31 (agree: capstone with fresh context; log D87 as the resume anchor before /clear).
