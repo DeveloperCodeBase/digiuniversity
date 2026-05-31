@@ -1811,3 +1811,22 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Lesson:** anon/public-feature discovery must check **all data dependencies for public-accessibility**, not just the primary models — an authed read that the form depends on is a hidden blocker. (Added to the R-CI / process-hygiene notes.)
 
 **Source:** owner directive 2026-05-30 «Option A، برو» (public programs-list resolution; C→E silent execution; stop-triggers remain active).
+
+### D83 — R6 D13 PASS + Phase B closure + R5 Phase-2 close
+**Context:** R6 (Candidate C — applicant self-service) shipped as commits A–E (`ef54747` migration → `3cc3949` token backend + green-all-4 → `35b2312` /apply + public programs → `b3085ce` /track + D18 → `221d7dc` review), deployed all-green via `deploy-and-smoke.ps1` (R5 Phase-2 first real run, exit 0, `62a2703` evidence). Owner ran the 9-step mobile D13 2026-05-31.
+
+**Owner decision (verbatim-blend):** «R6 D13 PASS … migration-gate finding ruling = الف … R5 D13 Phase 2 CLOSED … **Phase B (Onboarding) CLOSED per Compass** — Gate-A-style milestone.»
+
+**R6 close:**
+- **9-step mobile visual PASS** — anon `/apply` (no login redirect) + populated picker (D82 public endpoint live), student submit → confirmation (reference + `/track` link + timeline), `/track` → SUBMITTED + stepper + withdraw, instructor submit (Q4.a both), bogus token → no leak (D80 token security), `/admin/applications` integration (R3.b), withdraw via `/track` → WITHDRAWN, D70 admin soft-delete → GET 404, Phase A/B untouched.
+- **Deploy:** exit 0; migration applied + **8.2-confirmed** (`prisma migrate status` = schema up to date — zero safety gap); bundle Δ **+0.76 KiB** (lazy chunks, D66 Path D); modulepreload vendor-only; prod surfaces live-validated (`/programs/public` 200, `/track?token=bogus` 404 no-leak, `/apply` 200).
+
+**Migration-gate finding — ruled الف:** step 8.2 (`prisma migrate status`, reads the DB) is the **authoritative** ground-truth gate (D78 already named it so). Step 2 (`origin/main..HEAD` git diff) is a **pre-push heuristic** — naturally a no-op in the push-then-deploy workflow (the migration is pushed before deploy). This is **redundancy, not a gap**: step-2 catches *unpushed* migrations; 8.2 is the post-deploy authoritative check. Option ب (duplicate 8.2 into step-2) is pointless. **Resolution:** document step-2 as "fires only for unpushed migrations"; 8.2 authoritative; any refinement deferred to R-CI.
+
+**R5 D13 Phase-2 — CLOSED.** `deploy-and-smoke.ps1` verified end-to-end on a real migration-bearing deploy. Owner toil reduced to **a single command + a 2-min mobile visual** (the R5 goal, realized).
+
+**Phase B (Academic Hierarchy + Onboarding) — CLOSED per Compass.** A Gate-A-style milestone. Arc: R1 (academic hierarchy) → R2 (CourseOffering migration) → R3.a (identity + SelfOrAdmin) → R3.b (applications + parallel state machines) → R4 (enrollment spine) → R5 (deploy tooling) → R6 (applicant self-service front door). **Onboarding loop complete end-to-end:** anon apply → track → admin review → accept → Student → enrolled.
+
+**Next:** Phase B closure ceremony (retrospective final update + `phase-b-complete` git tag + Phase C transition note), then R-CI-Cleanup (per D79 sequence C → R-CI → A).
+
+**Source:** owner directive 2026-05-31 (R6 D13 PASS 9/9 + migration-gate ruling الف + R5 Phase-2 close + Phase B closure).
