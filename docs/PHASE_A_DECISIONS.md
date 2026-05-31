@@ -1856,3 +1856,18 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **D81 closure milestone:** after R-CI there is one unified `verify` run by both CI and deploy — a silent-red gate can't recur. An infrastructure-maturity milestone.
 
 **Source:** owner directive 2026-05-31 «R-CI = Q1.a+Q2.a+Q3.a+Q4.a+Q5.a، شروع» (all defaults; codemod-first; stop-triggers active).
+
+### D85 — R-CI codemod scope refined: Hybrid (conservative codemod + manual majority) — 8th catch
+**Context:** R-CI discovery (the mandatory pre-code look at the actual 198 web tsc sites) surfaced that the debt report's "~59% codemod-mechanical" is mechanical in **pattern**, not in **type** (stop-trigger #1). Surfaced + acked before any codemod was written.
+
+**Discovery (the 8th Phase B/C catch):** **clearing** an error ≠ **properly fixing** it. A *generic* ts-morph codemod fixes only ~30 errors to **proper types** — err:unknown narrowing (shared helper), `{ go }`→`{ go: Go }` (go is always the router type), and callbacks over already-typed arrays. The other ~150 (most implicit-any TS7031/TS7006, the `useState({})` TS2339 trap, the toast-contract TS2322 cluster) need **per-site type knowledge**; a blind codemod could only `any`-suppress them — which is exactly the وصله‌پینه (patchwork) R-CI exists to eliminate (implicit-any → explicit-any is a rename, not a fix).
+
+**Resolution (owner: «Hybrid، برو»):** conservative codemod for the ~30 proper-able only; **manual per-site proper types** for the ~150. **Honest re-estimate:** the real split is **~30 codemod / ~150 manual**, NOT the 117/81 the "59%" implied → effort at the **upper bound (~30h, 4–5 days)**. Accepted because proper types > fast `any`, it's a one-time cleanup, and Candidate A must open Phase C on a *real* green baseline, not an `any`-suppressed façade.
+
+**Anti-`any` discipline (binding):** every `any` added must be **justified** (a genuinely dynamic structure with no real type) — prefer `unknown` + narrowing, or an explicit comment on why `any` is necessary. If a site is truly type-unknowable, flag it as a documented exception (stop-trigger #4), never a silent `any`.
+
+**Lesson:** "codemod-able" ≠ "proper-fix-able". A mechanical-looking error pattern may still need per-site type knowledge — don't conflate the two when estimating a typecheck cleanup.
+
+**Execution (Hybrid):** small safe codemod (~30: err:unknown + `{go}`→Go + typed-array callbacks) → manual buckets (~150, per-site proper types; per-**bucket** progress pings) → unified `verify` (Q3.a) → R5 gate flip (Q4.a) → AssessmentLive audit (Q5.a) → review doc.
+
+**Source:** owner directive 2026-05-31 «Hybrid، برو» (codemod scope refined; anti-any discipline; upper-bound effort accepted).
