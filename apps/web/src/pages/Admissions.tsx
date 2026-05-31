@@ -129,7 +129,7 @@ export const AdmissionsPage: React.FC<AdmissionsPageProps> = ({ go }) => {
   );
 };
 
-const Step1Programs = ({ go }) => (
+const Step1Programs = ({ go }: { go: Go }) => (
   <div>
     <h2 className="h-2">برنامه‌ی موردنظر را انتخاب کنید</h2>
     <p className="mt-3.5"  style={{color: "var(--fg-mute)"}}>هر برنامه شامل بسته‌ای از دروس، استادان و گواهی است.</p>
@@ -246,7 +246,7 @@ const Step4Payment = ({ onNext }) => (
   </div>
 );
 
-const Step5Onboard = ({ go }) => (
+const Step5Onboard = ({ go }: { go: Go }) => (
   <div className="text-center"  style={{ padding: "20px 0"}}>
     <div className="grid relative"  style={{width: 100, height: 100, margin: "0 auto",
       borderRadius: 50,

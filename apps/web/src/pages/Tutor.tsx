@@ -13,7 +13,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { useAuth } from "../auth/AuthContext";
 import { tutorApi } from "../api/endpoints.js";
-import { ApiError } from "../api/client.js";
+import { errorMessage } from "../lib/errorMessage";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import { Button } from "../ui";
@@ -143,7 +143,7 @@ const TutorPage: React.FC<TutorPageProps> = ({ go }) => {
         setActiveId(list[0].id);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.displayMessage : err.message);
+      setError(errorMessage(err));
     } finally {
       setLoadingSessions(false);
     }
@@ -169,7 +169,7 @@ const TutorPage: React.FC<TutorPageProps> = ({ go }) => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof ApiError ? err.displayMessage : err.message);
+        setError(errorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setLoadingMessages(false);
@@ -195,7 +195,7 @@ const TutorPage: React.FC<TutorPageProps> = ({ go }) => {
     } catch (err) {
       window.toast?.({
         title: "ایجاد گفت‌و‌گو ناموفق",
-        msg: err instanceof ApiError ? err.displayMessage : err.message,
+        msg: errorMessage(err),
         kind: "warn",
       });
     }
@@ -225,7 +225,7 @@ const TutorPage: React.FC<TutorPageProps> = ({ go }) => {
       // Refresh the session list so titles + lastMessageAt are current.
       reloadSessions();
     } catch (err) {
-      setError(err instanceof ApiError ? err.displayMessage : err.message);
+      setError(errorMessage(err));
       setMessages((prev) => prev.filter((m) => m.id !== tempUserId));
       setInput(q);
     } finally {

@@ -13,7 +13,7 @@ import {
   classSessionsApi,
   enrollmentsApi,
 } from "../api/endpoints.js";
-import { ApiError } from "../api/client.js";
+import { errorMessage } from "../lib/errorMessage";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import type { Go } from "../router";
@@ -79,7 +79,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof ApiError ? err.displayMessage : err.message);
+        setError(errorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -102,7 +102,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
       // returns a deep link back into the SPA so this works locally too.
       if (res.joinUrl) window.open(res.joinUrl, "_blank", "noopener");
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "ورود ناموفق", msg, kind: "warn" });
     } finally {
       setJoiningId(null);
@@ -120,7 +120,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
         kind: envelope.human_review_required ? "info" : "success",
       });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "تحلیل ناموفق", msg, kind: "warn" });
     } finally {
       setAnalyzing(null);
@@ -140,7 +140,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
         kind: "success",
       });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "ثبت‌نام ناموفق", msg, kind: "warn" });
     } finally {
       setEnrolling(false);

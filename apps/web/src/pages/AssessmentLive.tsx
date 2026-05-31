@@ -13,7 +13,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { useAuth } from "../auth/AuthContext";
 import { assessmentsApi, submissionsApi } from "../api/endpoints.js";
-import { ApiError } from "../api/client.js";
+import { errorMessage } from "../lib/errorMessage";
 import { toFa } from "../shared";
 import { formatJalaliDate } from "../i18n/format.js";
 import { Button } from "../ui";
@@ -88,7 +88,7 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof ApiError ? err.displayMessage : err.message);
+        setError(errorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -121,7 +121,7 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
       });
       setSubmission(saved);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "ذخیره ناموفق", msg, kind: "warn" });
     } finally {
       setSavingDraft(false);
@@ -148,7 +148,7 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
         kind: "success",
       });
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "ارسال ناموفق", msg, kind: "warn" });
     } finally {
       setPending(false);
@@ -162,7 +162,7 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
       const env = await submissionsApi.aiGradeDraft(submission.id);
       setAiDraft(env);
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "تحلیل ناموفق", msg, kind: "warn" });
     } finally {
       setAiPending(false);

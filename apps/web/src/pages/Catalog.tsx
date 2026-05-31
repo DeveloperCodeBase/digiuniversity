@@ -11,7 +11,7 @@ import React from "react";
 import { Icon } from "../icons";
 import { useAuth } from "../auth/AuthContext";
 import { catalogApi, enrollmentsApi } from "../api/endpoints.js";
-import { ApiError } from "../api/client.js";
+import { errorMessage } from "../lib/errorMessage";
 import { toFa } from "../shared";
 import { Button } from "../ui";
 import type { Go } from "../router";
@@ -29,7 +29,7 @@ const DEGREE_LABEL: Record<string, string> = {
   certificate: "گواهی",
 };
 
-const SignInPrompt = ({ go }) => (
+const SignInPrompt = ({ go }: { go: Go }) => (
   <main data-screen-label="کاتالوگ" className="shell" style={{ paddingTop: 80, paddingBottom: 80 }}>
     <div className="rounded-2xl"
          style={{ padding: "40px", background: "var(--surface)", border: "1px solid var(--line)", maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
@@ -92,7 +92,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof ApiError ? err.displayMessage : err.message);
+        setError(errorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -121,7 +121,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
       });
       await refreshEnrollments();
     } catch (err) {
-      const msg = err instanceof ApiError ? err.displayMessage : err.message;
+      const msg = errorMessage(err);
       window.toast?.({ title: "ثبت‌نام ناموفق", msg, kind: "warn" });
     } finally {
       setEnrolling(null);
