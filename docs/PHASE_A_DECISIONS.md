@@ -1830,3 +1830,29 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Next:** Phase B closure ceremony (retrospective final update + `phase-b-complete` git tag + Phase C transition note), then R-CI-Cleanup (per D79 sequence C → R-CI → A).
 
 **Source:** owner directive 2026-05-31 (R6 D13 PASS 9/9 + migration-gate ruling الف + R5 Phase-2 close + Phase B closure).
+
+### D84 — R-CI-Cleanup Q-answers locked
+**Ledger-naming note:** this file (`PHASE_A_DECISIONS.md`) is the **single continuous all-phases decision ledger** (D1 → present); the `PHASE_A` prefix is historical. R-CI is a bridge sub-R (post-Phase-B, pre-Candidate-A) and its decisions continue here so the ledger stays contiguous (the retrospective + every memo reference this one file). A rename to a phase-neutral name is a separate, deferred task.
+
+**Context:** Owner reviewed `docs/PHASE_B_RCI_CLEANUP_MEMO.md` and locked all five defaults 2026-05-31. R-CI-Cleanup is next per the D79 sequence (C → **R-CI** → A); debt-second, before Candidate A's large web-surface push.
+
+**Owner decision (verbatim-blend):** «R-CI = Q1.a + Q2.a + Q3.a + Q4.a + Q5.a، شروع.»
+
+**Locked answers:**
+- **Q1.a — single sub-R + escape hatch.** 198 web tsc errors + audit-lint/gate consolidation are one coherent unit. If the API jest suite proves *structural* (Postgres CI env), split it into a follow-up `R-CI-Api`; default is single.
+- **Q2.a — ts-morph codemod.** Batch-fix the ~59% (~117) mechanical buckets (useState({}) inference, implicit-any binding/params, err:unknown narrowing, toast-contract drift); remaining ~41% manual. Effort ~20–30h, ~half codemod.
+- **Q3.a — unified `verify` script (the root-cause D81 fix).** One entry point (tsc + audit-lint + jest-in-a-Postgres-container) wired into **both** CI and the deploy gate = a single source of truth for quality gates. Lightweight (not full GitHub Actions, per D76 — VPS access exists). Structurally closes the deploy-path vs test-path divergence D81 surfaced.
+- **Q4.a — flip R5 deploy-gate lean → full-CI (capstone).** After tsc is green, upgrade the deploy gate from lean (build/smoke/bundle) to full-CI (+tsc +audit-lint +jest) so the debt can't re-accumulate. + the D83 migration-gate doc note (step-2 = pre-push heuristic; 8.2 authoritative).
+- **Q5.a — 13 `@ts-nocheck` out of scope; audit `AssessmentLive.tsx`.** Suppressed files are intentional legacy debt for a separate future effort; R-CI scope = the 198 active errors + gate unification. `AssessmentLive.tsx` is in BOTH lists — audit why (a lifted `@ts-nocheck` leaving errors behind?).
+
+**Execution order (per memo):** ts-morph codemod (buckets A/C/D) → manual buckets (≈41%) → unified `verify` script (Q3.a) → R5 deploy-gate flip lean→full-CI (Q4.a capstone) → `AssessmentLive.tsx` audit (Q5.a) → review doc.
+
+**Codemod safety protocol (owner-set):** after each codemod — re-run tsc (error count strictly down, **zero new errors**) + `git diff` review (only intended transforms) + if a file changed unexpectedly, revert it + manual-fix. Stop-trigger if a codemod changes semantics on an edge case.
+
+**Active stop triggers (D61, R-CI):** (1) unexpected discovery → STOP; (2) scope expand → STOP; (3) codemod wrong-transform (semantics changed) → STOP; (4) API jest genuinely structural → STOP (Q1.a escape → split R-CI-Api); (5) `verify` surfaces a previously-hidden gate → flag (not stop); (6) R5 gate-flip regression (full-CI blocks a deploy that should pass) → STOP. Else silent continue.
+
+**Deploy:** R-CI is typecheck-heavy but ships one deploy (the R5 gate flip + verify wiring) via `deploy-and-smoke.ps1`; owner does a quick final mobile check (app still loads, no runtime regression from the codemod).
+
+**D81 closure milestone:** after R-CI there is one unified `verify` run by both CI and deploy — a silent-red gate can't recur. An infrastructure-maturity milestone.
+
+**Source:** owner directive 2026-05-31 «R-CI = Q1.a+Q2.a+Q3.a+Q4.a+Q5.a، شروع» (all defaults; codemod-first; stop-triggers active).
