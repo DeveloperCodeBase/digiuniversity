@@ -1779,3 +1779,18 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Owner note:** «این catch عالی بود — اگه blind با @default(uuid()) می‌رفتیم، token 122-bit می‌شد، زیر floor خودم … exactly اون نوع pre-code discovery که Phase B discipline برای آن وجود داره.»
 
 **Source:** owner directive 2026-05-30 «Option 1، برو» (token entropy resolution; A→E silent execution authorized; stop-triggers remain active for new items).
+
+### D81 — R6 Commit B audit-lint discovery + green-all-4 (6th Phase B catch)
+**Context:** Baselining the `audit-on-mutation` lint before writing R6's public `track/withdraw` mutations (stop-trigger #1) revealed it was **already red** — 2 pre-existing violations from R3.b. Surfaced + acked before continuing Commit B.
+
+**Discovery (the catch):** `tools/eslint-rules/audit-on-mutation.js` exits 1 on 2 violations — `student-applications.controller.ts:123` + `instructor-applications.controller.ts:102`, both the `@Public @Post() submit` handlers. Root cause: R3.b's submit handlers carry only a *comment* («@AuditSkip per Phase-A R4 lint…») but the actual `@AuditSkip()` decorator was never added and `AuditSkip` was never imported. The lint has **no `@Public` exemption** — every `@Post/@Put/@Patch/@Delete` needs `@AuditAction` / `@AuditSkip()` / a `this.audit.log()` body call.
+
+**Why R3.b D13 PASSed with this red:** `lint:audit` runs only as `pretest` (npm) + inside `remote.ps1 test`. The deploy path — `deploy-and-smoke.ps1` (build → up → migrate → seed → health → smoke → bundle) — **never invokes the lint**. So R3.b's ship/deploy/smoke were all green while the **test gate was silently red**. Same family as D70 (latent `api.delete` broken at the network layer) and D72 (ack ≠ ground truth): a failure mode happy-path verification doesn't catch.
+
+**Resolution (owner: «Option A، green all 4»):** Add `@AuditSkip()` + a justifying comment to all four public-mutation handlers — R3.b's 2 `submit` + R6's 2 new `track/withdraw` — and import `AuditSkip` in both controllers. `@AuditSkip()` is the rule's documented opt-out for public, no-authenticated-actor endpoints (precedent: `auth.controller.ts`). This **fulfils R3.b's own documented intent** (the comment promised the decorator), greens the lint so the **R6 e2e spec under D29 can actually run**, and keeps the audit-lint green from R6 forward.
+
+**Scope note (stop-trigger #2):** touching R3.b's 2 lines is outside strict R6 scope, but a **legitimate fix-while-here exception** (the D49 AppShell-minor-fix precedent): the files are already open for R6, it's a 2-line correctness fix completing a documented intent, it greens a silently-red gate, and it shrinks R-CI-Cleanup's backlog by 2.
+
+**Lesson (R-CI handoff):** the **deploy path (`deploy-and-smoke.ps1`) and the test path (`pretest` → `lint:audit`) are divergent** — a gate that lives only in the test path can stay silently red while deploys go green. R-CI-Cleanup must unify all quality gates (audit-lint + typecheck + tests) into one CI check so a silent-red can't recur. To be recorded in `PHASE_B_CI_DEBT_REPORT.md` / the R-CI memo when R-CI starts.
+
+**Source:** owner directive 2026-05-30 «Option A، green all 4» (audit-lint discovery resolution; B→E silent execution; R-CI handoff finding noted).
