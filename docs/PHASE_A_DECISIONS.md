@@ -1871,3 +1871,16 @@ Schema + CODE discovery (the kind Phase B lesson #1 exists to catch) found that 
 **Execution (Hybrid):** small safe codemod (~30: err:unknown + `{go}`→Go + typed-array callbacks) → manual buckets (~150, per-site proper types; per-**bucket** progress pings) → unified `verify` (Q3.a) → R5 gate flip (Q4.a) → AssessmentLive audit (Q5.a) → review doc.
 
 **Source:** owner directive 2026-05-31 «Hybrid، برو» (codemod scope refined; anti-any discipline; upper-bound effort accepted).
+
+### D86 — R-CI Icon shared-contract: add className+style to IconProps (Option A)
+**Context:** 28 R-CI errors (Stage.tsx 14 + AIPanel.tsx 12) are all `<Icon className=.../>` rejected because the shared `IconProps = { name; size?; stroke? }` has no `className`/`style`; icons.tsx also had 2 unrelated `TS1117` duplicate-map-key errors. Surfaced as stop-trigger #5 (shared-contract change); owner ruled Option A.
+
+**Owner decision (verbatim-blend):** «Icon = A، برو.»
+
+**Resolution (Option A):** add `className?: string` + `style?: React.CSSProperties` to `IconProps` and forward both to the `<svg>` (via the `P` props object). + remove the 2 duplicate `"chev-left"`/`"chev-right"` map entries (TS1117; originals kept at lines 73-74). Clears ~28 errors via one file change (Stage/AIPanel need no edits — their existing `className` usage simply becomes valid).
+
+**Why A (owner rationale):** it's the standard Icon API (lucide/heroicons/react-icons all accept className+style) — the missing props were an early oversight, not a design decision. The codebase **already** has 28 `className` + 5 `style` Icon call-sites; the usage exists and the type lagged. Option A **aligns the type with reality** — a proper fix, zero `any`, zero workaround. Same reasoning family as D74 (convention bends to reality, not vice-versa: D74 = enum→backward-compat data; here = IconProps→existing className usage). Option B (span-wrap) doesn't work for className (targets the SVG); Option C (strip classNames) degrades styling.
+
+**AssessmentLive Q5.a — resolved:** false flag (the debt-report grep matched the *comment* on line 59; there is no active `@ts-nocheck`). AssessmentLive is a normal 13-error bucket, not gated.
+
+**Source:** owner directive 2026-05-31 «Icon = A، برو» (shared-contract fix aligned with existing usage; finish R-CI in one pass — grind to 0 + verify + gate-flip + deploy).
