@@ -54,13 +54,13 @@ export const NotificationsPage: React.FC<ProductivityPageProps> = ({ go }) => {
                 ["admin", "اداری", 2, "shield"],
               ].map(([id, lbl, n, ic]) => (
                 <li key={id}>
-                  <button className="flex items-center justify-between rounded-lg cursor-pointer" onClick={() => setFilter(id)}  style={{width: "100%",
+                  <button className="flex items-center justify-between rounded-lg cursor-pointer" onClick={() => setFilter(String(id))}  style={{width: "100%",
                     padding: "10px 14px",
                     background: filter === id ? "var(--accent-soft)" : "transparent",
                     border: "1px solid " + (filter === id ? "color-mix(in oklch, var(--accent) 25%, transparent)" : "transparent"),
                     color: filter === id ? "var(--accent)" : "var(--fg-mute)",
                     fontFamily: "inherit", fontSize: 14}}>
-                    <span className="flex items-center gap-2.5" ><Icon name={ic} size={14} />{lbl}</span>
+                    <span className="flex items-center gap-2.5" ><Icon name={String(ic)} size={14} />{lbl}</span>
                     <span className="mono" style={{ fontSize: 11 }}>{toFa(n)}</span>
                   </button>
                 </li>
@@ -104,9 +104,9 @@ const NOTIFS = NOTIFICATIONS.map((n) => {
   const colorByCategory = { live: "accent", ai: "navy", grade: "sage", office: "navy", social: "accent", cert: "accent", event: "accent", admin: "gold" };
   const catLabel = { live: "کلاس زنده", ai: "AI Tutor", grade: "نمره منتشر شد", office: "Office Hours", social: "پاسخ به سوال", cert: "گواهی صادر شد", event: "رویداد", admin: "اداری" };
   return {
-    cat: catLabel[n.category] || n.category,
+    cat: catLabel[n.category as keyof typeof catLabel] || n.category,
     ic: n.icon,
-    color: colorByCategory[n.category] || "accent",
+    color: colorByCategory[n.category as keyof typeof colorByCategory] || "accent",
     t: n.title,
     d: n.body,
     time: n.time,
@@ -243,7 +243,7 @@ export const MessagesPage: React.FC<ProductivityPageProps> = ({ go }) => {
   );
 };
 
-const ChatBubble = ({ side, t, time }) => (
+const ChatBubble = ({ side, t, time }: { side: string; t: string; time: string }) => (
   <div className="flex gap-2.5"  style={{ justifyContent: side === "me" ? "flex-start" : "flex-end"}}>
     <div style={{ maxWidth: "70%" }}>
       <div style={{
@@ -300,7 +300,7 @@ export const BookmarksPage: React.FC<ProductivityPageProps> = ({ go }) => {
             ].map(([id, t, n, c]) => (
               <li key={id}>
                 <button className="flex items-center justify-between rounded-lg cursor-pointer"
-                  onClick={() => setActiveCat(id)}
+                  onClick={() => setActiveCat(String(id))}
                   aria-pressed={activeCat === id}
                    style={{width: "100%",
                     padding: "10px 14px",
@@ -321,7 +321,7 @@ export const BookmarksPage: React.FC<ProductivityPageProps> = ({ go }) => {
                     body: "آیا می‌خواهید یک مجموعه‌ی جدید برای ذخیره‌ها بسازید؟",
                     confirmLabel: "بساز",
                   });
-                  if (ok) window.toast?.({ title: "مجموعه ساخته شد", kind: "success" });
+                  if (ok) window.toast?.({ title: "مجموعه ساخته شد", msg: "مجموعه‌ی جدید ساخته شد.", kind: "success" });
                 }}
               >
                 <Icon name="plus" size={13} />مجموعه جدید
@@ -367,7 +367,7 @@ const SAVED_ITEMS = LIBRARY_RESOURCES.slice(0, 6).map((r, i) => {
     title: r.title,
     meta: `${r.author} · ${r.size}`,
     tags: r.tags,
-    color: colorByType[r.type] || "accent",
+    color: colorByType[r.type as keyof typeof colorByType] || "accent",
     saved: savedRel[i] || "اخیر",
   };
 });
@@ -420,7 +420,7 @@ export const AchievementsPage: React.FC<ProductivityPageProps> = ({ go }) => (
             </div>
             <h4 className="mt-4"  style={{fontSize: 14}}>{b.t}</h4>
             <div className="mt-1.5"  style={{fontSize: 12, color: "var(--fg-mute)", lineHeight: 1.5}}>{b.d}</div>
-            {b.locked && <div className="mt-3"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--accent)"}}>+{toFa(b.xp)} XP</div>}
+            {b.locked && <div className="mt-3"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--accent)"}}>+{toFa(b.xp ?? 0)} XP</div>}
             {!b.locked && <div className="mt-3"  style={{fontFamily: "var(--f-mono)", fontSize: 10, color: "var(--sage)"}}>کسب شد · {b.date}</div>}
           </div>
         ))}
