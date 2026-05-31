@@ -42,19 +42,61 @@ const SignInPrompt: React.FC<SignInPromptProps> = ({ go }) => (
   </main>
 );
 
+interface MineEnrollment {
+  courseId: string | null;
+  status: string;
+}
+interface AiConcept {
+  name: string;
+  level?: string;
+}
+interface AiEnvelope {
+  model?: string;
+  provider?: string;
+  mode?: string;
+  confidence: number;
+  human_review_required?: boolean;
+  request_id?: string;
+  payload?: {
+    summary?: string;
+    concepts?: AiConcept[];
+  };
+}
+interface Lesson {
+  id: string;
+  title: string;
+  durationMinutes?: number | null;
+}
+interface CourseModule {
+  id: string;
+  title: string;
+  description?: string | null;
+  lessons?: Lesson[];
+}
+interface CourseDetail {
+  id?: string;
+  code: string;
+  title: string;
+  description?: string | null;
+  credits: number;
+  language?: string | null;
+  level?: string | null;
+  modules?: CourseModule[];
+}
+
 interface CourseLivePageProps { go: Go; courseId?: string }
 
 const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
   const { isAuthenticated, hasRole } = useAuth();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [course, setCourse] = React.useState<any>(null);
+  const [course, setCourse] = React.useState<CourseDetail | null>(null);
   const [enrolled, setEnrolled] = React.useState<boolean>(false);
   const [enrolling, setEnrolling] = React.useState<boolean>(false);
   const [sessions, setSessions] = React.useState<any[]>([]);
   const [joiningId, setJoiningId] = React.useState<string | null>(null);
   const [analyzing, setAnalyzing] = React.useState<string | null>(null);
-  const [analysisBySession, setAnalysisBySession] = React.useState<Record<string, unknown>>({});
+  const [analysisBySession, setAnalysisBySession] = React.useState<Record<string, AiEnvelope>>({});
   const [assessments, setAssessments] = React.useState<any[]>([]);
 
   React.useEffect(() => {
@@ -72,7 +114,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
         if (cancelled) return;
         setCourse(c);
         setEnrolled(
-          mine.some((e) => e.courseId === courseId && e.status === "active"),
+          mine.some((e: MineEnrollment) => e.courseId === courseId && e.status === "active"),
         );
         setSessions(sess);
         setAssessments(ass);
@@ -89,7 +131,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
     };
   }, [isAuthenticated, courseId]);
 
-  const handleJoin = async (sessionId) => {
+  const handleJoin = async (sessionId: string) => {
     setJoiningId(sessionId);
     try {
       const res = await classSessionsApi.join(sessionId);
@@ -109,7 +151,7 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
     }
   };
 
-  const handleAnalyze = async (sessionId, task = "analyze") => {
+  const handleAnalyze = async (sessionId: string, task = "analyze") => {
     setAnalyzing(sessionId);
     try {
       const envelope = await classSessionsApi.analyze(sessionId, { task });
@@ -152,7 +194,9 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
       <Button variant="outline" style={{ marginBottom: 28 }}
         onClick={() => go("catalog")}
       >
-        <Icon name="arrow" size={14} style={{ transform: "scaleX(-1)" }} />
+        <span style={{ display: "inline-flex", transform: "scaleX(-1)" }}>
+          <Icon name="arrow" size={14} />
+        </span>
         بازگشت به کاتالوگ
       </Button>
 
@@ -307,11 +351,11 @@ const CourseLivePage: React.FC<CourseLivePageProps> = ({ go, courseId }) => {
                             </span>
                           </div>
                           {envelope.payload?.summary && (
-                            <p style={{ marginTop: 12, lineHeight: 1.8 }}>{envelope.payload.summary}</p>
+                            <p style={{ marginTop: 12, lineHeight: 1.8 }}>{envelope.payload?.summary}</p>
                           )}
-                          {Array.isArray(envelope.payload?.concepts) && envelope.payload.concepts.length > 0 && (
+                          {(envelope.payload?.concepts?.length ?? 0) > 0 && (
                             <div className="mt-3 flex gap-2 flex-wrap">
-                              {envelope.payload.concepts.map((c, i) => (
+                              {envelope.payload?.concepts?.map((c, i) => (
                                 <span key={i} className="pill" style={{ fontSize: 11 }}>
                                   {c.name}{c.level ? ` · ${c.level}` : ""}
                                 </span>
