@@ -1949,3 +1949,45 @@ None are product regressions — the running app is fine (static green; deploy s
 **Next:** Candidate A (per D79). R-CI-Api is an independent follow-up, schedulable any time (8 characterized jest failures + drift; not blocking).
 
 **Source:** owner directive 2026-05-31 «ببند R-CI» (R-CI-Cleanup close; review doc + D89 + R-CI-Api stub + progress final).
+
+### D90 — Working mode: Claude Code self-orchestrates (owner retired the relay loop)
+**Context:** The owner had been relaying Q-decisions between Claude Code and a separate strategic orchestrator (clipboard round-trips) and tired of it. Retired 2026-05-31. From here, Claude Code holds BOTH roles — implementer AND strategic decision-maker — and self-drives. **Future sessions inherit this mode.**
+
+**Owner directive (verbatim-blend):** «تغییر mode دائمی — self-orchestration … خودت decide کن، خودت پیش برو، فقط برای چیزای واقعاً human به owner برگرد.»
+
+**The mode:** Claude Code makes Q-decisions itself with the SAME rigor a strategic orchestrator would (analyze → recommendation + reasoning → self-ack → decision-log entry → proceed). It does NOT wait for owner ack on routine forks.
+
+**Self-orchestration rules (binding):**
+1. **Q-decisions:** analyze, recommend, self-ack, log (Dxx), proceed. Do the same reasoning an orchestrator would — yourself. No waiting on routine forks.
+2. **Discovery discipline preserved:** schema/code discovery before any memo lock (Phase B lesson #1). Define + honor your own stop-triggers.
+3. **Deploy:** self-deploy via `deploy-and-smoke.ps1` (full-CI-gated). gate + smoke green → proceed. Non-zero → diagnose + fix or rollback yourself.
+4. **Decision logs + progress docs always updated** (continuity + owner can review any time).
+5. **Anti-patterns held:** zero new `any`, MVP scope (not sprawl), MIGRATION_POLICY, bundle discipline (D66 Path D).
+
+**Return to the owner ONLY for:**
+- **(a) Phase/candidate boundary** — a sub-R finished; the next direction needs picking (e.g. "A.1 done → A.2 or A.3?"). Short summary + recommendation; owner picks.
+- **(b) High-stakes / irreversible / novel fork** — genuinely consequential + hard-to-reverse (destructive prod-data migration; an architecture choice shaping a whole phase; a security-critical call where wrong = exposure). Surface WITH a recommendation. NOT routine Q-decisions.
+- **(c) Real-mobile check** — a UI-critical surface deployed that genuinely needs human eyes on mobile (not every deploy — only when visual/UX matters). Short checklist. Backend-only / internal sub-Rs don't need it.
+
+**Do NOT return for:** routine Q-decisions, deploy go-ahead (gated), confirmation a recommendation is good, micro-decisions. Decide those yourself.
+
+**Calibration:** "is this (b) or routine?" → reversible + low-blast-radius = routine, decide yourself; irreversible + high-blast-radius = surface. **Most decisions are routine.**
+
+**Source:** owner directive 2026-05-31 (permanent mode change; future sessions inherit).
+
+---
+
+## Phase C — Core Learning Loop
+
+*Phase B closed onboarding (anon apply → enrolled). Phase C builds the learning loop: enrolled student → course content → progress → assessment. Per Compass, ~20 additive models across several sub-Rs; Candidate A is the opening slice. Decisions continue in this single ledger (per D84).*
+
+### D91 — Candidate A.1 scope locked (content-loop MVP)
+**Context:** Candidate A opens Phase C. Memo: `docs/PHASE_C_A_CONTENT_MEMO.md` (8-agent schema discovery — the `Course→CourseModule→Lesson` hierarchy already exists since Phase 3 but is ~30% wired). Owner accepted the memo's recommended Q-defaults at the D90 transition. Per D90, subsequent A Q-forks are self-acked.
+
+**Decision (Q-answers locked):** Q1.a (minimal content loop; blocks/objectives/progress → A.2+) · Q2.a (markdown + `contentType` enum) · Q3 (attach to **Course**, schema-forced) · Q4.a (program-term enrollment unlocks ALL courses in `offering.programId`, via a shared `hasContentAccess` resolver) · Q5.a (admin + any-instructor authoring via `@Roles`; record-level owner-scoping deferred) · Q6.b (simple publish flag, not a full state machine) · Q7.a (external-link media; real storage = a separate sub-R).
+
+**A.1 scope:** wire the EXISTING `Course→CourseModule→Lesson` end-to-end — module/lesson CRUD + transactional reorder (mirror the `course-offerings/` pattern), CASL subjects + rules, the dual-shape content gate + a gated lesson-content endpoint serving `contentMarkdown`, a real authoring UI (replace the `Course.tsx` mock) + learner render (extend `CourseLive.tsx`), e2e. **Fix the latent live-class gate bug** (locks out program-term students) via the same resolver. §4 additive (`Lesson.contentType` + a publish flag) — no §3 reshape, no new child tables (A.2+).
+
+**Stop-triggers (self-honored, per memo §11):** per-term-content requirement / instructor owner-scoping for v1 / storage-not-stub / §3-drift / bundle Δ > 50 KB → STOP + ping; else self-proceed.
+
+**Source:** owner accepted the memo defaults 2026-05-31 «Q1.a Q2.a Q3 Q4.a Q5.a Q6.b Q7.a، شروع A.1» (the D90 transition decision; A.1 forks hereafter self-acked).
