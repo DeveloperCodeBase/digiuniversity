@@ -57,13 +57,25 @@ interface AssessmentLivePageProps {
 // API responses flow as `any` from the untyped .js api client. Phase-A
 // R2 deliberately defers data-contract typing to a follow-up — the goal
 // here is removing the file-wide @ts-nocheck without changing behaviour.
+interface AnswerValue {
+  selectedIndex?: number;
+  text?: string;
+}
+interface Question {
+  id: string;
+  points?: number;
+  prompt?: string;
+  kind?: string;
+  options?: string[];
+}
+
 const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentId }) => {
   const { isAuthenticated, hasRole } = useAuth();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
   const [assessment, setAssessment] = React.useState<any>(null);
   const [submission, setSubmission] = React.useState<any>(null);
-  const [answers, setAnswers] = React.useState<Record<string, unknown>>({});
+  const [answers, setAnswers] = React.useState<Record<string, AnswerValue>>({});
   const [pending, setPending] = React.useState<boolean>(false);
   const [savingDraft, setSavingDraft] = React.useState<boolean>(false);
   const [aiDraft, setAiDraft] = React.useState<any>(null);
@@ -103,10 +115,10 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
   const isFinal =
     submission && (submission.status === "submitted" || submission.status === "graded");
 
-  const setMcAnswer = (questionId, selectedIndex) => {
+  const setMcAnswer = (questionId: string, selectedIndex: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: { selectedIndex } }));
   };
-  const setTextAnswer = (questionId, text) => {
+  const setTextAnswer = (questionId: string, text: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: { text } }));
   };
 
@@ -240,8 +252,8 @@ const AssessmentLivePage: React.FC<AssessmentLivePageProps> = ({ go, assessmentI
 
           {assessment.questions && assessment.questions.length > 0 ? (
             <ol className="mt-9" style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 16 }}>
-              {assessment.questions.map((q, i) => {
-                const a = answers[q.id] || {};
+              {assessment.questions.map((q: Question, i: number) => {
+                const a: AnswerValue = answers[q.id] || {};
                 return (
                   <li
                     key={q.id}

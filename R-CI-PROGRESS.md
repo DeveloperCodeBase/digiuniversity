@@ -12,3 +12,5 @@ Standing authorization (owner, 2026-05-31): autonomous bucket-by-bucket to tsc=0
 - 2026-05-31 09:25 · University.tsx (VIRTUAL_LABS keyof cast + tuple coercions) · 109→96 · `e75cf31` · —
 - 2026-05-31 09:30 · ✅ **Q5.a AUDIT RESOLVED** — AssessmentLive.tsx has NO active `@ts-nocheck` (line 59 is only a *comment* referencing one; the directive was already removed). The debt-report "overlap" was a false flag (grep matched the comment). → AssessmentLive is a NORMAL 13-error bucket, **not gated**.
 - **Status @ 96**: only the Icon shared-contract fork (28: Stage 14 + AIPanel 12 + icons 2) is owner-gated. Remaining ~68 (Productivity, AssessmentLive, Dashboard, Course, Analytics, Academic, Progress, Instructor, + tail) are freely grindable. Final phases (verify/gate-flip/deploy) need tsc=0 → need the Icon fork resolved.
+- 2026-05-31 09:40 · icons.tsx (D86 Option A — Icon className+style forward + chev dedup) · 96→61 (−35: Stage/AIPanel/icons + 7 scattered Icon-prop errors) · `2c66e77` · —
+- 2026-05-31 09:50 · AssessmentLive.tsx (AnswerValue/Question types + typed handlers/map) · 61→49 · _(this commit)_ · —
