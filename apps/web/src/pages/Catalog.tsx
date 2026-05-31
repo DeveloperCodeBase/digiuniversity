@@ -48,6 +48,30 @@ const SignInPrompt = ({ go }: { go: Go }) => (
   </main>
 );
 
+interface CatalogFaculty {
+  id: string;
+  name?: string;
+}
+interface CatalogProgram {
+  id: string;
+  name: string;
+  degreeLevel?: string;
+}
+interface CatalogCourse {
+  id: string;
+  programId: string;
+  code: string;
+  title: string;
+  description?: string | null;
+  level?: string | null;
+  credits: number;
+  _count?: { modules?: number } | null;
+}
+interface MineEnrollment {
+  status: string;
+  courseId: string | null;
+}
+
 interface CatalogPageProps { go: Go }
 
 const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
@@ -55,17 +79,24 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
 
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [faculties, setFaculties] = React.useState([]);
-  const [programs, setPrograms] = React.useState([]);
-  const [courses, setCourses] = React.useState([]);
-  const [myCourseIds, setMyCourseIds] = React.useState(new Set());
-  const [enrolling, setEnrolling] = React.useState(null);
+  const [faculties, setFaculties] = React.useState<CatalogFaculty[]>([]);
+  const [programs, setPrograms] = React.useState<CatalogProgram[]>([]);
+  const [courses, setCourses] = React.useState<CatalogCourse[]>([]);
+  const [myCourseIds, setMyCourseIds] = React.useState<Set<string>>(new Set());
+  const [enrolling, setEnrolling] = React.useState<string | null>(null);
 
   const refreshEnrollments = React.useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const mine = await enrollmentsApi.listMine();
-      setMyCourseIds(new Set(mine.filter((e) => e.status === "active").map((e) => e.courseId)));
+      setMyCourseIds(
+        new Set(
+          mine
+            .filter((e: MineEnrollment) => e.status === "active")
+            .map((e: MineEnrollment) => e.courseId)
+            .filter((id: string | null): id is string => Boolean(id)),
+        ),
+      );
     } catch {
       // Non-fatal: catalog still renders without enrolment overlay.
     }
@@ -103,14 +134,14 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
     };
   }, [isAuthenticated, refreshEnrollments]);
 
-  if (!isAuthenticated) return <SignInPrompt go={go} />;
+  if (!isAuthenticated || !user) return <SignInPrompt go={go} />;
 
-  const programById = React.useMemo(
-    () => Object.fromEntries(programs.map((p) => [p.id, p])),
+  const programById = React.useMemo<Record<string, CatalogProgram>>(
+    () => Object.fromEntries(programs.map((p): [string, CatalogProgram] => [p.id, p])),
     [programs],
   );
 
-  const handleEnrol = async (courseId) => {
+  const handleEnrol = async (courseId: string) => {
     setEnrolling(courseId);
     try {
       await enrollmentsApi.enrol({ courseId });
@@ -287,7 +318,7 @@ const CatalogPage: React.FC<CatalogPageProps> = ({ go }) => {
   );
 };
 
-const Stat = ({ label, value }) => (
+const Stat = ({ label, value }: { label: string; value: string }) => (
   <div>
     <div className="mono" style={{ fontSize: 11, color: "var(--fg-mute)", letterSpacing: "0.1em" }}>
       {label}
