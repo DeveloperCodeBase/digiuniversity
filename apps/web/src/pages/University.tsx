@@ -293,13 +293,13 @@ const VIRTUAL_LABS = {
 };
 
 export const VirtualLabPage: React.FC<VirtualLabPageProps> = ({ go, labId }) => {
-  const id = labId && VIRTUAL_LABS[labId] ? labId : "ANAT";
-  const lab = VIRTUAL_LABS[id];
+  const id = labId && VIRTUAL_LABS[labId as keyof typeof VIRTUAL_LABS] ? labId : "ANAT";
+  const lab = VIRTUAL_LABS[id as keyof typeof VIRTUAL_LABS];
   const [activeTab, setActiveTab] = React.useState(lab.tabs[0][0]);
 
   // Reset active tab when lab changes
   React.useEffect(() => {
-    setActiveTab(VIRTUAL_LABS[id].tabs[0][0]);
+    setActiveTab(VIRTUAL_LABS[id as keyof typeof VIRTUAL_LABS].tabs[0][0]);
   }, [id]);
 
   return (
@@ -350,8 +350,8 @@ export const VirtualLabPage: React.FC<VirtualLabPageProps> = ({ go, labId }) => 
 
           <div className="mono mt-6 mb-2.5"  style={{fontSize: 10, color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em"}}>لایه‌ها</div>
           {lab.layers.map(([t, on], i) => (
-            <label className="flex items-center gap-2.5 cursor-pointer" key={t}  style={{ padding: "8px 12px", fontSize: 13, color: "rgba(255,255,255,0.8)"}}>
-              <input type="checkbox" defaultChecked={on} style={{ accentColor: "oklch(0.7 0.18 145)" }} />
+            <label className="flex items-center gap-2.5 cursor-pointer" key={String(t)}  style={{ padding: "8px 12px", fontSize: 13, color: "rgba(255,255,255,0.8)"}}>
+              <input type="checkbox" defaultChecked={on === true} style={{ accentColor: "oklch(0.7 0.18 145)" }} />
               {t}
             </label>
           ))}
