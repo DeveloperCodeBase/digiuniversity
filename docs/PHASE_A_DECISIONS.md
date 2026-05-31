@@ -1930,3 +1930,22 @@ None are product regressions — the running app is fine (static green; deploy s
 **Active stop triggers (D61, capstone-revised):** (1) unexpected discovery → STOP+ping; (2) verify surfaces another hidden gate → ping; (3) gate-flip regression (a static gate blocks a deploy that should pass) → STOP+ping; (4) jest advisory-mode hermeticity itself turns structural (e.g. the `NODE_ENV=test` setup is itself a structural issue) → STOP+ping. + stop-trigger #7 (gate-flip regression on the 31 KB R5 deploy script) remains armed for phase 2.
 
 **Source:** owner directive 2026-05-31 «Split: R-CI-Api، برو (Option 1)» (jest structural → R-CI-Api split; static hard-enforce + jest advisory; capstone proceeds unblocked).
+
+### D89 — R-CI-Cleanup CLOSED
+**Context:** Capstone executed under Option 1 (D88), deployed green, mobile-accepted. Closes R-CI-Cleanup (D79 sequence: Candidate C → R-CI → Candidate A next). Review: `docs/PHASE_B_R_CI_REVIEW.md`.
+
+**Owner decision (verbatim-blend):** «R-CI mobile سبز … ببند R-CI» (mobile check PASS: app load + login + workspace pages dashboard/catalog/settings clean, no runtime regression from type-fixes).
+
+**What shipped:**
+- **`apps/web` tsc 198 → 0** — proper per-site types, **zero new `any`**, zero `@ts-ignore`/`@ts-nocheck`, 13 verified buckets.
+- **Unified `verify.ps1`** — web tsc + api tsc + audit-lint **HARD** + api jest **advisory** (one entry point, single source of truth).
+- **R5 deploy-gate flipped lean → full-CI** — `Invoke-VerifyGate` wired **after** the migration gate (D83 ordering: verify's jest push would blind the step-2 heuristic if first); static red → **`exit 50`** (`EXIT_VERIFY_FAILED`); jest advisory non-blocking; **`-SkipVerify`** hardened with a prominent warning + report-log (D81 ethos: bypass only WITH visibility).
+- **Stop-trigger #7 validated all 3 paths** (green→exit 0 / red→exit 50 halts before smoke / `-SkipVerify`→warn+bypass) — and the mandatory `-DryRun` **caught a real PS array-splat bug** (`@verifyArgs` bound `-SkipJest` positionally → exit 99) **before prod**; fixed to a literal-switch call.
+- **Phase 3 deploy `eb2c81f` exit 0** — full-CI gate **proven on a real production deploy**; bundle Δ **+0.74 KiB** (zero-runtime confirmed); jest **8-fail advisory non-blocking** validated end-to-end (didn't hang, didn't block).
+- **Bonus:** **456 accumulated test tenants swept from the prod DB** via the new jest `globalSetup`/`globalTeardown` (`test-*` cascade-clean) — a data-hygiene win (pollution from every prior Phase B test run).
+
+**D81 closure:** the **STATIC portion is CLOSED** — web tsc + api tsc + audit-lint are now unified and **hard-enforced in both CI and the deploy gate**; a silently-red static gate cannot recur. The **jest-hermetic portion → R-CI-Api follow-up** (D88, the Q1.a escape hatch): make the suite hermetic (disposable test DB off prod, per-test throttle isolation, the 8 drifts incl. the **ENROLLED-idempotency behavior-question**), then flip jest → blocking. Stub: `docs/PHASE_B_R_CI_API_MEMO.md`.
+
+**Next:** Candidate A (per D79). R-CI-Api is an independent follow-up, schedulable any time (8 characterized jest failures + drift; not blocking).
+
+**Source:** owner directive 2026-05-31 «ببند R-CI» (R-CI-Cleanup close; review doc + D89 + R-CI-Api stub + progress final).
