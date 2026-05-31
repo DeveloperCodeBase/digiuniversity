@@ -77,11 +77,30 @@ Runs `git pull` → **migration gate** (the new `trackingToken` migration trips 
 
 ---
 
-## 7. Deploy evidence (R5 Phase-2 close)
+## 7. Deploy evidence (R5 Phase-2)
 
-> Filled after the `deploy-and-smoke.ps1` run. Records exit code, the migration-gate firing, smoke results, and the main-bundle delta vs baseline. A clean run (exit 0, or green-with-documented-warnings) closes **R5 D13 Phase 2** concurrently with R6.
+Ran `deploy-and-smoke.ps1 -Yes` against `main@221d7dc` → **exit 0, all green**. Report: `logs/deploy/2026-05-31-070858.md`.
 
-_(pending the deploy run — see the follow-up commit / D83.)_
+| Phase | Result |
+|---|---|
+| git pull → build → up → migrate → seed → health (4 services) | all PASS |
+| `prisma migrate status` (8.2) | **schema up to date** — the `trackingToken` migration applied on prod |
+| public health (`/healthz`, `/api/v1/health`, `/ai/v1/health`) | 200 / 200 / 200 |
+| auth probe (bogus → 401) | PASS (SMOKE_* unset → full round-trip skipped by design) |
+| modulepreload allow-list (8.5) | **vendor-only** (react-vendor, radix-vendor) — Apply/Track chunks did NOT leak |
+| main bundle (8.6) | **384.5 KiB, Δ +0.76 KiB vs baseline** — well under +40 warn / +50 fail |
+
+**Live R6 surface validation** (the smoke covers health/auth, not the new pages — checked separately, non-mutating):
+- `GET /api/v1/programs/public?tenantSlug=demo` → **200**, returns a real program (`bsc-cs` — کارشناسی علوم کامپیوتر), so the `/apply` picker populates.
+- `GET /api/v1/applications/student/track?token=<bogus>` → **404** `"no application found for this tracking token"` — no leak.
+- `GET /apply` → **200** (SPA shell).
+
+The **+0.76 KiB** main-bundle delta (two full pages added) confirms the D66 Path D lazy-chunk approach: Apply + Track ship as their own chunks, not in `index`.
+
+### ⚠ Finding — migration gate (step 2) is a no-op in push-then-deploy
+Step 2 reported `migration gate - no new migration`, even though R6 adds the `trackingToken` migration. Cause: step 1 (`git pull --ff-only origin main`) fast-forwards local to origin, so the gate's `origin/main..HEAD` diff is **empty** — the migration was already on `origin/main` (canonical commit→push→deploy). The migration was still **applied + ground-truth-confirmed via 8.2** (`prisma migrate status` = "schema up to date"), which D78 already names as the authoritative check. So the **step-2 warning/countdown is effectively dead in the normal workflow** (it only fires for *unpushed* local migrations); 8.2 is the real migration gate, and it passed. Reframe for R5 / R-CI: either document step-2 as a pre-push heads-up, or make it diff the deployed migration set vs the DB's applied set (what 8.2 already does). **Owner to rule** on whether this affects R5 D13 Phase-2 closure (the run itself was clean — exit 0).
+
+**R5 D13 Phase-2:** the owner's stated criterion was "a clean first real run closes R5 D13 Phase 2." The run was clean (exit 0, real migration applied + verified, bundle/preload/smoke all green). Met — pending the owner's ruling on the step-2 finding above. To be ratified in the closing decision log alongside the owner's D13 mobile visual.
 
 ---
 
