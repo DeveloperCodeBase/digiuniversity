@@ -9,9 +9,13 @@ export interface IconProps {
   name: string;
   size?: number;
   stroke?: number;
+  /** Phase B R-CI (D86) — forwarded to the rendered <svg>. The codebase
+   *  has long used <Icon className=.../style=.../>; the type now matches. */
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7 }) => {
+export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7, className, style }) => {
   const P: React.SVGProps<SVGSVGElement> = {
     width: size,
     height: size,
@@ -21,6 +25,8 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7 }) => 
     strokeWidth: stroke,
     strokeLinecap: "round",
     strokeLinejoin: "round",
+    ...(className ? { className } : {}),
+    ...(style ? { style } : {}),
   };
   const map: Record<string, React.ReactElement> = {
     arrow: <svg {...P}><path d="M5 12h14M13 5l7 7-7 7"/></svg>,
@@ -88,8 +94,6 @@ export const Icon: React.FC<IconProps> = ({ name, size = 18, stroke = 1.7 }) => 
     link: <svg {...P}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>,
 
     /* Phase-A R6 — Classroom redesign icons */
-    "chev-left": <svg {...P}><path d="m14 6-6 6 6 6"/></svg>,
-    "chev-right": <svg {...P}><path d="m10 6 6 6-6 6"/></svg>,
     chevronLeft: <svg {...P}><path d="m14 6-6 6 6 6"/></svg>,
     chevronRight: <svg {...P}><path d="m10 6 6 6-6 6"/></svg>,
     sparkles: <svg {...P}><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>,
