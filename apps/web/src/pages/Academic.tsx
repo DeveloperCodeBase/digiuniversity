@@ -243,7 +243,7 @@ export const RegistrationPage: React.FC<AcademicPageProps> = ({ go }) => {
   React.useEffect(() => {
     try { localStorage.setItem("digiu_cart", JSON.stringify(cart)); } catch {}
   }, [cart]);
-  const toggle = (code) => setCart(cart.includes(code) ? cart.filter(c => c !== code) : [...cart, code]);
+  const toggle = (code: string) => setCart(cart.includes(code) ? cart.filter((c: string) => c !== code) : [...cart, code]);
 
   const available = [
     { code: "CS-580", t: "معماری سامانه‌های مقیاس‌پذیر", cr: 3, prof: "م. کیانی", day: "یکشنبه ۱۴:۰۰", capacity: 30, enrolled: 24, prereqs: ["CS-380"] },
@@ -402,8 +402,8 @@ export const CareerPage: React.FC<AcademicPageProps> = ({ go }) => (
           <div className="mono mb-3"  style={{color: "var(--fg-mute)", fontSize: 11, letterSpacing: "0.1em"}}>تجربه</div>
           <div className="flex flex-col gap-1" >
             {[["دانشجویی", true], ["تازه‌کار", true], ["میانه", false], ["ارشد", false]].map(([t, d]) => (
-              <label className="flex items-center gap-2.5 cursor-pointer" key={t}  style={{ padding: "8px 10px", fontSize: 13}}>
-                <input type="checkbox" defaultChecked={d} style={{ accentColor: "var(--accent)" }} />{t}
+              <label className="flex items-center gap-2.5 cursor-pointer" key={String(t)}  style={{ padding: "8px 10px", fontSize: 13}}>
+                <input type="checkbox" defaultChecked={d === true} style={{ accentColor: "var(--accent)" }} />{t}
               </label>
             ))}
           </div>

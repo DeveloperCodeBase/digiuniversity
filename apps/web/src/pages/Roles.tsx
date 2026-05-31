@@ -294,7 +294,7 @@ export const ParentPage: React.FC<RolesPageProps> = ({ go }) => (
 // =====================================================
 export const OfficeHoursPage: React.FC<RolesPageProps> = ({ go }) => {
   const [selectedDay, setSelectedDay] = React.useState(2);
-  const [selectedSlot, setSelectedSlot] = React.useState(null);
+  const [selectedSlot, setSelectedSlot] = React.useState<number | null>(null);
   const [selectedInstructor, setSelectedInstructor] = React.useState(0);
 
   const INSTRUCTORS = [
@@ -434,6 +434,7 @@ export const OfficeHoursPage: React.FC<RolesPageProps> = ({ go }) => {
                 <span style={{ fontSize: 12, color: "var(--fg-mute)" }}>تا ۲ ساعت قبل از جلسه قابل لغو</span>
                 <Button variant="primary" disabled={selectedSlot === null}
                   onClick={() => {
+                    if (selectedSlot === null) return;
                     window.toast?.({ title: "جلسه ثبت شد", msg: `جلسه‌ی شما با دکتر عظیمی روز ${days[selectedDay].d} ساعت ${slots[selectedSlot].t} رزرو شد.`, kind: "success" });
                   }}
                   aria-label="رزرو جلسه"

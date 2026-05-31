@@ -225,7 +225,7 @@ const InstructorSideNav = () => (
   </aside>
 );
 
-const HealthCard = ({ l, v, status, desc }) => {
+const HealthCard = ({ l, v, status, desc }: { l: string; v: React.ReactNode; status: string; desc: string }) => {
   const color = status === "ok" ? "var(--cyan)" : status === "warn" ? "var(--amber)" : "var(--rose)";
   return (
     <div className="card-flat p-5"  style={{ borderColor: color + "40"}}>

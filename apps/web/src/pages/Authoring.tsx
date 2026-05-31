@@ -214,7 +214,7 @@ const OutlineStep = () => (
       </div>
     ))}
     <Button variant="outline" className="justify-center mt-3" style={{width: "100%"}}
-      onClick={() => window.toast?.({ title: "جلسه‌ی جدید اضافه شد", kind: "success" })}
+      onClick={() => window.toast?.({ title: "جلسه‌ی جدید اضافه شد", msg: "جلسه به برنامه اضافه شد.", kind: "success" })}
     >
       <Icon name="plus" size={14} />افزودن جلسه
     </Button>

@@ -48,7 +48,7 @@ export const CommunityPage: React.FC<CommunityPageProps> = ({ go }) => {
                 ["solved", "حل‌شده", 312],
               ].map(([id, lbl, n]) => (
                 <li key={id}>
-                  <button className="rounded-lg flex justify-between items-center cursor-pointer" onClick={() => setFilter(id)}  style={{width: "100%",
+                  <button className="rounded-lg flex justify-between items-center cursor-pointer" onClick={() => setFilter(String(id))}  style={{width: "100%",
                     padding: "10px 12px",
                     background: filter === id ? "color-mix(in oklch, var(--cyan) 10%, var(--surface))" : "transparent",
                     border: "1px solid " + (filter === id ? "color-mix(in oklch, var(--cyan) 30%, transparent)" : "transparent"),

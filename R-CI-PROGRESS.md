@@ -15,4 +15,8 @@ Standing authorization (owner, 2026-05-31): autonomous bucket-by-bucket to tsc=0
 - 2026-05-31 09:40 · icons.tsx (D86 Option A — Icon className+style forward + chev dedup) · 96→61 (−35: Stage/AIPanel/icons + 7 scattered Icon-prop errors) · `2c66e77` · —
 - 2026-05-31 09:50 · AssessmentLive.tsx (AnswerValue/Question types + typed handlers/map) · 61→49 · `e994743` · —
 - 2026-05-31 10:00 · Productivity.tsx (array String() coercions + keyof index casts + ChatBubble props + toast msg + xp ??0) · 49→38 · `5ff234f` · —
-- 2026-05-31 10:10 · Dashboard+Course+Analytics (helper-component props + ModuleRow type + Number()/String() coercions for loose arrays) · 38→20 · _(this commit)_ · —
+- 2026-05-31 10:10 · Dashboard+Course+Analytics (helper-component props + ModuleRow type + Number()/String() coercions for loose arrays) · 38→20 · `647acb6` · —
+- 2026-05-31 10:20 · tail (Academic, Assessment, Authoring, Community, Instructor, More, Progress, Roles + landing-v2 spec) — prop/param types, keyof casts, Number()/String() coercions, selectedSlot number|null + guard, inline factor/event types · 20→**0** · _(this commit)_ · 🎉 **WEB TSC GREEN**
+
+## ✅ Milestone — `apps/web` tsc = 0 (was 198, all R0.5-era debt)
+13 buckets, every one verified (count down exactly, zero new error codes, **zero new `any`** across the whole sub-R). API tsc + audit-lint already green. Remaining R-CI capstone: unified `verify` script (Q3.a) → R5 gate flip lean→full-CI (Q4.a) → deploy → review doc.

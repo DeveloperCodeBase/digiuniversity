@@ -230,7 +230,7 @@ const ProgressPage: React.FC<ProgressPageProps> = ({ go }) => {
                   className="mt-4"
                   style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 10 }}
                 >
-                  {risk.factors.map((f) => (
+                  {risk.factors.map((f: { key: string; label: string; contribution: number; detail: string }) => (
                     <li
                       key={f.key}
                       className="rounded-lg"
@@ -275,7 +275,7 @@ const ProgressPage: React.FC<ProgressPageProps> = ({ go }) => {
                 className="mt-5"
                 style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}
               >
-                {summary.recentEvents.map((e) => (
+                {summary.recentEvents.map((e: { id: string; type: string; occurredAt: string }) => (
                   <li
                     key={e.id}
                     className="rounded-lg flex items-center justify-between"
@@ -324,7 +324,7 @@ const ProgressPage: React.FC<ProgressPageProps> = ({ go }) => {
                     className="mt-3"
                     style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 6 }}
                   >
-                    {Object.entries(tenantSummary.eventsByType)
+                    {Object.entries(tenantSummary.eventsByType as Record<string, number>)
                       .sort((a, b) => b[1] - a[1])
                       .map(([t, count]) => (
                         <li

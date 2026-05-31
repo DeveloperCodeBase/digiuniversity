@@ -156,7 +156,7 @@ export const LibraryPage: React.FC<MorePageProps> = ({ go }) => {
   const filteredItems = LIBRARY_ITEMS.filter((it) => {
     if (activeCat !== "all") {
       const map = { video: "VIDEO", pdf: "PDF", code: "CODE", data: "DATA", slide: "SLIDE" };
-      if (it.t !== map[activeCat]) return false;
+      if (it.t !== map[activeCat as keyof typeof map]) return false;
     }
     if (query && !it.title.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
@@ -209,7 +209,7 @@ export const LibraryPage: React.FC<MorePageProps> = ({ go }) => {
                 <label className="flex items-center gap-2.5 cursor-pointer" key={f}  style={{ fontSize: 13, color: "var(--fg-mute)"}}>
                   <input
                     type="checkbox"
-                    checked={!!filters[f]}
+                    checked={!!filters[f as keyof typeof filters]}
                     onChange={(e) => setFilters({ ...filters, [f]: e.target.checked })}
                     style={{ accentColor: "var(--accent)" }}
                   />

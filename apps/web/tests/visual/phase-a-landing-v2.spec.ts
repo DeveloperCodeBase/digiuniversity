@@ -118,7 +118,7 @@ test.describe("@gate-a R-Landing-v2 — Home redesign D12 contract", () => {
   test("CTA → /schools: existing «دانشکده‌ها و برنامه‌ها» button works", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: /دانشکده‌ها و برنامه‌ها/ }).first().click();
-    await page.waitForURL((u) => u.pathname.match(/\/(schools|programs)/), { timeout: 5000 });
+    await page.waitForURL((u) => /\/(schools|programs)/.test(u.pathname), { timeout: 5000 });
     expect(page.url()).toMatch(/\/(schools|programs)$/);
   });
 

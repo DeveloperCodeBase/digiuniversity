@@ -56,7 +56,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({ go }) => {
                 ["C", "حدود ۹۰ گام", false],
                 ["D", "همه‌ی گام‌های قبلی به‌طور یکسان", false],
               ].map(([letter, text, correct], i) => (
-                <button key={letter} className={"exam-option " + (selected === i ? "selected" : "")} onClick={() => setSelected(i)}>
+                <button key={String(letter)} className={"exam-option " + (selected === i ? "selected" : "")} onClick={() => setSelected(i)}>
                   <span className="letter">{letter}</span>
                   <span>{text}</span>
                   {selected === i && <Icon name="check" size={18} stroke={3} />}
