@@ -342,6 +342,12 @@ export const studentApplicationsApi = {
   // return (true). Caller can branch on that for UX.
   publicSubmit: (data) => publicApi.post("/v1/applications/student", data),
 
+  // Phase B R6 (D80) — public anon tracking by token (no auth).
+  trackByToken: (token) =>
+    publicApi.get("/v1/applications/student/track?token=" + encodeURIComponent(token)),
+  withdrawByToken: (token) =>
+    publicApi.post("/v1/applications/student/track/withdraw", { token }),
+
   // Own application (any authenticated user; 404 if no app).
   getOwn: () => api.get("/v1/applications/student/me"),
 
@@ -379,6 +385,11 @@ export const studentApplicationsApi = {
 
 export const instructorApplicationsApi = {
   publicSubmit: (data) => publicApi.post("/v1/applications/instructor", data),
+  // Phase B R6 (D80) — public anon tracking by token (no auth).
+  trackByToken: (token) =>
+    publicApi.get("/v1/applications/instructor/track?token=" + encodeURIComponent(token)),
+  withdrawByToken: (token) =>
+    publicApi.post("/v1/applications/instructor/track/withdraw", { token }),
   getOwn: () => api.get("/v1/applications/instructor/me"),
   withdraw: (id) => api.post("/v1/applications/instructor/" + encodeURIComponent(id) + "/withdraw"),
   list: ({ status, departmentId } = {}) => {

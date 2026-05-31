@@ -179,6 +179,9 @@ const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 // cold-paint-critical; a brief Suspense fallback is acceptable). Own
 // content-hashed chunk, NOT eager → main-bundle Δ ≈ 0.
 const ApplyPage = React.lazy(() => import("./pages/Apply"));
+// Phase B R6 (D80) — public anon /track status page (token-based read +
+// withdraw). Lazy per D66 Path D; own content-hashed chunk.
+const TrackPage = React.lazy(() => import("./pages/Track"));
 
 // =====================================================
 // useGo — back-compat shim
@@ -372,6 +375,8 @@ const routes = [
   { path: "/admissions", element: <RouteShell Component={AdmissionsPage} /> },
   // Phase B R6 (D80) — public anon application form (PUBLIC route, Q1.a).
   { path: "/apply", element: <RouteShell Component={ApplyPage} /> },
+  // Phase B R6 (D80) — public anon status page (token in ?token=, type in ?type=).
+  { path: "/track", element: <RouteShell Component={TrackPage} /> },
   { path: "/credential", element: <RouteShell Component={CredentialPage} /> },
   { path: "/search", element: <RouteShell Component={SearchPage} /> },
   { path: "/assessment", element: <RouteShell Component={AssessmentPage} /> },
