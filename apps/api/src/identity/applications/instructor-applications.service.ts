@@ -18,14 +18,24 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import type { AppStatus, InstructorApplication, InstructorRank } from "@prisma/client";
+import type {
+  AppStatus,
+  InstructorApplication,
+  InstructorRank,
+  Prisma,
+} from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import { ApplicationEnrollmentService } from "./application-enrollment.service";
 import {
   ALLOWED_TRANSITIONS,
+  buildPublicApplicationView,
+  generateTrackingToken,
   illegalTransitionMessage,
   isLegalTransition,
+  isTrackingTokenCollision,
+  PUBLIC_TRACK_ACTOR,
+  type PublicApplicationView,
   UNDER_REVIEW_FORWARD_TARGETS,
   verificationGateMessage,
   verificationGateMissing,
@@ -247,26 +257,29 @@ export class InstructorApplicationsService {
           "an earlier instructor application for this applicant was soft-deleted; contact admin to restore",
         );
       }
-      application = existing;
+      // R6 (D80): backfill a tracking token on legacy/admin rows that
+      // lack one so a re-submit always yields a working /track link.
+      application = existing.trackingToken
+        ? existing
+        : await this.ensureTrackingToken(existing.id);
     } else {
-      application = await this.prisma.instructorApplication.create({
-        data: {
-          tenantId: input.tenantId,
-          departmentId: input.departmentId,
-          preferredDepartmentSlug: input.preferredDepartmentSlug,
-          applicantFullName: input.applicantFullName,
-          applicantEmail: normalizedEmail,
-          applicantPhone: input.applicantPhone,
-          applicantNationalId: input.applicantNationalId,
-          applicantBio: input.applicantBio,
-          desiredRank: input.desiredRank,
-          expertise: input.expertise ?? [],
-          cvUrl: input.cvUrl,
-          status: "SUBMITTED",
-          userId: input.actorUserId ?? null,
-          createdBy: input.actorUserId ?? null,
-          updatedBy: input.actorUserId ?? null,
-        },
+      // R6 (D80): mint a 192-bit tracking token (app-level) on create.
+      application = await this.createWithTrackingToken({
+        tenantId: input.tenantId,
+        departmentId: input.departmentId,
+        preferredDepartmentSlug: input.preferredDepartmentSlug,
+        applicantFullName: input.applicantFullName,
+        applicantEmail: normalizedEmail,
+        applicantPhone: input.applicantPhone,
+        applicantNationalId: input.applicantNationalId,
+        applicantBio: input.applicantBio,
+        desiredRank: input.desiredRank,
+        expertise: input.expertise ?? [],
+        cvUrl: input.cvUrl,
+        status: "SUBMITTED",
+        userId: input.actorUserId ?? null,
+        createdBy: input.actorUserId ?? null,
+        updatedBy: input.actorUserId ?? null,
       });
       created = true;
 
@@ -359,5 +372,109 @@ export class InstructorApplicationsService {
     }
 
     return this.transition(tenantId, actor.userId, applicationId, "WITHDRAWN");
+  }
+
+  // ===================================================================
+  // Phase B R6 (D80) — public anon tracking by token.
+  // ===================================================================
+
+  /** Create with a freshly-minted 192-bit tracking token; regenerate on
+   *  the (astronomically unlikely) P2002 collision, up to 3 attempts. */
+  private async createWithTrackingToken(
+    data: Omit<Prisma.InstructorApplicationUncheckedCreateInput, "trackingToken">,
+  ): Promise<InstructorApplication> {
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await this.prisma.instructorApplication.create({
+          data: { ...data, trackingToken: generateTrackingToken() },
+        });
+      } catch (err) {
+        lastErr = err;
+        if (!isTrackingTokenCollision(err)) throw err;
+      }
+    }
+    throw lastErr;
+  }
+
+  /** Backfill a tracking token on a row that lacks one (legacy / admin-
+   *  created), so a re-submit always yields a working /track link. */
+  private async ensureTrackingToken(id: string): Promise<InstructorApplication> {
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await this.prisma.instructorApplication.update({
+          where: { id },
+          data: { trackingToken: generateTrackingToken() },
+        });
+      } catch (err) {
+        lastErr = err;
+        if (!isTrackingTokenCollision(err)) throw err;
+      }
+    }
+    throw lastErr;
+  }
+
+  /**
+   * Public status read by tracking token. Returns the PII-masked view
+   * (nationalId omitted, raw ids dropped, email/phone masked). Soft-
+   * deleted rows + empty/unknown tokens → 404 (no enumeration leak).
+   * The token is never logged.
+   */
+  async getByToken(token: string): Promise<PublicApplicationView> {
+    const trimmed = (token ?? "").trim();
+    if (!trimmed) {
+      throw new NotFoundException("no application found for this tracking token");
+    }
+    const row = await this.prisma.instructorApplication.findFirst({
+      where: { trackingToken: trimmed, deletedAt: null },
+      select: {
+        id: true,
+        status: true,
+        submittedAt: true,
+        decidedAt: true,
+        applicantFullName: true,
+        applicantEmail: true,
+        applicantPhone: true,
+        department: { select: { name: true } },
+        preferredDepartmentSlug: true,
+      },
+    });
+    if (!row) {
+      throw new NotFoundException("no application found for this tracking token");
+    }
+    return buildPublicApplicationView({
+      id: row.id,
+      type: "instructor",
+      status: row.status,
+      submittedAt: row.submittedAt,
+      decidedAt: row.decidedAt,
+      applicantFullName: row.applicantFullName,
+      applicantEmail: row.applicantEmail,
+      applicantPhone: row.applicantPhone,
+      departmentName: row.department?.name ?? row.preferredDepartmentSlug ?? null,
+    });
+  }
+
+  /**
+   * Public withdraw by tracking token. Reuses the canonical transition
+   * path (state machine validates: terminal → 400; already-WITHDRAWN →
+   * idempotent). Anon applicant has no User, so the public-track sentinel
+   * actor is recorded. Returns the refreshed masked view.
+   */
+  async withdrawByToken(token: string): Promise<PublicApplicationView> {
+    const trimmed = (token ?? "").trim();
+    if (!trimmed) {
+      throw new NotFoundException("no application found for this tracking token");
+    }
+    const row = await this.prisma.instructorApplication.findFirst({
+      where: { trackingToken: trimmed, deletedAt: null },
+      select: { id: true, tenantId: true },
+    });
+    if (!row) {
+      throw new NotFoundException("no application found for this tracking token");
+    }
+    await this.transition(row.tenantId, PUBLIC_TRACK_ACTOR, row.id, "WITHDRAWN");
+    return this.getByToken(trimmed);
   }
 }

@@ -37,7 +37,7 @@ import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Public } from "../../auth/decorators/public.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
-import { AuditAction } from "../../audit/audit-action.decorator";
+import { AuditAction, AuditSkip } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 import { InstructorApplicationsService } from "./instructor-applications.service";
 
@@ -90,6 +90,15 @@ const SUBMIT_THROTTLE = {
   default: { limit: 5, ttl: 60 * 60 * 1000 },
 };
 
+// R6 (D80) — public tracking throttles (parallel to student variant).
+const TRACK_THROTTLE = { default: { limit: 30, ttl: 60 * 60 * 1000 } };
+const TRACK_WITHDRAW_THROTTLE = { default: { limit: 5, ttl: 60 * 60 * 1000 } };
+
+// R6 (D80) — public withdraw-by-token body.
+class TrackWithdrawDto {
+  @IsString() @MinLength(16) @MaxLength(128) token!: string;
+}
+
 @Controller("applications/instructor")
 export class InstructorApplicationsController {
   constructor(
@@ -100,6 +109,7 @@ export class InstructorApplicationsController {
   // ---------- Public submission (Q8.a refinement) ----------
 
   @Public()
+  @AuditSkip()
   @Throttle(SUBMIT_THROTTLE)
   @Post()
   async submit(
@@ -129,6 +139,29 @@ export class InstructorApplicationsController {
     });
     res.status(result.created ? HttpStatus.CREATED : HttpStatus.OK);
     return { ...result.application, _idempotent: !result.created };
+  }
+
+  // ---------- Public tracking by token (R6 D80) ----------
+
+  @Public()
+  @Throttle(TRACK_THROTTLE)
+  @Get("track")
+  async track(@Query("token") token: string) {
+    return this.service.getByToken(token ?? "");
+  }
+
+  /**
+   * @AuditSkip(): public endpoint, no authenticated actor (the service
+   * records the public-track sentinel actor on the row). Declared before
+   * :id/withdraw so "track/withdraw" wins over the :id param.
+   */
+  @Public()
+  @AuditSkip()
+  @Throttle(TRACK_WITHDRAW_THROTTLE)
+  @Post("track/withdraw")
+  @HttpCode(HttpStatus.OK)
+  async trackWithdraw(@Body() dto: TrackWithdrawDto) {
+    return this.service.withdrawByToken(dto.token);
   }
 
   // ---------- Self-read + WITHDRAW ----------

@@ -13,6 +13,8 @@
 // Verification gate (UNDER_REVIEW → forward) per Q4.a caveat lands
 // in Commit C as a separate service-layer guard.
 
+import { randomBytes } from "node:crypto";
+
 import type { AppStatus } from "@prisma/client";
 
 /**
@@ -107,4 +109,140 @@ export function verificationGateMissing(app: {
  */
 export function verificationGateMessage(missing: string[]): string {
   return `cannot advance application past UNDER_REVIEW: applicant ${missing.join(" + ")} not verified (Q4.a caveat)`;
+}
+
+// =====================================================================
+// Phase B R6 (D80) — public anon-applicant tracking-token helpers.
+//
+// The applicant has no User until ENROLLED (StudentApplication.userId is
+// null SUBMITTED→ACCEPTED), so R3.b's authed /me + SelfOrAdmin withdraw
+// cannot serve them. A high-entropy tracking token (minted in
+// submitPublic) is the anon applicant's bearer capability to read status
+// + withdraw on the public /track surface.
+// =====================================================================
+
+/**
+ * Mint a 192-bit URL-safe tracking token. App-level (NOT a DB @default):
+ * per D80 stop-trigger #6, no Prisma/Postgres default reaches the
+ * >=128-bit hardening floor (uuid v4 = 122-bit; cuid is not crypto-
+ * random). Mirrors generateSecurePassword() in
+ * application-enrollment.service.ts.
+ */
+export function generateTrackingToken(): string {
+  return randomBytes(24).toString("base64url"); // 24 bytes = 192 bits
+}
+
+/**
+ * True iff `err` is a Prisma P2002 unique-constraint violation on the
+ * trackingToken index — the signal to regenerate + retry the write.
+ * (A 192-bit collision is astronomically unlikely; this is defense in
+ * depth, D80.)
+ */
+export function isTrackingTokenCollision(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) return false;
+  if ((err as { code?: string }).code !== "P2002") return false;
+  const target = (err as { meta?: { target?: unknown } }).meta?.target;
+  const asString = Array.isArray(target) ? target.join(",") : String(target ?? "");
+  return asString.includes("trackingToken");
+}
+
+/**
+ * Sentinel actor recorded on a token-driven (anon) withdraw. The audit
+ * columns (decidedBy / updatedBy) are plain String? with no FK, so a
+ * non-id sentinel is safe and makes the public-track origin explicit in
+ * the trail (vs an admin or authed-self withdraw).
+ */
+export const PUBLIC_TRACK_ACTOR = "public:track-token";
+
+/**
+ * Whether the applicant may withdraw from this status. True for the 4
+ * non-terminal states (WITHDRAWN is a legal target); false for the
+ * terminals ENROLLED / REJECTED / WITHDRAWN. Drives the /track withdraw
+ * button + the masked view's `canWithdraw`.
+ */
+export function canApplicantWithdraw(status: AppStatus): boolean {
+  return status !== "WITHDRAWN" && isLegalTransition(status, "WITHDRAWN");
+}
+
+/**
+ * Human-friendly public reference derived from the application id — NOT
+ * the raw cuid (internal ids are never exposed on the public /track
+ * surface). Mirrors the STU-/INS- code shape (last 6, uppercased).
+ */
+export function deriveApplicationReference(id: string): string {
+  return `APP-${id.slice(-6).toUpperCase()}`;
+}
+
+/** Partially mask an email for the public view: keep 1-2 local chars +
+ *  the full domain. e.g. `ma***@gmail.com`. */
+export function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at < 1) return "***";
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const head = local.slice(0, Math.min(2, local.length));
+  return `${head}${local.length > head.length ? "***" : ""}@${domain}`;
+}
+
+/** Partially mask a phone for the public view: last 4 digits only.
+ *  e.g. `***6789`. Returns null for empty input. */
+export function maskPhone(phone: string | null | undefined): string | null {
+  if (!phone) return null;
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 0) return null;
+  if (digits.length <= 4) return "****";
+  return `***${digits.slice(-4)}`;
+}
+
+/**
+ * The PII-masked, internal-id-free view returned by the public /track
+ * endpoint (D80 PII-mask: nationalId omitted entirely; raw ids dropped;
+ * email + phone masked). The submitter's confirmation page gets the full
+ * row from submitPublic — this masked shape is only for the bearer-token
+ * read, where the token is the sole credential.
+ */
+export interface PublicApplicationView {
+  reference: string;
+  type: "student" | "instructor";
+  status: AppStatus;
+  submittedAt: Date;
+  decidedAt: Date | null;
+  applicantFullName: string;
+  applicantEmailMasked: string;
+  applicantPhoneMasked: string | null;
+  programName: string | null; // student variant
+  departmentName: string | null; // instructor variant
+  canWithdraw: boolean;
+}
+
+/**
+ * Build a PublicApplicationView from a row's already-selected fields.
+ * Centralizes masking + reference derivation so both services emit an
+ * identical shape.
+ */
+export function buildPublicApplicationView(input: {
+  id: string;
+  type: "student" | "instructor";
+  status: AppStatus;
+  submittedAt: Date;
+  decidedAt: Date | null;
+  applicantFullName: string;
+  applicantEmail: string;
+  applicantPhone: string | null;
+  programName?: string | null;
+  departmentName?: string | null;
+}): PublicApplicationView {
+  return {
+    reference: deriveApplicationReference(input.id),
+    type: input.type,
+    status: input.status,
+    submittedAt: input.submittedAt,
+    decidedAt: input.decidedAt,
+    applicantFullName: input.applicantFullName,
+    applicantEmailMasked: maskEmail(input.applicantEmail),
+    applicantPhoneMasked: maskPhone(input.applicantPhone),
+    programName: input.programName ?? null,
+    departmentName: input.departmentName ?? null,
+    canWithdraw: canApplicantWithdraw(input.status),
+  };
 }

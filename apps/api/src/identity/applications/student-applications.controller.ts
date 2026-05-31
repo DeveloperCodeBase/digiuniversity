@@ -38,7 +38,7 @@ import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
 import { Public } from "../../auth/decorators/public.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
-import { AuditAction } from "../../audit/audit-action.decorator";
+import { AuditAction, AuditSkip } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
 import { StudentApplicationsService } from "./student-applications.service";
 
@@ -101,6 +101,17 @@ const SUBMIT_THROTTLE = {
   default: { limit: 5, ttl: 60 * 60 * 1000 },
 };
 
+// R6 (D80) — public tracking throttles. Status read is generous (refresh-
+// friendly); withdraw is destructive → strict (mirrors SUBMIT_THROTTLE).
+const TRACK_THROTTLE = { default: { limit: 30, ttl: 60 * 60 * 1000 } };
+const TRACK_WITHDRAW_THROTTLE = { default: { limit: 5, ttl: 60 * 60 * 1000 } };
+
+// R6 (D80) — public withdraw-by-token body. Token is a 192-bit base64url
+// string (~32 chars); accept a tolerant 16-128 range.
+class TrackWithdrawDto {
+  @IsString() @MinLength(16) @MaxLength(128) token!: string;
+}
+
 @Controller("applications/student")
 export class StudentApplicationsController {
   constructor(
@@ -121,6 +132,7 @@ export class StudentApplicationsController {
    * stub captures the abuse signal instead.
    */
   @Public()
+  @AuditSkip()
   @Throttle(SUBMIT_THROTTLE)
   @Post()
   async submit(
@@ -146,6 +158,38 @@ export class StudentApplicationsController {
     });
     res.status(result.created ? HttpStatus.CREATED : HttpStatus.OK);
     return { ...result.application, _idempotent: !result.created };
+  }
+
+  // ---------- Public tracking by token (R6 D80) ----------
+
+  /**
+   * Public status read by tracking token. @Public + @Throttle (30/IP/hr
+   * — refresh-friendly). Returns the PII-masked view; unknown/forged
+   * token → 404 (no enumeration leak). GET is not a mutation, so no
+   * audit decorator. Declared BEFORE the :id routes so the "track"
+   * literal wins over the :id param.
+   */
+  @Public()
+  @Throttle(TRACK_THROTTLE)
+  @Get("track")
+  async track(@Query("token") token: string) {
+    return this.service.getByToken(token ?? "");
+  }
+
+  /**
+   * Public withdraw by tracking token. @Public + strict @Throttle
+   * (5/IP/hr). @AuditSkip(): public endpoint, no authenticated actor —
+   * the rule's documented opt-out (the service records the public-track
+   * sentinel actor on the row instead). Declared BEFORE :id/withdraw so
+   * "track/withdraw" wins over the :id param.
+   */
+  @Public()
+  @AuditSkip()
+  @Throttle(TRACK_WITHDRAW_THROTTLE)
+  @Post("track/withdraw")
+  @HttpCode(HttpStatus.OK)
+  async trackWithdraw(@Body() dto: TrackWithdrawDto) {
+    return this.service.withdrawByToken(dto.token);
   }
 
   // ---------- Self-read + WITHDRAW (D69 SelfOrAdmin reuse) ----------
