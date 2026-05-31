@@ -51,5 +51,8 @@ uploads/
 *.sql
 *.sql.gz
 !apps/api/prisma/migrations/**/migration.sql
-docs/my-upload/landing-v2/uploads/
-docs/my-upload/landing-v2/assets/
+# Owner's design-reference / prototype scratch area (UI mockups + heavy binary
+# uploads/screenshots). Kept locally for reference; never shipped to the repo
+# image. The landing-v2 + landing-page/README files predate this and stay
+# tracked (git keeps tracked files even under an ignored dir).
+docs/my-upload/
