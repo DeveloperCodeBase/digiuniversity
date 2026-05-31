@@ -175,6 +175,10 @@ const SubmissionPage = React.lazy(() => import("./pages/Productivity").then((m) 
 // once unreferenced; left there to keep Productivity.tsx untouched in
 // this commit). Per D66 Path D: own lazy chunk, NO admin bucket.
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
+// Phase B R6 (D80) — public anon /apply form. Lazy per D66 Path D (not
+// cold-paint-critical; a brief Suspense fallback is acceptable). Own
+// content-hashed chunk, NOT eager → main-bundle Δ ≈ 0.
+const ApplyPage = React.lazy(() => import("./pages/Apply"));
 
 // =====================================================
 // useGo — back-compat shim
@@ -366,6 +370,8 @@ const routes = [
   { path: "/course", element: <RouteShell Component={CoursePage} /> },
   { path: "/instructor", element: <RouteShell Component={InstructorPage} /> },
   { path: "/admissions", element: <RouteShell Component={AdmissionsPage} /> },
+  // Phase B R6 (D80) — public anon application form (PUBLIC route, Q1.a).
+  { path: "/apply", element: <RouteShell Component={ApplyPage} /> },
   { path: "/credential", element: <RouteShell Component={CredentialPage} /> },
   { path: "/search", element: <RouteShell Component={SearchPage} /> },
   { path: "/assessment", element: <RouteShell Component={AssessmentPage} /> },

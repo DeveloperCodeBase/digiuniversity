@@ -396,3 +396,13 @@ export const instructorApplicationsApi = {
     api.patch("/v1/applications/instructor/" + encodeURIComponent(id) + "/verify-phone", { verified }),
   delete: (id) => api.delete("/v1/applications/instructor/" + encodeURIComponent(id)),
 };
+
+// ---------- public catalog (Phase B R6 D82) ----------
+// Anon program list for the public /apply form. Uses publicApi (no auth):
+// GET /v1/programs/public?tenantSlug= → [{ id, slug, name, nameEn,
+// degreeLevel, department }] (active programs only). The only public read
+// in the catalog surface; program data is non-sensitive marketing info.
+export const publicCatalogApi = {
+  listPrograms: (tenantSlug) =>
+    publicApi.get("/v1/programs/public?tenantSlug=" + encodeURIComponent(tenantSlug)),
+};

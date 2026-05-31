@@ -12,10 +12,12 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { IsIn, IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from "class-validator";
 
 import type { AuthenticatedUser } from "../../auth/auth.types";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
+import { Public } from "../../auth/decorators/public.decorator";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { AuditAction } from "../../audit/audit-action.decorator";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -48,6 +50,16 @@ class ListProgramsQueryDto {
   @IsOptional() @IsString() @IsIn([...DEGREE_LEVELS]) degreeLevel?: typeof DEGREE_LEVELS[number];
 }
 
+// Phase B R6 (D82) — public catalog read query. Only the tenant slug is
+// needed (no JWT to resolve tenantId from), mirroring the public submit.
+class PublicListProgramsQueryDto {
+  @IsString() @MinLength(2) @MaxLength(64) tenantSlug!: string;
+}
+
+// R6 (D82) — public catalog throttle. Generous (read-only, non-sensitive
+// program data); still caps anon abuse per-IP.
+const PUBLIC_CATALOG_THROTTLE = { default: { limit: 60, ttl: 60 * 60 * 1000 } };
+
 @Controller("programs")
 export class ProgramsController {
   constructor(private readonly prisma: PrismaService) {}
@@ -79,6 +91,39 @@ export class ProgramsController {
         updatedAt: true,
         department: { select: { id: true, slug: true, name: true, shortCode: true } },
         _count: { select: { courses: { where: { deletedAt: null } } } },
+      },
+    });
+  }
+
+  /**
+   * Phase B R6 (D82) — public program catalog for the anon /apply form.
+   * @Public + @Throttle. Returns active (non-deleted) programs for the
+   * tenant resolved from tenantSlug, with a non-sensitive subset
+   * (id/slug/name/nameEn/degreeLevel + department name). Declared BEFORE
+   * :id so the "public" literal wins over the :id param. Program catalog
+   * is public-by-nature marketing data — no PII concern.
+   */
+  @Public()
+  @Throttle(PUBLIC_CATALOG_THROTTLE)
+  @Get("public")
+  async listPublic(@Query() query: PublicListProgramsQueryDto) {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { slug: query.tenantSlug },
+      select: { id: true, isActive: true },
+    });
+    if (!tenant || !tenant.isActive) {
+      throw new BadRequestException("tenant not found or inactive");
+    }
+    return this.prisma.program.findMany({
+      where: { tenantId: tenant.id, deletedAt: null },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        nameEn: true,
+        degreeLevel: true,
+        department: { select: { name: true } },
       },
     });
   }

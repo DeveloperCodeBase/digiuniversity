@@ -11,6 +11,12 @@ const PUBLIC_ROUTE_IDS: ReadonlySet<string> = new Set([
   "about",
   "pricing",
   "admissions",
+  // Phase B R6 (D80, Q1.a) — the public anon applicant surfaces. These
+  // are the first anon *writable* routes (a form + a token status page);
+  // PUBLIC classification keeps the AppShell auth gate from forcing a
+  // login (which would break the anon premise). No new RouteKind.
+  "apply",
+  "track",
   "help",
   "honor-code",
 ]);
