@@ -41,7 +41,13 @@ param(
     [switch]$DryRun,
     # After a green run, overwrite docs/BUNDLE_BASELINE.json with the measured
     # main-bundle size. Explicit + manual; the script never updates it silently.
-    [switch]$UpdateBaseline
+    [switch]$UpdateBaseline,
+    # R-CI capstone (Q4.a / D88): bypass the pre-deploy verify gate (static
+    # quality gates: web tsc + api tsc + audit-lint). EMERGENCY ONLY -- a hot-
+    # fix/rollback that can't wait for verify. Prints a prominent warning + logs
+    # it (D81 ethos: gates enforce; a bypass is allowed only WITH visibility,
+    # never silent -- a silent bypass would re-open the D81 silent-red hole).
+    [switch]$SkipVerify
 )
 
 Set-StrictMode -Version Latest
@@ -53,6 +59,7 @@ $EXIT_REMOTE_FAILED = 10
 $EXIT_SMOKE_FAILED  = 20
 $EXIT_BUNDLE_FAILED = 30
 $EXIT_GATE_ABORTED  = 40
+$EXIT_VERIFY_FAILED = 50
 $EXIT_UNEXPECTED    = 99
 
 # --- Paths -----------------------------------------------------------------
@@ -173,10 +180,10 @@ function Get-Verdict {
 }
 
 function Get-ExitCode {
-    # The full contract (memo step 10): 0 ok / 10 remote / 20 smoke / 30 bundle
-    # / 40 gate-aborted / 99 unexpected. Gate aborts (40) return at their call
-    # site and 99 is the catch block, so this maps only the three "a step
-    # failed" families. Cascade order remote->smoke->bundle returns the FIRST
+    # The full contract: 0 ok / 10 remote / 20 smoke / 30 bundle / 40 gate-
+    # aborted / 50 verify-failed / 99 unexpected. Gate aborts (40), verify
+    # failures (50), and 99 (catch) all return at their call site, so this
+    # maps only the three "a step failed" families. Cascade order remote->smoke->bundle returns the FIRST
     # failing family: a remote failure usually cascades into smoke/bundle, so
     # reporting the root family is more actionable. (Verified: an unreachable
     # prod fails smoke+bundle and exits 20, not 30 -- smoke precedes bundle.)
@@ -199,6 +206,7 @@ function Write-Report {
     if ($DryRun)         { $mods.Add('dry-run') }
     if ($SkipMigrate)    { $mods.Add('-SkipMigrate') }
     if ($SkipSeed)       { $mods.Add('-SkipSeed') }
+    if ($SkipVerify)     { $mods.Add('-SkipVerify') }
     if ($UpdateBaseline) { $mods.Add('-UpdateBaseline') }
     $mode = if ($mods.Count -gt 0) { ' (' + ($mods -join '; ') + ')' } else { '' }
 
@@ -273,6 +281,13 @@ function Invoke-MigrationGate {
     # NOT HEAD@{1}..HEAD which sees only the tip commit and would miss a
     # migration committed earlier in the sub-R (the R4 A->G case). The post-
     # deploy ground-truth check is prisma migrate status at step 8.2, not here.
+    #
+    # D83 ruling: this step-2 diff is a PRE-PUSH heuristic -- it fires only for
+    # migrations committed locally but not yet on origin/main. In the normal
+    # push-then-deploy flow -- and after the verify gate (step 2.5), whose jest
+    # stage pushes main -- origin/main == HEAD, so this is a natural no-op. The
+    # AUTHORITATIVE post-deploy check is `prisma migrate status` (8.2); step 2 is
+    # redundancy (catches an unpushed migration), not a gap.
     $migDir  = 'apps/api/prisma/migrations'
     $prevEAP = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
@@ -304,6 +319,46 @@ function Invoke-MigrationGate {
         }
     }
     return $true
+}
+
+function Invoke-VerifyGate {
+    # R-CI capstone (Q4.a gate flip, D88): run the unified verify gate before any
+    # deploy mutation. The static gates (web tsc + api tsc + audit-lint) are
+    # BLOCKING -- verify.ps1 returns non-zero (10/20/30) on a static failure and
+    # we halt the deploy (exit 50). The jest gate is ADVISORY inside verify.ps1
+    # (warn, never exits non-zero) until R-CI-Api makes the suite hermetic. In
+    # --dry-run we pass -SkipJest so the probe never pushes/builds on the VPS.
+    $verify = Join-Path $PSScriptRoot 'verify.ps1'
+    $mode = if ($DryRun) { '-SkipJest' } else { '' }
+    Write-Host ">> verify.ps1 $mode"
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $global:LASTEXITCODE = 0
+    # Pass the switch literally. An array splat (@verifyArgs) would bind
+    # '-SkipJest' as a POSITIONAL arg ("positional parameter cannot be found");
+    # only a hashtable splat or a literal switch binds a [switch] correctly.
+    try {
+        if ($DryRun) { $raw = & $verify -SkipJest 2>&1 }
+        else         { $raw = & $verify 2>&1 }
+    }
+    finally { $ErrorActionPreference = $prevEAP }
+    $code = $LASTEXITCODE
+    $text = (@($raw) | ForEach-Object { "$_" }) -join "`n"
+    Add-Appendix "verify.ps1 $mode (exit $code)" $text
+    # Pull verify's one-line verdict ('all green' / 'PASS - ...' / 'FAIL - ...')
+    # for the report detail. The Gates lines read '- [PASS] ...' (bracket), so
+    # this only matches the verdict line.
+    $verdict = ''
+    $vm = [regex]::Match($text, '(?m)^-\s+(all green|PASS[^\r\n]*|FAIL[^\r\n]*)\s*$')
+    if ($vm.Success) { $verdict = $vm.Groups[1].Value.Trim() }
+    if ($code -eq 0) {
+        $detail = if ($verdict) { $verdict } else { 'static gates green' }
+        Add-Step -Section gate -Name 'verify gate' -Status pass -Detail $detail
+        return $true
+    }
+    $detail = if ($verdict) { $verdict } else { "verify exit $code (static gate failed)" }
+    Add-Step -Section gate -Name 'verify gate' -Status fail -Detail $detail
+    return $false
 }
 
 function Add-RemoteStep {
@@ -635,6 +690,19 @@ try {
 
     # Step 2 -- migration-detection gate (Q2.a). Operator abort -> exit 40.
     if (-not (Invoke-MigrationGate)) { Write-Report; exit $EXIT_GATE_ABORTED }
+
+    # Step 2.5 -- verify gate (R-CI capstone Q4.a / D88). Runs AFTER the migration
+    # gate on purpose: verify's jest stage pushes main, which would empty
+    # origin/main..HEAD and blind the step-2 migration heuristic if it ran first.
+    # Static gates BLOCK (a red one -> exit 50); jest is advisory. -SkipVerify
+    # bypasses (emergency only) with a prominent, logged warning.
+    if ($SkipVerify) {
+        Write-Host ''
+        Write-Host '!! VERIFY SKIPPED (-SkipVerify): static quality gates bypassed -- EMERGENCY USE ONLY.'
+        Add-Step -Section gate -Name 'verify gate' -Status warn -Detail 'SKIPPED via -SkipVerify (static gates bypassed; emergency only)'
+    } elseif (-not (Invoke-VerifyGate)) {
+        Write-Report; exit $EXIT_VERIFY_FAILED
+    }
 
     if ($DryRun) {
         Add-Step -Section remote -Name 'deploy (build/up/migrate/seed/health)' -Status skip -Detail 'dry-run'

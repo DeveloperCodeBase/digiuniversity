@@ -34,6 +34,7 @@ timestamped copy under `logs/deploy/`.
 | `-DryRun` | Run steps 1, 2 (warn only), and 8 (smoke + bundle against current prod) with **no deploy mutation** — no build/up/migrate/seed. Verifies the report shape end-to-end against the live system. |
 | `-SkipMigrate` | Skip `remote.ps1 migrate` (step 5) when you know no migration is pending. |
 | `-SkipSeed` | Skip `remote.ps1 seed` (step 6). Seed is idempotent and runs by default. |
+| `-SkipVerify` | **Emergency only.** Bypass the pre-deploy verify gate (static quality gates). Prints a prominent `!! VERIFY SKIPPED` warning + records it in the report (never silent — D81 ethos). Use for a hot-fix/rollback that can't wait for verify. |
 | `-UpdateBaseline` | After measuring, record the live main-bundle size as the new `docs/BUNDLE_BASELINE.json` baseline. Explicit + reviewable (lands as a git diff); never silent. Use only after an **owner-approved** bundle bump. |
 | `-Verbose` | Echo captured `remote.ps1` output to the console too (it always lands in the log-file appendix regardless). |
 
@@ -45,6 +46,12 @@ timestamped copy under `logs/deploy/`.
 2. **Migration gate** — diffs `apps/api/prisma/migrations/` over `origin/main..HEAD`.
    New migration => prints a warning + 5s countdown (proceeds under `-Yes`; the
    post-deploy `prisma migrate status` at 8.2 is the ground-truth check).
+2.5. **Verify gate** (R-CI capstone Q4.a / D88) — runs `scripts/verify.ps1` AFTER
+   the migration gate (verify's jest stage pushes main, which would blind the
+   step-2 heuristic if it ran first). Static gates (web tsc + api tsc + audit-lint)
+   are **blocking** => a red one halts the deploy with exit `50`. The jest gate is
+   **advisory** (run + reported, non-blocking) until R-CI-Api makes the suite
+   hermetic. Runs `-SkipJest` under `-DryRun`; `-SkipVerify` bypasses (emergency).
 3-7. `remote.ps1 build` -> `up` -> `migrate` -> `seed` -> `health`.
 8. **Smoke + bundle** (also runs under `-DryRun`):
    - 8.1 public health: `/healthz`, `/api/v1/health`, `/ai/v1/health` all 200.
@@ -69,6 +76,7 @@ timestamped copy under `logs/deploy/`.
 | `20` | API smoke failed (incl. prod unreachable -> HTTP 0) | App up but a route/auth/ingress is broken; check Caddy + container health. |
 | `30` | Bundle constraint failed (preload leak or size over +50 KiB) | A chunk leaked into modulepreload, or the main bundle grew too much. |
 | `40` | Migration gate aborted by the operator | Intentional cancel; nothing deployed. |
+| `50` | Verify gate failed (a static quality gate is red) | Run `scripts/verify.ps1` to see which (web/api tsc or audit-lint); fix before deploying. jest is advisory and never causes `50`. |
 | `99` | Unexpected exception | See the appendix's `unexpected-exception` block. |
 
 The smoke gate **fails closed**: if prod is unreachable, the run exits `20` (never
